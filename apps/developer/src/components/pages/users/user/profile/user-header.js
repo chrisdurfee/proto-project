@@ -1,4 +1,4 @@
-import { A, Div, H1 } from "@base-framework/atoms";
+import { Div, H1 } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar, StaticStatusIndicator } from "@base-framework/ui/molecules";
@@ -49,14 +49,16 @@ export const UserHeader = ({ user }) => (
 		Div({ class: 'flex flex-auto items-center justify-center' }, [
 			Div({ class: 'flex space-x-4 mt-4' }, [
 				Tooltip({ content: 'Email' }, [
-					A({ href: `mailto:[[user.email]]`, class: 'text-muted-foreground', 'data-cancel-route': true }, [
-						Button({ variant: 'icon', icon: Icons.envelope.default, label: 'Email', disabled: '[[user.email]]' })
-					])
+					Button({ variant: 'icon', icon: Icons.envelope.default, label: 'Email', disabled: '[[user.email]]', click: (e, { context }) =>
+					{
+						window.location.href = `mailto:${context?.data?.user?.email}`;
+					}})
 				]),
 				Tooltip({ content: 'Call' }, [
-					A({ href: `tel:[[user.mobile]]`, class: 'text-muted-foreground', 'data-cancel-route': true }, [
-						Button({ variant: 'icon', icon: Icons.phone.default, label: 'Call', disabled: '[[user.mobile]]' })
-					])
+					Button({ variant: 'icon', icon: Icons.phone.default, label: 'Call', disabled: '[[user.mobile]]', click: (e, { context }) =>
+					{
+						window.location.href = `tel:${context?.data?.user?.mobile}`;
+					}})
 				]),
 				Tooltip({ content: 'Message' }, [
 					Button({ variant: 'icon', icon: Icons.chat.text, label: 'Message' })
