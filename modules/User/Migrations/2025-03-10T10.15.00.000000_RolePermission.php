@@ -4,6 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * Migration for the permission_roles pivot table.
+ * @suppresswarnings PHP6609
  */
 class RolePermission extends Migration
 {

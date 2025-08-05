@@ -4,6 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * Migration for the user_roles pivot table.
+ * @suppresswarnings PHP6609
  */
 class UserRole extends Migration
 {

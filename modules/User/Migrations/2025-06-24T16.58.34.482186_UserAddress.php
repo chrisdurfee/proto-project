@@ -4,7 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * UserAddress
- *
+ * @suppresswarnings PHP6609
  */
 class UserAddress extends Migration
 {

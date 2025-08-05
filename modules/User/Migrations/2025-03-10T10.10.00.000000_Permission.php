@@ -4,6 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * Migration for the permissions table.
+ * @suppresswarnings PHP6609
  */
 class Permission extends Migration
 {

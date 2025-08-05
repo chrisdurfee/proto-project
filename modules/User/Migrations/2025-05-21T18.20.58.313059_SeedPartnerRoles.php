@@ -4,7 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * SeedPartnerRoles
- *
+ * @suppresswarnings PHP6609
  */
 class SeedPartnerRoles extends Migration
 {

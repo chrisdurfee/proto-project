@@ -6,6 +6,8 @@ use Proto\Database\Migrations\Migration;
  * WebPush
  *
  * Migration for the web_push_users table.
+ *
+ * @suppresswarnings PHP6609
  */
 class WebPush extends Migration
 {

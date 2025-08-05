@@ -6,6 +6,7 @@ use Proto\Database\Migrations\Migration;
  * Organization
  *
  * Adds `organizations` and the pivot `organization_user`.
+ * @suppresswarnings PHP6609
  */
 class Organization extends Migration
 {

@@ -4,7 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * BlockUser
- *
+ * @suppresswarnings PHP6609
  */
 class BlockUser extends Migration
 {

@@ -4,6 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * Migration to seed initial roles and permissions.
+ * @suppresswarnings PHP6609
  */
 class SeedRolesAndPermissions extends Migration
 {

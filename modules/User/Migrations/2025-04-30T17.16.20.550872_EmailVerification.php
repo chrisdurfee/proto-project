@@ -4,7 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * EmailVerification
- *
+ * @suppresswarnings PHP6609
  */
 class EmailVerification extends Migration
 {

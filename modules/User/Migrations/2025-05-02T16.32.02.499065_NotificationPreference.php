@@ -4,7 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * NotificationPreference
- *
+ * @suppresswarnings PHP6609
  */
 class NotificationPreference extends Migration
 {

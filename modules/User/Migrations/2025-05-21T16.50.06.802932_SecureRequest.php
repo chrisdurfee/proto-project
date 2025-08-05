@@ -4,7 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * SecureRequest
- *
+ * @suppresswarnings PHP6609
  */
 class SecureRequest extends Migration
 {

@@ -4,6 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * Migration for the roles table.
+ * @suppresswarnings PHP6609
  */
 class Role extends Migration
 {

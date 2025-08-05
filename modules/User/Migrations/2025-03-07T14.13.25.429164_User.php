@@ -5,6 +5,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * Migration for the users table.
+ * @suppresswarnings PHP6609
  */
 class User extends Migration
 {

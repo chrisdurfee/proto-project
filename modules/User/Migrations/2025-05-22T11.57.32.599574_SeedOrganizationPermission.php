@@ -7,6 +7,8 @@ use Proto\Database\Migrations\Migration;
  *
  * Seeds the organization-related permissions and assigns them
  * to both the global Administrator role and the Partner Admin role.
+ *
+ * @suppresswarnings PHP6609
  */
 class SeedOrganizationPermission extends Migration
 {

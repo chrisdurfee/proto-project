@@ -4,7 +4,7 @@ use Proto\Database\Migrations\Migration;
 
 /**
  * FollowerUser
- *
+ * @suppresswarnings PHP6609
  */
 class FollowerUser extends Migration
 {
