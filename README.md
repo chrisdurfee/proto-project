@@ -51,11 +51,7 @@ Your application-specific settings live in **`common/Config/.env`**. Proto reads
 ```dotenv
 # common/Config/.env
 {
-  "APP_ENV": "development",
-  "DB_DSN":  "mysql:host=localhost;dbname=myapp",
-  "DB_USER": "root",
-  "DB_PASS": "secret",
-  "REDIS_URL": "redis://localhost:6379"
+  "APP_ENV": "dev",
 }
 ```
 
