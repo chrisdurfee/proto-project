@@ -1,0 +1,43 @@
+{
+	"name": "protoframework/proto-project",
+	"description": "This is a project that uses the Proto Framework.",
+	"keywords": [
+		"proto",
+		"framework",
+		"modular",
+		"monolith",
+		"php"
+	],
+	"type": "project",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Chris Durfee",
+			"email": "j.c.durf@gmail.com"
+		}
+	],
+	"require": {
+		"php": ">=8.1",
+		"protoframework/proto": "^1.0"
+	},
+	"require-dev": {
+
+	},
+	"scripts": {
+
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"preferred-install": "dist",
+		"sort-packages": true
+	},
+	"minimum-stability": "stable",
+	"prefer-stable": true,
+	"autoload": {
+		"psr-4": {
+			"Modules\\": "modules/",
+			"Common\\": "common/",
+			"Apps\\": "apps/"
+		}
+	}
+}
