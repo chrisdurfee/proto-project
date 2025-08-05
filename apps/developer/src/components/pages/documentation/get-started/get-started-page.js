@@ -105,8 +105,10 @@ composer update`
 				CodeBlock(
 `common/          // Shared code
 modules/         // Each major feature or domain is a self-contained module
-proto/           // Core framework code (do not modify)
 public/          // Public-facing files (including the developer app in /public/developer)
+apps/            // the front end applications, crm, developer, main
+
+vendor/protoframework/proto/src/          // The core framework. This folder is accessible but should not be modified.
 `
 				),
 				P(

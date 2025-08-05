@@ -72,7 +72,7 @@ export const AuthPage = () =>
 				P(
 					{ class: 'text-muted-foreground' },
 					`Gates are classes responsible for authenticating a particular type of resource.
-					 They should be placed in Common\\Auth, and typically extend the base Gate class.`
+					 They should be placed in Proto\\Auth, and typically extend the base Gate class.`
 				),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -107,7 +107,7 @@ $value = static::get('key');`
 				),
 				P(
 					{ class: 'text-muted-foreground' },
-					`All gates can be registered within Common\\Auth so they can be accessed globally. The framework has a global "auth" function that will return the singleton instance for the "Auth" class.
+					`All gates can be registered within Proto\\Auth so they can be accessed globally. The framework has a global "auth" function that will return the singleton instance for the "Auth" class.
 					 For instance, if you have a user gate, you might call:`
 				),
 				CodeBlock(

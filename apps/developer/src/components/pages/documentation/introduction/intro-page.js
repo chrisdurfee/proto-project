@@ -109,9 +109,11 @@ export const IntroPage = () => (
 				),
 				CodeBlock(
 `common/         // The root for your application code and shared components between modules.
-proto/          // The core framework. This folder is accessible but should not be modified.
 modules/        // Contains self-contained modules for each major domain or feature.
-public/         // Front-end assets and public resources.`
+public/         // Front-end assets and public resources.
+apps/           // the front end applications
+
+vendor/protoframework/proto/src/          // The core framework. This folder is accessible but should not be modified.`
 				)
 			]),
 
@@ -122,7 +124,7 @@ public/         // Front-end assets and public resources.`
 					`All class names should be in PascalCase, and all methods and variables should be in camelCase.
 					Class names should be singular, while namespace paths can be plural.`),
 				P({ class: 'text-muted-foreground' },
-					`Folder names should be lowercase and use hyphens to concatenate words. Files should use PascalCase.
+					`Folder names should be pascal case. Files should use PascalCase.
 					Namespaces should reflect the folder structure to support autoloading.`)
 			]),
 
