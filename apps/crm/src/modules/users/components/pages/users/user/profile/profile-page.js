@@ -1,61 +1,9 @@
-import { Div, H1, On } from "@base-framework/atoms";
-import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+import { Div, On } from "@base-framework/atoms";
 import { Page } from "@base-framework/ui/pages";
-import { UserModal } from "../../modals/user-modal.js";
-import UserSkeleton from "../user-skeleton.js";
+import { UserSkeleton } from "../user-skeleton.js";
+import { PageHeader } from "./page-header.js";
 import { UserContent } from "./user-content.js";
 import UserHeader from "./user-header.js";
-
-/**
- * This will create a permission modal.
- *
- * @param {object} context
- * @returns {object}
- */
-const Modal = (context) => (
-	UserModal({
-		item: context.data.user,
-		onSubmit: (data) =>
-		{
-			context.data.user = data.get();
-		}
-	})
-);
-
-/**
- * Creates the page header for the profile page.
- *
- * @param {object} props
- * @param {object} props.user - The user data.
- * @param {object} props.context - The context object.
- * @returns {object}
- */
-const PageHeader = ({ context }) => (
-	Div({ class: 'flex flex-row justify-between gap-4' }, [
-		Div({ class: 'flex flex-col' }, [
-			H1({ class: 'text-2xl md:text-2xl font-bold tracking-tight' }, 'Profile'),
-		]),
-		Div({ class: 'flex flex-row space-x-2' }, [
-			Div({ class: 'hidden lg:inline-flex' }, [
-				Button({
-					variant: 'withIcon',
-					class: 'text-muted-foreground outline',
-					icon: Icons.pencil.square,
-					click: () => Modal(context)
-				}, 'Edit'),
-			]),
-			Div({ class: 'flex lg:hidden mr-4' }, [
-				Tooltip({ content: 'Edit', position: 'left' }, Button({
-					variant: 'icon',
-					class: 'outline',
-					icon: Icons.pencil.square,
-					click: () => Modal(context)
-				}))
-			])
-		])
-	])
-);
 
 /**
  * ProfilePage
@@ -74,12 +22,9 @@ export const ProfilePage = () => (
 			}
 
 			const user = context.data.user;
-			if (!user)
-			{
-				return Div({ class: "text-center" }, "User not found.");
-			}
-
-			return Div({ class: 'md:p-6 md:pt-0 2xl:mx-auto w-full 2xl:max-w-[1600px]' }, [
+			return (!user)
+			? Div({ class: "text-center" }, "User not found.")
+			: Div({ class: 'md:p-6 md:pt-0 2xl:mx-auto w-full 2xl:max-w-[1600px]' }, [
 				PageHeader({
 					user,
 					context
