@@ -36,8 +36,7 @@
 	"autoload": {
 		"psr-4": {
 			"Modules\\": "modules/",
-			"Common\\": "common/",
-			"Apps\\": "apps/"
+			"Common\\": "common/"
 		}
 	}
 }
