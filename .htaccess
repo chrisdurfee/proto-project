@@ -106,6 +106,7 @@ AddType application/font-woff2 .woff2
 
 # URL rewriting rules for your app
 <IfModule mod_rewrite.c>
+    RewriteRule ^crm/(.*)$ /public/crm/$1 [L,NC,QSA]
     RewriteRule ^developer/(.*)$ /public/developer/$1 [L,NC,QSA]
     RewriteRule ^embed/(.*)$ /public/embed/$1 [L,NC,QSA]
     RewriteRule ^api/.*$ /public/api/ [L,NC,QSA]
@@ -114,5 +115,5 @@ AddType application/font-woff2 .woff2
     RewriteBase /
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ /public/$1 [NC,L,QSA]
+    RewriteRule ^(.*)$ /public/main/$1 [NC,L,QSA]
 </IfModule>
