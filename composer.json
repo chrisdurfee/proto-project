@@ -21,7 +21,9 @@
 		"protoframework/proto": "^1.0"
 	},
 	"require-dev": {
-
+		"phpunit/phpunit": "^10.0",
+		"fakerphp/faker": "^1.21",
+		"phpstan/phpstan": "^1.10"
 	},
 	"scripts": {
 
@@ -37,6 +39,10 @@
 		"psr-4": {
 			"Modules\\": "modules/",
 			"Common\\": "common/"
-		}
+		},
+		"classmap": [
+			"common/Migrations",
+			"modules/*/Migrations"
+		]
 	}
 }
