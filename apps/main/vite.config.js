@@ -21,6 +21,14 @@ export default defineConfig({
 		host: '0.0.0.0',
 		port: 3000,
 		cors: true,
+		watch: {
+			usePolling: true,
+			interval: 100
+		},
+		hmr: {
+			port: 3000,
+			host: 'localhost'
+		},
 		proxy: {
 			'/api': {
 				target: apiTarget,
