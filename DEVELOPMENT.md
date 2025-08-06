@@ -83,7 +83,7 @@ npm run dev
 - Reinstall: `cd apps/main && npm install`
 
 ### CORS Issues
-- Backend CORS configured in: `public/api/index.php`
+- Backend CORS configured in the proto router
 - Allows: `localhost:3000`, `localhost:3001`, `localhost:3002`
 
 ## Previous Containerized Setup
