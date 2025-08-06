@@ -22,12 +22,11 @@ export default defineConfig({
 		port: 3000,
 		cors: true,
 		watch: {
-			usePolling: true,
-			interval: 100
+			usePolling: false,
+			ignored: ['**/node_modules/**', '**/dist/**']
 		},
 		hmr: {
-			port: 3000,
-			host: 'localhost'
+			port: 3000
 		},
 		proxy: {
 			'/api': {
