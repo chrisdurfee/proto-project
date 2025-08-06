@@ -4,7 +4,21 @@ This repository is a **project skeleton** for building applications on top of th
 
 ---
 
-## 📦 Installation
+## � Prerequisites
+
+### For Containerized Development (Recommended)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/macOS) or Docker Engine (Linux)
+- Git
+
+### For Traditional Development
+- PHP 8.2+
+- Composer
+- MySQL/MariaDB
+- Node.js (for frontend development)
+
+---
+
+## �📦 Installation
 
 Choose one of the two approaches:
 
@@ -23,6 +37,81 @@ git clone https://github.com/protoframework/proto-project.git my-app
 cd my-app
 composer install
 ```
+
+---
+
+## 🐳 Local Development (Containerized)
+
+This project includes a complete containerized development environment using Docker. No need for XAMPP, WAMP, or local PHP/MySQL installations!
+
+### Quick Start
+
+**Windows:**
+```cmd
+setup-dev.bat
+```
+
+**Linux/macOS:**
+```bash
+chmod +x setup-dev.sh
+./setup-dev.sh
+```
+
+**Manual Setup:**
+```bash
+# Start all services
+docker-compose up -d
+
+# Run database migrations
+docker-compose exec web php run-migrations.php
+
+# Install frontend dependencies (if needed)
+docker-compose exec vite-main npm install
+docker-compose exec vite-crm npm install
+docker-compose exec vite-developer npm install
+```
+
+### Available Services
+
+Once running, you'll have access to:
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| 🌐 Main App | http://localhost:3000 | Frontend development server |
+| 🌐 CRM App | http://localhost:3001 | CRM frontend development server |
+| 🌐 Developer Tools | http://localhost:3002 | Developer UI with scaffolding tools |
+| 🚀 API Server | http://localhost:8080 | PHP backend API |
+| 🗄️ PHPMyAdmin | http://localhost:8081 | Database management interface |
+| 🗄️ Database | localhost:3307 | MariaDB 11.7.2 server |
+| 📝 Cache | localhost:6380 | Redis server |
+
+### Development Workflow
+
+```bash
+# View logs for all services
+docker-compose logs -f
+
+# View logs for specific service
+docker-compose logs -f web
+docker-compose logs -f vite-main
+
+# Access containers
+docker-compose exec web bash           # PHP container
+docker-compose exec mariadb mariadb -uroot -proot proto  # Database
+
+# Stop development environment
+docker-compose down
+```
+
+### Features
+
+- **🔥 Hot Reload**: Frontend changes automatically refresh the browser
+- **🔗 API Proxy**: Frontend apps proxy `/api` requests to PHP backend
+- **🗄️ Database**: MariaDB with persistent data
+- **📦 Package Management**: Automatic npm/composer dependency handling
+- **🛠️ Developer Tools**: Built-in scaffolding and migration tools
+
+For detailed setup instructions, see [DOCKER-SETUP.md](DOCKER-SETUP.md).
 
 ---
 
@@ -105,12 +194,15 @@ Behind the scenes Composer’s autoloader handles:
 
 ## 🛠️ Developer Tools
 
-A simple admin UI at `public/developer` lets you:
+A simple admin UI lets you:
 
 * Scaffold modules, controllers, models, migrations, etc.
 * Run migrations, view error logs, dispatch jobs
+* Manage users, permissions, and system settings
 
-Just point your browser at `/developer` after `composer install`.
+**Access Developer Tools:**
+- **Containerized**: http://localhost:3002 (after running `setup-dev.bat` or `docker-compose up -d`)
+- **Traditional**: Point your browser to `/developer` after `composer install`
 
 ---
 
@@ -126,6 +218,45 @@ Just point your browser at `/developer` after `composer install`.
 ![IAM Page](https://raw.githubusercontent.com/chrisdurfee/proto-project/refs/heads/main/public/images/product/iam-page.png)
 ![IAM Modal](https://raw.githubusercontent.com/chrisdurfee/proto-project/refs/heads/main/public/images/product/iam-modal.png)
 ![Email Page](https://raw.githubusercontent.com/chrisdurfee/proto-project/refs/heads/main/public/images/product/email-page.png)
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**Docker not starting:**
+- Ensure Docker Desktop is running
+- Check that virtualization is enabled in BIOS/UEFI
+- On Windows, ensure WSL2 is installed and updated
+
+**Port conflicts:**
+- Default ports: 3000-3002 (Vite), 8080 (API), 8081 (PHPMyAdmin), 3307 (DB), 6380 (Redis)
+- Stop conflicting services or modify ports in `docker-compose.yaml`
+
+**Database connection issues:**
+```bash
+# Check if containers are running
+docker-compose ps
+
+# Restart database
+docker-compose restart mariadb
+
+# Check logs
+docker-compose logs mariadb
+```
+
+**Frontend build errors:**
+```bash
+# Clear and rebuild containers
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+For more detailed troubleshooting, see [DOCKER-SETUP.md](DOCKER-SETUP.md).
+
+---
 
 ## 🤝 Contributing
 
