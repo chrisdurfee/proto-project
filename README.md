@@ -142,14 +142,55 @@ my-app/
 
 ## ⚙️ Configuration
 
+### Application Settings
+
 Your application-specific settings live in **`common/Config/.env`**. Proto reads JSON-encoded environment variables from there:
 
-```dotenv
-# common/Config/.env
+```json
 {
   "APP_ENV": "dev",
+  "siteName": "My Application",
+  "domain": {
+    "production": "yourdomain.com",
+    "development": "localhost",
+    "subdomains": {
+      "api": "api",
+      "main": "app",
+      "crm": "crm",
+      "developer": "dev"
+    },
+    "ssl": true,
+    "ports": {
+      "development": {
+        "api": 8080,
+        "main": 3000,
+        "crm": 3001,
+        "developer": 3002
+      }
+    }
+  }
 }
 ```
+
+### Domain Configuration
+
+The project uses a **hybrid domain configuration system** that automatically adapts URLs based on your environment:
+
+**Development Mode:**
+- All apps use `localhost` with specific ports
+- No SSL/HTTPS required for local development
+
+**Production Mode:**
+- Uses subdomains with your configured domain
+- Automatic SSL/HTTPS based on configuration
+- All frontend apps automatically use correct API endpoints
+
+**To change your domain:**
+1. Edit the `"production"` value in `common/Config/.env`
+2. All apps will automatically use the new domain
+3. No code changes required in individual apps
+
+The domain configuration is handled by `domain.config.js`, which reads from your Proto configuration and provides fallback defaults if needed.
 
 ---
 

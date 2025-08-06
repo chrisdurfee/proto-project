@@ -2,10 +2,49 @@
 
 ## Overview
 
-This project now uses a **hybrid containerized development approach**:
+This project uses a **hybrid containerized development approach** with **centralized domain configuration**:
 
 - **Backend Services**: Run in Docker containers (PHP, MariaDB, Redis)
 - **Frontend Apps**: Run locally with Vite dev servers for fast hot module reload
+- **Domain Config**: Centralized system that reads from Proto `.env` configuration
+
+## Domain Configuration
+
+The project automatically configures URLs based on your environment. All apps read from a central configuration.
+
+**Development URLs** (automatically configured):
+- Backend API: `http://localhost:8080`
+- Main App: `http://localhost:3000`
+- CRM App: `http://localhost:3001`
+- Developer Tools: `http://localhost:3002`
+
+**Production URLs** (configured in `common/Config/.env`):
+- Backend API: `https://api.yourdomain.com`
+- Main App: `https://app.yourdomain.com`
+- CRM App: `https://crm.yourdomain.com`
+- Developer Tools: `https://dev.yourdomain.com`
+
+### Changing Your Domain
+
+To configure your actual domain, edit `common/Config/.env`:
+
+```json
+{
+  "domain": {
+    "production": "yourdomain.com", // ← Change this
+    "development": "localhost",
+    "subdomains": {
+      "api": "api",
+      "main": "app",
+      "crm": "crm",
+      "developer": "dev"
+    },
+    "ssl": true
+  }
+}
+```
+
+All apps will automatically use the new domain settings without code changes.
 
 ## Quick Start
 

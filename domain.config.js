@@ -1,12 +1,16 @@
 /**
  * Domain Configuration
  *
- * Update this file to configure your domain settings.
- * This will be used by all Vite configs and build scripts.
+ * This hybrid system loads domain settings from Proto's .env file
+ * but falls back to static defaults if the file can't be read.
+ * Used by all Vite configs and build scripts.
  */
 
-// Main domain configuration
-const DOMAIN_CONFIG = {
+import fs from 'fs';
+import path from 'path';
+
+// Static fallback configuration
+const DEFAULT_CONFIG = {
     // Set your actual domain here (without protocol)
     production: 'yourdomain.com',
     development: 'localhost',
@@ -32,13 +36,54 @@ const DOMAIN_CONFIG = {
 };
 
 /**
+ * Load domain configuration from Proto's .env file
+ */
+function loadProtoConfig()
+{
+    try
+    {
+        const configPath = path.resolve(import.meta.dirname || __dirname, 'common/Config/.env');
+        const configData = fs.readFileSync(configPath, 'utf8');
+        const protoConfig = JSON.parse(configData);
+
+        // Extract domain configuration if it exists
+        if (protoConfig.domain)
+        {
+            return {
+                production: protoConfig.domain.production || DEFAULT_CONFIG.production,
+                development: protoConfig.domain.development || DEFAULT_CONFIG.development,
+                subdomains: protoConfig.domain.subdomains || DEFAULT_CONFIG.subdomains,
+                ssl: protoConfig.domain.ssl !== undefined ? protoConfig.domain.ssl : DEFAULT_CONFIG.ssl,
+                ports: protoConfig.domain.ports?.development ? {
+                    api: protoConfig.domain.ports.development.api || DEFAULT_CONFIG.ports.api,
+                    main: protoConfig.domain.ports.development.main || DEFAULT_CONFIG.ports.main,
+                    crm: protoConfig.domain.ports.development.crm || DEFAULT_CONFIG.ports.crm,
+                    developer: protoConfig.domain.ports.development.developer || DEFAULT_CONFIG.ports.developer
+                } : DEFAULT_CONFIG.ports
+            };
+        }
+    }
+    catch (error)
+    {
+        console.warn('Could not load Proto config, using defaults:', error.message);
+    }
+
+    return DEFAULT_CONFIG;
+}
+
+// Load configuration (tries Proto .env first, falls back to static)
+const DOMAIN_CONFIG = loadProtoConfig();
+
+/**
  * Generate URLs based on environment
  */
-function generateUrls(isDev = false) {
+function generateUrls(isDev = false)
+{
     const protocol = isDev ? 'http' : (DOMAIN_CONFIG.ssl ? 'https' : 'http');
     const baseDomain = isDev ? DOMAIN_CONFIG.development : DOMAIN_CONFIG.production;
 
-    if (isDev) {
+    if (isDev)
+    {
         return {
             api: `${protocol}://${baseDomain}:${DOMAIN_CONFIG.ports.api}`,
             main: `${protocol}://${baseDomain}:${DOMAIN_CONFIG.ports.main}`,
@@ -56,3 +101,4 @@ function generateUrls(isDev = false) {
 }
 
 export { DOMAIN_CONFIG, generateUrls };
+

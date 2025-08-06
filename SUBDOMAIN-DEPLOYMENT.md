@@ -2,14 +2,68 @@
 
 This guide explains how to deploy the Proto Project using subdomains for each application.
 
+## Domain Configuration
+
+The project uses a **hybrid domain configuration system** that automatically reads settings from your Proto framework configuration.
+
+### Setting Your Domain
+
+**Option 1: Configure via Proto .env (Recommended)**
+
+Edit `common/Config/.env` and update the domain section:
+
+```json
+{
+  "domain": {
+    "production": "yourdomain.com",
+    "development": "localhost",
+    "subdomains": {
+      "api": "api",
+      "main": "app",
+      "crm": "crm",
+      "developer": "dev"
+    },
+    "ssl": true,
+    "ports": {
+      "development": {
+        "api": 8080,
+        "main": 3000,
+        "crm": 3001,
+        "developer": 3002
+      }
+    }
+  }
+}
+```
+
+**Option 2: Configure via domain.config.js (Fallback)**
+
+If the Proto config can't be read, the system uses defaults from `domain.config.js`:
+
+```javascript
+const DEFAULT_CONFIG = {
+    production: 'yourdomain.com',
+    development: 'localhost',
+    // ... other settings
+};
+```
+
+### How It Works
+
+- **Development**: Uses localhost with ports (3000, 3001, 3002, 8080)
+- **Production**: Uses subdomains with your configured domain
+- **Automatic**: All Vite configs and build scripts read from this central configuration
+
 ## Subdomain Structure
+
+Based on your domain configuration, the structure will be:
 
 | Subdomain | Purpose | Serves From |
 |-----------|---------|-------------|
-| `api.domain.com` | Backend API | `public/api/` |
-| `app.domain.com` | Main Application | `public/main/` |
-| `crm.domain.com` | CRM Interface | `public/crm/` |
-| `dev.domain.com` | Developer Tools | `public/developer/` |
+| `api.yourdomain.com` | Backend API | `public/api/` |
+| `app.yourdomain.com` | Main Application | `public/main/` |
+| `crm.yourdomain.com` | CRM Interface | `public/crm/` |
+| `dev.yourdomain.com` | Developer Tools | `public/developer/` |
 
 ## Building for Production
 
@@ -34,13 +88,13 @@ This creates production builds in:
 
 ### 2. DNS Configuration
 
-Create A records pointing to your server:
+Create A records pointing to your server (replace `yourdomain.com` with your actual domain):
 
 ```dns
-api.domain.com    IN  A  YOUR_SERVER_IP
-app.domain.com    IN  A  YOUR_SERVER_IP
-crm.domain.com    IN  A  YOUR_SERVER_IP
-dev.domain.com    IN  A  YOUR_SERVER_IP
+api.yourdomain.com    IN  A  YOUR_SERVER_IP
+app.yourdomain.com    IN  A  YOUR_SERVER_IP
+crm.yourdomain.com    IN  A  YOUR_SERVER_IP
+dev.yourdomain.com    IN  A  YOUR_SERVER_IP
 ```
 
 ### 3. Web Server Configuration
