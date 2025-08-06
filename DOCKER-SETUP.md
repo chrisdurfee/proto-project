@@ -194,3 +194,53 @@ docker-compose logs mariadb
 - **Development Speed**: Fastest possible frontend development experience
 - **Easy Debugging**: Full browser dev tools and native performance
 - **Flexible**: Can develop frontend and backend independently
+
+## Production Deployment
+
+When ready to deploy to production, the project includes SSL certificate setup:
+
+### SSL Certificate Setup (Let's Encrypt)
+
+For production deployment with automatic SSL certificates:
+
+```bash
+# Linux/macOS
+chmod +x setup-ssl.sh
+./setup-ssl.sh yourdomain.com your-email@yourdomain.com
+
+# Windows
+setup-ssl.bat yourdomain.com your-email@yourdomain.com
+```
+
+This automated script will:
+- ✅ Request free Let's Encrypt SSL certificates for all subdomains
+- ✅ Configure Apache for HTTPS
+- ✅ Set up automatic certificate renewal
+- ✅ Create production deployment files
+
+### Production Docker Deployment
+
+After SSL setup, deploy with production configuration:
+
+```bash
+# Use production Docker Compose with SSL support
+docker-compose -f docker-compose.prod.yaml up -d
+```
+
+This provides:
+- HTTPS for all subdomains (api, app, crm, dev)
+- Production-optimized containers
+- Automatic certificate renewal
+- Proper security headers and CORS
+
+### Production URLs Structure
+
+Based on your domain configuration:
+```
+https://api.yourdomain.com    → Backend API
+https://app.yourdomain.com    → Main Application
+https://crm.yourdomain.com    → CRM Interface
+https://dev.yourdomain.com    → Developer Tools
+```
+
+For detailed production deployment instructions and advanced SSL options, see [SUBDOMAIN-DEPLOYMENT.md](SUBDOMAIN-DEPLOYMENT.md).

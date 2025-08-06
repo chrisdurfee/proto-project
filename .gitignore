@@ -18,3 +18,31 @@ error.log
 .phpunit.result.cache
 .env
 user-settings.txt
+
+# SSL Certificates and Private Keys (security)
+certs/
+private/
+certbot-webroot/
+*.crt
+*.key
+*.pem
+
+# Generated SSL/Certificate files
+renew-certificates.sh
+renew-certificates.bat
+
+# Temporary files created during SSL setup
+docker-compose.certbot.yaml
+nginx-certbot.conf
+
+# Environment-specific files
+.env.production
+.env.staging
+
+# Build outputs (these get regenerated)
+public/main/
+public/crm/
+public/developer/
+
+# Docker volumes data
+docker/mysql/data/

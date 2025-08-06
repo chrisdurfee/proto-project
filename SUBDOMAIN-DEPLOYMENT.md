@@ -4,7 +4,106 @@ This guide explains how to deploy the Proto Project using subdomains for each ap
 
 ## Domain Configuration
 
-The project uses a **hybrid domain configuration system** that automatically reads settings from your Proto framework configuration.
+The project uses a **hybrid dom### 4. SSL Certificate Setup
+
+For production deployment with HTTPS, you have several options:
+
+#### Option A: Let's Encrypt (Recommended - Free SSL)
+
+**Automated Setup:**
+```bash
+# Linux/macOS
+chmod +x setup-ssl.sh
+./setup-ssl.sh yourdomain.com your-email@yourdomain.com
+
+# Windows
+setup-ssl.bat yourdomain.com your-email@yourdomain.com
+```
+
+**Manual Let's Encrypt Setup:**
+```bash
+# Install Certbot
+sudo apt install certbot
+
+# Get certificates for all subdomains
+sudo certbot certonly --webroot -w /var/www/html/public \
+  -d api.yourdomain.com \
+  -d app.yourdomain.com \
+  -d crm.yourdomain.com \
+  -d dev.yourdomain.com
+
+# Certificates will be saved to:
+# /etc/letsencrypt/live/yourdomain.com/fullchain.pem
+# /etc/letsencrypt/live/yourdomain.com/privkey.pem
+```
+
+#### Option B: Using Production Docker Compose
+
+Use the production docker-compose file with SSL support:
+
+```bash
+# Copy environment variables
+cp .env.example .env
+
+# Edit .env with your settings
+nano .env
+
+# Start with SSL support
+docker-compose -f docker-compose.prod.yaml up -d
+```
+
+**Required .env variables:**
+```bash
+DOMAIN_NAME=yourdomain.com
+DB_ROOT_PASSWORD=your_secure_password
+DB_DATABASE=proto
+DB_USERNAME=proto_user
+DB_PASSWORD=your_secure_password
+REDIS_PASSWORD=your_redis_password
+```
+
+#### Option C: Custom SSL Certificates
+
+If you have your own SSL certificates:
+
+1. **Place certificates in the correct locations:**
+   ```bash
+   # Create directories
+   mkdir -p certs private
+
+   # Copy your certificates
+   cp your-certificate.crt certs/yourdomain.com.crt
+   cp your-private-key.key private/yourdomain.com.key
+
+   # Set permissions
+   chmod 644 certs/yourdomain.com.crt
+   chmod 600 private/yourdomain.com.key
+   ```
+
+2. **Update docker-compose.prod.yaml** to mount your certificates:
+   ```yaml
+   web:
+     volumes:
+       - ./certs:/etc/ssl/certs/custom
+       - ./private:/etc/ssl/private/custom
+     environment:
+       - DOMAIN_NAME=yourdomain.com
+   ```
+
+#### Option D: Traefik Reverse Proxy (Advanced)
+
+For automatic SSL management and load balancing:
+
+```bash
+# Use Traefik setup
+docker-compose -f docker-compose.traefik.yaml up -d
+
+# Traefik will automatically:
+# - Request Let's Encrypt certificates
+# - Handle SSL termination
+# - Route traffic to containers
+# - Renew certificates automatically
+```iguration system** that automatically reads settings from your Proto framework configuration.
 
 ### Setting Your Domain
 

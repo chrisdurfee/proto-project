@@ -125,6 +125,34 @@ npm run dev
 - Backend CORS configured in the proto router
 - Allows: `localhost:3000`, `localhost:3001`, `localhost:3002`
 
+## Production Deployment
+
+When ready to deploy to production with SSL:
+
+### SSL Certificate Setup
+```bash
+# Linux/macOS
+chmod +x setup-ssl.sh
+./setup-ssl.sh yourdomain.com your-email@yourdomain.com
+
+# Windows
+setup-ssl.bat yourdomain.com your-email@yourdomain.com
+```
+
+### Production Docker Compose
+```bash
+# After SSL setup, use production configuration
+docker-compose -f docker-compose.prod.yaml up -d
+```
+
+This provides:
+- ✅ HTTPS/SSL for all subdomains
+- ✅ Production-optimized containers
+- ✅ Automatic certificate renewal
+- ✅ Proper security headers
+
+For detailed production deployment instructions, see [SUBDOMAIN-DEPLOYMENT.md](SUBDOMAIN-DEPLOYMENT.md).
+
 ## Previous Containerized Setup
 
 The old setup containerized everything including Vite servers, which caused:

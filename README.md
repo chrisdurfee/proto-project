@@ -192,6 +192,29 @@ The project uses a **hybrid domain configuration system** that automatically ada
 
 The domain configuration is handled by `domain.config.js`, which reads from your Proto configuration and provides fallback defaults if needed.
 
+### SSL Certificate Setup (Production)
+
+For production deployment with HTTPS, use the automated SSL setup:
+
+**Quick SSL Setup:**
+```bash
+# Linux/macOS
+chmod +x setup-ssl.sh
+./setup-ssl.sh yourdomain.com your-email@yourdomain.com
+
+# Windows
+setup-ssl.bat yourdomain.com your-email@yourdomain.com
+```
+
+This automatically:
+- ✅ Requests free Let's Encrypt SSL certificates for all subdomains
+- ✅ Sets up certificate renewal scripts
+- ✅ Configures Apache for HTTPS
+- ✅ Creates production-ready deployment files
+
+**Manual SSL Setup:**
+See [SUBDOMAIN-DEPLOYMENT.md](SUBDOMAIN-DEPLOYMENT.md) for detailed SSL configuration options including custom certificates and Traefik reverse proxy setup.
+
 ---
 
 ## 🚀 Bootstrapping & Usage
