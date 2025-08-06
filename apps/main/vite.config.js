@@ -2,6 +2,9 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import { Configs } from './src/configs.js';
 
+// Use environment variable for API URL in containers
+const apiTarget = process.env.VITE_API_URL || 'http://localhost:8080';
+
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [],
@@ -15,11 +18,12 @@ export default defineConfig({
 		}
 	},
 	server: {
-		open: true,
+		host: '0.0.0.0',
+		port: 3000,
 		cors: true,
 		proxy: {
 			'/api': {
-				target: 'https://proto.local',
+				target: apiTarget,
 				changeOrigin: true,
 				secure: false
 			}
