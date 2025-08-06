@@ -18,7 +18,7 @@ export default defineConfig({
         }
     },
     server: {
-        host: 'localhost',
+        host: true,
         port: 3002,
         cors: true,
         proxy: {
@@ -26,6 +26,7 @@ export default defineConfig({
                 target: apiTarget,
                 changeOrigin: true,
                 secure: false,
+				ws: true,
                 configure: (proxy, options) => {
                     // Log proxy requests for debugging
                     proxy.on('proxyReq', (proxyReq, req, res) => {
