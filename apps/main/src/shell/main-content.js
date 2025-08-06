@@ -1,7 +1,7 @@
 import { Main } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { Heartbeat } from '../../../common/shell/heartbeat/heartbeat.js';
 import { modules } from '../modules/modules.js';
+import { Heartbeat } from './heartbeat/heartbeat.js';
 import { AppControl } from './navigation/app-control.js';
 import { MobileHeader } from './navigation/mobile-header.js';
 

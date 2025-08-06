@@ -1,5 +1,5 @@
 import { Icons } from "@base-framework/ui/icons";
-import { PasswordValidator } from "../../../../../../../../common/utils/password/password-validator.js";
+import { PasswordValidator } from "./utils/password/password-validator.js";
 
 /**
  * Validates the password and confirm password.
