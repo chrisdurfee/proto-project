@@ -60,7 +60,7 @@ export const MigrationTable = () => (
 		rowItem: MigrationRow,
 		key: 'id',
 		emptyState: () => EmptyState({
-			title: 'No Migrations are found',
+			title: 'No Migrations Found',
 			description: 'No migrations have been found. Maybe create a new migration.',
 			icon: Icons.stack
 		})
