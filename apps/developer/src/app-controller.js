@@ -1,7 +1,7 @@
 import { Builder, router } from "@base-framework/base";
-import { getCsrfToken } from "../../common/csrf-token.js";
 import { AuthModel } from "../../common/models/auth-model.js";
 import { Configs } from "./configs.js";
+import { getCsrfToken } from "./csrf-token.js";
 import { setupServiceWorker } from "./service.js";
 import { AppShell } from "./shell/app-shell.js";
 import { setHtmlThemeBySettings } from "./theme.js";
