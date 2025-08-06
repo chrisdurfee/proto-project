@@ -46,9 +46,37 @@ To configure your actual domain, edit `common/Config/.env`:
 
 All apps will automatically use the new domain settings without code changes.
 
+### Configuration Sync
+
+The project uses a **single source of truth** for configuration:
+
+**Primary Config**: `common/Config/.env` (Proto framework configuration)
+**Generated Config**: `.env` (Docker environment variables)
+
+**To update any database, Redis, or domain settings:**
+
+1. **Edit Proto config**: Update `common/Config/.env`
+2. **Sync to Docker**: Run `node sync-config.js`
+3. **Restart containers**: Run `docker-compose restart`
+
+This ensures you only maintain configuration in one place, eliminating sync issues between Proto and Docker configurations.
+
 ## Quick Start
 
-### 1. Start Backend Services
+### 1. Sync Configuration
+
+First, sync your Proto configuration to Docker:
+
+```bash
+# Generate Docker .env from Proto configuration
+node sync-config.js
+
+# Or use the helper scripts:
+# Windows: sync-config.bat
+# Linux/macOS: chmod +x sync-config.sh && ./sync-config.sh
+```
+
+### 2. Start Backend Services
 
 ```bash
 docker-compose up -d
