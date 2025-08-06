@@ -1,14 +1,16 @@
 import path from 'path';
 import { defineConfig } from 'vite';
-import { Configs } from './src/configs.js';
+import { generateUrls } from '../../domain.config.js';
 
-// Use localhost:8080 to connect to containerized backend
-const apiTarget = 'http://localhost:8080';
+// Generate URLs based on environment
+const isDev = process.env.NODE_ENV !== 'production';
+const urls = generateUrls(isDev);
+const apiTarget = urls.api;
 
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [],
-    base: Configs.router.baseUrl,
+    base: '/', // Changed for subdomain serving
     resolve: {
         alias: {
             '@components': path.resolve(__dirname, 'src/components'),
@@ -36,5 +38,8 @@ export default defineConfig({
     build: {
         outDir: path.resolve(__dirname, '../../public/developer'),
         emptyOutDir: true
+    },
+    define: {
+        'process.env.VITE_API_URL': JSON.stringify(apiTarget)
     }
 });
