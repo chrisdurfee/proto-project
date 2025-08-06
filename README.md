@@ -46,6 +46,17 @@ This project uses a **hybrid development approach** that combines the best of bo
 - **Backend services** run in Docker containers (no local PHP/MySQL needed)
 - **Frontend apps** run locally with Vite for lightning-fast hot reload
 
+### Configuration Sync
+
+First, sync your Proto configuration to Docker:
+
+```bash
+# Generate Docker .env from Proto configuration
+./run.sh sync-config
+
+# Or run directly: node sync-config.js
+```
+
 ### Quick Start
 
 **1. Start Backend Services:**
@@ -118,29 +129,63 @@ docker-compose exec mariadb mariadb -uroot -proot proto
 ✅ **Easy API Access**: Frontend apps automatically proxy `/api` requests to containerized backend
 ✅ **No Setup Complexity**: No need for local PHP/MySQL installation
 
-For detailed setup instructions, see [DEVELOPMENT.md](DEVELOPMENT.md).
+For detailed setup instructions, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ---
 
 ## 🏗️ Directory Layout
 
 ```text
-my-app/
-├─ apps/                   # Your front-end PWAs (CRM, developer UI, etc.)
-├─ common/                 # Shared code (helpers, config, utilities)
-├─ modules/                # Feature modules (user, product, auth, …)
+proto-project/
+├─ apps/                   # Frontend PWAs (main, crm, developer)
+├─ common/                 # Shared Proto framework code
+├─ config/                 # Configuration files
+│  ├─ domain.config.js     # Domain configuration system
+│  ├─ docker-compose.prod.yaml # Production Docker setup
+│  └─ docker-compose.traefik.yaml # Traefik reverse proxy setup
+├─ docs/                   # Documentation
+│  ├─ DEVELOPMENT.md       # Development setup guide
+│  ├─ SSL-SETUP.md         # SSL certificate setup
+│  ├─ SUBDOMAIN-DEPLOYMENT.md # Production deployment
+│  └─ ...                  # Other documentation
+├─ modules/                # Proto framework feature modules
 ├─ public/                 # HTTP entrypoints & public assets
-│   └─ api/
-│       └─ index.php       # Example API bootstrap
-├─ composer.json
-└─ vendor/
-   └─ protoframework/
-      └─ proto/            # The Proto Framework core (do not edit)
+├─ scripts/                # Build and setup scripts
+│  ├─ build-production.*   # Production build scripts
+│  ├─ setup-ssl.*          # SSL certificate setup
+│  ├─ sync-config.*        # Configuration sync scripts
+│  └─ ...                  # Other utility scripts
+├─ vendor/                 # Composer dependencies
+├─ docker-compose.yaml     # Development Docker setup
+├─ sync-config.js          # Configuration sync utility
+├─ run.sh / run.bat        # Script runner
+└─ README.md               # This file
 ```
 
 ---
 
-## ⚙️ Configuration
+## 🚀 Quick Commands
+
+```bash
+# Configuration
+./run.sh sync-config              # Sync Proto config to Docker
+node sync-config.js               # Alternative: direct sync
+
+# Development
+docker-compose up -d              # Start backend services
+cd apps/main && npm run dev       # Start main app
+cd apps/crm && npm run dev        # Start CRM app
+cd apps/developer && npm run dev  # Start developer tools
+
+# Production
+./run.sh setup-ssl yourdomain.com your-email@domain.com  # Setup SSL
+./run.sh build                    # Build all apps for production
+docker-compose -f config/docker-compose.prod.yaml up -d  # Deploy production
+
+# Utilities
+./run.sh migrations               # Run database migrations
+./run.sh help                     # Show all available scripts
+```
 
 ### Application Settings
 
@@ -199,11 +244,10 @@ For production deployment with HTTPS, use the automated SSL setup:
 **Quick SSL Setup:**
 ```bash
 # Linux/macOS
-chmod +x setup-ssl.sh
-./setup-ssl.sh yourdomain.com your-email@yourdomain.com
+./run.sh setup-ssl yourdomain.com your-email@yourdomain.com
 
 # Windows
-setup-ssl.bat yourdomain.com your-email@yourdomain.com
+run.bat setup-ssl yourdomain.com your-email@yourdomain.com
 ```
 
 This automatically:
@@ -213,11 +257,9 @@ This automatically:
 - ✅ Creates production-ready deployment files
 
 **Manual SSL Setup:**
-See [SUBDOMAIN-DEPLOYMENT.md](SUBDOMAIN-DEPLOYMENT.md) for detailed SSL configuration options including custom certificates and Traefik reverse proxy setup.
+See [docs/SSL-SETUP.md](docs/SSL-SETUP.md) for detailed SSL configuration options including custom certificates and Traefik reverse proxy setup.---
 
----
-
-## 🚀 Bootstrapping & Usage
+## ⚙️ Configuration
 
 All you need in your front-controller is:
 
