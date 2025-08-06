@@ -1,7 +1,7 @@
 RewriteEngine on
 
-#redirect all page requests to main index
-RewriteBase /
+#redirect all page requests to api index
+RewriteBase /api/
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ /index.php [NC,L,QSA]
+RewriteRule ^(.*)$ index.php [NC,L,QSA]

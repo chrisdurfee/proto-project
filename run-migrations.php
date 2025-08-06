@@ -1,29 +1,34 @@
 <?php declare(strict_types=1);
 
-// Simple migration runner script
 require __DIR__ . '/vendor/autoload.php';
 
-try {
-    echo "Initializing Proto framework...\n";
+use Proto\Base;
 
-    // Initialize the API system which will bootstrap everything we need
-    Proto\Api\ApiRouter::initialize();
+/**
+ * Initialize the Proto framework
+ */
+new Base();
 
-    echo "Running database migrations...\n";
+// Now try to run Proto migrations
+echo "Running Proto migrations...\n";
 
-    // Initialize the migration guide
-    $guide = new Proto\Database\Migrations\Guide();
-
-    // Run all pending migrations
+try
+{
+    // Use Proto's migration system
+    $guide = new \Proto\Database\Migrations\Guide();
     $result = $guide->run();
-
-    if ($result) {
+    if ($result)
+    {
         echo "Migrations completed successfully!\n";
-    } else {
-        echo "Migrations failed or no pending migrations found.\n";
     }
-
-} catch (Exception $e) {
-    echo "Error running migrations: " . $e->getMessage() . "\n";
-    echo "Stack trace: " . $e->getTraceAsString() . "\n";
+    else
+    {
+        echo "No migrations to run or migrations failed.\n";
+    }
 }
+catch (Exception $e)
+{
+    echo "Migration error: " . $e->getMessage() . "\n";
+}
+
+echo "Database setup complete!\n";
