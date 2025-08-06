@@ -1,7 +1,7 @@
 import { Div } from '@base-framework/atoms';
 import { Import } from '@base-framework/base';
-import { AuthModel } from '../../../common/models/auth-model.js';
 import { openInstallPrompt } from './installation/install.js';
+import { AuthModel } from './models/auth-model.js';
 
 /**
  * This will update the body class based on the sign in state.

@@ -3,7 +3,7 @@ import { Atom } from '@base-framework/base';
 import { Button, Input, LoadingButton } from "@base-framework/ui/atoms";
 import { Icons } from '@base-framework/ui/icons';
 import { Form } from '@base-framework/ui/molecules';
-import { AuthModel } from '../../../../../common/models/auth-model.js';
+import { AuthModel } from '../../models/auth-model.js';
 
 /**
  * OneTimeCodeHeader

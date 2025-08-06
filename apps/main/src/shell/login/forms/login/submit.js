@@ -1,5 +1,5 @@
 import { Icons } from '@base-framework/ui/icons';
-import { AuthModel } from '../../../../../../common/models/auth-model.js';
+import { AuthModel } from '../../../models/auth-model.js';
 import { STEPS } from '../../steps.js';
 
 /**

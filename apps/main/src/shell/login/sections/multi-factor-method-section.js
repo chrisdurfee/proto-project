@@ -1,7 +1,7 @@
 import { Div, H1, Header, P, Section } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
 import { Button } from "@base-framework/ui/atoms";
-import { AuthModel } from '../../../../../common/models/auth-model.js';
+import { AuthModel } from '../../models/auth-model.js';
 import { STEPS } from '../steps.js';
 
 /**

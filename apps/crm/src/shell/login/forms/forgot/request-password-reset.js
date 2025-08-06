@@ -1,4 +1,4 @@
-import { AuthModel } from '../../../../../../common/models/auth-model.js';
+import { AuthModel } from '../../../models/auth-model.js';
 
 /**
  * Requests a verification code for the selected multi-factor authentication option.

@@ -1,6 +1,6 @@
 import { Strings } from '@base-framework/base';
 import { Icons } from '@base-framework/ui/icons';
-import { AuthModel } from '../../../../../../common/models/auth-model.js';
+import { AuthModel } from '../../../models/auth-model.js';
 
 /**
  * This will send a request to reset the user's password.
