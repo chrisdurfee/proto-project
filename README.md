@@ -40,78 +40,85 @@ composer install
 
 ---
 
-## 🐳 Local Development (Containerized)
+## 🐳 Local Development (Hybrid Setup)
 
-This project includes a complete containerized development environment using Docker. No need for XAMPP, WAMP, or local PHP/MySQL installations!
+This project uses a **hybrid development approach** that combines the best of both worlds:
+- **Backend services** run in Docker containers (no local PHP/MySQL needed)
+- **Frontend apps** run locally with Vite for lightning-fast hot reload
 
 ### Quick Start
 
-**Windows:**
-```cmd
-setup-dev.bat
-```
-
-**Linux/macOS:**
+**1. Start Backend Services:**
 ```bash
-chmod +x setup-dev.sh
-./setup-dev.sh
-```
-
-**Manual Setup:**
-```bash
-# Start all services
 docker-compose up -d
+```
 
-# Run database migrations
-docker-compose exec web php run-migrations.php
+**2. Start Frontend Apps** (in separate terminals):
+```bash
+# Main App
+cd apps/main
+npm install  # (first time only)
+npm run dev
 
-# Install frontend dependencies (if needed)
-docker-compose exec vite-main npm install
-docker-compose exec vite-crm npm install
-docker-compose exec vite-developer npm install
+# CRM App
+cd apps/crm
+npm install  # (first time only)
+npm run dev
+
+# Developer App
+cd apps/developer
+npm install  # (first time only)
+npm run dev
 ```
 
 ### Available Services
 
-Once running, you'll have access to:
-
 | Service | URL | Description |
 |---------|-----|-------------|
-| 🌐 Main App | http://localhost:3000 | Frontend development server |
-| 🌐 CRM App | http://localhost:3001 | CRM frontend development server |
-| 🌐 Developer Tools | http://localhost:3002 | Developer UI with scaffolding tools |
-| 🚀 API Server | http://localhost:8080 | PHP backend API |
+| 🌐 Main App | http://localhost:3000 | Main application (Vite dev server) |
+| 🌐 CRM App | http://localhost:3001 | CRM interface (Vite dev server) |
+| 🌐 Developer Tools | http://localhost:3002 | Developer UI with scaffolding tools (Vite dev server) |
+| 🚀 API Server | http://localhost:8080 | PHP backend API (containerized) |
 | 🗄️ PHPMyAdmin | http://localhost:8081 | Database management interface |
 | 🗄️ Database | localhost:3307 | MariaDB 11.7.2 server |
 | 📝 Cache | localhost:6380 | Redis server |
 
 ### Development Workflow
 
+**Backend Changes:**
 ```bash
-# View logs for all services
-docker-compose logs -f
-
-# View logs for specific service
+# View API logs
 docker-compose logs -f web
-docker-compose logs -f vite-main
 
-# Access containers
-docker-compose exec web bash           # PHP container
-docker-compose exec mariadb mariadb -uroot -proot proto  # Database
+# Access PHP container
+docker-compose exec web bash
 
-# Stop development environment
-docker-compose down
+# Restart backend if needed
+docker-compose restart web
 ```
 
-### Features
+**Frontend Changes:**
+- Edit any `.js`, `.css`, or other frontend files
+- Changes appear instantly in browser (hot module reload)
+- No need to restart anything!
 
-- **🔥 Hot Reload**: Frontend changes automatically refresh the browser
-- **🔗 API Proxy**: Frontend apps proxy `/api` requests to PHP backend
-- **🗄️ Database**: MariaDB with persistent data
-- **📦 Package Management**: Automatic npm/composer dependency handling
-- **🛠️ Developer Tools**: Built-in scaffolding and migration tools
+**Database Management:**
+```bash
+# Access database directly
+docker-compose exec mariadb mariadb -uroot -proot proto
 
-For detailed setup instructions, see [DOCKER-SETUP.md](DOCKER-SETUP.md).
+# Or use phpMyAdmin at http://localhost:8081
+```
+
+### Why This Approach?
+
+✅ **Lightning Fast HMR**: Native Vite performance on your host machine
+✅ **Instant Updates**: File changes reflect immediately in browser
+✅ **Clean Architecture**: Backend and frontend properly separated
+✅ **Easy API Access**: Frontend apps automatically proxy `/api` requests to containerized backend
+✅ **No Setup Complexity**: No need for local PHP/MySQL installation
+
+For detailed setup instructions, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ---
 
@@ -201,8 +208,9 @@ A simple admin UI lets you:
 * Manage users, permissions, and system settings
 
 **Access Developer Tools:**
-- **Containerized**: http://localhost:3002 (after running `setup-dev.bat` or `docker-compose up -d`)
-- **Traditional**: Point your browser to `/developer` after `composer install`
+1. Start backend: `docker-compose up -d`
+2. Start developer app: `cd apps/developer && npm run dev`
+3. Visit: http://localhost:3002
 
 ---
 
@@ -231,8 +239,8 @@ A simple admin UI lets you:
 - On Windows, ensure WSL2 is installed and updated
 
 **Port conflicts:**
-- Default ports: 3000-3002 (Vite), 8080 (API), 8081 (PHPMyAdmin), 3307 (DB), 6380 (Redis)
-- Stop conflicting services or modify ports in `docker-compose.yaml`
+- Default ports: 3000-3002 (Vite dev servers), 8080 (API), 8081 (PHPMyAdmin), 3307 (DB), 6380 (Redis)
+- Stop conflicting services or modify ports in `docker-compose.yaml` (backend) or `vite.config.js` (frontend)
 
 **Database connection issues:**
 ```bash
@@ -246,15 +254,23 @@ docker-compose restart mariadb
 docker-compose logs mariadb
 ```
 
-**Frontend build errors:**
+**Frontend issues:**
 ```bash
-# Clear and rebuild containers
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+# Clear Vite cache
+rm -rf apps/*/node_modules/.vite
+
+# Reinstall dependencies
+cd apps/main && npm install
+cd ../crm && npm install
+cd ../developer && npm install
 ```
 
-For more detailed troubleshooting, see [DOCKER-SETUP.md](DOCKER-SETUP.md).
+**API connectivity issues:**
+- Frontend apps proxy `/api` requests to `http://localhost:8080`
+- Check if backend container is running: `docker-compose ps`
+- Test API directly: visit `http://localhost:8080/api/auth/csrf-token`
+
+For more detailed troubleshooting, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ---
 
