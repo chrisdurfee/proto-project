@@ -104,6 +104,36 @@ Dispatcher::email($settings, $data);
 				),
 				P({ class: 'text-muted-foreground' },
 					`An API endpoint is available for testing email dispatch: /api/developer/email/test?to={email}.`
+				),
+				P({ class: 'text-muted-foreground' },
+					`The User Module has a EmailGateway to make sending email notifications easier to a user. This is a wrapper around the Dispatcher class and checks the user permissions before sending. Here is an example on how to use it:`
+				),
+				CodeBlock(
+`$settings = (object)[
+	'subject' => 'Subject',
+	'fromName' => 'Sender Name', // optional
+	'unsubscribeUrl' => '', // optional, it will set this by default in the EmailHelper class
+	'template' => 'Common\\Email\\ExampleEmail',
+	'attachments' => [
+		'/path/to/file1.pdf',
+	]
+};
+
+$userId = 1; // user id
+$data = (object)[];
+
+modules()->user()->email()->sendById(
+	$userId,
+	$settings,
+	$data
+);
+
+$user = User::get($userId);
+modules()->user()->email()->send(
+	$user, // user model data
+	$settings,
+	$data
+);`
 				)
 			]),
 
@@ -139,6 +169,31 @@ Dispatcher::sms($settings, $data);`
 				),
 				P({ class: 'text-muted-foreground' },
 					`Test SMS sending via the API endpoint: /api/developer/sms/test?to={number}.`
+				),
+				P({ class: 'text-muted-foreground' },
+					`The User Module has an SmsGateway to make sending SMS notifications easier to a user. This is a wrapper around the Dispatcher class and checks the user permissions before sending. Here is an example on how to use it:`
+				),
+				CodeBlock(
+`$settings = (object)[
+	'session' => 'session id', // if different than the default
+	'template' => 'Common\\Text\\ExampleSms'
+};
+
+$userId = 1; // user id
+$data = (object)[];
+
+modules()->user()->sms()->sendById(
+	$userId,
+	$settings,
+	$data
+);
+
+$user = User::get($userId);
+modules()->user()->sms()->send(
+	$user, // user model data
+	$settings,
+	$data
+);`
 				)
 			]),
 
@@ -195,7 +250,7 @@ Dispatcher::push($settings, $data);`
 					`Test Push sending via the API endpoint: /api/developer/push/test?userId={userId}.`
 				),
 				P({ class: 'text-muted-foreground' },
-					`The User Module has a PushGateway to make sending push notifications easier to a user. This is a wrapper around the Dispatcher class. Here is an example on how to use it:`
+					`The User Module has a PushGateway to make sending push notifications easier to a user. This is a wrapper around the Dispatcher class and checks the user permissions before sending. Here is an example on how to use it:`
 				),
 				CodeBlock(
 `$settings = (object)[

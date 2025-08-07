@@ -110,6 +110,26 @@ class Gateway
 	}
 
 	/**
+	 * This will return the email gateway.
+	 *
+	 * @return EmailGateway
+	 */
+	public function email(): EmailGateway
+	{
+		return new EmailGateway();
+	}
+
+	/**
+	 * This will return the sms gateway.
+	 *
+	 * @return SmsGateway
+	 */
+	public function sms(): SmsGateway
+	{
+		return new SmsGateway();
+	}
+
+	/**
 	 * This will return the push gateway.
 	 *
 	 * @return PushGateway
