@@ -1,6 +1,6 @@
 import path from 'path';
 import { defineConfig } from 'vite';
-import { generateUrls } from '../../config/domain.config.js';
+import { generateUrls } from '../../infrastructure/config/domain.config.js';
 
 // Generate URLs based on environment
 const isDev = process.env.NODE_ENV !== 'production';

@@ -129,7 +129,7 @@ docker-compose exec mariadb mariadb -uroot -proot proto
 ✅ **Easy API Access**: Frontend apps automatically proxy `/api` requests to containerized backend
 ✅ **No Setup Complexity**: No need for local PHP/MySQL installation
 
-For detailed setup instructions, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+For detailed setup instructions, see [infrastructure/docs/DEVELOPMENT.md](infrastructure/docs/DEVELOPMENT.md).
 
 ---
 
@@ -139,23 +139,29 @@ For detailed setup instructions, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 proto-project/
 ├─ apps/                   # Frontend PWAs (main, crm, developer)
 ├─ common/                 # Shared Proto framework code
-├─ config/                 # Configuration files
-│  ├─ domain.config.js     # Domain configuration system
-│  ├─ docker-compose.prod.yaml # Production Docker setup
-│  └─ docker-compose.traefik.yaml # Traefik reverse proxy setup
-├─ docs/                   # Documentation
-│  ├─ DEVELOPMENT.md       # Development setup guide
-│  ├─ SSL-SETUP.md         # SSL certificate setup
-│  ├─ SUBDOMAIN-DEPLOYMENT.md # Production deployment
-│  └─ ...                  # Other documentation
 ├─ modules/                # Proto framework feature modules
 ├─ public/                 # HTTP entrypoints & public assets
-├─ scripts/                # Build and setup scripts
-│  ├─ build-production.*   # Production build scripts
-│  ├─ setup-ssl.*          # SSL certificate setup
-│  ├─ sync-config.*        # Configuration sync scripts
-│  └─ ...                  # Other utility scripts
 ├─ vendor/                 # Composer dependencies
+├─ infrastructure/         # Development & deployment infrastructure
+│  ├─ config/              # Configuration files
+│  │  ├─ domain.config.js  # Domain configuration system
+│  │  ├─ docker-compose.prod.yaml # Production Docker setup
+│  │  └─ docker-compose.traefik.yaml # Traefik reverse proxy
+│  ├─ docker/              # Docker-related files
+│  │  ├─ apache-subdomain.conf # Apache virtual host config
+│  │  ├─ apache-vhost.conf # Standard Apache config
+│  │  ├─ php/              # PHP configuration
+│  │  └─ mysql/            # MySQL initialization scripts
+│  ├─ docs/                # Documentation
+│  │  ├─ DEVELOPMENT.md    # Development setup guide
+│  │  ├─ SSL-SETUP.md      # SSL certificate setup
+│  │  ├─ SUBDOMAIN-DEPLOYMENT.md # Production deployment
+│  │  └─ ...               # Other documentation
+│  └─ scripts/             # Build and setup scripts
+│     ├─ build-production.* # Production build scripts
+│     ├─ setup-ssl.*       # SSL certificate setup
+│     ├─ sync-config.*     # Configuration sync scripts
+│     └─ ...               # Other utility scripts
 ├─ docker-compose.yaml     # Development Docker setup
 ├─ sync-config.js          # Configuration sync utility
 ├─ run.sh / run.bat        # Script runner
@@ -180,7 +186,7 @@ cd apps/developer && npm run dev  # Start developer tools
 # Production
 ./run.sh setup-ssl yourdomain.com your-email@domain.com  # Setup SSL
 ./run.sh build                    # Build all apps for production
-docker-compose -f config/docker-compose.prod.yaml up -d  # Deploy production
+docker-compose -f infrastructure/config/docker-compose.prod.yaml up -d  # Deploy production
 
 # Utilities
 ./run.sh migrations               # Run database migrations
@@ -257,7 +263,7 @@ This automatically:
 - ✅ Creates production-ready deployment files
 
 **Manual SSL Setup:**
-See [docs/SSL-SETUP.md](docs/SSL-SETUP.md) for detailed SSL configuration options including custom certificates and Traefik reverse proxy setup.---
+See [infrastructure/docs/SSL-SETUP.md](infrastructure/docs/SSL-SETUP.md) for detailed SSL configuration options including custom certificates and Traefik reverse proxy setup.---
 
 ## ⚙️ Configuration
 

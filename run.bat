@@ -3,7 +3,7 @@ REM Script Runner for Proto Project (Windows)
 REM Usage: run.bat <script-name> [args...]
 
 set SCRIPT_NAME=%1
-set SCRIPTS_DIR=scripts
+set SCRIPTS_DIR=infrastructure\scripts
 
 if "%SCRIPT_NAME%"=="" (
     echo ❌ No script specified. Use 'run.bat help' for available scripts.

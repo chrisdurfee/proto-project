@@ -6,7 +6,7 @@
 SCRIPT_NAME="$1"
 shift # Remove script name from arguments
 
-SCRIPTS_DIR="./scripts"
+SCRIPTS_DIR="./infrastructure/scripts"
 
 case "$SCRIPT_NAME" in
     "sync"|"sync-config")
