@@ -64,6 +64,8 @@ First, sync your Proto configuration to Docker:
 docker-compose up -d
 ```
 
+> **✨ New**: Database migrations now run automatically when the container starts! This ensures your database schema is always up-to-date. To disable this behavior, set `AUTO_MIGRATE=false` in your `.env` file.
+
 **2. Start Frontend Apps** (in separate terminals):
 ```bash
 # Main App
@@ -106,6 +108,9 @@ docker-compose exec web bash
 
 # Restart backend if needed
 docker-compose restart web
+
+# Manual migration control (if AUTO_MIGRATE=false)
+docker-compose exec web php infrastructure/scripts/run-migrations.php
 ```
 
 **Frontend Changes:**
@@ -128,8 +133,60 @@ docker-compose exec mariadb mariadb -uroot -proot proto
 ✅ **Clean Architecture**: Backend and frontend properly separated
 ✅ **Easy API Access**: Frontend apps automatically proxy `/api` requests to containerized backend
 ✅ **No Setup Complexity**: No need for local PHP/MySQL installation
+✅ **Auto-Migration**: Database schema automatically updates on container start
 
 For detailed setup instructions, see [infrastructure/docs/DEVELOPMENT.md](infrastructure/docs/DEVELOPMENT.md).
+
+---
+
+## 🤖 Automated Features
+
+The Docker setup includes several automation features to streamline development:
+
+### **Build-Time Automation**
+When you build the Docker image (`docker-compose build`), the following happens automatically:
+- ✅ **Configuration Sync**: Reads `common/Config/.env` and generates Docker environment variables
+- ✅ **PHP Validation**: Checks PHP syntax across the codebase
+- ✅ **Apache Module Setup**: Enables all required modules for `.htaccess` functionality
+- ✅ **Build Verification**: Ensures all critical files and directories are present
+
+### **Runtime Automation**
+When you start the container (`docker-compose up`), the following happens automatically:
+- ✅ **Service Dependencies**: Waits for database and Redis to be ready before starting
+- ✅ **Database Migrations**: Runs pending migrations automatically (configurable)
+- ✅ **Health Checks**: Verifies autoloader and critical dependencies
+- ✅ **Apache Startup**: Starts Apache with optimized configuration
+
+### **Migration Control**
+
+By default, database migrations run automatically for convenience:
+
+```bash
+# Default behavior - migrations run automatically
+docker-compose up -d
+```
+
+For production or when you want manual control:
+
+```bash
+# Disable auto-migrations
+echo "AUTO_MIGRATE=false" >> .env
+docker-compose up -d
+
+# Then run migrations manually when ready
+docker-compose exec web php infrastructure/scripts/run-migrations.php
+```
+
+### **SSL Setup (Manual)**
+
+For security reasons, SSL certificate setup remains manual:
+
+```bash
+# Set up SSL certificates (production only)
+./run.sh setup-ssl yourdomain.com your-email@yourdomain.com
+```
+
+This automation makes the development experience much smoother while maintaining production safety controls.
 
 ---
 
@@ -178,10 +235,15 @@ proto-project/
 node sync-config.js               # Alternative: direct sync
 
 # Development
-docker-compose up -d              # Start backend services
+docker-compose up -d              # Start backend services (auto-migrates by default)
 cd apps/main && npm run dev       # Start main app
 cd apps/crm && npm run dev        # Start CRM app
 cd apps/developer && npm run dev  # Start developer tools
+
+# Database
+AUTO_MIGRATE=false docker-compose up -d  # Start without auto-migration
+./run.sh migrations               # Run database migrations manually
+docker-compose exec web php infrastructure/scripts/run-migrations.php  # Alternative manual migration
 
 # Production
 ./run.sh setup-ssl yourdomain.com your-email@domain.com  # Setup SSL
@@ -189,8 +251,8 @@ cd apps/developer && npm run dev  # Start developer tools
 docker-compose -f infrastructure/config/docker-compose.prod.yaml up -d  # Deploy production
 
 # Utilities
-./run.sh migrations               # Run database migrations
 ./run.sh help                     # Show all available scripts
+docker-compose logs -f web        # Watch container startup and migration logs
 ```
 
 ### Application Settings

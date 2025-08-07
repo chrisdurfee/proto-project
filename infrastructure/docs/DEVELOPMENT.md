@@ -2,11 +2,26 @@
 
 ## Overview
 
-This project uses a **hybrid containerized development approach** with **centralized domain configuration**:
+This project uses a **hybrid containerized development approach** with **automated setup** and **centralized domain configuration**:
 
-- **Backend Services**: Run in Docker containers (PHP, MariaDB, Redis)
+- **Backend Services**: Run in Docker containers (PHP, MariaDB, Redis) with automatic initialization
 - **Frontend Apps**: Run locally with Vite dev servers for fast hot module reload
 - **Domain Config**: Centralized system that reads from Proto `.env` configuration
+- **Auto-Migration**: Database schema automatically stays up-to-date
+
+## ✨ What's Automated
+
+The Docker setup now includes intelligent automation to minimize setup time:
+
+### **Automatic on Container Start:**
+- ✅ **Database Migrations**: Runs automatically (configurable via `AUTO_MIGRATE` env var)
+- ✅ **Service Dependencies**: Waits for database/Redis to be ready
+- ✅ **Configuration Sync**: Reads from Proto config during build
+- ✅ **Health Checks**: Verifies autoloader and dependencies
+
+### **Manual Operations:**
+- ❌ **SSL Certificates**: Intentionally manual for security
+- ❌ **Production Deployment**: Requires explicit commands
 
 ## Domain Configuration
 
@@ -82,11 +97,36 @@ node sync-config.js
 docker-compose up -d
 ```
 
-This starts:
-- **Proto Backend**: `http://localhost:8080`
-- **MariaDB**: `localhost:3307`
-- **Redis**: `localhost:6380`
+> **✨ New**: This now automatically runs database migrations! Watch the logs to see the initialization process:
+> ```bash
+> docker-compose logs -f web
+> ```
+
+This starts and automatically configures:
+- **Proto Backend**: `http://localhost:8080` (with auto-migration)
+- **MariaDB**: `localhost:3307` (waits until ready)
+- **Redis**: `localhost:6380` (waits until ready)
 - **phpMyAdmin**: `http://localhost:8081`
+
+### Migration Control
+
+**Default Behavior** (migrations run automatically):
+```bash
+docker-compose up -d
+# → Waits for database
+# → Runs pending migrations
+# → Starts Apache
+```
+
+**Manual Control** (for production or testing):
+```bash
+# Disable auto-migration
+echo "AUTO_MIGRATE=false" >> .env
+docker-compose up -d
+
+# Run migrations manually when ready
+docker-compose exec web php infrastructure/scripts/run-migrations.php
+```
 
 ### 2. Start Frontend Apps
 
@@ -116,13 +156,32 @@ npm run dev
 ✅ **Clean Architecture**: Backend and frontend properly separated
 ✅ **Easy API Access**: Frontend apps proxy `/api` requests to containerized backend
 ✅ **CORS Configured**: Backend allows requests from all three frontend ports
+✅ **Auto-Migration**: Database schema stays current without manual intervention
+✅ **Intelligent Startup**: Container waits for dependencies and validates setup
 
 ## Development Workflow
 
 1. **Backend Changes**: Edit PHP files → Changes reflect immediately (volume mounted)
 2. **Frontend Changes**: Edit JS/CSS files → Hot reload updates browser instantly
-3. **Database**: Use phpMyAdmin at `http://localhost:8081` or direct connection on port 3307
-4. **API Testing**: Backend APIs available at `http://localhost:8080/api/*`
+3. **Database Changes**: Create migrations → Auto-applied on container restart
+4. **Database Management**: Use phpMyAdmin at `http://localhost:8081` or direct connection on port 3307
+5. **API Testing**: Backend APIs available at `http://localhost:8080/api/*`
+
+### Database Migrations
+
+**Automatic (Default)**:
+- Migrations run when container starts
+- Perfect for development and team collaboration
+- Ensures everyone has the latest schema
+
+**Manual (Production)**:
+```bash
+# Disable auto-migration
+AUTO_MIGRATE=false docker-compose up -d
+
+# Run specific migration
+docker-compose exec web php infrastructure/scripts/run-migrations.php --target=2025-01-01
+```
 
 ## Architecture
 
@@ -143,11 +202,35 @@ npm run dev
 - Check containers: `docker ps`
 - View logs: `docker logs proto-web`
 - Restart: `docker-compose restart`
+- Check migrations: `docker-compose logs web | grep Migration`
+
+### Migration Issues
+```bash
+# Check migration status
+docker-compose exec web php infrastructure/scripts/run-migrations.php --status
+
+# Reset and re-run migrations (development only!)
+docker-compose exec web php infrastructure/scripts/run-migrations.php --reset
+
+# Disable auto-migration if causing issues
+echo "AUTO_MIGRATE=false" >> .env
+docker-compose restart web
+```
 
 ### Frontend Issues
 - Check Vite config: `apps/*/vite.config.js`
 - Clear cache: `rm -rf apps/*/node_modules/.vite`
 - Reinstall: `cd apps/main && npm install`
+
+### Container Startup Issues
+```bash
+# Watch detailed startup logs
+docker-compose up --no-detach
+
+# Check service health
+docker-compose exec web bash -c "nc -z mariadb 3306 && echo 'DB OK' || echo 'DB Failed'"
+docker-compose exec web bash -c "nc -z redis 6379 && echo 'Redis OK' || echo 'Redis Failed'"
+```
 
 ### CORS Issues
 - Backend CORS configured in the proto router
