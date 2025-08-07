@@ -369,6 +369,18 @@ public function addData(Request $request): void
 		'status' => 'int'
 	]);
 
+	// or you can use a shorthand method from the request
+	$data = $request->validate([
+		'id' => 'int|required',
+		'name' => 'string:255|required',
+		'email' => 'email|required',
+		'phone' => 'phone',
+		'status' => 'int'
+	]);
+
+	// if the validation passes, the data will be sanitized and validated
+	// if the data fails, an error response will be returned and the request will be terminated
+
 	// do something with the data
 }`
 				)
