@@ -58,6 +58,8 @@ class TestMigration extends Migration
 
 		$this->alter('test_table', function($table)
 		{
+			$table->dropIndex('email_read');
+
 			$table->add('status')->int(20);
 			$table->alter('subject')->varchar(180);
 			$table->drop('read_at');
