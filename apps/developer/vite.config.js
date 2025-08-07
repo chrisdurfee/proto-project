@@ -21,18 +21,13 @@ export default defineConfig({
         host: true,
         port: 3002,
         cors: true,
+        open: true,
         proxy: {
             '/api': {
                 target: apiTarget,
-                changeOrigin: true,
-                secure: false,
-				ws: true,
-                configure: (proxy, options) => {
-                    // Log proxy requests for debugging
-                    proxy.on('proxyReq', (proxyReq, req, res) => {
-                        console.log('Proxying request:', req.method, req.url, 'to', apiTarget + req.url);
-                    });
-                }
+				changeOrigin: true,
+				secure: false,
+				ws: true
             }
         }
     },

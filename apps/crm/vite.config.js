@@ -20,14 +20,16 @@ export default defineConfig({
 		}
 	},
 	server: {
-		host: 'localhost',
-		port: 3001,
-		cors: true,
+		host: true,
+        port: 3001,
+        cors: true,
+        open: true,
 		proxy: {
 			'/api': {
 				target: apiTarget,
 				changeOrigin: true,
-				secure: false
+				secure: false,
+				ws: true
 			}
 		}
 	},
