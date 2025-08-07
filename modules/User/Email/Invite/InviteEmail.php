@@ -20,7 +20,7 @@ class InviteEmail extends BasicEmail
 	protected function addBody(): string
 	{
 		$props = $this->props;
-		$url = env('urls')->prod;
+		$url = env('domain')->production;
 		$siteName = env('siteName');
 		$inviter = $props->inviterName ?? $siteName;
 
