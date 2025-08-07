@@ -34,7 +34,7 @@ AddDefaultCharset UTF-8
     Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
 
     # Content Security Policy (adjust according to your app requirements)
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; font-src 'self'; frame-ancestors 'self'"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; object-src 'none'; base-uri 'self'"
 
     # Set Referrer Policy
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
@@ -63,8 +63,12 @@ FileETag None
 # Disable server signature
 ServerSignature Off
 
-# Add support for woff2 fonts
+# Add support for font files
 AddType application/font-woff2 .woff2
+AddType application/font-woff .woff
+AddType application/vnd.ms-fontobject .eot
+AddType font/truetype .ttf
+AddType font/opentype .otf
 
 # Block unwanted user agents (e.g., libwww-perl)
 <IfModule mod_rewrite.c>
@@ -74,7 +78,7 @@ AddType application/font-woff2 .woff2
 
 # Compression with mod_deflate
 <IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/plain text/html text/css text/javascript application/javascript application/json application/xml application/xhtml+xml text/xml font/otf font/ttf font/eot font/woff
+    AddOutputFilterByType DEFLATE text/plain text/html text/css text/javascript application/javascript application/json application/xml application/xhtml+xml text/xml font/otf font/ttf font/eot application/font-woff application/font-woff2
 </IfModule>
 
 # Compression with mod_brotli (if available)
@@ -96,12 +100,17 @@ AddType application/font-woff2 .woff2
     ExpiresByType application/x-javascript "access plus 1 month"
     ExpiresByType font/woff2 "access plus 1 year"
     ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/vnd.ms-fontobject "access plus 1 year"
     ExpiresDefault "access plus 2 days"
 </IfModule>
 
 # Deny access to sensitive directories
 <IfModule mod_alias.c>
-    RedirectMatch 403 /(common|proto|tests|vendor|apps|\.git|apache|k8s|node_modules)/
+    RedirectMatch 403 ^/(vendor|\.git|infrastructure|modules|tests|node_modules)(/.*)?$
 </IfModule>
 
 # URL rewriting rules for your app
@@ -109,7 +118,7 @@ AddType application/font-woff2 .woff2
     RewriteRule ^crm/(.*)$ /public/crm/$1 [L,NC,QSA]
     RewriteRule ^developer/(.*)$ /public/developer/$1 [L,NC,QSA]
     RewriteRule ^embed/(.*)$ /public/embed/$1 [L,NC,QSA]
-    RewriteRule ^api/.*$ /public/api/ [L,NC,QSA]
+    RewriteRule ^api/(.*)$ /public/api/$1 [L,NC,QSA]
 
     # Redirect non-existent files/directories to main index (adjust as needed)
     RewriteBase /
