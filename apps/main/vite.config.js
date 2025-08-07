@@ -13,7 +13,6 @@ export default defineConfig({
 	base: '/', // Changed for subdomain serving
 	resolve: {
 		alias: {
-			'@common': path.resolve(__dirname, '../common'),
 			'@components': path.resolve(__dirname, 'src/components'),
 			'@modules': path.resolve(__dirname, 'src/modules'),
 			'@shell': path.resolve(__dirname, 'src/shell'),
