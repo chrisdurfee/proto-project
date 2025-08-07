@@ -16,6 +16,10 @@ This repository is a **project skeleton** for building applications on top of th
 - MySQL/MariaDB
 - Node.js (for frontend development)
 
+### Framework Requirements
+- **Proto Framework**: v1.0.15+ (includes enhanced Email/SMTP support)
+- **PHPMailer**: Included with Proto framework for universal email sending
+
 ---
 
 ## �📦 Installation

@@ -60,6 +60,49 @@ function generateDockerEnv(protoConfig) {
         envVars.push('');
     }
 
+    // Email configuration from Proto config
+    if (protoConfig.email && protoConfig.email.smtp) {
+        const smtp = protoConfig.email.smtp;
+        envVars.push('# Email Configuration (Universal SMTP from Proto email.smtp)');
+        envVars.push(`MAIL_HOST=${smtp.host || 'smtp.mailtrap.io'}`);
+        envVars.push(`MAIL_PORT=${smtp.port || 2525}`);
+        envVars.push(`MAIL_USERNAME=${smtp.username || ''}`);
+        envVars.push(`MAIL_PASSWORD=${smtp.password || ''}`);
+        envVars.push(`MAIL_ENCRYPTION=${smtp.encryption || 'tls'}`);
+        envVars.push(`MAIL_FROM_ADDRESS=${smtp.fromAddress || 'noreply@proto-project.com'}`);
+        envVars.push(`MAIL_FROM_NAME="${smtp.fromName || 'Proto Project'}"`);
+        envVars.push(`MAIL_SENDING_ENABLED=${smtp.sendingEnabled || false}`);
+        envVars.push('');
+    }
+
+    // Application Environment
+    envVars.push('# Application Environment');
+    envVars.push(`APP_ENV=${protoConfig.env === 'dev' ? 'development' : 'production'}`);
+    envVars.push('');
+
+    // Automation Controls
+    envVars.push('# Automation Controls');
+    envVars.push('# Set to \'true\' to automatically run migrations on container startup');
+    envVars.push('AUTO_MIGRATE=true');
+    envVars.push('');
+
+    // Development Settings
+    envVars.push('# Development Settings');
+    envVars.push('CORS_ENABLED=true');
+
+    if (protoConfig.domain && protoConfig.domain.ports && protoConfig.domain.ports.development) {
+        const ports = protoConfig.domain.ports.development;
+        const origins = [
+            `http://localhost:${ports.main || 3000}`,
+            `http://localhost:${ports.crm || 3001}`,
+            `http://localhost:${ports.developer || 3002}`
+        ];
+        envVars.push(`CORS_ORIGINS=${origins.join(',')}`);
+    } else {
+        envVars.push('CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002');
+    }
+    envVars.push('');
+
     // Add any missing defaults
     envVars.push('# Fallback defaults');
     envVars.push('DB_ROOT_PASSWORD=root');
@@ -90,11 +133,23 @@ function syncConfiguration() {
     }
     if (protoConfig.connections?.default) {
         const db = protoConfig.connections.default.dev || protoConfig.connections.default.prod;
-        console.log(`   Database: ${db.username}@${db.host}:${db.port}/${db.database}`);
+        console.log(`   Database: ${db.username}@${db.host}:${db.port || 3306}/${db.database}`);
     }
     if (protoConfig.domain) {
         console.log(`   Domain: ${protoConfig.domain.production}`);
+        if (protoConfig.domain.ports?.development) {
+            const ports = protoConfig.domain.ports.development;
+            console.log(`   Development Ports: API:${ports.api}, Main:${ports.main}, CRM:${ports.crm}, Dev:${ports.developer}`);
+        }
     }
+    if (protoConfig.email?.smtp) {
+        const smtp = protoConfig.email.smtp;
+        console.log(`   Email SMTP: ${smtp.host}:${smtp.port} (${smtp.encryption})`);
+        console.log(`   Email From: ${smtp.fromName} <${smtp.fromAddress}>`);
+        console.log(`   Email Sending: ${smtp.sendingEnabled ? 'ENABLED' : 'DISABLED'}`);
+        console.log(`   SMTP Auth: ${smtp.username ? '[SET]' : '[EMPTY]'}`);
+    }
+    console.log(`   App Environment: ${protoConfig.env === 'dev' ? 'development' : 'production'}`);
 
     console.log('\n🎉 Configuration sync complete!');
     console.log('💡 Run: docker-compose restart');
