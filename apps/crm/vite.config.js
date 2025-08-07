@@ -21,9 +21,9 @@ export default defineConfig({
 	},
 	server: {
 		host: true,
-        port: 3001,
-        cors: true,
-        open: true,
+		port: 3001,
+		cors: true,
+		open: true,
 		proxy: {
 			'/api': {
 				target: apiTarget,
