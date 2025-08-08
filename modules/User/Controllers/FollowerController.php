@@ -182,7 +182,7 @@ class FollowerController extends Controller
 			'dates' => $dates,
 			'orderBy' => $orderBy,
 			'groupBy' => $groupBy,
-			'lastCursor' => $lastCursor
+			'cursor' => $lastCursor
 		]);
 		return $this->response($result);
 	}

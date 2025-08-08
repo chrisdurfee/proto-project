@@ -84,14 +84,18 @@ class ErrorController extends Controller
 		$limit = $request->getInt('limit');
 		$search = $request->input('search');
 		$custom = $request->input('custom');
+		$lastCursor = $request->input('lastCursor') ?? null;
 		$orderBy = $this->setOrderByModifier($request);
 		$dates = $this->setDateModifier($request);
+		$groupBy = $this->setGroupByModifier($request);
 
 		$result = ErrorLog::all($filter, $offset, $limit, [
 			'search' => $search,
 			'custom' => $custom,
 			'orderBy' => $orderBy,
-			'dates' => $dates
+			'dates' => $dates,
+			'groupBy' => $groupBy,
+			'cursor' => $lastCursor
 		]);
 		return $this->response($result);
 	}

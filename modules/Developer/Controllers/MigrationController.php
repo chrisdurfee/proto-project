@@ -123,10 +123,18 @@ class MigrationController extends Controller
 		$limit = $request->getInt('limit');
 		$search = $request->input('search');
 		$custom = $request->input('custom');
+		$lastCursor = $request->input('lastCursor') ?? null;
+		$orderBy = $this->setOrderByModifier($request);
+		$dates = $this->setDateModifier($request);
+		$groupBy = $this->setGroupByModifier($request);
 
 		$result = Migration::all($filter, $offset, $limit, [
 			'search' => $search,
-			'custom' => $custom
+			'custom' => $custom,
+			'orderBy' => $orderBy,
+			'dates' => $dates,
+			'groupBy' => $groupBy,
+			'cursor' => $lastCursor
 		]);
 		return $this->response($result);
 	}
