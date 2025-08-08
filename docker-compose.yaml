@@ -1,0 +1,107 @@
+services:
+  # MariaDB Database
+  mariadb:
+    image: mariadb:11.7.2
+    container_name: proto-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MARIADB_DATABASE: ${DB_DATABASE:-proto}
+      MARIADB_USER: ${DB_USERNAME:-proto_user}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-proto_password}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./infrastructure/docker/mysql/:/docker-entrypoint-initdb.d/
+    networks:
+      - proto-network
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=256M
+      --max_connections=200
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: proto-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD:-}"
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - proto-network
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+
+  # PHP Apache Web Server (Proto Backend)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: proto-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./infrastructure/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - mariadb
+      - redis
+    networks:
+      - proto-network
+    environment:
+      - DB_HOST=${DB_HOST:-mariadb}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_DATABASE=${DB_DATABASE:-proto}
+      - DB_USERNAME=${DB_USERNAME:-proto_user}
+      - DB_PASSWORD=${DB_PASSWORD:-proto_password}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - APP_ENV=${APP_ENV:-development}
+      # Automation controls
+      - AUTO_MIGRATE=${AUTO_MIGRATE:-true}
+      # Email configuration (SMTP)
+      - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-tls}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@proto-project.local}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Proto Project}
+      - MAIL_ENABLED=${MAIL_ENABLED:-true}
+      # Enable CORS for local development
+      - CORS_ENABLED=true
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
+
+  # PHPMyAdmin (optional, for database management)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: proto-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: ${DB_HOST:-mariadb}
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    depends_on:
+      - mariadb
+    networks:
+      - proto-network
+
+volumes:
+  mariadb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  proto-network:
+    driver: bridge
