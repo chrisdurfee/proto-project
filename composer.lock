@@ -815,16 +815,16 @@
         },
         {
             "name": "protoframework/proto",
-            "version": "1.0.16",
+            "version": "1.0.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/chrisdurfee/proto.git",
-                "reference": "4259a0d982133c4e854813bca6d807fb11da6aee"
+                "reference": "6776cc101c7fd083b7eddc6f11092e442228f4f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/4259a0d982133c4e854813bca6d807fb11da6aee",
-                "reference": "4259a0d982133c4e854813bca6d807fb11da6aee",
+                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/6776cc101c7fd083b7eddc6f11092e442228f4f1",
+                "reference": "6776cc101c7fd083b7eddc6f11092e442228f4f1",
                 "shasum": ""
             },
             "require": {
@@ -875,9 +875,9 @@
             ],
             "support": {
                 "issues": "https://github.com/chrisdurfee/proto/issues",
-                "source": "https://github.com/chrisdurfee/proto/tree/1.0.16"
+                "source": "https://github.com/chrisdurfee/proto/tree/1.0.17"
             },
-            "time": "2025-08-07T19:46:02+00:00"
+            "time": "2025-08-08T08:26:53+00:00"
         },
         {
             "name": "psr/clock",
@@ -3406,12 +3406,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.2"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }
