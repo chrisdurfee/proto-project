@@ -1,7 +1,8 @@
 import { Div, Iframe, Span } from "@base-framework/atoms";
 import { Data } from "@base-framework/base";
-import { Input } from "@base-framework/ui/atoms";
+import { Button, Input } from "@base-framework/ui/atoms";
 import { BlankPage } from "@base-framework/ui/pages";
+import { TestEmailModal } from "./modals/test-email-modal.js";
 
 /**
  * ContentSwitch
@@ -13,8 +14,21 @@ import { BlankPage } from "@base-framework/ui/pages";
  */
 export const ContentSwitch = (props) => (
 	Div({ class: 'flex-1 flex-col w-full h-full hidden lg:flex px-6 py-4 space-y-4' }, [
-		Div({ class: "flex items-center justify-between border-b border-muted pb-2" }, [
-			Span({ class: "text-xl font-semibold text-foreground" }, "Email Template Preview")
+		Div({ class: 'flex justify-between' }, [
+			Div({ class: "items-center pb-2" }, [
+				Span({ class: "text-xl font-semibold text-foreground" }, "Email Template Preview")
+			]),
+			Div([
+				Button({
+					variant: 'secondary',
+					click: (e, { data }) =>
+					{
+						TestEmailModal({
+							template: data.template
+						});
+					}
+				}, 'Test')
+			])
 		]),
 		Div({ class: "flex flex-auto flex-col space-y-2" }, [
 			Input({
