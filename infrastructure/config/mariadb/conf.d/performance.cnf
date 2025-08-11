@@ -1,0 +1,45 @@
+# MariaDB performance overrides (mounted read-only)
+[mysqld]
+# Adjust buffer pool to ~50-70% of container memory in production
+innodb_buffer_pool_size=512M
+innodb_buffer_pool_instances=1
+innodb_log_file_size=256M
+innodb_flush_method=O_DIRECT
+innodb_flush_log_at_trx_commit=1
+innodb_file_per_table=1
+
+# Connections & Threads
+# Reduced to more conservative setting for better stability
+max_connections=1000
+thread_cache_size=256
+table_open_cache=8000
+
+# Query Cache is removed in recent MariaDB/MySQL; ensure disabled settings not present
+query_cache_type=0
+query_cache_size=0
+
+# Temporary tables
+tmp_table_size=64M
+max_heap_table_size=64M
+
+# Logging (tune as needed)
+slow_query_log=1
+slow_query_log_file=/var/lib/mysql/slow.log
+long_query_time=2
+log_error=/var/lib/mysql/error.log
+
+# Character set
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+# Misc
+skip_name_resolve=1
+# Increase timeout to more reasonable values
+# Balanced timeout to reclaim abandoned connections while avoiding premature disconnects
+wait_timeout=60
+interactive_timeout=60
+
+[mysqldump]
+quick
+quote-names
+max_allowed_packet=128M

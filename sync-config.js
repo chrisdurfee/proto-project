@@ -44,11 +44,22 @@ function generateDockerEnv(protoConfig) {
     if (protoConfig.connections && protoConfig.connections.default) {
         const db = protoConfig.connections.default.dev || protoConfig.connections.default.prod;
         if (db) {
+            const dbPassword = db.password || 'proto_password';
+            const dbUser = db.username || 'proto_user';
+            const isProd = protoConfig.env !== 'dev';
+            // Basic password strength heuristic
+            const weak = dbPassword.length < 12 || /^(proto_password|password|changeme)$/i.test(dbPassword);
+            if (isProd && weak) {
+                console.error('❌ Weak database password detected in production config. Aborting generation.');
+                process.exit(2);
+            } else if (weak) {
+                console.warn('⚠️  Weak database password detected (development). Consider strengthening.');
+            }
             envVars.push('# Database Configuration (from Proto connections.default)');
             envVars.push(`DB_HOST=${db.host || 'mariadb'}`);
             envVars.push(`DB_DATABASE=${db.database || 'proto'}`);
-            envVars.push(`DB_USERNAME=${db.username || 'proto_user'}`);
-            envVars.push(`DB_PASSWORD=${db.password || 'proto_password'}`);
+            envVars.push(`DB_USERNAME=${dbUser}`);
+            envVars.push(`DB_PASSWORD=${dbPassword}`);
             envVars.push('');
         }
     }
@@ -105,6 +116,7 @@ function generateDockerEnv(protoConfig) {
 
     // Add any missing defaults
     envVars.push('# Fallback defaults');
+    envVars.push('# Root password MUST be overridden outside of dev');
     envVars.push('DB_ROOT_PASSWORD=root');
 
     return envVars.join('\n');

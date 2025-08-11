@@ -9,10 +9,14 @@ services:
       MARIADB_DATABASE: ${DB_DATABASE:-proto}
       MARIADB_USER: ${DB_USERNAME:-proto_user}
       MARIADB_PASSWORD: ${DB_PASSWORD:-proto_password}
-    ports:
-      - "3307:3306"
+    # IMPORTANT: Database port is no longer published to the host for security.
+    # If you really need host access for debugging, temporarily uncomment below
+    # and restrict with a firewall / bind-address.
+    # ports:
+    #   - "3307:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
+      - ./infrastructure/config/mariadb/conf.d:/etc/mysql/mariadb.conf.d:ro
       - ./infrastructure/docker/mysql/:/docker-entrypoint-initdb.d/
     networks:
       - proto-network
@@ -20,22 +24,34 @@ services:
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
       --innodb-buffer-pool-size=256M
-      --max_connections=200
+      --max_connections=5000
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$${MARIADB_ROOT_PASSWORD} || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
 
   # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: proto-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD:-}"
-    ports:
-      - "6380:6379"
+    # Redis no longer published to host. Uncomment only for controlled local debugging.
+    # ports:
+    #   - "6380:6379"
     volumes:
       - redis_data:/data
+      - ./infrastructure/config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: ["redis-server","/usr/local/etc/redis/redis.conf"]
     networks:
       - proto-network
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $${REDIS_PASSWORD:-} ping | grep PONG || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
 
   # PHP Apache Web Server (Proto Backend)
   web:
@@ -49,6 +65,7 @@ services:
     volumes:
       - .:/var/www/html
       - ./infrastructure/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./infrastructure/docker/apache-mpm.conf:/etc/apache2/conf-available/mpm-tuning.conf:ro
     depends_on:
       - mariadb
       - redis
@@ -78,14 +95,30 @@ services:
       # Enable CORS for local development
       - CORS_ENABLED=true
       - CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost/health.php >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    # Security hardening options (commented if they impede dev workflow)
+    # read_only: true
+    # tmpfs:
+    #   - /tmp
+    # cap_drop:
+    #   - ALL
+    # cap_add:
+    #   - NET_BIND_SERVICE
+    # security_opt:
+    #   - no-new-privileges:true
 
   # PHPMyAdmin (optional, for database management)
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: proto-phpmyadmin
     restart: unless-stopped
-    ports:
-      - "8081:80"
+  # Not published by default. Uncomment only for local use.
+  # ports:
+  #   - "8081:80"
     environment:
       PMA_HOST: ${DB_HOST:-mariadb}
       PMA_PORT: 3306
@@ -95,6 +128,7 @@ services:
       - mariadb
     networks:
       - proto-network
+    profiles: [dev]
 
 volumes:
   mariadb_data:

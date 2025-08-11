@@ -1,4 +1,5 @@
-FROM php:8.2-apache
+ARG PHP_VERSION=8.3
+FROM php:${PHP_VERSION}-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -47,14 +48,21 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin \
     --filename=composer
 
-# Configure OPcache for production
-RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.memory_consumption=256" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.interned_strings_buffer=16" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.max_accelerated_files=4000" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.revalidate_freq=2" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.fast_shutdown=1" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.enable_cli=1" >> /usr/local/etc/php/conf.d/opcache.ini
+# Base OPcache + JIT defaults (env-specific overrides in entrypoint)
+RUN { \
+    echo 'opcache.enable=1'; \
+    echo 'opcache.enable_cli=1'; \
+    echo 'opcache.jit_buffer_size=128M'; \
+    echo 'opcache.jit=1255'; \
+    echo 'opcache.memory_consumption=256'; \
+    echo 'opcache.interned_strings_buffer=32'; \
+    echo 'opcache.max_accelerated_files=20000'; \
+    echo 'opcache.revalidate_freq=1'; \
+    echo 'opcache.validate_timestamps=1'; \
+    echo 'opcache.fast_shutdown=1'; \
+    echo 'realpath_cache_size=4096K'; \
+    echo 'realpath_cache_ttl=600'; \
+} >> /usr/local/etc/php/conf.d/opcache.ini
 
 # Set recommended PHP settings
 RUN echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/uploads.ini \
@@ -103,7 +111,8 @@ RUN \
 	chown -R www-data:www-data .
 
 # Final build verification
-RUN /tmp/verify-build.sh && rm /tmp/verify-build.sh
+RUN /tmp/verify-build.sh && rm /tmp/verify-build.sh \
+ && echo "<?php // preload placeholder ?>" > /var/www/html/preload.php || true
 
 # Expose port 80
 EXPOSE 80

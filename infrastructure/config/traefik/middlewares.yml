@@ -1,0 +1,17 @@
+http:
+  middlewares:
+    dashboard-auth:
+      basicAuth:
+        users:
+          # Generate with: htpasswd -nb admin STRONG_PASSWORD | sed -E 's/\$/\$\$/g'
+          - "admin:$apr1$example$PLEASE_REPLACE_HASH"
+    security-headers:
+      headers:
+        frameDeny: true
+        sslRedirect: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true

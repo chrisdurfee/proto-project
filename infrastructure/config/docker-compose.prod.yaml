@@ -11,20 +11,32 @@ services:
       MARIADB_PASSWORD: ${DB_PASSWORD}
     volumes:
       - mariadb_data:/var/lib/mysql
+      - ./mariadb/conf.d:/etc/mysql/mariadb.conf.d:ro
       - ./docker/mysql/:/docker-entrypoint-initdb.d/
     networks:
       - proto-network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$${MARIADB_ROOT_PASSWORD} || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
 
   # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: proto-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD}"
     volumes:
       - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: ["redis-server","/usr/local/etc/redis/redis.conf"]
     networks:
       - proto-network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $${REDIS_PASSWORD} ping | grep PONG || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
 
   # PHP Apache Web Server (Proto Backend)
   web:
@@ -33,9 +45,11 @@ services:
       dockerfile: Dockerfile
     container_name: proto-web
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
+  # If using Traefik reverse proxy, you generally don't need to publish 80/443 here.
+  # Uncomment ONLY if running standalone without Traefik.
+  # ports:
+  #   - "80:80"
+  #   - "443:443"
     volumes:
       - .:/var/www/html
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
@@ -56,6 +70,22 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - APP_ENV=production
+    healthcheck:
+  # HTTP health endpoint check
+      test: ["CMD-SHELL", "curl -fsS http://localhost/health.php >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    # Security hardening (adjust if it breaks write paths or logging):
+    # read_only: true
+    # tmpfs:
+    #   - /tmp
+    # cap_drop:
+    #   - ALL
+    # cap_add:
+    #   - NET_BIND_SERVICE
+    # security_opt:
+    #   - no-new-privileges:true
 
   # Certbot for Let's Encrypt certificates
   certbot:

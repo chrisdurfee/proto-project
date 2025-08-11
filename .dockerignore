@@ -31,6 +31,17 @@ Thumbs.db
 # Vendor (will be installed during build)
 vendor
 
+# Secrets & certificates
+secrets
+certs
+private
+certbot-webroot
+
+# Built frontend artifacts (rebuilt inside containers if needed)
+public/main
+public/crm
+public/developer
+
 # Cache directories
 common/files/cache/
 *.cache
