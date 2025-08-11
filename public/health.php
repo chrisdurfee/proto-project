@@ -42,7 +42,7 @@ if ($redisHost) {
         $redisPass = getenv('REDIS_PASSWORD');
         if ($redisPass) { @$redis->auth($redisPass); }
         $pong = @$redis->ping();
-        $result['checks']['redis'] = ($pong === '+PONG' || $pong === 'PONG') ? 'ok' : 'fail';
+        $result['checks']['redis'] = ($pong === '+PONG' || $pong === 'PONG' || $pong === 1 || $pong === true) ? 'ok' : 'fail';
         if ($result['checks']['redis'] !== 'ok') { $result['status'] = 'degraded'; }
         @$redis->close();
     } catch (Throwable $e) {

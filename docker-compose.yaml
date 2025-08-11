@@ -5,10 +5,10 @@ services:
     container_name: proto-mariadb
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-ProtoRoot2025!AdminPass#456}
       MARIADB_DATABASE: ${DB_DATABASE:-proto}
-      MARIADB_USER: ${DB_USERNAME:-proto_user}
-      MARIADB_PASSWORD: ${DB_PASSWORD:-proto_password}
+      MARIADB_USER: ${DB_USERNAME:-proto_app_user}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-ProtoApp2025!SecureDbPass#789}
     # IMPORTANT: Database port is no longer published to the host for security.
     # If you really need host access for debugging, temporarily uncomment below
     # and restrict with a firewall / bind-address.
@@ -46,9 +46,9 @@ services:
     networks:
       - proto-network
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a $${REDIS_PASSWORD:-} ping | grep PONG || exit 1"]
+      test: ["CMD-SHELL", "redis-cli -a 'ProtoRedis2025!CacheSecure#123456789' ping | grep PONG || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -75,11 +75,11 @@ services:
       - DB_HOST=${DB_HOST:-mariadb}
       - DB_PORT=${DB_PORT:-3306}
       - DB_DATABASE=${DB_DATABASE:-proto}
-      - DB_USERNAME=${DB_USERNAME:-proto_user}
-      - DB_PASSWORD=${DB_PASSWORD:-proto_password}
+      - DB_USERNAME=${DB_USERNAME:-proto_app_user}
+      - DB_PASSWORD=${DB_PASSWORD:-ProtoApp2025!SecureDbPass#789}
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}
       - APP_ENV=${APP_ENV:-development}
       # Automation controls
       - AUTO_MIGRATE=${AUTO_MIGRATE:-true}
