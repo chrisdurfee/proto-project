@@ -5,10 +5,10 @@ services:
     container_name: proto-mariadb
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-ProtoRoot2025!AdminPass#456}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Please set DB_ROOT_PASSWORD in .env file}
       MARIADB_DATABASE: ${DB_DATABASE:-proto}
       MARIADB_USER: ${DB_USERNAME:-proto_app_user}
-      MARIADB_PASSWORD: ${DB_PASSWORD:-ProtoApp2025!SecureDbPass#789}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env file}
     # IMPORTANT: Database port is no longer published to the host for security.
     # If you really need host access for debugging, temporarily uncomment below
     # and restrict with a firewall / bind-address.
@@ -46,9 +46,9 @@ services:
     networks:
       - proto-network
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?Please set REDIS_PASSWORD in .env file}
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a 'ProtoRedis2025!CacheSecure#123456789' ping | grep PONG || exit 1"]
+      test: ["CMD-SHELL", "redis-cli -a \"${REDIS_PASSWORD}\" ping | grep PONG || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -111,7 +111,7 @@ services:
     # security_opt:
     #   - no-new-privileges:true
 
-  # PHPMyAdmin (optional, for database management)
+  # PHPMyAdmin (optional, for database management - DISABLE IN PRODUCTION)
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: proto-phpmyadmin
@@ -128,7 +128,7 @@ services:
       - mariadb
     networks:
       - proto-network
-    profiles: [dev]
+    profiles: [dev, debug]  # Only enable in development profiles
 
 volumes:
   mariadb_data:

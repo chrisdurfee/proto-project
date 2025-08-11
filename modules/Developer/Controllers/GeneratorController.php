@@ -261,8 +261,6 @@ class GeneratorController extends Controller
 	/**
 	 * Sets up a table callback for execution.
 	 *
-	 * Wraps the provided callback code in an anonymous function that evaluates the builder code.
-	 *
 	 * @param object $settings Table object to setup (passed by reference).
 	 * @return void
 	 */

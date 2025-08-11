@@ -1,0 +1,63 @@
+# Production Docker Compose Override
+# Usage: docker-compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d
+# This file removes development tools and applies production-specific configurations
+
+services:
+  # Remove PHPMyAdmin from production
+  phpmyadmin:
+    deploy:
+      replicas: 0
+    profiles:
+      - disabled
+
+  # Production-specific web service overrides
+  web:
+    environment:
+      - APP_ENV=production
+      - CORS_ENABLED=false
+      - AUTO_MIGRATE=false
+    # Enable security hardening for production
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=100m
+      - /var/run:rw,noexec,nosuid,size=50m
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # Production MariaDB optimizations
+  mariadb:
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # Production Redis optimizations
+  redis:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
