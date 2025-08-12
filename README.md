@@ -52,7 +52,13 @@ This project uses a **hybrid development approach** that combines the best of bo
 
 ### Configuration Sync
 
-First, sync your Proto configuration to Docker:
+First, create your Common/Config/.env file by copying the example:
+
+```bash
+cp .env.example .env
+```
+
+Update the environment variables as needed. Then, sync your Proto configuration to Docker:
 
 ```bash
 # Generate Docker .env from Proto configuration
