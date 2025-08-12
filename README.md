@@ -55,7 +55,7 @@ This project uses a **hybrid development approach** that combines the best of bo
 First, create your Common/Config/.env file by copying the example:
 
 ```bash
-cp .env.example .env
+cp common/Config/.env.example common/Config/.env
 ```
 
 Update the environment variables as needed. Then, sync your Proto configuration to Docker:
