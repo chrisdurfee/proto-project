@@ -83,6 +83,9 @@ services:
       - APP_ENV=${APP_ENV:-development}
       # Automation controls
       - AUTO_MIGRATE=${AUTO_MIGRATE:-true}
+      # Generator control
+      - DOCKER_CONTAINER=true
+      - PROJECT_ROOT=/var/www/html
       # Email configuration (SMTP)
       - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
       - MAIL_PORT=${MAIL_PORT:-587}

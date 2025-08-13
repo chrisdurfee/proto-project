@@ -9,7 +9,7 @@ use Proto\Http\Router\Request;
  *
  * This controller provides endpoints for creating various resources such as APIs,
  * controllers, models, storage, policies, tables, migrations, and unit tests using
- * the underlying Generator service.
+ * the underlying Generator service with Docker awareness built-in.
  *
  * @package Modules\Developer\Controllers
  */
@@ -17,6 +17,7 @@ class GeneratorController extends Controller
 {
 	/**
 	 * Initializes the Generator service.
+	 * Now uses the updated Proto Generator with native Docker support.
 	 *
 	 * @param Generator|null $generator The generator service instance.
 	 * @return void
