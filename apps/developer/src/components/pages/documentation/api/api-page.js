@@ -125,31 +125,171 @@ router()
 				)
 			]),
 
-			// Main API Router Setup Section
+			// Middleware System Section
 			Section({ class: 'space-y-4 mt-12' }, [
-				H4({ class: 'text-lg font-bold' }, 'Main API Router Setup'),
+				H4({ class: 'text-lg font-bold' }, 'Middleware System'),
 				P({ class: 'text-muted-foreground' },
-					`The application bootstraps using a main route which then redirects to module-specific API routes. There are some global functions available for session management and routing.`
+					`Middleware in Proto allows you to filter and process HTTP requests entering your application.
+					You can apply middleware globally, to route groups, or to individual routes.`
 				),
 				CodeBlock(
 `<?php declare(strict_types=1);
+namespace Common\\Http\\Middleware;
+
+use Proto\\Http\\Middleware\\Middleware;
+use Proto\\Http\\Router\\Request;
+use Proto\\Http\\Router\\Response;
 
 /**
- * Thsi will get the router.
- *
- * @return Router
+ * Custom authentication middleware
  */
-function router(): Router
+class AuthMiddleware
 {
+    public function handle(Request $request, callable $next): mixed
+    {
+        $token = $request->header('Authorization');
+        if (!$token || !$this->validateToken($token))
+		{
+            return Response::error('Unauthorized', 401);
+        }
+
+        // Set authenticated user
+        $user = $this->getUserFromToken($token);
+        setSession('user', $user);
+
+        return $next($request);
+    }
+
+	private function getUserFromToken(string $token): bool
+    {
+        return User::getBy(['token' => $token]);
+    }
+
+    private function validateToken(string $token): bool
+    {
+        // Token validation logic
+        return auth()->token()->validate($token);
+    }
 }
 
-/**
- * This will get the session.
- *
- * @return SessionInterface
- */
-function session(): Session\\SessionInterface
+// Apply middleware to routes
+router()
+    ->middleware([
+        AuthMiddleware::class,
+        RateLimitMiddleware::class
+    ])
+    ->group('protected', function(Router $router) {
+        $router->resource('users', UserController::class);
+        $router->resource('posts', PostController::class);
+    });
+`
+				)
+			]),
+
+			// Error Handling Section
+			Section({ class: 'space-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'Error Handling & Responses'),
+				P({ class: 'text-muted-foreground' },
+					`Proper error handling and consistent response formats are crucial for API development.`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Modules\\User\\Controllers;
+
+use Proto\\Controllers\\ApiController;
+
+class UserController extends ApiController
 {
+    /**
+     * Get user with proper error handling.
+	 *
+	 * @param Request $request
+	 * @return object
+     */
+    public function get(Request $request): object
+    {
+		$userId = $this->getRequestId($request);
+        $user = User::get($userId);
+		if (!$user)
+		{
+			return $this->error('User not found');
+		}
+
+		// Check permissions
+		if (!auth()->permission()->can('user.view'))
+		{
+			return $this->error('Insufficient permissions');
+		}
+
+		return $this->success($user);
+    }
+
+    /**
+     * Create user with validation.
+	 *
+	 * @param Request $request
+	 * @return object
+     */
+    public function create(Request $request): object
+    {
+        $data = $request->validate([
+            'name' => 'required|string:100',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8'
+        ]);
+
+        $result = User::create($data);
+        return $this->response($result);
+    }
+
+    /**
+     * Update user.
+     */
+    public function update(Request $request): object
+    {
+		$id = $request->params()->id;
+        $user = User::get($id);
+        if (!$user)
+		{
+            return $this->error('User not found');
+        }
+
+		$data = $request->json('data');
+		if (!$data)
+		{
+			return $this->error('No data provided');
+		}
+
+		$data = $this->validateRules($data, [
+            'name' => 'required|string:100',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8'
+        ]);
+
+        $user->set($data);
+        $user->update();
+        return $this->success($user);
+    }
+
+    /**
+     * Delete user.
+     */
+    public function delete(Request $request): object
+    {
+		$id = $request->params()->id;
+        $user = User::get($id);
+        if (!$user)
+		{
+            return $this->notFound('User not found');
+        }
+
+        if (!auth()->user()->can('user.delete')) {
+            return $this->error('Cannot delete this user');
+        }
+
+        $user->delete();
+        return $this->response('User deleted successfully');
+    }
 }
 `
 				)
