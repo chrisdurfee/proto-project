@@ -288,6 +288,33 @@ $table->foreign('message_id')->references('id')->on('messages');`, required: tru
 					]),
 					new FormField({ name: "className", label: "Class Name", description: "The migration class name." }, [
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "migration.className" })
+					]),
+					new FormField({ name: "up", label: "Up", description: "The migration up method logic." }, [
+						Textarea({ value: `$this->create('table_name', function($table)
+{
+	$table->id();
+	$table->timestamps();
+	$table->integer('user_id', 30);
+	$table->integer('block_user_id', 30);
+
+	// Indexes
+	$table->index('user_id')->fields('user_id', 'block_user_id');
+	$table->index('block_user_id')->fields('block_user_id');
+
+	// FKs
+	$table->foreign('user_id')
+		->references('id')
+		->on('users')
+		->onDelete('cascade');
+
+	$table->foreign('block_user_id')
+		->references('id')
+		->on('users')
+		->onDelete('cascade');
+});`, rows: 12, bind: "migration.up" })
+					]),
+					new FormField({ name: "down", label: "Down", description: "The migration down method logic." }, [
+						Textarea({ value: `$this->drop('table_name');`, rows: 3, bind: "migration.down" })
 					])
 				])
 			];
