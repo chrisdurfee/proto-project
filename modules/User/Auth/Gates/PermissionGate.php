@@ -54,6 +54,18 @@ class PermissionGate extends Gate
 	/**
 	 * Checks if the user has the specified permission.
 	 *
+	 * @param string $permission The permission to check.
+	 * @param int|null $organizationId The organization ID to check against.
+	 * @return bool True if the user has the permission, otherwise false.
+	 */
+	public function can(string $permission, ?int $organizationId = null): bool
+	{
+		return $this->hasPermission($permission, $organizationId);
+	}
+
+	/**
+	 * Checks if the user has the specified permission.
+	 *
 	 * @param string $permission The permission name to check.
 	 * @param int|null $organizationId The organization ID to check against.
 	 * @return bool True if the user has the permission, otherwise false.
