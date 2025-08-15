@@ -18,80 +18,111 @@ export const Links = (path) => ([
 
 	// Core Architecture
 	{
-		href: `${path}/modules`,
-		label: 'Modules'
-	},
-	{
-		label: 'Http',
-		href: `${path}/http`
-	},
-	{
-		label: 'API',
-		href: `${path}/api`
-	},
-	{
-		label: 'Controllers',
-		href: `${path}/controllers`
-	},
-	{
-		label: 'Services',
-		href: `${path}/services`
+		group: 'Core',
+		options: [
+			{
+				href: `${path}/modules`,
+				label: 'Modules'
+			},
+			{
+				label: 'Http',
+				href: `${path}/http`
+			},
+			{
+				label: 'API',
+				href: `${path}/api`
+			},
+			{
+				label: 'Controllers',
+				href: `${path}/controllers`
+			},
+			{
+				label: 'Services',
+				href: `${path}/services`
+			}
+		]
 	},
 
 	// Database & Models
 	{
-		label: 'Database & Query Builder',
-		href: `${path}/database`
-	},
-	{
-		label: 'Models',
-		href: `${path}/models`
-	},
-	{
-		label: 'Migrations',
-		href: `${path}/migrations`
+		group: 'Database & Models',
+		options: [
+			{
+				label: 'Query Builder',
+				href: `${path}/database`
+			},
+			{
+				label: 'Models',
+				href: `${path}/models`
+			},
+			{
+				label: 'Migrations',
+				href: `${path}/migrations`
+			}
+		]
 	},
 
 	// Security & Validation
 	{
-		label: 'Security & Authorization',
-		href: `${path}/security`
-	},
-	{
-		label: 'Auth',
-		href: `${path}/auth`
-	},
-	{
-		label: 'Input Validation',
-		href: `${path}/validation`
+		group: 'Security & Validation',
+		options: [
+			{
+				label: 'Security & Authorization',
+				href: `${path}/security`
+			},
+			{
+				label: 'Auth',
+				href: `${path}/auth`
+			},
+			{
+				label: 'Input Validation',
+				href: `${path}/validation`
+			}
+		]
 	},
 
 	// Performance & Caching
 	{
-		label: 'Storage',
-		href: `${path}/storage`
-	},
-	{
-		label: 'File Storage',
-		href: `${path}/file-storage`
+		group: 'Storage',
+		options: [
+			{
+				label: 'Storage',
+				href: `${path}/storage`
+			},
+			{
+				label: 'File Storage',
+				href: `${path}/file-storage`
+			}
+		]
 	},
 
 	// Real-time & Background
-	// {
-	// 	label: 'WebSockets & Real-time',
-	// 	href: `${path}/websockets`
-	// },
-	// {
-	// 	label: 'Automation & Jobs',
-	// 	href: `${path}/automation`
-	// },
 	{
-		label: 'Events',
-		href: `${path}/events`
+		group: 'Real-time',
+		options: [
+			// {
+			// 	label: 'WebSockets & Real-time',
+			// 	href: `${path}/websockets`
+			// },
+			{
+				label: 'Events',
+				href: `${path}/events`
+			},
+		]
 	},
+
 	{
-		label: 'Dispatch',
-		href: `${path}/dispatch`
+		group: 'Background',
+		options: [
+			// {
+			// 	label: 'Automation & Jobs',
+			// 	href: `${path}/automation`
+			// },
+			{
+				label: 'Dispatch',
+				href: `${path}/dispatch`
+			},
+		]
 	},
 
 	// Testing & Development
