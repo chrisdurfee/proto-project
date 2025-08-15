@@ -148,7 +148,7 @@ env('settingName');`
 				H4({ class: 'text-lg font-bold' }, 'Bootstrapping'),
 				P({ class: 'text-muted-foreground' },
 					`Proto auto bootstraps when interfacing with an API, Controller, Model, Storage, or Routine.
-					Simply include /proto/autoload.php and call the namespaced classes you need.`)
+					Simply include /vendor/autoload.php and call the namespaced classes you need.`)
 			]),
 
 			// Global Data

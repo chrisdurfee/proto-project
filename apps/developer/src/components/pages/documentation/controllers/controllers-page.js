@@ -170,6 +170,35 @@ public function getByName(string $name)
 				)
 			]),
 
+			// Api Controllers
+			Section({ class: 'space-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'API Controllers'),
+				P({ class: 'text-muted-foreground' },
+					`API controllers are used to handle HTTP requests and return responses in a RESTful manner. They typically extend the ResourceController class and interact with models to perform non standard operations.`
+				),
+				P({ class: 'text-muted-foreground' },
+					`These classes are used with the router and can be passed as a resource for a route. The controller method receives the request object when the route is called.`
+				),
+				P({ class: 'text-muted-foreground' },
+					`For example, an API controller might look like this:`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Modules\\User\\Controllers;
+
+use Proto\\Controllers\\ApiController;
+use Proto\\Http\\Router\\Request;
+
+class SummaryController extends ApiController
+{
+	public function getSummary(Request $request): object
+	{
+		// do something
+	}
+}`
+				)
+			]),
+
 			// Route Resource Controllers
 			Section({ class: 'space-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Route Resource Controllers'),
@@ -224,8 +253,8 @@ class UserController extends ResourceController
 			Section({ class: 'space-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Pass-Through Responses'),
 				P({ class: 'text-muted-foreground' },
-					`Controllers automatically wraps the result of any undeclared method call in a Response object. This makes it faster to add new
-					resources without rewriting response logic.`
+					`Controllers automatically wraps the result of any undeclared method that is added to it's model or model's storage's public methods call in a Response object. This makes it faster to add new
+					resources without rewriting response logic. This allows an empty controller to automatically have access to calling the models public methods.`
 				)
 			]),
 
@@ -438,19 +467,19 @@ $model = $this->model($data);`
 				),
 				CodeBlock(
 `// Retrieve all rows matching a custom query
-$this->storage()->findAll(function($sql, &$params) {
-    $params[] = 'active';
-    $sql->where('status = ?')
-        ->orderBy('status DESC')
-        ->groupBy('user_id');
-});
+$this->storage()->findAll(fn($sql, &$params) => (
+	$params[] = 'active',
+	$sql->where('status = ?')
+		->orderBy('status DESC')
+		->groupBy('user_id')
+));
 
 // Retrieve a single row using a custom query
-$this->storage()->find(function($sql, &$params) {
-    $params[] = 'active';
-    $sql->where('status = ?')
-        ->limit(1);
-});`
+$this->storage()->find(fn($sql, &$params) => (
+	$params[] = 'active',
+	$sql->where('status = ?')
+		->limit(1)
+));`
 				)
 			])
 		]

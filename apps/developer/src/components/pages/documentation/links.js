@@ -5,6 +5,7 @@
  * @returns {Array<object>}
  */
 export const Links = (path) => ([
+	// Getting Started
 	{
 		href: `${path}`,
 		label: 'Introduction',
@@ -14,6 +15,8 @@ export const Links = (path) => ([
 		href: `${path}/get-started`,
 		label: 'Get Started'
 	},
+
+	// Core Architecture
 	{
 		href: `${path}/modules`,
 		label: 'Modules'
@@ -27,43 +30,73 @@ export const Links = (path) => ([
 		href: `${path}/api`
 	},
 	{
-		label: 'Auth',
-		href: `${path}/auth`
-	},
-	{
 		label: 'Controllers',
 		href: `${path}/controllers`
 	},
 	{
-		label: 'Events',
-		href: `${path}/events`
+		label: 'Services',
+		href: `${path}/services`
 	},
+
+	// Database & Models
 	{
-		label: 'File Storage',
-		href: `${path}/file-storage`
-	},
-	{
-		label: 'Migrations',
-		href: `${path}/migrations`
+		label: 'Database & Query Builder',
+		href: `${path}/database`
 	},
 	{
 		label: 'Models',
 		href: `${path}/models`
 	},
 	{
-		label: 'Services',
-		href: `${path}/services`
+		label: 'Migrations',
+		href: `${path}/migrations`
 	},
+
+	// Security & Validation
+	{
+		label: 'Security & Authorization',
+		href: `${path}/security`
+	},
+	{
+		label: 'Auth',
+		href: `${path}/auth`
+	},
+	{
+		label: 'Input Validation',
+		href: `${path}/validation`
+	},
+
+	// Performance & Caching
 	{
 		label: 'Storage',
 		href: `${path}/storage`
 	},
 	{
-		label: 'Tests',
-		href: `${path}/tests`
+		label: 'File Storage',
+		href: `${path}/file-storage`
+	},
+
+	// Real-time & Background
+	// {
+	// 	label: 'WebSockets & Real-time',
+	// 	href: `${path}/websockets`
+	// },
+	// {
+	// 	label: 'Automation & Jobs',
+	// 	href: `${path}/automation`
+	// },
+	{
+		label: 'Events',
+		href: `${path}/events`
 	},
 	{
 		label: 'Dispatch',
 		href: `${path}/dispatch`
-	}
+	},
+
+	// Testing & Development
+	// {
+	// 	label: 'Tests',
+	// 	href: `${path}/tests`
+	// }
 ]);

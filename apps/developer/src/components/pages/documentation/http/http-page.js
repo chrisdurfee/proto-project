@@ -44,21 +44,32 @@ const CodeBlock = Atom((props, children) => (
 /**
  * HttpPage
  *
- * This page documents how to access and manipulate the current HTTP request in Proto
- * using the static methods of Proto\Http\Request.
+ * This page documents how to work with HTTP requests, responses, and routing in Proto.
+ * Covers request handling, response generation, routing patterns, and middleware.
  *
  * @returns {DocPage}
  */
 export const HttpPage = () =>
 	DocPage(
 		{
-			title: 'HTTP System',
-			description: 'Learn how to work with the current HTTP request using Proto\'s request utilities.'
+			title: 'HTTP System & Routing',
+			description: 'Learn how to work with HTTP requests, responses, routing, and middleware in Proto.'
 		},
 		[
 			// Introduction
 			Section({ class: 'space-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Introduction'),
+				P(
+					{ class: 'text-muted-foreground' },
+					`Proto provides a comprehensive HTTP system for handling requests, generating responses,
+					and routing traffic to the appropriate handlers. The system includes static methods for
+					accessing request data, response utilities, flexible routing patterns, and middleware support.`
+				)
+			]),
+
+			// HTTP Request Handling
+			Section({ class: 'space-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'HTTP Request Handling'),
 				P(
 					{ class: 'text-muted-foreground' },
 					`Proto provides a static class, \`Proto\\Http\\Request\`, to access and manage
@@ -69,7 +80,7 @@ export const HttpPage = () =>
 
 			// Available Methods
 			Section({ class: 'space-y-4 mt-12' }, [
-				H4({ class: 'text-lg font-bold' }, 'Available Methods'),
+				H4({ class: 'text-lg font-bold' }, 'Request Methods'),
 				P(
 					{ class: 'text-muted-foreground' },
 					`Below is a list of common methods available on \`Proto\\Http\\Request\`:
