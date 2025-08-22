@@ -114,6 +114,7 @@ export const UserTable = (data) => (
 		customHeader: HeaderRow(),
 		rows: [],
 		limit: 50,
+		skeleton: true,
 		rowItem: UserRow,
 		key: 'id',
 		emptyState: () => EmptyState({

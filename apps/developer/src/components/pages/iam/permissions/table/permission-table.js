@@ -74,6 +74,7 @@ export const PermissionTable = (data) => (
 		data,
 		cache: 'list',
 		customHeader: HeaderRow(),
+		skeleton: true,
 		rows: [],
 		limit: 50,
 		rowItem: PermissionRow,

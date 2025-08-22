@@ -55,6 +55,7 @@ export const MigrationTable = () => (
 		data: new MigrationModel(),
 		cache: 'list',
 		customHeader: MigrationHeaderRow(),
+		skeleton: true,
 		rows: [],
 		limit: 50,
 		rowItem: MigrationRow,
