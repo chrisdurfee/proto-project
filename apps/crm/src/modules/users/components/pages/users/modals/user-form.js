@@ -1,4 +1,5 @@
-import { DateInput, Fieldset, Input, Select, TelInput, Textarea } from "@base-framework/ui/atoms";
+import { DatePicker } from "@base-framework/ui";
+import { Fieldset, Input, Select, TelInput, Textarea } from "@base-framework/ui/atoms";
 import { FormField } from "@base-framework/ui/molecules";
 import { AuthFieldset } from "./auth-fieldset.js";
 import { UserRoleFieldset } from "./user-role-fieldset.js";
@@ -47,10 +48,9 @@ const UserFieldset = (isEditing) => (
 		new FormField(
 			{ name: "dob", label: "Date of Birth", description: "Enter the user's date of birth." },
 			[
-				DateInput({
-					type: "date",
-					required: true,
-					bind: "dob"
+				new DatePicker({
+					bind: "dob",
+					required: true
 				})
 			]
 		),
