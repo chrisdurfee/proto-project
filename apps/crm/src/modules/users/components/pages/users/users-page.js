@@ -17,9 +17,7 @@ export const UsersPage = () =>
 	 */
 	const data = new UserModel({
 		search: '',
-		filter: {
-
-		}
+		filter: {}
 	});
 
 	/**
