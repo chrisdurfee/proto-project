@@ -56,6 +56,7 @@ export const LoginTable = (data) =>
 		cache: 'list',
 		limit: 50,
 		customHeader: HeaderRow(),
+		skeleton: true,
 		rows: [],
 		rowItem:
 		LoginRow,

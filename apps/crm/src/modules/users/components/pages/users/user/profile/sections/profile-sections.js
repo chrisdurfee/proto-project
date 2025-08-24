@@ -335,6 +335,9 @@ export const AuthedDeviceSection = (user) =>
 					{ label: 'Brand', key: 'brand' },
 					{ label: 'Version', key: 'version' }
 				],
+				skeleton: {
+					number: 3
+				},
 				rows: [],
 				limit: 3,
 				rowItem: (device) => Tr({ class: "items-center px-4 py-2 hover:bg-muted/50" }, [
