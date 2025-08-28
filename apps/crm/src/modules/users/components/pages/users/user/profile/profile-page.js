@@ -29,7 +29,7 @@ export const ProfilePage = () => (
 					user,
 					context
 				}),
-				Div({ class: 'flex flex-auto flex-col lg:flex-row lg:space-x-8'}, [
+				Div({ class: 'flex flex-auto flex-col lg:flex-row lg:gap-x-8'}, [
 					Div({ class: 'w-full lg:w-1/3' }, [
 						UserHeader({ user })
 					]),

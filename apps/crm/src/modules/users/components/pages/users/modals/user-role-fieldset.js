@@ -41,10 +41,10 @@ const request = (checked, userId, roleId) =>
  * @returns {object}
  */
 export const RoleSkeleton = () => (
-	Div({ class: "flex flex-col space-y-8" }, [
+	Div({ class: "flex flex-col gap-y-8" }, [
 		...[1, 2, 3, 4].map(() =>
-			Div({ class: "flex flex-col space-y-2" }, [
-				Div({ class: "flex items-center space-x-2" }, [
+			Div({ class: "flex flex-col gap-y-2" }, [
+				Div({ class: "flex items-center gap-x-2" }, [
 					Skeleton({
 						shape: "circle",
 						width: "w-5",
@@ -72,14 +72,14 @@ export const RoleSkeleton = () => (
  */
 const RoleFields = ({ hasRole, toggleRole }) => (
 	Div({
-		class: 'flex flex-col space-y-2',
+		class: 'flex flex-col gap-y-2',
 		for: ['rows', (role) => new FormField(
 			{
 				name: role.name,
 				description: role.description
 			},
 			[
-				Div({ class: 'flex items-center space-x-2' }, [
+				Div({ class: 'flex items-center gap-x-2' }, [
 					new Toggle({
 						active: hasRole(role.name),
 						change: (active, e) =>

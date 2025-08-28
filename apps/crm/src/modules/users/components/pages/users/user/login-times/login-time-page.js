@@ -39,9 +39,9 @@ export const LoginTimePage = () =>
 			{
 				// @ts-ignore
 				data.userId = route.userId;
-				return Div({ class: 'flex flex-auto flex-col pt-0 lg:space-y-12 w-full mx-auto 2xl:max-w-[1600px]' }, [
+				return Div({ class: 'flex flex-auto flex-col pt-0 lg:gap-y-12 w-full mx-auto 2xl:max-w-[1600px]' }, [
 					PageHeader(),
-					Div({ class: 'flex flex-auto flex-col space-y-4 lg:space-y-2' }, [
+					Div({ class: 'flex flex-auto flex-col gap-y-4 lg:gap-y-2' }, [
 						Div({ class: 'flex flex-auto flex-col overflow-x-auto' }, [
 							LoginTable(data)
 						])
