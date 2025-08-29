@@ -55,7 +55,7 @@ export const DatabasePage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Proto provides a comprehensive database system with connection management,
@@ -66,7 +66,7 @@ export const DatabasePage = () =>
 			]),
 
 			// Database Connections
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Database Connections'),
 				P({ class: 'text-muted-foreground' },
 					`Configure and manage multiple database connections with automatic
@@ -89,7 +89,7 @@ export const DatabasePage = () =>
 			]),
 
 			// Query Builder
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Query Builder'),
 				P({ class: 'text-muted-foreground' },
 					`Proto's query builder provides a fluent interface for building SQL queries
@@ -128,7 +128,7 @@ $userPosts = QueryBuilder::table('users')
 			]),
 
 			// Model Integration
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Model Integration'),
 				P({ class: 'text-muted-foreground' },
 					`Proto models integrate seamlessly with the query builder, providing

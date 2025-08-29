@@ -26,42 +26,42 @@ export const OrgDetailsSection = () =>
 	ProfileSection({ title: "User Details" }, [
 		Card({ class: "p-6", margin: "m-0", hover: true }, [
 			Div({ class: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" }, [
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "User ID"),
 					P({ class: "font-medium text-foreground" }, "[[user.id]]")
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "UUID"),
 					P({ class: "font-medium text-foreground truncate" }, "[[user.uuid]]")
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Date Created"),
 					P({ class: "font-medium text-foreground" }, Format.date("[[user.createdAt]]"))
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Birth Date"),
 					P({ class: "font-medium text-foreground" }, Format.date("[[user.dob]]"))
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Gender"),
 					P({ class: "font-medium text-foreground capitalize" }, "[[user.gender]]")
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Allows Email"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.allowEmail]]"))
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Allows Sms"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.allowSms]]"))
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Allows Push"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.allowPush]]"))
 				])
@@ -78,45 +78,45 @@ export const LocaleDetailsSection = () =>
 	ProfileSection({ title: "Locale Details" }, [
 		Card({ class: "p-6", margin: "m-0", hover: true }, [
 			Div({ class: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" }, [
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Address"),
 					P({ class: "font-medium text-foreground capitalize truncate" }, "[[user.street1]] [[user.street2]]")
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "City"),
 					P({ class: "font-medium text-foreground uppercase" }, "[[user.city]]")
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "State"),
 					P({ class: "font-medium text-foreground uppercase" }, "[[user.state]]")
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Postal Code"),
 					P({ class: "font-medium text-foreground uppercase" }, "[[user.postalCode]]")
 				]),
 
 				// Language
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Language"),
 					P({ class: "font-medium text-foreground capitalize" }, "[[user.language]]")
 				]),
 
 				// Country
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Country"),
 					P({ class: "font-medium text-foreground uppercase" }, "[[user.country]]")
 				]),
 
 				// Time Zone
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Time Zone"),
 					P({ class: "font-medium text-foreground uppercase" }, "[[user.timezone]]")
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Currency"),
 					P({ class: "font-medium text-foreground uppercase" }, "[[user.currency]]")
 				])
@@ -133,42 +133,42 @@ export const AppDetailsSection = () =>
 	ProfileSection({ title: "Account Details" }, [
 		Card({ class: "p-6", margin: "m-0", hover: true }, [
 			Div({ class: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" }, [
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Accepted Terms"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.acceptedTermsAt]]"))
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Last Login"),
 					P({ class: "font-medium text-foreground" }, Format.dateTime("[[user.lastLoginAt]]"))
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Enabled"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.enabled]]"))
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Email Verified"),
 					P({ class: "font-medium text-foreground" }, Format.dateTime("[[user.emailVerifiedAt]]", 'Not Verified'))
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Allows Marketing"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.marketingOptIn]]"))
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Last Updated"),
 					P({ class: "font-medium text-foreground" }, Format.dateTime("[[user.updatedAt]]"))
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Multi Factor"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.multiFactorEnabled]]"))
 				]),
 
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Password Changed"),
 					P({ class: "font-medium text-foreground" }, Format.dateTime("[[user.lastPasswordChangeAt]]", 'No change'))
 				]),
@@ -186,13 +186,13 @@ export const PersonalFollowSection = () =>
 		Div([
 			Div({ class: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" }, [
 				// Followers
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Followers"),
 					P({ class: "font-medium text-foreground" }, Format.number("[[user.followerCount]]"))
 				]),
 
 				// Following
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Following"),
 					P({ class: "font-medium text-foreground" }, Format.number("[[user.followingCount]]"))
 				])
@@ -210,13 +210,13 @@ export const PersonalDetailsSection = () =>
 		Div([
 			Div({ class: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" }, [
 				// Trial mode
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Trial Mode"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.trialMode]]"))
 				]),
 
 				// Marketing
-				Div({ class: "space-y-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Days Remaining"),
 					P({ class: "font-medium text-foreground" }, "[[user.trialDaysLeft]] days left"),
 				])
@@ -240,11 +240,11 @@ export const ScheduleSection = () =>
 			Div({ class: "grid grid-cols-7 text-sm text-muted-foreground divide-x divide-border" },
 				days.map((day) =>
 					(day == 'Sat' || day == 'Sun')
-					? Div({ class: "flex flex-col items-center space-y-1 p-2 bg-card rounded" }, [
+					? Div({ class: "flex flex-col items-center gap-y-1 p-2 bg-card rounded" }, [
 						P({ class: "font-medium text-foreground" }, day),
 						P("-")
 					])
-					: Div({ class: "flex flex-col items-center space-y-1 p-2 bg-card rounded hover:bg-muted/50" }, [
+					: Div({ class: "flex flex-col items-center gap-y-1 p-2 bg-card rounded hover:bg-muted/50" }, [
 						P({ class: "font-medium text-foreground flex-col" }, day),
 						P("9:00 am"),
 						P("5:00 pm")
@@ -316,7 +316,7 @@ const setupRoles = (roles) =>
  */
 export const RoleSection = ({ roles }) =>
 	ProfileSection({ title: "Roles" }, [
-		Div({ class: "space-y-4" }, [
+		Div({ class: "flex flex-col gap-y-4" }, [
 			Div({ class: "flex flex-wrap gap-2", onSet: ['user.roles', setupRoles] })
 		])
 	]);

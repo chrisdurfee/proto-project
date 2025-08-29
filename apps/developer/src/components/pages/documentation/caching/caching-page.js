@@ -54,7 +54,7 @@ export const CachingPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Caching is an important technique for improving application performance by storing
@@ -64,13 +64,13 @@ export const CachingPage = () =>
 			]),
 
 			// Basic Caching Concepts
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Basic Caching Concepts'),
 				P({ class: 'text-muted-foreground' },
 					`Caching involves storing copies of data in a location where it can be accessed
 					more quickly than from the original source.`
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("Cache Hit: When requested data is found in cache"),
 					Li("Cache Miss: When requested data is not in cache"),
 					Li("TTL (Time To Live): How long data stays in cache"),
@@ -80,7 +80,7 @@ export const CachingPage = () =>
 			]),
 
 			// Memory Caching
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Simple Memory Caching'),
 				P({ class: 'text-muted-foreground' },
 					`Simple in-memory caching can be implemented using static arrays or objects
@@ -128,7 +128,7 @@ if ($expensiveData === null) {
 			]),
 
 			// File-based Caching
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'File-based Caching'),
 				P({ class: 'text-muted-foreground' },
 					`File-based caching stores data in files on disk, providing persistence
@@ -203,7 +203,7 @@ class FileCache
 			]),
 
 			// Database Query Results
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Caching Database Results'),
 				P({ class: 'text-muted-foreground' },
 					`One common caching pattern is to cache expensive database query results
@@ -290,9 +290,9 @@ class UserService
 			]),
 
 			// Best Practices
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Caching Best Practices'),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("Cache only data that is expensive to compute or retrieve"),
 					Li("Use appropriate TTL values - not too short or too long"),
 					Li("Implement cache invalidation when data changes"),
@@ -305,12 +305,12 @@ class UserService
 			]),
 
 			// Cache Invalidation Strategies
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Cache Invalidation Strategies'),
 				P({ class: 'text-muted-foreground' },
 					`Different strategies for keeping cached data fresh and accurate:`
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("Time-based expiration (TTL)"),
 					Li("Manual invalidation when data changes"),
 					Li("Tag-based invalidation for related data"),

@@ -58,7 +58,7 @@ export const FileStoragePage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -68,7 +68,7 @@ export const FileStoragePage = () =>
 			]),
 
 			// File Settings
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'File Settings'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -101,7 +101,7 @@ export const FileStoragePage = () =>
 			]),
 
 			// File Uploads & Storage
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'File Uploads & Storage'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -127,7 +127,7 @@ Vault::disk('local')->store($uploadFile);`
 			]),
 
 			// Custom Buckets
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Custom Buckets'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -140,7 +140,7 @@ Vault::disk('local')->store($uploadFile);`
 			]),
 
 			// Downloading Files
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Downloading Files'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -152,7 +152,7 @@ Vault::disk('local')->store($uploadFile);`
 			]),
 
 			// Retrieving Files
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Retrieving Files'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -164,7 +164,7 @@ Vault::disk('local')->store($uploadFile);`
 			]),
 
 			// Deleting Files
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Deleting Files'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -176,7 +176,7 @@ Vault::disk('local')->store($uploadFile);`
 			]),
 
 			// Using Remote Storage
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Using Remote Storage'),
 				P(
 					{ class: 'text-muted-foreground' },

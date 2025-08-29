@@ -57,7 +57,7 @@ export const MigrationsPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Migrations are classes used to update or revert database changes.
@@ -67,7 +67,7 @@ export const MigrationsPage = () =>
 			]),
 
 			// Naming
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Naming'),
 				P({ class: 'text-muted-foreground' },
 					`The name of a migration should always be singular and followed by "Migration". For example:`
@@ -102,14 +102,14 @@ class ExampleMigration extends Migration
 			]),
 
 			// Schema Builder
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Schema Builder'),
 				P({ class: 'text-muted-foreground' },
 					`Proto includes a schema query builder to simplify common database tasks.
 					This fluent interface allows you to chain methods for creating and altering tables.
 					Available methods include:`
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("engine()"),
 					Li("myisam()"),
 					Li("create()"),
@@ -146,7 +146,7 @@ class ExampleMigration extends Migration
 			]),
 
 			// Up Method
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Up Method'),
 				P({ class: 'text-muted-foreground' },
 					`The up() method should include all the commands to update the database.
@@ -190,7 +190,7 @@ class ExampleMigration extends Migration
 			]),
 
 			// Down Method
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Down Method'),
 				P({ class: 'text-muted-foreground' },
 					`The down() method should revert all changes made in the up() method.
@@ -216,7 +216,7 @@ class ExampleMigration extends Migration
 			]),
 
 			// Seeding Data
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Seeding Data'),
 				P({ class: 'text-muted-foreground' },
 					`You can also seed data in the up() method. For example:`
@@ -289,7 +289,7 @@ public function seed(): void
 			]),
 
 			// Creating a Migration
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Creating a Migration'),
 				P({ class: 'text-muted-foreground' },
 					`Migrations can be generated using the built-in generator. For example:`
@@ -303,7 +303,7 @@ $generator->createMigration((object)[
 			]),
 
 			// Migration Guide
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Migration Guide'),
 				P({ class: 'text-muted-foreground' },
 					`The migration guide can run or revert migrations. For example:`

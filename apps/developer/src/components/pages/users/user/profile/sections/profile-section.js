@@ -12,8 +12,8 @@ import { Atom } from "@base-framework/base";
  * @returns {object}
  */
 export const ProfileSection = Atom((props, children) => (
-	Div({ class: "space-y-6" }, [
-		Header({ class: "flex flex-col space-y-2" }, [
+	Div({ class: "flex flex-col gap-y-6" }, [
+		Header({ class: "flex flex-col gap-y-2" }, [
 			H2({ class: "text-xl font-semibold" }, props.title),
 			props.description && P({ class: "text-sm text-muted-foreground" }, props.description)
 		]),

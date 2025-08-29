@@ -58,7 +58,7 @@ export const ModelsPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: "space-y-4" }, [
+			Section({ class: "flex flex-col gap-y-4" }, [
 				H4({ class: "text-lg font-bold" }, "Overview"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -75,7 +75,7 @@ export const ModelsPage = () =>
 			]),
 
 			// Naming and Basic Setup
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Naming and Basic Setup"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -95,7 +95,7 @@ export const ModelsPage = () =>
 			]),
 
 			// Model Pass-Through
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Model Pass-Through"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -114,7 +114,7 @@ $result = static::$storageType::methodName();`
 			]),
 
 			// Fields and Blacklisting
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Fields and Blacklisting"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -140,7 +140,7 @@ $result = static::$storageType::methodName();`
 			]),
 
 			// Field Formatting
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Field Formatting"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -172,7 +172,7 @@ protected static function format(?object $data): ?object
 			]),
 
 			// Model Joins: Original (Join Builder) vs. Lazy Relationships
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Model Joins"),
 
 				// Intro paragraph
@@ -425,7 +425,7 @@ $author = $post->user;`
 				)
 			]),
 
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				P({ class: "text-muted-foreground" }, `Both styles can be used together in a single model, allowing you to mix and match as needed. For example, you might use JoinBuilder for eager joins and lazy relationships for simpler ones. Eager and lazy belongs to many relationships can also be used to attach, detach, sync, or toggle related records.`),
 				P({ class: "text-muted-foreground" }, `Belongs to many examples:`),
 				CodeBlock(
@@ -448,7 +448,7 @@ $user->roles()->toggle([2, 6]);
 			]),
 
 			// Storage Type and Proxy
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Storage Type and Proxy"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -471,7 +471,7 @@ $result = $this->storage->get(1);`
 			]),
 
 			// Getting, Setting, and Persistence
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Getting, Setting, and Persistence"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -510,7 +510,7 @@ $result = Example::create((object)[
 			]),
 
 			// Model Data
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Model Data"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -526,7 +526,7 @@ $dataReadonly = $model->getReadOnlyData();`
 			]),
 
 			// JSON Encoding
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "JSON Encoding"),
 				P(
 					{ class: "text-muted-foreground" },

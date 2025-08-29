@@ -56,7 +56,7 @@ export const ServicesPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -76,7 +76,7 @@ export const ServicesPage = () =>
 			]),
 
 			// Naming Conventions
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Naming'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -104,7 +104,7 @@ class ExampleService extends Service
 			]),
 
 			// Activation
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Activation'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -121,7 +121,7 @@ public function activate()
 			]),
 
 			// Events
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Events'),
 				P(
 					{ class: 'text-muted-foreground' },

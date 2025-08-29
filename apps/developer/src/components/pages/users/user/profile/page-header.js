@@ -32,7 +32,7 @@ export const PageHeader = ({ context }) => (
 		Div({ class: 'flex flex-col' }, [
 			H1({ class: 'text-2xl md:text-2xl font-bold tracking-tight' }, 'Profile'),
 		]),
-		Div({ class: 'flex flex-row space-x-2' }, [
+		Div({ class: 'flex flex-row gap-x-2' }, [
 			Div({ class: 'hidden lg:inline-flex' }, [
 				Button({
 					variant: 'withIcon',

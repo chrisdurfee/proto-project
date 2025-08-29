@@ -55,7 +55,7 @@ export const ValidationPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Proto provides a built-in validation system through the Proto\\Api\\Validator class that can validate
@@ -65,7 +65,7 @@ export const ValidationPage = () =>
 			]),
 
 			// Basic Validation
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Basic Validation with Proto\\Api\\Validator'),
 				P({ class: 'text-muted-foreground' },
 					`Use Proto's built-in Validator class to validate and sanitize data using rule arrays:`
@@ -142,7 +142,7 @@ class UserController extends ApiController
 			]),
 
 			// Validation Rules
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Available Validation Rules'),
 				P({ class: 'text-muted-foreground' },
 					`Proto validation rules follow the pattern 'type:maxLength|required'. The validation
@@ -169,7 +169,7 @@ $rules = [
 			]),
 
 			// Sanitization and Validation Methods
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Sanitization & Validation Methods'),
 				P({ class: 'text-muted-foreground' },
 					`Proto provides sanitization through Proto\\Utils\\Filter\\Sanitize and validation
@@ -219,7 +219,7 @@ public function processInput(): object
 			]),
 
 			// Working with Arrays and Objects
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Validating Arrays and Objects'),
 				P({ class: 'text-muted-foreground' },
 					`The Validator can work with both arrays and objects, and will update the data
@@ -270,7 +270,7 @@ if ($validator->isValid()) {
 			]),
 
 			// Error Handling
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Error Handling'),
 				P({ class: 'text-muted-foreground' },
 					`The Validator provides multiple ways to access validation errors:`
@@ -319,7 +319,7 @@ return $this->success($data);`
 			]),
 
 			// Integration with Models
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Integration with Models'),
 				P({ class: 'text-muted-foreground' },
 					`Combine validation with Proto's model system for complete data processing:`
@@ -411,9 +411,9 @@ class UserController extends ApiController
 			]),
 
 			// Best Practices
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Validation Best Practices'),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("Always validate user input before processing or storing data"),
 					Li("Use appropriate data types in validation rules (string, email, url, int)"),
 					Li("Set reasonable length limits to prevent oversized data"),

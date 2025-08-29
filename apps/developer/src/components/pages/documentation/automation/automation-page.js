@@ -55,7 +55,7 @@ export const AutomationPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Proto provides a comprehensive automation system for background processing, scheduled tasks,
@@ -65,7 +65,7 @@ export const AutomationPage = () =>
 			]),
 
 			// Jobs System
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Background Jobs System'),
 				P({ class: 'text-muted-foreground' },
 					`Proto includes a comprehensive jobs system for background processing. Jobs are processed
@@ -126,7 +126,7 @@ $worker->run();`
 			]),
 
 			// Process System
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Automation Routines'),
 				P({ class: 'text-muted-foreground' },
 					`Proto provides automation routines that extend the base Routine class.
@@ -184,7 +184,7 @@ $cleanup->run();
 			]),
 
 			// Benchmarking
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Routine Benchmarking'),
 				P({ class: 'text-muted-foreground' },
 					`All automation routines include built-in benchmarking to monitor
@@ -218,7 +218,7 @@ class CustomRoutine extends Routine
 			]),
 
 			// Configuration
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Job System Usage'),
 				P({ class: 'text-muted-foreground' },
 					`The job system uses a database driver for queue management.
@@ -246,9 +246,9 @@ $queue->work('default', 5); // Process 5 jobs from default queue`
 			]),
 
 			// Best Practices
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Best Practices'),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("Always include error handling and logging in jobs and processes"),
 					Li("Set appropriate memory and time limits for long-running processes"),
 					Li("Use benchmarking to monitor performance and identify bottlenecks"),

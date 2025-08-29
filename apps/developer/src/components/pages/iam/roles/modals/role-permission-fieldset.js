@@ -42,10 +42,10 @@ const request = (checked, roleId, permissionId) =>
  * @returns {object}
  */
 export const PermissionSkeleton = () => (
-	Div({ class: "flex flex-col space-y-8" }, [
+	Div({ class: "flex flex-col gap-y-8" }, [
 		...[1, 2, 3, 4].map(() =>
-			Div({ class: "flex flex-col space-y-2" }, [
-				Div({ class: "flex items-center space-x-2" }, [
+			Div({ class: "flex flex-col gap-y-2" }, [
+				Div({ class: "flex items-center gap-x-2" }, [
 					Skeleton({
 						shape: "circle",
 						width: "w-5",
@@ -73,14 +73,14 @@ export const PermissionSkeleton = () => (
  */
 const PermissionFields = ({ hasPermission, togglePermission }) => (
 	Div({
-		class: 'flex flex-col space-y-2',
+		class: 'flex flex-col gap-y-2',
 		for: ['rows', (permission) => new FormField(
 			{
 				name: permission.name,
 				description: permission.description
 			},
 			[
-				Div({ class: 'flex items-center space-x-2' }, [
+				Div({ class: 'flex items-center gap-x-2' }, [
 					new Toggle({
 						active: hasPermission(permission.name),
 						change: (active, e) =>

@@ -44,7 +44,7 @@ export const StoragePage = () =>
 		[
 
 			// OVERVIEW
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Storage is an object used to get and set data to the database table. It can access its parent model and inherits all built-in CRUD methods from the base class. You don't need to manually write basic methods in most child storage classes.`
@@ -52,7 +52,7 @@ export const StoragePage = () =>
 			]),
 
 			// NAMING
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Naming'),
 				P({ class: 'text-muted-foreground' },
 					`Storage classes should be singular and end with "Storage".`
@@ -71,7 +71,7 @@ class ExampleStorage extends Storage
 			]),
 
 			// CONNECTION PROPERTY
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Connection Property'),
 				P({ class: 'text-muted-foreground' },
 					`Define a custom database connection if this storage should use a different DB from the default.`
@@ -81,7 +81,7 @@ class ExampleStorage extends Storage
 			]),
 
 			// DATABASE ADAPTER
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Database Adapter'),
 				P({ class: 'text-muted-foreground' },
 					`The storage layer uses a database adapter (usually Mysqli) for executing SQL operations.`
@@ -97,7 +97,7 @@ class ExampleStorage extends Storage
 			]),
 
 			// QUERY BUILDER
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Query Builder'),
 				P({ class: 'text-muted-foreground' },
 					`Storage gives access to a fluent query builder to compose SQL easily.`
@@ -119,7 +119,7 @@ $rows = $this->fetch($sql);`
 			]),
 
 			// DEBUGGING
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Debugging Queries'),
 				P({ class: 'text-muted-foreground' },
 					`Use casting or debug() to inspect the generated SQL.`
@@ -132,7 +132,7 @@ $sql->debug();`
 			]),
 
 			// HELPER METHODS
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Helper Methods'),
 				P({ class: 'text-muted-foreground' },
 					`Common shortcuts available on all storage classes.`
@@ -151,7 +151,7 @@ $sql = $this->builder('other_table', 'o')->select()->where("o.active = 1");`
 			]),
 
 			// FILTER ARRAYS
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Filter Arrays'),
 				P({ class: 'text-muted-foreground' },
 					`Filters simplify conditions and are used in methods like getBy(), where(), all().`
@@ -178,7 +178,7 @@ $rows = $this->fetchWhere($filter);   // many`
 			]),
 
 			// FIND & FINDALL
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Find and FindAll'),
 				P({ class: 'text-muted-foreground' },
 					`Find allows dynamic queries without creating a custom storage method.`
@@ -198,7 +198,7 @@ $this->find(function($sql, &$params) {
 			]),
 
 			// EXAMPLES
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Example Queries'),
 
 				H4({ class: 'font-semibold' }, 'Custom Select with Conditions'),

@@ -57,7 +57,7 @@ export const HttpPage = () =>
 		},
 		[
 			// Introduction
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Introduction'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -68,7 +68,7 @@ export const HttpPage = () =>
 			]),
 
 			// HTTP Request Handling
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'HTTP Request Handling'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -79,7 +79,7 @@ export const HttpPage = () =>
 			]),
 
 			// Available Methods
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Request Methods'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -87,7 +87,7 @@ export const HttpPage = () =>
 					they enable you to read data from the current HTTP request, including path,
 					IP address, HTTP method, headers, request body, and uploaded files.`
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("path() - Returns the current request path."),
 					Li("fullUrl() - Returns the full request URL, including query parameters."),
 					Li("fullUrlWithScheme() - Returns the full request URL, including query parameters and the scheme."),
@@ -115,7 +115,7 @@ export const HttpPage = () =>
 			]),
 
 			// Example Usage
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Example Usage'),
 				P(
 					{ class: 'text-muted-foreground' },

@@ -54,7 +54,7 @@ export const SecurityPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Security is a critical aspect of web application development. This page covers
@@ -64,7 +64,7 @@ export const SecurityPage = () =>
 			]),
 
 			// Input Validation and Sanitization
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Input Validation and Sanitization'),
 				P({ class: 'text-muted-foreground' },
 					`Always validate and sanitize user input to prevent injection attacks and XSS.

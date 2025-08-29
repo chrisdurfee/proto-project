@@ -56,7 +56,7 @@ export const GetStartedPage = () =>
 		},
 		[
 			// 1) About Proto
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'About Proto'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -73,7 +73,7 @@ export const GetStartedPage = () =>
 			]),
 
 			// 2) Prerequisites & Installation
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Prerequisites & Installation'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -96,7 +96,7 @@ composer update`
 			]),
 
 			// 3) Project Structure
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Project Structure'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -119,7 +119,7 @@ vendor/protoframework/proto/src/          // The core framework. This folder is 
 			]),
 
 			// 4) Configuration
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Configuration'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -147,7 +147,7 @@ $connections = env('connections');
 			]),
 
 			// 5) Bootstrapping
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Bootstrapping'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -171,7 +171,7 @@ modules()->user()->v1()->createUser($data);`
 			]),
 
 			// 6) Modules & Gateway
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Modules & Gateways'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -223,7 +223,7 @@ class Gateway
 			]),
 
 			// 7) Developer App
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Developer App in public/developer'),
 				P(
 					{ class: 'text-muted-foreground' },

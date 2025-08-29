@@ -57,7 +57,7 @@ export const ModulesPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Each feature or domain of your application should be developed as a separate module.
@@ -67,7 +67,7 @@ export const ModulesPage = () =>
 			]),
 
 			// Module Folder Structure
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Module Folder Structure'),
 				P({ class: 'text-muted-foreground' },
 					`All modules reside in their own folders inside the modules directory.
@@ -76,7 +76,7 @@ export const ModulesPage = () =>
 			]),
 
 			// Module Gateway
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Module Gateway'),
 				P({ class: 'text-muted-foreground' },
 					`Modules can include a gateway file within a gateway subfolder. The gateway provides
@@ -118,7 +118,7 @@ class Gateway
 			]),
 
 			// Example Module
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Example Module'),
 				P({ class: 'text-muted-foreground' },
 					`Below is an example module that demonstrates how to encapsulate a feature within a module.
@@ -157,7 +157,7 @@ class ExampleModule extends Module
 			]),
 
 			// Registering Gates
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Registering Gates'),
 				P({ class: 'text-muted-foreground' },
 					`Modules can register gates to control access to their functionality globally using the auth() helper. Gates are defined in the module's
@@ -204,7 +204,7 @@ class UserModule extends Module
 			]),
 
 			// Module Registration
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Module Registration'),
 				P({ class: 'text-muted-foreground' },
 					`For a module to be valid and loaded, it must be registered in your configuration file
@@ -219,7 +219,7 @@ class UserModule extends Module
 				)
 			]),
 
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Accessing a Module'),
 				P({ class: 'text-muted-foreground' },
 					`To access a module's functionality, you can use the modules() helper function. Use the modules() global function and call the module name in camelCase.

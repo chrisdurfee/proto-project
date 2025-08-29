@@ -56,7 +56,7 @@ export const AuthPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -67,7 +67,7 @@ export const AuthPage = () =>
 			]),
 
 			// Gates
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Gates Overview'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -133,7 +133,7 @@ $auth->user->isUser(1);`
 			]),
 
 			// Policies
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Policy Overview'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -190,7 +190,7 @@ class ExamplePolicy extends Policy
 				)
 			]),
 
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Controller Policy Usage'),
 				P(
 					{ class: 'text-muted-foreground' },

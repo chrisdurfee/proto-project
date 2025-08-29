@@ -56,7 +56,7 @@ export const DispatchPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Proto supports dispatching several default types of messages:
@@ -67,13 +67,13 @@ export const DispatchPage = () =>
 			]),
 
 			// Email Dispatch
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Email'),
 				P({ class: 'text-muted-foreground' },
 					`To dispatch an email, add the email configurations to your Common\\Config .env file under the key "email".
 					Email messages can use HTML templates that reside in the Common\\Email or module Email folder.`
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("Dispatch email immediately:"),
 					Li("Enqueue email for later sending:")
 				]),
@@ -138,13 +138,13 @@ modules()->user()->email()->send(
 			]),
 
 			// SMS Dispatch
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'SMS'),
 				P({ class: 'text-muted-foreground' },
 					`To dispatch a text message, add SMS configurations to your Common\\Config .env file under "sms".
 					The dispatch system uses Twilio settings, and text templates should be placed in the Common\\Text or module Text folder.`
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("Dispatch SMS immediately:"),
 					Li("Enqueue SMS for later sending:")
 				]),
@@ -198,7 +198,7 @@ modules()->user()->sms()->send(
 			]),
 
 			// web push dispatch
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Web-Push'),
 				P({ class: 'text-muted-foreground' },
 					`To dispatch a push notification, add push configurations to your Common\\Config .env file under "push".
@@ -214,7 +214,7 @@ modules()->user()->sms()->send(
 					},
 					'VAPID Key Generator'
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("Dispatch web push immediately:"),
 					Li("Enqueue web push for later sending:")
 				]),

@@ -54,18 +54,18 @@ export const IntroPage = () => (
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Distributed systems are great except when they are not. Building large team-based systems that can scale has many challenges. Testing, conflicts, build times, response times, developer environments, etc. The Proto framework is created to allow scalable server applications to be created quickly and securely. It's modular to allow teams to build their specific features without many of the issues when building distributed systems. It autoloads and auto bootstraps. Configuration is managed in the Common/Config .env file.`),
 			]),
 
 			// Framework Features
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Framework Features'),
 				P({ class: 'text-muted-foreground' },
 					`Proto includes items for creating complex applications, including:`),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li('Modules system to encpasulate features'),
 					Li("API Systems (Both Resource and REST Routers)"),
 					Li('Validation'),
@@ -101,7 +101,7 @@ export const IntroPage = () => (
 			]),
 
 			// File Structure
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'File Structure'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -118,7 +118,7 @@ vendor/protoframework/proto/src/          // The core framework. This folder is 
 			]),
 
 			// Naming Conventions & Namespace Structure
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Naming Conventions & Namespace Structure'),
 				P({ class: 'text-muted-foreground' },
 					`All class names should be in PascalCase, and all methods and variables should be in camelCase.
@@ -129,7 +129,7 @@ vendor/protoframework/proto/src/          // The core framework. This folder is 
 			]),
 
 			// Configuration
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Configuration'),
 				P({ class: 'text-muted-foreground' },
 					`Before beginning, configure your application settings in the Common/Config .env file.
@@ -144,7 +144,7 @@ env('settingName');`
 			]),
 
 			// Bootstrapping
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Bootstrapping'),
 				P({ class: 'text-muted-foreground' },
 					`Proto auto bootstraps when interfacing with an API, Controller, Model, Storage, or Routine.
@@ -152,7 +152,7 @@ env('settingName');`
 			]),
 
 			// Global Data
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Global Data'),
 				P({ class: 'text-muted-foreground' },
 					`Proto implements a global data pattern. Use Common\\Data to get and set global data.

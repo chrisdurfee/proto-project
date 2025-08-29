@@ -55,7 +55,7 @@ export const WebSocketsPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Proto provides comprehensive real-time communication capabilities through WebSockets,
@@ -65,7 +65,7 @@ export const WebSocketsPage = () =>
 			]),
 
 			// WebSockets
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'WebSockets'),
 				P({ class: 'text-muted-foreground' },
 					`WebSockets provide full-duplex communication between client and server.
@@ -219,7 +219,7 @@ $server->start();`
 			]),
 
 			// Server-Sent Events
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Server-Sent Events (SSE)'),
 				P({ class: 'text-muted-foreground' },
 					`Server-Sent Events provide one-way real-time communication from server to client.
@@ -360,7 +360,7 @@ function showNotification(notification) {
 			]),
 
 			// Socket Management
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Socket Management'),
 				P({ class: 'text-muted-foreground' },
 					`Proto provides socket management utilities for handling connections,
@@ -454,12 +454,12 @@ class SocketManager
 			]),
 
 			// Real-time Features
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Real-time Features Examples'),
 				P({ class: 'text-muted-foreground' },
 					`Common real-time features you can implement with Proto's WebSocket and SSE systems:`
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("Live chat and messaging"),
 					Li("Real-time notifications"),
 					Li("Collaborative editing"),
@@ -516,7 +516,7 @@ class DocumentHandler extends WebSocketHandler
 			]),
 
 			// Configuration
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Configuration'),
 				P({ class: 'text-muted-foreground' },
 					`Configure WebSocket and SSE settings in your Common/Config/.env file:`

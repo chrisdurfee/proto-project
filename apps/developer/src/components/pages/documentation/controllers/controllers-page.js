@@ -58,7 +58,7 @@ export const ControllersPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`A controller is a class used to access models, integrations, or other controllers.
@@ -69,7 +69,7 @@ export const ControllersPage = () =>
 			]),
 
 			// Naming
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Naming'),
 				P({ class: 'text-muted-foreground' },
 					`The name of a controller should always be singular and followed by "Controller".`
@@ -88,7 +88,7 @@ class ExampleController extends ModelController
 			]),
 
 			// Custom Methods
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Custom Methods'),
 				P({ class: 'text-muted-foreground' },
 					`Controllers can have custom methods to extend their functionality. For instance, a method
@@ -110,7 +110,7 @@ class ExampleController extends ModelController
 			]),
 
 			// Controller Response
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Controller Response'),
 				P({ class: 'text-muted-foreground' },
 					`Controllers return response objects that encapsulate the response data,
@@ -171,7 +171,7 @@ public function getByName(string $name)
 			]),
 
 			// Api Controllers
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'API Controllers'),
 				P({ class: 'text-muted-foreground' },
 					`API controllers are used to handle HTTP requests and return responses in a RESTful manner. They typically extend the ResourceController class and interact with models to perform non standard operations.`
@@ -200,7 +200,7 @@ class SummaryController extends ApiController
 			]),
 
 			// Route Resource Controllers
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Route Resource Controllers'),
 				P({ class: 'text-muted-foreground' },
 					`Resource controllers are used to manage resources in a RESTful way. The ResourceController class provides full CRUD functionality
@@ -250,7 +250,7 @@ class UserController extends ResourceController
 			]),
 
 			// Pass-Through Responses
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Pass-Through Responses'),
 				P({ class: 'text-muted-foreground' },
 					`Controllers automatically wraps the result of any undeclared method that is added to it's model or model's storage's public methods call in a Response object. This makes it faster to add new
@@ -259,7 +259,7 @@ class UserController extends ResourceController
 			]),
 
 			// Bypassing Pass-Through Responses
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Bypassing Pass-Through Responses'),
 				P({ class: 'text-muted-foreground' },
 					`To bypass the response wrapper and return the raw model result, call the undeclared controller
@@ -271,7 +271,7 @@ $result = static::$controllerType::methodName();`
 				)
 			]),
 
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Request Item'),
 				P({ class: 'text-muted-foreground' },
 					`The request item property sets the key name that will be used to get the item value from the request params. By default, the item is set to "item." This property can be overridden to set a custom key name to get the requested item.`
@@ -282,7 +282,7 @@ protected string $item = 'example';`
 				)
 			]),
 
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Get Request Item'),
 				P({ class: 'text-muted-foreground' },
 					`This will get the requested item and decode the value. It will also clean the value.`
@@ -297,7 +297,7 @@ public function addUser(Request $request): object
 				)
 			]),
 
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Validation & Sanitize'),
 				P({ class: 'text-muted-foreground' },
 					`The validator class can validate and sanitize data. The validator accepts an object to validate and the validation settings to document how to validate the data. The validator will validate and sanitize the data by specified data type.`
@@ -322,7 +322,7 @@ if ($validator->isValid() === false)
 					`The validator will sanitize and validate the data by specified data type. The supported data types include:`
 				),
 
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li('int'),
 					Li("float"),
 					Li('string'),
@@ -415,7 +415,7 @@ public function addData(Request $request): void
 				)
 			]),
 
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Resource Id Parameter'),
 				P({ class: 'text-muted-foreground' },
 					`The resource controller provides a method to get the resource ID from the request.`
@@ -447,7 +447,7 @@ public function updateStatus(Request $request): object
 			]),
 
 			// Access Model
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Access Model'),
 				P({ class: 'text-muted-foreground' },
 					`Controllers can instantiate their associated model by invoking the \`model\` method with model data:`
@@ -459,7 +459,7 @@ $model = $this->model($data);`
 			]),
 
 			// Storage Find and Find All
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Storage Find and Find All'),
 				P({ class: 'text-muted-foreground' },
 					`Controllers can use the \`find\` and \`findAll\` methods to create ad-hoc, complex queries without

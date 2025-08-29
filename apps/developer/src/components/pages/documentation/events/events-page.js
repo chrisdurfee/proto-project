@@ -56,7 +56,7 @@ export const EventsPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
 					`Proto provides a powerful event system that enables decoupled communication between
@@ -68,12 +68,12 @@ export const EventsPage = () =>
 			]),
 
 			// Event Types
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Event Types'),
 				P({ class: 'text-muted-foreground' },
 					`Proto supports several types of events:`
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("**Storage Events**: Automatically triggered by model CRUD operations"),
 					Li("**Custom Events**: Manually triggered for application-specific logic"),
 					Li("**System Events**: Framework-level events for bootstrapping and lifecycle"),
@@ -82,7 +82,7 @@ export const EventsPage = () =>
 			]),
 
 			// Storage Events
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Storage Events'),
 				P({ class: 'text-muted-foreground' },
 					`The storage layer automatically publishes events for all actions performed via the
@@ -136,7 +136,7 @@ Events::on('Storage', function($payload) {
 			]),
 
 			// Custom Events
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Custom Events'),
 				P({ class: 'text-muted-foreground' },
 					`In addition to storage events, Proto supports custom events.
@@ -157,7 +157,7 @@ Events::update('CustomEvent', (object)[
 			]),
 
 			// Event Registration Patterns
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Event Registration Patterns'),
 				P({ class: 'text-muted-foreground' },
 					`Events should typically be registered during application bootstrap.
@@ -212,7 +212,7 @@ class UserServiceProvider extends ServiceProvider
 			]),
 
 			// Event Payload Structure
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Event Payload Structure'),
 				P({ class: 'text-muted-foreground' },
 					`Events receive a payload object containing relevant data about the triggered event.
@@ -241,7 +241,7 @@ class UserServiceProvider extends ServiceProvider
 			]),
 
 			// Multiple Event Listeners
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Multiple Event Listeners'),
 				P({ class: 'text-muted-foreground' },
 					`You can register multiple listeners for the same event. They will be executed
@@ -269,7 +269,7 @@ Events::on('User:add', function($payload) {
 			]),
 
 			// Event-Driven Architecture Patterns
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Event-Driven Architecture Patterns'),
 				P({ class: 'text-muted-foreground' },
 					`Events enable powerful architectural patterns for building scalable applications:`
@@ -328,7 +328,7 @@ Events::on('Payment:Successful', function($payload) {
 			]),
 
 			// Conditional Event Listeners
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Conditional Event Listeners'),
 				P({ class: 'text-muted-foreground' },
 					`You can implement conditional logic within event listeners to handle
@@ -370,7 +370,7 @@ Events::on('User:update', function($payload) {
 			]),
 
 			// Error Handling in Events
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Error Handling in Events'),
 				P({ class: 'text-muted-foreground' },
 					`Event listeners should handle errors gracefully to prevent one failing

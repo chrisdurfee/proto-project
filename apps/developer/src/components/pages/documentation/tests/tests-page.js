@@ -55,7 +55,7 @@ export const TestsPage = () =>
 		},
 		[
 			// Overview
-			Section({ class: "space-y-4" }, [
+			Section({ class: "flex flex-col gap-y-4" }, [
 				H4({ class: "text-lg font-bold" }, "Overview"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -67,7 +67,7 @@ export const TestsPage = () =>
 			]),
 
 			// Test Structure and Organization
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Test Structure and Organization"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -93,13 +93,13 @@ export const TestsPage = () =>
 			]),
 
 			// Test Types
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Test Types"),
 				P(
 					{ class: "text-muted-foreground" },
 					`Proto supports three primary types of tests:`
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("**Unit Tests**: Test individual methods and classes in isolation"),
 					Li("**Feature Tests**: Test complete user workflows and API endpoints"),
 					Li("**Integration Tests**: Test interactions with external services and databases")
@@ -107,7 +107,7 @@ export const TestsPage = () =>
 			]),
 
 			// Naming
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Naming"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -138,7 +138,7 @@ class ExampleTest extends Test
 			]),
 
 			// Set-Up
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Set-Up"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -155,7 +155,7 @@ class ExampleTest extends Test
 			]),
 
 			// Tear-Down
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Tear-Down"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -172,7 +172,7 @@ class ExampleTest extends Test
 			]),
 
 			// Test Method Names
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Test Method Names"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -208,7 +208,7 @@ public function testEmailIsDispatchedWhenUserRegisters(): void
 			]),
 
 			// Database Testing
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Database Testing"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -280,7 +280,7 @@ class UserModelTest extends Test
 			]),
 
 			// API Testing
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "API Testing"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -372,7 +372,7 @@ class UserApiTest extends Test
 			]),
 
 			// Testing Utilities and Helpers
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Testing Utilities and Helpers"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -476,7 +476,7 @@ class TestHelpers extends Test
 			]),
 
 			// Test Data Management
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Test Data Management"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -575,7 +575,7 @@ class TestDataManagement extends Test
 			]),
 
 			// Performance and Load Testing
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Performance and Load Testing"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -633,7 +633,7 @@ class PerformanceTest extends Test
 			]),
 
 			// Running Tests
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Running Tests"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -664,7 +664,7 @@ php vendor/bin/phpunit --log-junit results.xml`
 			]),
 
 			// Test Configuration
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Test Configuration"),
 				P(
 					{ class: "text-muted-foreground" },
@@ -704,13 +704,13 @@ php vendor/bin/phpunit --log-junit results.xml`
 			]),
 
 			// Best Practices
-			Section({ class: "space-y-4 mt-12" }, [
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Testing Best Practices"),
 				P(
 					{ class: "text-muted-foreground" },
 					`Follow these best practices for effective testing in Proto:`
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("**Test one thing at a time**: Each test should verify a single behavior"),
 					Li("**Use descriptive test names**: Make it clear what is being tested"),
 					Li("**Arrange, Act, Assert**: Structure tests with clear setup, execution, and verification"),

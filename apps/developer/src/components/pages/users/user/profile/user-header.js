@@ -47,7 +47,7 @@ export const UserHeader = ({ user }) => (
 			Div(Format.phone('[[user.mobile]]')),
 		]),
 		Div({ class: 'flex flex-auto items-center justify-center' }, [
-			Div({ class: 'flex space-x-4 mt-4' }, [
+			Div({ class: 'flex gap-x-4 mt-4' }, [
 				Tooltip({ content: 'Email' }, [
 					Button({ variant: 'icon', icon: Icons.envelope.default, label: 'Email', disabled: '[[user.email]]', click: (e, { context }) =>
 					{

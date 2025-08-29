@@ -57,7 +57,7 @@ export const ApiPage = () =>
 		},
 		[
 			// Overview Section
-			Section({ class: 'space-y-4' }, [
+			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P(
 					{ class: 'text-muted-foreground' },
@@ -68,21 +68,21 @@ export const ApiPage = () =>
 			]),
 
 			// API File Structure Section
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'API File Structure'),
 				P(
 					{ class: 'text-muted-foreground' },
 					`APIs are declared in files named api.php inside the api folder of a module.
 					You can nest folders in the API folder to create deep API routes. For example:`
 				),
-				Ul({ class: 'list-disc pl-6 space-y-1 text-muted-foreground' }, [
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li("Modules/User/Api/api.php"),
 					Li("Modules/User/Api/Account/api.php")
 				])
 			]),
 
 			// Resource Routes Section
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Resource Routes'),
 				P({ class: 'text-muted-foreground' },
 					`A resource route automatically handles CRUD operations for a controller.
@@ -126,7 +126,7 @@ router()
 			]),
 
 			// Middleware System Section
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Middleware System'),
 				P({ class: 'text-muted-foreground' },
 					`Middleware in Proto allows you to filter and process HTTP requests entering your application.
@@ -187,7 +187,7 @@ router()
 			]),
 
 			// Error Handling Section
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Error Handling & Responses'),
 				P({ class: 'text-muted-foreground' },
 					`Proper error handling and consistent response formats are crucial for API development.`
@@ -296,7 +296,7 @@ class UserController extends ApiController
 			]),
 
 			// Individual Routes Section
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Individual Routes'),
 				P({ class: 'text-muted-foreground' },
 					`Apart from resource routes, you can also define individual API routes.
@@ -395,7 +395,7 @@ $router->get('*', function($req)
 			]),
 
 			// group routes Section
-			Section({ class: 'space-y-4 mt-12' }, [
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Group Routes'),
 				P({ class: 'text-muted-foreground' },
 					`You can group routes together to apply common middleware or settings. For example:`
@@ -436,7 +436,7 @@ router()
 `)
 		]),
 
-		Section({ class: 'space-y-4 mt-12' }, [
+		Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 			H4({ class: 'text-lg font-bold' }, 'Caching'),
 			P({ class: 'text-muted-foreground' },
 				`Proto supports server-side caching for API responses. It will automatically cache and invalidate cache for registered "resource" routes using Redis. The cache is handled by a Cache Proxy that will run after authentication. If the request is a "GET" request, it will check if the cache exists. If it does, it will return the cached response. If not, it will call the controller and cache the response. Non get methods will clear the cache.`

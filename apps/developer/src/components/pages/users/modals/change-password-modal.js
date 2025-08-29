@@ -124,7 +124,7 @@ export const ChangePasswordModal = (props = {}) =>
 			}
 		}
 	}, [
-		Div({ class: 'flex flex-col lg:p-4 space-y-8' }, [
+		Div({ class: 'flex flex-col lg:p-4 gap-y-8' }, [
 			Div({ class: "flex flex-auto flex-col w-full gap-4" }, PasswordForm())
 		])
 	]).open();
