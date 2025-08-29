@@ -119,19 +119,17 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     container_name: proto-phpmyadmin
     restart: unless-stopped
-  # Not published by default. Uncomment only for local use.
-  # ports:
-  #   - "8081:80"
+    ports:
+      - "8081:80"
     environment:
-      PMA_HOST: ${DB_HOST:-mariadb}
-      PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      - PMA_HOST=${DB_HOST:-mariadb}
+      - PMA_PORT=3306
+      - PMA_USER=root
+      - PMA_PASSWORD=${DB_ROOT_PASSWORD:-root}
     depends_on:
       - mariadb
     networks:
       - proto-network
-    profiles: [dev, debug]  # Only enable in development profiles
 
 volumes:
   mariadb_data:
