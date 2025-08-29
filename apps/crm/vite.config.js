@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 import { defineConfig } from 'vite';
 import { generateUrls } from '../../infrastructure/config/domain.config.js';
@@ -9,7 +10,9 @@ const apiTarget = urls.api;
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	plugins: [],
+	plugins: [
+		tailwindcss()
+	],
 	base: '/', // Changed for subdomain serving
 	resolve: {
 		alias: {
