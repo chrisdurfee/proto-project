@@ -224,7 +224,7 @@ class AuthController extends Controller
 		/**
 		 * Check if the connection is still active before refreshing the session ID.
 		 */
-		if(connection_aborted() === false)
+		if (connection_aborted() === false)
 		{
 			// refresh session ID to prevent fixation
 			session()->refreshId();

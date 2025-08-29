@@ -56,7 +56,7 @@ class User extends Migration
 			$table->varchar('country', 100)->nullable();
 
 			// Status & flags
-			$table->enum('status', 'active','inactive','pending')->default("'active'");
+			$table->enum('status', 'online','offline','busy', 'away')->default("'offline'");
 			$table->tinyInteger('enabled')->default(1);
 			$table->timestamp('email_verified_at')->nullable();
 			$table->tinyInteger('marketing_opt_in')->default(0);
