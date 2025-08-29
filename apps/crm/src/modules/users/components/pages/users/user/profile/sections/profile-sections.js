@@ -61,7 +61,7 @@ export const OrgDetailsSection = () =>
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.allowSms]]"))
 				]),
 
-				Div({ class: "flex flex-col gap-, [
+				Div({ class: "flex flex-col gap-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Allows Push"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.allowPush]]"))
 				])
