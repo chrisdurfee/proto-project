@@ -1,6 +1,6 @@
 import { Code, H4, Li, P, Pre, Section, Ul } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
-import { DocPage } from "../../doc-page.js";
+import { DocPage } from "../../types/doc/doc-page.js";
 
 /**
  * CodeBlock

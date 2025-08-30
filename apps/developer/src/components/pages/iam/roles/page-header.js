@@ -1,6 +1,7 @@
-import { Div, H1, Header } from "@base-framework/atoms";
+import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
+import { PageHeader as TablePageHeader } from "../../types/full/table/page-header.js";
 import { RoleModal } from "./modals/role-modal";
 
 /**
@@ -35,20 +36,15 @@ const Modal = (item, parent) => (
  * @returns {object}
  */
 export const PageHeader = () => (
-	Header({ class: 'flex flex-col' }, [
-		Div({ class: 'flex flex-auto items-center justify-between w-full' }, [
-			H1({ class: 'text-3xl font-bold' }, 'Roles'),
-			Div({ class: 'flex items-center gap-2' }, [
-				Div({ class: 'hidden lg:flex' }, [
-					Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.refresh, click: refresh }, 'Refresh')
-				]),
-				Div({ class: 'hidden lg:flex' }, [
-					Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add Role')
-				]),
-				Div({ class: 'flex lg:hidden mr-0' }, [
-					Tooltip({ content: 'Add Role', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }))
-				])
-			])
+	TablePageHeader({ title: 'Roles' }, [
+		Div({ class: 'hidden lg:flex' }, [
+			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.refresh, click: refresh }, 'Refresh')
+		]),
+		Div({ class: 'hidden lg:flex' }, [
+			Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add Role')
+		]),
+		Div({ class: 'flex lg:hidden mr-0' }, [
+			Tooltip({ content: 'Add Role', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }))
 		])
 	])
 );
