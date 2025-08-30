@@ -3,7 +3,7 @@ import { Component, Jot } from "@base-framework/base";
 import { Fieldset, Skeleton } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { FormField, Toggle } from "@base-framework/ui/molecules";
-import { RoleModel } from "../../iam/roles/models/role-model.js";
+import { RoleModel } from "../models/role-model.js";
 import { UserRoleModel } from "../models/user-role-model.js";
 
 /**
