@@ -1,7 +1,7 @@
 import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { PageHeader as TablePageHeader } from "../../types/full/table/page-header.js";
+import { PageHeader as TablePageHeader } from "@pages/types/full/table/page-header.js";
 import { OrganizationModal } from "./modals/organization-modal.js";
 
 
