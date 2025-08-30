@@ -11,10 +11,7 @@ import { RoleModal } from "./modals/role-modal";
  * @param {object} parent - The parent object.
  * @returns {void}
  */
-const refresh = (e, { list }) =>
-{
-	list.refresh();
-};
+const refresh = (e, { list }) => list.refresh();
 
 /**
  * This will create a permission modal.
