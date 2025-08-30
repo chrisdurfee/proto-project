@@ -12,17 +12,17 @@ export const MigrationModel = Model.extend({
 
 	xhr: {
 
-        /**
-         * This will update the migration.
-         *
-         * @param {object} instanceParams
-         * @param {function} callBack
-         * @returns {object}
-         */
+		/**
+		 * This will update the migration.
+		 *
+		 * @param {object} instanceParams
+		 * @param {function} callBack
+		 * @returns {object}
+		 */
 		update(instanceParams, callBack)
-        {
-            let params = 'direction=' + instanceParams.direction;
-            return this._post('', params, instanceParams, callBack);
-        }
+		{
+			let params = 'direction=' + instanceParams.direction;
+			return this._post('', params, instanceParams, callBack);
+		}
 	}
 });

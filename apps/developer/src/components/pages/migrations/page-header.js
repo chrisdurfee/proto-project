@@ -1,8 +1,9 @@
-import { Div, H1, Header } from "@base-framework/atoms";
+import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Confirmation } from "@base-framework/ui/molecules";
-import { MigrationModel } from "./models/migration-model";
+import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
+import { MigrationModel } from "./models/migration-model.js";
 
 /**
  * Thi swill revert the last migration.
@@ -61,28 +62,23 @@ const update = (direction, { list }) =>
 };
 
 /**
- * This will create a page header for the clients page.
+ * This will create a page header for the migrations page.
  *
  * @returns {object}
  */
 export const PageHeader = () => (
-	Header({ class: 'flex flex-col' }, [
-		Div({ class: 'flex flex-auto items-center justify-between w-full' }, [
-			H1({ class: 'text-3xl font-bold' }, 'Migrations'),
-			Div({ class: 'flex items-center gap-2' }, [
-				Div({ class: 'hidden lg:flex' }, [
-					Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.circleMinus, click: revert }, 'Revert')
-				]),
-				Div({ class: 'flex lg:hidden mr-0' }, [
-					Tooltip({ content: 'Revert Migration', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circleMinus, click: revert }))
-				]),
-				Div({ class: 'hidden lg:flex' }, [
-					Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: Icons.circlePlus, click: run }, 'Run')
-				]),
-				Div({ class: 'flex lg:hidden mr-0' }, [
-					Tooltip({ content: 'Run Migration', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: run }))
-				])
-			])
+	TablePageHeader({ title: 'Migrations' }, [
+		Div({ class: 'hidden lg:flex' }, [
+			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.circleMinus, click: revert }, 'Revert')
+		]),
+		Div({ class: 'flex lg:hidden mr-0' }, [
+			Tooltip({ content: 'Revert Migration', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circleMinus, click: revert }))
+		]),
+		Div({ class: 'hidden lg:flex' }, [
+			Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: Icons.circlePlus, click: run }, 'Run')
+		]),
+		Div({ class: 'flex lg:hidden mr-0' }, [
+			Tooltip({ content: 'Run Migration', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: run }))
 		])
 	])
 );

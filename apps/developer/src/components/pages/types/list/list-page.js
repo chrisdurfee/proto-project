@@ -11,9 +11,9 @@ import { BlankPage } from "@base-framework/ui/pages";
  * @returns {object}
  */
 export const ListContainer = (children) => (
-    Div({ class: 'flex flex-auto flex-col gap-y-2 md:gap-y-4' }, [
-        Div({ class: 'flex flex-auto flex-col overflow-x-auto' }, children)
-    ])
+	Div({ class: 'flex flex-auto flex-col gap-y-2 md:gap-y-4' }, [
+		Div({ class: 'flex flex-auto flex-col overflow-x-auto' }, children)
+	])
 );
 
 /**
@@ -26,16 +26,16 @@ export const ListContainer = (children) => (
  */
 export const ListPage = Atom((props, children) => (
 	new BlankPage({
-        ...props,
-        /**
+		...props,
+		/**
 		 * This will remove the padding.
 		 */
 		class: 'pt-0',
-    }, [
-        Div({ class: 'grid grid-cols-1 flex-auto' }, [
-            Div({ class: 'flex flex-auto flex-col p-6 pt-0 gap-y-6 md:gap-y-12 md:pt-6 lg:p-8 w-full mx-auto lg:max-w-7xl' }, children)
-        ])
-    ])
+	}, [
+		Div({ class: 'grid grid-cols-1 flex-auto' }, [
+			Div({ class: 'flex flex-auto flex-col p-6 pt-0 gap-y-6 md:gap-y-12 md:pt-6 lg:p-8 w-full mx-auto lg:max-w-7xl' }, children)
+		])
+	])
 ));
 
 export default ListPage;

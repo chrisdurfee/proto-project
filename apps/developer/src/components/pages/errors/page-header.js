@@ -2,7 +2,7 @@ import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Combobox } from "@base-framework/ui/molecules";
-import { PageHeader as TablePageHeader } from "@pages/types/full/table/page-header.js";
+import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
 
 /**
  * This will refresh the list.

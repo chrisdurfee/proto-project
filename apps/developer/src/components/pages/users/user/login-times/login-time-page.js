@@ -1,5 +1,5 @@
-import { Div, UseParent } from "@base-framework/atoms";
-import { BlankPage } from "@base-framework/ui/pages";
+import { UseParent } from "@base-framework/atoms";
+import FullTablePage, { TableContainer } from "@components/pages/types/full/table/full-table-page.js";
 import { getDate } from "./get-date.js";
 import { LoginLogModel } from "./login-log-model.js";
 import { LoginTable } from "./login-table.js";
@@ -33,20 +33,14 @@ export const LoginTimePage = () =>
 		data,
 	};
 
-	return new BlankPage(Props, [
-		Div({ class: 'grid grid-cols-1 flex-auto' }, [
+	return FullTablePage(Props, [
+		PageHeader(),
+		TableContainer([
 			UseParent(({ route }) =>
 			{
 				// @ts-ignore
 				data.userId = route.userId;
-				return Div({ class: 'flex flex-auto flex-col pt-0 lg:gap-y-12 w-full mx-auto 2xl:max-w-[1600px]' }, [
-					PageHeader(),
-					Div({ class: 'flex flex-auto flex-col gap-y-4 lg:gap-y-2' }, [
-						Div({ class: 'flex flex-auto flex-col overflow-x-auto' }, [
-							LoginTable(data)
-						])
-					])
-				]);
+				return LoginTable(data);
 			})
 		])
 	]);

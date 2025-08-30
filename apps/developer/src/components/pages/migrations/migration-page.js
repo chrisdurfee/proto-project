@@ -13,12 +13,12 @@ const Props = {};
  * @returns {object}
  */
 export const MigrationPage = () => (
-    ListPage(Props, [
-        PageHeader(),
-        ListContainer([
-            MigrationTable()
-        ])
-    ])
+	ListPage(Props, [
+		PageHeader(),
+		ListContainer([
+			MigrationTable()
+		])
+	])
 );
 
 export default MigrationPage;

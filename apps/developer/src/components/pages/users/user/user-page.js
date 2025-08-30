@@ -1,5 +1,5 @@
-import { Div, UseParent } from "@base-framework/atoms";
 import { Overlay } from "@base-framework/ui/organisms";
+import { FullScreenOverlay } from "@components/organisms/overlays/full/full-screen-overlay.js";
 import { UserModel } from "../models/user-model.js";
 import { ContentSection } from "./content-section.js";
 import { Sidebar } from "./sidebar.js";
@@ -70,18 +70,10 @@ const Props =
  * @returns {Overlay}
  */
 export const UserPage = () => (
-	new Overlay(Props, [
-		Div({ class: "flex flex-auto flex-col w-full" }, [
-			Div({ class: "flex flex-auto flex-col gap-6 w-full" }, [
-				Div({ class: 'flex flex-auto flex-col pt-0 sm:pt-2 lg:pt-0 lg:flex-row h-full' }, [
-					UseParent(({ route }) => ([
-						Sidebar({ userId: route.userId }),
-						ContentSection({ userId: route.userId })
-					]))
-				])
-			])
-		])
-	])
+	FullScreenOverlay(Props, ({ route }) => ([
+		Sidebar({ userId: route.userId }),
+		ContentSection({ userId: route.userId })
+	]))
 );
 
 export default UserPage;
