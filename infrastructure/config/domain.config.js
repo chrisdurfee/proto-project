@@ -42,7 +42,7 @@ function loadProtoConfig()
 {
     try
     {
-        const configPath = path.resolve(import.meta.dirname || __dirname, 'common/Config/.env');
+        const configPath = path.resolve((import.meta.dirname || __dirname) + '/../../', 'common/Config/.env');
         const configData = fs.readFileSync(configPath, 'utf8');
         const protoConfig = JSON.parse(configData);
 

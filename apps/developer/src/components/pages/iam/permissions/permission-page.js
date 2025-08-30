@@ -1,5 +1,5 @@
 import { Div } from "@base-framework/atoms";
-import FullTablePage, { TableContainer } from "../../types/full/table/full-table-page.js";
+import FullTablePage, { TableContainer } from "@pages/types/full/table/full-table-page.js";
 import { PermissionModel } from "./models/permission-model.js";
 import { PageHeader } from "./page-header.js";
 import { PermissionTable } from "./table/permission-table.js";

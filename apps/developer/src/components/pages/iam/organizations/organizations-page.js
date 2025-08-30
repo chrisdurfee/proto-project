@@ -1,4 +1,4 @@
-import FullTablePage, { TableContainer } from "../../types/full/table/full-table-page.js";
+import FullTablePage, { TableContainer } from "@pages/types/full/table/full-table-page.js";
 import { OrganizationModel } from "./models/organization-model.js";
 import { PageHeader } from "./page-header.js";
 import { OrganizationTable } from "./table/organization-table.js";
