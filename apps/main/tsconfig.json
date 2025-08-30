@@ -18,6 +18,10 @@
 		"baseUrl": "./",
 		"skipLibCheck": true,  // Add this to avoid checking node_modules
 		"paths": {
+			"@components/*": ["src/components/*"],
+			"@modules/*": ["src/modules/*"],
+			"@pages/*": ["src/components/pages/*"],
+			"@shell/*": ["src/shell/*"],
 			"@base-framework/base": [
 				"node_modules/@base-framework/base/dist/types/base.d.ts",
 				"node_modules/@base-framework/base/dist/base.js"

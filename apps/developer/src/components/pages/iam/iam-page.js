@@ -1,5 +1,5 @@
 import { SidebarMenuPage } from "@base-framework/ui/pages";
-import FullSidebarMenuPage from "../types/full/full-sidebar-menu-page.js";
+import FullSidebarMenuPage from "@pages/types/full/full-sidebar-menu-page.js";
 import { IamSwitch } from "./iam-switch.js";
 import { Links } from "./links.js";
 
