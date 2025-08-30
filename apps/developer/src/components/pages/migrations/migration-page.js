@@ -1,27 +1,11 @@
-import { Div } from "@base-framework/atoms";
-import { BlankPage } from "@base-framework/ui/pages";
+import ListPage, { ListContainer } from "@pages/types/list/list-page.js";
 import { MigrationTable } from "./migration-table.js";
 import { PageHeader } from "./page-header.js";
 
 /**
  * @type {object}
  */
-const Props =
-{
-    /**
-     * This will update the migration list when the url is
-     * updated.
-     *
-     * @returns {void}
-     */
-    update()
-    {
-        if (this.list)
-        {
-            this.list.refresh();
-        }
-    }
-}
+const Props = {};
 
 /**
  * This will create the migration list page.
@@ -29,16 +13,10 @@ const Props =
  * @returns {object}
  */
 export const MigrationPage = () => (
-    new BlankPage(Props, [
-        Div({ class: 'grid grid-cols-1 flex-auto' }, [
-            Div({ class: 'flex flex-auto flex-col p-6 pt-0 gap-y-6 md:gap-y-12 md:pt-6 lg:p-8 w-full mx-auto lg:max-w-7xl' }, [
-                PageHeader(),
-                Div({ class: 'flex flex-auto flex-col gap-y-2 md:gap-y-4' }, [
-                    Div({ class: 'flex flex-auto flex-col overflow-x-auto' }, [
-                        MigrationTable()
-                    ])
-                ])
-            ])
+    ListPage(Props, [
+        PageHeader(),
+        ListContainer([
+            MigrationTable()
         ])
     ])
 );
