@@ -37,7 +37,8 @@ export const Sidebar = ({ userId }) => (
 		topNav: Toolbar(),
 		options: [
 			{ label: 'Profile', href: `users/${userId}`, icon: Icons.identification, exact: true },
-			{ label: 'Login Times', href: `users/${userId}/login-times`, icon: Icons.calendar.default }
+			{ label: 'Login Times', href: `users/${userId}/login-times`, icon: Icons.calendar.default },
+			{ label: 'Connections', href: `users/${userId}/connections`, icon: Icons.user.group }
 		]
 	})
 );
