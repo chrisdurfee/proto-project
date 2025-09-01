@@ -7,6 +7,6 @@ import { Model } from "@base-framework/base";
  *
  * @type {typeof Model}
  */
-export const LoginLogModel = Model.extend({
-	url: '/api/auth/[[userId]]/login-log',
+export const FollowerModel = Model.extend({
+	url: '/api/user/[[userId]]/follower',
 });

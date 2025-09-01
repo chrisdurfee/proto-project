@@ -31,7 +31,7 @@ const HeaderRow = () =>
  * @param {function} onSelect - Callback when the row is selected
  * @returns {object}
  */
-export const LoginRow = (row, onSelect) =>
+export const FollowerRow = (row, onSelect) =>
 	Tr({ class: 'items-center px-4 py-2 hover:bg-muted/50' }, [
 		Td({ class: 'p-4 hidden md:table-cell' }, [
 			new Checkbox({ checked: row.selected, class: 'mr-2', onChange: () => onSelect(row) })
@@ -50,7 +50,7 @@ export const LoginRow = (row, onSelect) =>
  * @param {object} data
  * @returns {object}
  */
-export const LoginTable = (data) =>
+export const FollowerTable = (data) =>
 	ScrollableDataTable({
 		data,
 		cache: 'list',
@@ -58,12 +58,11 @@ export const LoginTable = (data) =>
 		customHeader: HeaderRow(),
 		skeleton: true,
 		rows: [],
-		rowItem:
-		LoginRow,
+		rowItem: FollowerRow,
 		key: 'id',
 		emptyState: () => EmptyState({
-			title: 'Who Hurt Them?',
-			description: 'No login attempts have been found. Maybe we should send them flowers.',
-			icon: Icons.clock
+			title: 'No Followers',
+			description: 'No worries. Followers come with time.',
+			icon: Icons.user.default
 		})
 	});

@@ -1,24 +1,20 @@
 import { UseParent } from "@base-framework/atoms";
-import FullTablePage, { TableContainer } from "@components/pages/types/full/table/full-table-page.js";
-import { LoginLogModel } from "./follower-model.js";
-import { LoginTable } from "./follower-table.js";
-import { getDate } from "./get-date.js";
-import { PageHeader } from "./page-header.js";
+import { BlankPage } from "@base-framework/ui";
+import { TableContainer } from "@components/pages/types/full/table/full-table-page.js";
+import { FollowerModel } from "./follower-model.js";
+import { FollowerTable } from "./follower-table.js";
 
 /**
  * This will create the login time page.
  *
  * @returns {object}
  */
-export const LoginTimePage = () =>
+export const FollowerPage = () =>
 {
-	const data = new LoginLogModel({
+	const data = new FollowerModel({
+		userId: null,
 		filter: {
 
-		},
-		dates: {
-			start: getDate('start'),
-			end: getDate('end')
 		},
 		orderBy: {
 			createdAt: 'DESC'
@@ -33,17 +29,16 @@ export const LoginTimePage = () =>
 		data,
 	};
 
-	return FullTablePage(Props, [
-		PageHeader(),
+	return new BlankPage(Props, [
 		TableContainer([
 			UseParent(({ route }) =>
 			{
 				// @ts-ignore
 				data.userId = route.userId;
-				return LoginTable(data);
+				return FollowerTable(data);
 			})
 		])
 	]);
 };
 
-export default LoginTimePage;
+export default FollowerPage;

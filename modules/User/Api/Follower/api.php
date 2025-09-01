@@ -10,7 +10,7 @@ use Proto\Http\Router\Router;
  * This will handle the API routes for the User followers.
  */
 router()
-	->group('user/:id/followers', function(Router $router)
+	->group('user/:id/follower', function(Router $router)
 	{
 		$router->get('', [FollowerController::class, 'all']);
 		$router->post(':followerId', [FollowerController::class, 'follow']);
