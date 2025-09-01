@@ -15,15 +15,13 @@ const TabContent = () => (
 			options: [
 				{
 					label: 'Followers',
-					href: `./users/${route.userId}/connections/followers`,
+					href: `users/${route.userId}/connections/followers`,
 					component: new Panel({ class: 'p-8' }, 'Posts content'),
-					uri: 'users/:userId/connections/followers'
 				},
 				{
 					label: 'Following',
 					href: `users/${route.userId}/connections/following`,
 					component: new Panel({ class: 'p-8' }, 'Stories content'),
-					uri: 'users/:userId/connections/following'
 				}
 			]
 		})
