@@ -146,6 +146,21 @@ class User extends Model
 	}
 
 	/**
+	 * This will get the user following.
+	 *
+	 * @return Relations\BelongsToMany
+	 */
+	public function following(): Relations\BelongsToMany
+	{
+		return $this->belongsToMany(
+			User::class,
+			'follower_users',
+			'follower_user_id',
+			'user_id'
+		);
+	}
+
+	/**
 	 * This will get the user blocked users.
 	 *
 	 * @return Relations\BelongsToMany
