@@ -362,7 +362,7 @@ class UserController extends ResourceController
 	 */
 	public function uploadImage(
 		Request $request,
-		UserImageService $imageService = null
+		UserImageService $imageService = new UserImageService()
 	): object
 	{
 		$userId = $this->getResourceId($request);
@@ -372,23 +372,18 @@ class UserController extends ResourceController
 		}
 
 		/**
-		 * Initialize the service if not provided.
-		 */
-		if ($imageService === null)
-		{
-			$imageService = new UserImageService();
-		}
-
-		/**
 		 * Get the uploaded file.
 		 */
-		$uploadFile = $this->file('image');
+		$uploadFile = $request->file('image');
+		if ($uploadFile === null)
+		{
+			return $this->error('No image file provided.');
+		}
 
 		/**
 		 * Use the service to handle the complete upload workflow.
 		 */
 		$result = $imageService->uploadUserImage($uploadFile, $userId);
-
 		if ($result['success'])
 		{
 			return $this->response($result['data']);
