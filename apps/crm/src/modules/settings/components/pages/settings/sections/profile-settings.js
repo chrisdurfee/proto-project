@@ -313,9 +313,7 @@ export const ProfileSettings = () => (
                         description: "Receive marketing emails and updates."
                     }, [
                         new Toggle({
-                            bind: 'marketingOptIn',
-                            active: false,
-                            change: (val) => console.log("Marketing Opt-In:", val)
+                            bind: 'marketingOptIn'
                         })
                     ])
                 ])

@@ -27,4 +27,5 @@ router()
 	 * Profile routes
 	 */
 	->patch('user/:id/update-credentials', [UserController::class, 'updateCredentials'])
+	->post('user/:id/upload-image', [UserController::class, 'uploadImage'])
 	->resource('user', UserController::class);

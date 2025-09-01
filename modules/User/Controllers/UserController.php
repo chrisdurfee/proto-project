@@ -6,6 +6,7 @@ use Modules\User\Models\User;
 use Modules\User\Auth\Policies\UserPolicy;
 use Modules\User\Services\User\PasswordUpdateService;
 use Modules\User\Services\User\UnsubscribeService;
+use Modules\User\Services\User\UserImageService;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;
 
@@ -350,5 +351,51 @@ class UserController extends ResourceController
 		return $this->response([
 			'rows' => $model->roles
 		]);
+	}
+
+	/**
+	 * Uploads and sets the user's profile image.
+	 *
+	 * @param Request $request The request object.
+	 * @param UserImageService $imageService The image service.
+	 * @return object The response.
+	 */
+	public function uploadImage(
+		Request $request,
+		UserImageService $imageService = null
+	): object
+	{
+		$userId = $this->getResourceId($request);
+		if ($userId === null)
+		{
+			return $this->error('Invalid user ID.');
+		}
+
+		/**
+		 * Initialize the service if not provided.
+		 */
+		if ($imageService === null)
+		{
+			$imageService = new UserImageService();
+		}
+
+		/**
+		 * Get the uploaded file.
+		 */
+		$uploadFile = $this->file('image');
+
+		/**
+		 * Use the service to handle the complete upload workflow.
+		 */
+		$result = $imageService->uploadUserImage($uploadFile, $userId);
+
+		if ($result['success'])
+		{
+			return $this->response($result['data']);
+		}
+		else
+		{
+			return $this->error($result['error']);
+		}
 	}
 }
