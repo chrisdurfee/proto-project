@@ -1,7 +1,8 @@
 import { UseParent } from "@base-framework/atoms";
-import { Panel, UnderlinedTab } from "@base-framework/ui/organisms";
+import { UnderlinedTab } from "@base-framework/ui/organisms";
 import FullTablePage from "@components/pages/types/full/table/full-table-page.js";
 import FollowerPage from "./followers/follower-page.js";
+import FollowingPage from "./following/following-page.js";
 import { PageHeader } from "./page-header.js";
 
 /**
@@ -24,8 +25,14 @@ const TabContent = () => (
 				{
 					label: 'Following',
 					href: `users/${route.userId}/connections/following`,
-					component: new Panel({ class: 'p-8' }, 'Stories content'),
+					component: () => FollowingPage(),
 					uri: `users/:userId/connections/following`,
+				},
+				{
+					label: 'Blocked',
+					href: `users/${route.userId}/connections/blocked`,
+					//component: () => BlockedPage(),
+					uri: `users/:userId/connections/blocked`,
 				}
 			]
 		})
