@@ -102,6 +102,29 @@ const HeaderRow = () => (
 );
 
 /**
+ * This will create an empty state for the user list.
+ * @returns {object}
+ */
+const UserListEmpty = () => EmptyState(
+	{
+		title: 'Feels Empty!',
+		description: 'No users have been found. Maybe create a new user.',
+		icon: Icons.user.minus
+	}, [
+	Button({
+		variant: 'withIcon',
+		icon: Icons.user.plus,
+		click: (e, parent) => UserModal({
+			onClose: (data) =>
+			{
+				// @ts-ignore
+				parent.list.refresh();
+			}
+		})
+	}, 'Add User')
+]);
+
+/**
  * This will create a user table.
  *
 * @param {object} data
@@ -114,20 +137,9 @@ export const UserTable = (data) => (
 		customHeader: HeaderRow(),
 		rows: [],
 		limit: 50,
+		skeleton: true,
 		rowItem: UserRow,
 		key: 'id',
-		emptyState: () => EmptyState({
-			title: 'Feels Empty!',
-			description: 'No users have been found. Maybe create a new user.',
-			icon: Icons.user.minus
-		}, [
-			Button({ variant: 'withIcon', icon: Icons.user.plus, click: (e, parent) => UserModal({
-				onClose: (data) =>
-				{
-					// @ts-ignore
-					parent.list.refresh();
-				}
-			}) }, 'Add User')
-		])
+		emptyState: UserListEmpty
 	})
 );

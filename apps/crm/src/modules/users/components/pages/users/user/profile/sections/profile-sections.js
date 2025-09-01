@@ -46,22 +46,22 @@ export const OrgDetailsSection = () =>
 					P({ class: "font-medium text-foreground" }, Format.date("[[user.dob]]"))
 				]),
 
-				Div({ class: "flex flex-col gap-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Gender"),
 					P({ class: "font-medium text-foreground capitalize" }, "[[user.gender]]")
 				]),
 
-				Div({ class: "flex flex-col gap-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Allows Email"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.allowEmail]]"))
 				]),
 
-				Div({ class: "flex flex-col gap-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Allows Sms"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.allowSms]]"))
 				]),
 
-				Div({ class: "flex flex-col gap-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Allows Push"),
 					P({ class: "font-medium text-foreground" }, Format.yesno("[[user.allowPush]]"))
 				])
@@ -78,7 +78,7 @@ export const LocaleDetailsSection = () =>
 	ProfileSection({ title: "Locale Details" }, [
 		Card({ class: "p-6", margin: "m-0", hover: true }, [
 			Div({ class: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" }, [
-				Div({ class: "flex flex-col gap-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Address"),
 					P({ class: "font-medium text-foreground capitalize truncate" }, "[[user.street1]] [[user.street2]]")
 				]),
@@ -99,7 +99,7 @@ export const LocaleDetailsSection = () =>
 				]),
 
 				// Language
-				Div({ class: "flex flex-col gap-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Language"),
 					P({ class: "font-medium text-foreground capitalize" }, "[[user.language]]")
 				]),
@@ -192,7 +192,7 @@ export const PersonalFollowSection = () =>
 				]),
 
 				// Following
-				Div({ class: "flex flex-col gap-1" }, [
+				Div({ class: "flex flex-col gap-y-1" }, [
 					P({ class: "text-sm text-muted-foreground" }, "Following"),
 					P({ class: "font-medium text-foreground" }, Format.number("[[user.followingCount]]"))
 				])

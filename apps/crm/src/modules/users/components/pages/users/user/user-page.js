@@ -1,5 +1,6 @@
-import { Div, UseParent } from "@base-framework/atoms";
+import { Div, OnRoute } from "@base-framework/atoms";
 import { Overlay } from "@base-framework/ui/organisms";
+import { FullScreenOverlay } from "@components/organisms/overlays/full/full-screen-overlay.js";
 import { UserModel } from "../models/user-model.js";
 import { ContentSection } from "./content-section.js";
 import { Sidebar } from "./sidebar.js";
@@ -28,11 +29,9 @@ const Props =
 	},
 
 	/**
-	 * Loads the user data after the component is set up.
-	 *
-	 * @returns {void}
+	 * Updates the user data by fetching the latest information.
 	 */
-	afterSetup()
+	updateUser()
 	{
 		const data = this.context.data;
 		data.id = this.route.userId;
@@ -70,18 +69,17 @@ const Props =
  * @returns {Overlay}
  */
 export const UserPage = () => (
-	new Overlay(Props, [
-		Div({ class: "flex flex-auto flex-col w-full" }, [
-			Div({ class: "flex flex-auto flex-col gap-6 w-full" }, [
-				Div({ class: 'flex flex-auto flex-col pt-0 sm:pt-2 lg:pt-0 lg:flex-row h-full' }, [
-					UseParent(({ route }) => ([
-						Sidebar({ userId: route.userId }),
-						ContentSection({ userId: route.userId })
-					]))
-				])
+	FullScreenOverlay(Props, (parent) => ([
+		OnRoute('userId', (userId) =>
+		{
+			parent.updateUser();
+
+			return Div({ class: 'flex flex-auto flex-col lg:flex-row' }, [
+				Sidebar({ userId: userId }),
+				ContentSection({ userId: userId })
 			])
-		])
-	])
+		})
+	]))
 );
 
 export default UserPage;

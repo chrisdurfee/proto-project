@@ -1,5 +1,5 @@
-import { Div } from "@base-framework/atoms";
 import { SidebarMenuPage } from "@base-framework/ui/pages";
+import FullSidebarMenuPage from "@pages/types/full/full-sidebar-menu-page.js";
 import { IamSwitch } from "./iam-switch.js";
 import { Links } from "./links.js";
 
@@ -9,7 +9,7 @@ import { Links } from "./links.js";
  * @constant
  * @type {string}
  */
-const basePath = 'iam';
+const BASE_PATH = 'iam';
 
 /**
  * IamPage
@@ -19,7 +19,7 @@ const basePath = 'iam';
  * @returns {SidebarMenuPage}
  */
 export const IamPage = () => (
-	new SidebarMenuPage({
+	FullSidebarMenuPage({
 		/**
 		 * @member {string}	title
 		 */
@@ -28,30 +28,17 @@ export const IamPage = () => (
 		/**
 		 * @member {string}	basePath
 		 */
-		basePath,
-
-		/**
-		 * This will add the body of the page.
-		 *
-		 * @returns {object}
-		 */
-		addBody()
-		{
-			return Div({
-				class: 'flex flex-auto flex-col',
-				switch: this.addSwitch()
-			});
-		},
+		basePath: BASE_PATH,
 
 		/**
 		 * @member {Array<object>} switch
 		 */
-		switch: IamSwitch(basePath),
+		switch: IamSwitch(BASE_PATH),
 
 		/**
 		 * @member {Array<object>} links
 		 */
-		links: Links(basePath)
+		links: Links(BASE_PATH)
 	})
 );
 

@@ -13,7 +13,7 @@ import UserHeader from "./user-header.js";
  * @returns {object}
  */
 export const ProfilePage = () => (
-	new Page({ class: 'flex flex-auto flex-col' }, [
+	new Page({ class: 'flex flex-auto flex-col p-4 lg:p-6' }, [
 		On("loaded", (loaded, ele, { context }) =>
 		{
 			if (!loaded)

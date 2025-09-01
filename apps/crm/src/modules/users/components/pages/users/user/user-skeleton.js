@@ -43,7 +43,7 @@ export const UserSkeleton = () =>
 	// Work Progress section
 	const workProgressSectionSkeleton = Div({ class: "flex flex-col gap-y-4" }, [
 		Skeleton({ width: "w-32", height: "h-6", class: "rounded-md" }),
-		Div({ class: "flex flex-col pl-6 gap-y-6" },
+		Div({ class: "pl-6 flex flex-col gap-y-6" },
 			[0, 1].map(() =>
 				Div({ class: "flex items-center gap-x-4" }, [
 					Skeleton({ width: "w-5", height: "h-5", class: "rounded-full" }),
@@ -113,7 +113,7 @@ export const UserSkeleton = () =>
 	]);
 
 	// full layout
-	return Div({ class: "flex flex-col p-6 pt-0 2xl:mx-auto w-full 2xl:max-w-[1600px] gap-y-8" }, [
+	return Div({ class: "p-6 pt-0 2xl:mx-auto w-full 2xl:max-w-[1600px] flex flex-col gap-y-8" }, [
 		Skeleton({ width: "w-20", height: "h-6", class: "rounded-md" }),
 		Div({ class: "flex flex-col lg:flex-row lg:gap-x-8" }, [
 			sidebarSkeleton,
