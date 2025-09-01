@@ -1,3 +1,4 @@
+import { Div, OnRoute } from "@base-framework/atoms";
 import { Overlay } from "@base-framework/ui/organisms";
 import { FullScreenOverlay } from "@components/organisms/overlays/full/full-screen-overlay.js";
 import { UserModel } from "../models/user-model.js";
@@ -71,8 +72,12 @@ const Props =
  */
 export const UserPage = () => (
 	FullScreenOverlay(Props, ({ route }) => ([
-		Sidebar({ userId: route.userId }),
-		ContentSection({ userId: route.userId })
+		OnRoute('userId', (userId) => (
+			Div({ class: 'flex flex-auto flex-col lg:flex-row' }, [
+				Sidebar({ userId: userId }),
+				ContentSection({ userId: userId })
+			])
+		))
 	]))
 );
 
