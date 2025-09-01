@@ -136,6 +136,23 @@ class UserPolicy extends Policy
 	}
 
 	/**
+	 * Determines if the user can accept terms.
+	 *
+	 * @param Request $request The request containing the user ID.
+	 * @return bool True if the user can accept terms, otherwise false.
+	 */
+	public function acceptTerms(Request $request): bool
+	{
+		$userId = $this->getResourceId($request);
+		if ($userId === null)
+		{
+			return false;
+		}
+
+		return $this->ownsResource($userId);
+	}
+
+	/**
 	 * Determines if the user can unsubscribe.
 	 *
 	 * @param Request $request The request containing the user ID.

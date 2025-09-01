@@ -181,6 +181,31 @@ class UserController extends ResourceController
 	}
 
 	/**
+	 * This will mark that the user has accepted the terms.
+	 *
+	 * @param Request $request
+	 * @return object
+	 */
+	public function acceptTerms(Request $request): object
+	{
+		$userId = $this->getResourceId($request);
+		if ($userId === null)
+		{
+			return $this->error('Invalid user ID.');
+		}
+
+		/**
+		 * This will add the accepted terms date to the user.
+		 */
+		$response = parent::update((object)[
+			'id' => $userId,
+			'acceptedTermsAt' => date('Y-m-d H:i:s')
+		]);
+
+		return $response;
+	}
+
+	/**
 	 * This will unsubscribe the user.
 	 *
 	 * @param Request $request

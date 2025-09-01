@@ -16,9 +16,10 @@ router()
 	->patch('user/:id/status', [UserController::class, 'updateStatus'])
 
 	/**
-	 * Email routes
+	 * Email and Terms routes
 	 */
 	->patch('user/:id/verify-email', [UserController::class, 'verifyEmail'])
+	->patch('user/:id/accept-terms', [UserController::class, 'acceptTerms'])
 	->all('user/unsubscribe', [UserController::class, 'unsubscribe'])
 
 	/**
