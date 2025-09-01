@@ -206,6 +206,37 @@ class UserController extends ResourceController
 	}
 
 	/**
+	 * This will update the user's marketing preference.
+	 *
+	 * @param Request $request
+	 * @return object
+	 */
+	public function allowMarketing(Request $request): object
+	{
+		$userId = $this->getResourceId($request);
+		if ($userId === null)
+		{
+			return $this->error('Invalid user ID.');
+		}
+
+		$marketingOptIn = $request->getInt('marketingOptIn');
+		if ($marketingOptIn === null)
+		{
+			return $this->error('Marketing preference is required.');
+		}
+
+		/**
+		 * This will update the user's marketing preference.
+		 */
+		$response = parent::update((object)[
+			'id' => $userId,
+			'marketingOptIn' => $marketingOptIn
+		]);
+
+		return $response;
+	}
+
+	/**
 	 * This will unsubscribe the user.
 	 *
 	 * @param Request $request
