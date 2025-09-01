@@ -80,7 +80,22 @@ export const ProfileSettings = () => (
                     }, [
                         new LogoUploader({
                             src: "",
-                            onChange: (file, parent) => console.log("Avatar file:", file, parent)
+                            onChange: (file, parent) =>
+                            {
+                                parent.parent.data.xhr.uploadImage(file, {}, (err, res) =>
+                                {
+                                    if (err)
+                                    {
+                                        app.notify({
+                                            type: "destructive",
+                                            title: "Upload Error",
+                                            description: "There was an error uploading your profile image.",
+                                            icon: Icons.shield
+                                        });
+                                        return;
+                                    }
+                                });
+                            }
                         })
                     ])
                 ]),
