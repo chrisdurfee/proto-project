@@ -6,4 +6,5 @@
 import "./home/module.js";
 import "./users/module.js";
 import "./iam/module.js";
+import "./settings/module.js";
 
