@@ -38,6 +38,7 @@ export const Sidebar = ({ userId }) => (
 		options: [
 			{ label: 'Profile', href: `users/${userId}`, icon: Icons.identification, exact: true },
 			{ label: 'Login Times', href: `users/${userId}/login-times`, icon: Icons.calendar.default },
+			{ label: 'Authorized Devices', href: `users/${userId}/authed-devices`, icon: Icons.device.mobile },
 			{ label: 'Connections', href: `users/${userId}/connections`, icon: Icons.user.group }
 		]
 	})

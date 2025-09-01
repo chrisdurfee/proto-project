@@ -23,6 +23,7 @@ const ContentPage = () => (
 		switch: [
 			Page(`/users/:userId`, () => import('./profile/profile-page.js')),
 			Page(`/users/:userId/login-times`, () => import('./login-times/login-time-page.js')),
+			Page(`/users/:userId/authed-devices`, () => import('./authed-devices/authed-devices-page.js')),
 			Page(`/users/:userId/connections/:page?*`, () => import('./connections/connection-page.js'))
 		]
 	})
