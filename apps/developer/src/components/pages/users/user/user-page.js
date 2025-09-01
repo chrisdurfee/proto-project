@@ -1,4 +1,4 @@
-import { OnRoute } from "@base-framework/atoms";
+import { Div, OnRoute } from "@base-framework/atoms";
 import { Overlay } from "@base-framework/ui/organisms";
 import { FullScreenOverlay } from "@components/organisms/overlays/full/full-screen-overlay.js";
 import { UserModel } from "../models/user-model.js";
@@ -74,10 +74,10 @@ export const UserPage = () => (
 		{
 			parent.updateUser();
 
-			return [
+			return Div({ class: 'flex flex-auto flex-col lg:flex-row' }, [
 				Sidebar({ userId: userId }),
 				ContentSection({ userId: userId })
-			];
+			])
 		})
 	]))
 );
