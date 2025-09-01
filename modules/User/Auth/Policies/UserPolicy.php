@@ -246,4 +246,23 @@ class UserPolicy extends Policy
 	{
 		return $this->canAccess('users.view');
 	}
+
+	/**
+	 * Uploads and sets the user's profile image.
+	 *
+	 * @param Request $request The request object.
+	 * @return bool True if the user can upload the image, otherwise false.
+	 */
+	public function uploadImage(
+		Request $request
+	): bool
+	{
+		$userId = $this->getResourceId($request);
+		if ($userId === null)
+		{
+			return false;
+		}
+
+		return $this->canEdit((object) ['id' => $userId]);
+	}
 }
