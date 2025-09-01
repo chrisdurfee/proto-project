@@ -75,6 +75,6 @@ export const AuthedDevicesTable = (data) =>
 		emptyState: () => EmptyState({
 			title: 'No Authorized Devices',
 			description: 'No devices have been authorized for this user.',
-			icon: Icons.shield.check
+			icon: Icons.device.mobile
 		})
 	});
