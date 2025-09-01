@@ -1,6 +1,7 @@
 import { UseParent } from "@base-framework/atoms";
 import { UnderlinedTab } from "@base-framework/ui/organisms";
 import FullTablePage from "@components/pages/types/full/table/full-table-page.js";
+import BlockedPage from "./blocked/blocked-page.js";
 import FollowerPage from "./followers/follower-page.js";
 import FollowingPage from "./following/following-page.js";
 import { PageHeader } from "./page-header.js";
@@ -31,7 +32,7 @@ const TabContent = () => (
 				{
 					label: 'Blocked',
 					href: `users/${route.userId}/connections/blocked`,
-					//component: () => BlockedPage(),
+					component: () => BlockedPage(),
 					uri: `users/:userId/connections/blocked`,
 				}
 			]

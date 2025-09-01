@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Controllers;
 
-use Modules\User\Auth\Policies\FollowerPolicy;
+use Modules\User\Auth\Policies\BlockUserPolicy;
 use Proto\Controllers\ApiController as Controller;
 use Modules\User\Services\User\BlockUserService;
 use Proto\Http\Router\Request;
@@ -17,7 +17,7 @@ class BlockUserController extends Controller
 	/**
 	 * @var string|null $policy
 	 */
-	protected ?string $policy = FollowerPolicy::class;
+	protected ?string $policy = BlockUserPolicy::class;
 
 	/**
 	 * BlockUserController constructor.
