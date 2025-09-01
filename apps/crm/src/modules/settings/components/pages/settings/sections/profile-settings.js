@@ -1,5 +1,5 @@
 import { Div } from "@base-framework/atoms";
-import { DatePicker } from "@base-framework/ui";
+import { DatePicker, TelInput } from "@base-framework/ui";
 import { Button, Input, NumberInput, Select, Textarea } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import {
@@ -170,7 +170,7 @@ export const ProfileSettings = () => (
                         label: "",
                         description: "Your mobile number."
                     }, [
-                        Input({ placeholder: "e.g. +1234567890", bind: 'mobile' })
+                        TelInput({ bind: 'mobile' })
                     ])
                 ]),
                 FormCardGroup({ label: "Mailing Address", description: "", border: true }, [
