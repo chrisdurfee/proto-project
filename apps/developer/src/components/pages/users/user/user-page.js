@@ -29,11 +29,9 @@ const Props =
 	},
 
 	/**
-	 * Loads the user data after the component is set up.
-	 *
-	 * @returns {void}
+	 * Updates the user data by fetching the latest information.
 	 */
-	afterSetup()
+	updateUser()
 	{
 		const data = this.context.data;
 		data.id = this.route.userId;
@@ -71,13 +69,16 @@ const Props =
  * @returns {Overlay}
  */
 export const UserPage = () => (
-	FullScreenOverlay(Props, ({ route }) => ([
-		OnRoute('userId', (userId) => (
-			Div({ class: 'flex flex-auto flex-col lg:flex-row' }, [
+	FullScreenOverlay(Props, (parent) => ([
+		OnRoute('userId', (userId) =>
+		{
+			parent.updateUser();
+
+			return Div({ class: 'flex flex-auto flex-col lg:flex-row' }, [
 				Sidebar({ userId: userId }),
 				ContentSection({ userId: userId })
 			])
-		))
+		})
 	]))
 );
 
