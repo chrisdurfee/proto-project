@@ -78,7 +78,7 @@ export const ProfileSettings = () => (
                         description: "Your avatar, shown on your profile."
                     }, [
                         new LogoUploader({
-                            src: "/public/files/user/profile/[[image]]",
+                            src: "/files/users/profile/[[image]]",
                             onChange: (file, parent) =>
                             {
                                 parent.parent.data.xhr.uploadImage(file, {}, (err, res) =>
