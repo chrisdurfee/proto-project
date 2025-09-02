@@ -136,6 +136,8 @@ volumes:
     driver: local
   redis_data:
     driver: local
+  public_files:
+    driver: local
 
 networks:
   proto-network:
