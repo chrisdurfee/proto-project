@@ -394,9 +394,9 @@ class UserController extends ResourceController
 		$result = $imageService->uploadUserImage($uploadFile, $userId);
 		if ($result->success)
 		{
-			return $this->response($result->data);
+			return $this->response($result);
 		}
 
-		return $this->error($result->error);
+		return $this->error($result->message);
 	}
 }

@@ -105,7 +105,7 @@ class UserImageService
 		/**
 		 * Update user record.
 		 */
-		$update = $this->updateUserImage($userId, $storage->data->filename);
+		$update = $this->updateUserImage($userId, $storage->filename);
 		if (!$update->success)
 		{
 			return $update; // Return the update error response
@@ -115,8 +115,8 @@ class UserImageService
 		 * Return success with data.
 		 */
 		return Response::success([
-			'image' => $storage->data->filename,
-			'path' => $storage->data->path,
+			'image' => $storage->filename,
+			'path' => $storage->path,
 			'message' => 'Image uploaded successfully.'
 		]);
 	}
