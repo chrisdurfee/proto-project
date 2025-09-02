@@ -293,7 +293,7 @@ class UserController extends ResourceController
 	public function updateCredentials(
 		Request $request,
 		PasswordUpdateService $service = new PasswordUpdateService()
-		): object
+	): object
 	{
 		$userId = $this->getResourceId($request);
 		if (!isset($userId))
@@ -392,13 +392,11 @@ class UserController extends ResourceController
 		 * Use the service to handle the complete upload workflow.
 		 */
 		$result = $imageService->uploadUserImage($uploadFile, $userId);
-		if ($result['success'])
+		if ($result->success)
 		{
-			return $this->response($result['data']);
+			return $this->response($result->data);
 		}
-		else
-		{
-			return $this->error($result['error']);
-		}
+
+		return $this->error($result->error);
 	}
 }

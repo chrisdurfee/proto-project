@@ -19,7 +19,34 @@ class Policy extends BasePolicy
 	 */
 	protected function isAdmin(): bool
 	{
-		return auth()->role->hasRole('admin');
+		return $this->hasRole('admin');
+	}
+
+	/**
+	 * Checks if the user has a specific role.
+	 *
+	 * @param string $roleSlug
+	 * @return bool
+	 */
+	protected function hasRole(string $roleSlug): bool
+	{
+		return auth()->role->hasRole($roleSlug);
+	}
+
+	/**
+	 * Helper method to check either "admin" role
+	 * or a specific permission slug.
+	 *
+	 * @param string $permissionSlug The permission slug to check.
+	 * @return bool True if the user has the permission, otherwise false.
+	 */
+	protected function hasPermission(string $permissionSlug): bool
+	{
+		if ($this->isAdmin())
+		{
+			return true;
+		}
+		return auth()->permission->hasPermission($permissionSlug);
 	}
 
     /**
@@ -31,11 +58,7 @@ class Policy extends BasePolicy
 	 */
 	protected function canAccess(string $permissionSlug): bool
 	{
-		if ($this->isAdmin())
-		{
-			return true;
-		}
-		return auth()->permission->hasPermission($permissionSlug);
+		return $this->hasPermission($permissionSlug);
 	}
 
 	/**
