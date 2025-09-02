@@ -3,6 +3,7 @@ namespace Modules\User\Services\User;
 
 use Modules\User\Models\User;
 use Proto\Controllers\Response;
+use Proto\Http\UploadFile;
 
 /**
  * UserImageService
@@ -13,15 +14,14 @@ use Proto\Controllers\Response;
  */
 class UserImageService
 {
-
 	/**
 	 * Stores the uploaded image file.
 	 *
-	 * @param object $uploadFile The uploaded file object.
+	 * @param UploadFile $uploadFile The uploaded file object.
 	 * @param int $userId The user ID.
 	 * @return object Returns Response object with success/error data
 	 */
-	public function storeImage(object $uploadFile, int $userId): object
+	public function storeImage(UploadFile $uploadFile, int $userId): object
 	{
 		try
         {
@@ -87,11 +87,11 @@ class UserImageService
 	/**
 	 * Uploads and processes a user image (complete workflow).
 	 *
-	 * @param object|null $uploadFile The uploaded file object.
+	 * @param UploadFile|null $uploadFile The uploaded file object.
 	 * @param int $userId The user ID.
 	 * @return object Returns Response object with success/error data
 	 */
-	public function uploadUserImage(?object $uploadFile, int $userId): object
+	public function uploadUserImage(?UploadFile $uploadFile, int $userId): object
 	{
 		/**
 		 * Store the image (validation is handled at controller level).
@@ -125,11 +125,11 @@ class UserImageService
 	 * Generates a filename for the stored image.
 	 *
 	 * @param string $storedFileName The stored file name from Vault.
-	 * @param object $uploadFile The uploaded file object.
+	 * @param UploadFile $uploadFile The uploaded file object.
 	 * @param int $userId The user ID.
 	 * @return string The generated filename.
 	 */
-	private function generateFileName(string $storedFileName, object $uploadFile, int $userId): string
+	private function generateFileName(string $storedFileName, UploadFile $uploadFile, int $userId): string
 	{
 		if (empty($storedFileName))
 		{
