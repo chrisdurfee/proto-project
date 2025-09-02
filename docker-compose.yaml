@@ -66,6 +66,9 @@ services:
       - .:/var/www/html
       - ./infrastructure/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
       - ./infrastructure/docker/apache-mpm.conf:/etc/apache2/conf-available/mpm-tuning.conf:ro
+      # Persist/writable uploads
+      - public_files:/var/www/html/public/files:rw
+      - common_files:/var/www/html/common/files:rw
     depends_on:
       - mariadb
       - redis
@@ -137,6 +140,8 @@ volumes:
   redis_data:
     driver: local
   public_files:
+    driver: local
+  common_files:
     driver: local
 
 networks:

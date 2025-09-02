@@ -14,8 +14,8 @@ services:
   web:
     environment:
       - APP_ENV=production
-      - CORS_ENABLED=false
-      - AUTO_MIGRATE=false
+      - CORS_ENABLED=true
+      - AUTO_MIGRATE=true
     # Enable security hardening for production
     read_only: true
     tmpfs:
@@ -30,6 +30,15 @@ services:
       - SETUID
     security_opt:
       - no-new-privileges:true
+    # Re-state volumes because compose replaces arrays on override.
+    volumes:
+      # Code can be RO in prod (optional). If you prefer, leave as :rw.
+      - .:/var/www/html:ro
+      - ./infrastructure/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+      - ./infrastructure/docker/apache-mpm.conf:/etc/apache2/conf-available/mpm-tuning.conf:ro
+      # Writable uploads even with read_only root FS
+      - public_files:/var/www/html/public/files:rw
+      - common_files:/var/www/html/common/files:rw
     # Resource limits for production
     deploy:
       resources:

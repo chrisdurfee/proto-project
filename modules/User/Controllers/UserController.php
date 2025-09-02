@@ -382,7 +382,7 @@ class UserController extends ResourceController
 		/**
 		 * Get the uploaded file.
 		 */
-		$uploadFile = $request->file('image');
+		$uploadFile = $files['image'] ?? null;
 		if ($uploadFile === null)
 		{
 			return $this->error('No image file provided.');
