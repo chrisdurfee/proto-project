@@ -372,6 +372,14 @@ class UserController extends ResourceController
 		}
 
 		/**
+		 * This will validate the uploaded files.
+		 */
+		$files = $request->files();
+		$this->validateRules($files, [
+			'image' => 'image:30000|required|mime:jpeg,jpg,png,gif'
+		]);
+
+		/**
 		 * Get the uploaded file.
 		 */
 		$uploadFile = $request->file('image');
