@@ -6,8 +6,7 @@ import {
     FormCard,
     FormCardGroup,
     FormField,
-    LogoUploader,
-    Toggle
+    LogoUploader
 } from "@base-framework/ui/molecules";
 import { Page } from "@base-framework/ui/pages";
 import { SettingsSection } from "../atoms/settings-section.js";
@@ -314,21 +313,6 @@ export const ProfileSettings = () => (
                                 { value: "jpy", label: "Japanese Yen" },
                                 { value: "aud", label: "Australian Dollar" }
                             ]
-                        })
-                    ])
-                ])
-            ]),
-
-            // Preferences
-            FormCard({ title: "Preferences" }, [
-                FormCardGroup({ label: "Marketing Opt-In", description: "", border: true }, [
-                    new FormField({
-                        name: "marketingOptIn",
-                        label: "",
-                        description: "Receive marketing emails and updates."
-                    }, [
-                        new Toggle({
-                            bind: 'marketingOptIn'
                         })
                     ])
                 ])

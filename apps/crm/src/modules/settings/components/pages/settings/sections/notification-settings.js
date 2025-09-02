@@ -1,8 +1,16 @@
 import { Div, H4, P } from "@base-framework/atoms";
 import { Button } from "@base-framework/ui/atoms";
-import { FormCard, FormCardContent, FormCardGroup, Toggle } from "@base-framework/ui/molecules";
+import { FormCard, FormCardContent, FormCardGroup, FormField, Toggle } from "@base-framework/ui/molecules";
 import { Page } from "@base-framework/ui/pages";
 import { SettingsSection } from "../atoms/settings-section.js";
+
+/**
+ * @type {object}
+ */
+const Props =
+{
+    data: app.data.user
+};
 
 /**
  * NotificationSettings
@@ -12,7 +20,7 @@ import { SettingsSection } from "../atoms/settings-section.js";
  * @returns {object}
  */
 export const NotificationSettings = () => (
-    new Page([
+    new Page(Props, [
         SettingsSection({
             title: 'Notifications',
             description: 'Manage your notification preferences.',
@@ -34,8 +42,7 @@ export const NotificationSettings = () => (
                                 P({ class: 'text-sm text-muted-foreground' }, 'Receive email notifications for important updates.')
                             ]),
                             new Toggle({
-                                active: true,
-                                change: (active) => console.log("Email Notifications:", active)
+                                bind: 'allowEmail',
                             })
                         ]),
 
@@ -46,8 +53,7 @@ export const NotificationSettings = () => (
                                 P({ class: 'text-sm text-muted-foreground' }, 'Receive push notifications for important updates.')
                             ]),
                             new Toggle({
-                                active: false,
-                                change: (active) => console.log("Push Notifications:", active)
+                                bind: 'allowPush',
                             })
                         ]),
 
@@ -58,23 +64,34 @@ export const NotificationSettings = () => (
                                 P({ class: 'text-sm text-muted-foreground' }, 'Receive SMS notifications for important updates.')
                             ]),
                             new Toggle({
-                                active: true,
-                                change: (active) => console.log("SMS Notifications:", active)
+                                bind: 'allowSms',
                             })
                         ])
-
-                    ])
-                ]),
-
-                // Save button
-                FormCardContent({ border: true }, [
-                    Div({ class: 'mt-4 flex justify-end' }, [
-                        Button({ variant: 'primary' }, 'Save Preferences')
                     ])
                 ])
+            ]),
 
+            // Preferences
+            FormCard({ title: "Preferences" }, [
+                FormCardGroup({ label: "Marketing Opt-In", description: "", border: true }, [
+                    new FormField({
+                        name: "marketingOptIn",
+                        label: "",
+                        description: "Receive marketing emails and updates."
+                    }, [
+                        new Toggle({
+                            bind: 'marketingOptIn'
+                        })
+                    ])
+                ])
+            ]),
+
+            // Save button
+            FormCardContent([
+                Div({ class: 'mt-4 flex justify-end' }, [
+                    Button({ variant: 'primary' }, 'Save Preferences')
+                ])
             ])
-
         ])
     ])
 );
