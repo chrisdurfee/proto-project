@@ -38,7 +38,7 @@ class UserImageService
 		/**
 		 * Validate file type based on extension.
 		 */
-		$fileName = $uploadFile->getName();
+		$fileName = $uploadFile->getOriginalName();
 		$fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 		if (!in_array($fileExtension, $this->allowedExtensions))
 		{
@@ -86,14 +86,15 @@ class UserImageService
 			}
 
 			/**
-			 * Generate filename.
+			 * Get the stored filename and generate display filename.
 			 */
-			$storedFileName = $this->generateFileName($storedPath, $uploadFile, $userId);
+			$storedFileName = $uploadFile->getNewName();
+			$displayFileName = $this->generateFileName($storedFileName, $uploadFile, $userId);
 
 			return [
 				'success' => true,
-				'path' => $storedPath,
-				'filename' => $storedFileName,
+				'path' => $storedFileName, // This is the actual stored filename that can be used to retrieve the file
+				'filename' => $displayFileName,
 				'error' => null
 			];
 		}
@@ -193,18 +194,17 @@ class UserImageService
 	/**
 	 * Generates a filename for the stored image.
 	 *
-	 * @param string $storedPath The stored file path.
+	 * @param string $storedFileName The stored file name from Vault.
 	 * @param object $uploadFile The uploaded file object.
 	 * @param int $userId The user ID.
 	 * @return string The generated filename.
 	 */
-	private function generateFileName(string $storedPath, object $uploadFile, int $userId): string
+	private function generateFileName(string $storedFileName, object $uploadFile, int $userId): string
 	{
-		$storedFileName = basename($storedPath);
 		if (empty($storedFileName))
 		{
 			// Generate a unique filename if not provided
-			$fileName = $uploadFile->getName();
+			$fileName = $uploadFile->getOriginalName();
 			$fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 			$storedFileName = 'user_' . $userId . '_' . time() . '.' . $fileExtension;
 		}

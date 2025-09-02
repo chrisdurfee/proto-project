@@ -16,6 +16,7 @@ error.log
 .phpunit.result.cache
 .env
 user-settings.txt
+common/files/
 
 # SSL Certificates and Private Keys (security)
 certs/

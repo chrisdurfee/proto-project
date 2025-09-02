@@ -102,9 +102,11 @@ class UserImageServiceTest extends TestCase
 	 */
 	private function createMockUploadFile(string $fileName, int $fileSize): object
 	{
-		$mockFile = $this->createMock(\stdClass::class);
+		$mockFile = $this->getMockBuilder(\stdClass::class)
+			->addMethods(['getOriginalName', 'getSize'])
+			->getMock();
 
-		$mockFile->method('getName')
+		$mockFile->method('getOriginalName')
 			->willReturn($fileName);
 
 		$mockFile->method('getSize')
