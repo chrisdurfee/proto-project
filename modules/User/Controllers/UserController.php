@@ -90,10 +90,7 @@ class UserController extends ResourceController
 	protected function restrictCredentials(object &$data): void
 	{
 		$fields = ['username', 'password'];
-		foreach ($fields as $field)
-		{
-			unset($data->$field);
-		}
+		$this->restrictFields($data, $fields);
 	}
 
 	/**
@@ -105,10 +102,7 @@ class UserController extends ResourceController
 	protected function restrictData(object &$data): void
 	{
 		$fields = ['emailVerifiedAt', 'acceptedTermsAt', 'trialMode', 'trialDaysLeft', 'followerCount', 'deletedAt'];
-		foreach ($fields as $field)
-		{
-			unset($data->$field);
-		}
+		$this->restrictFields($data, $fields);
 	}
 
 	/**
