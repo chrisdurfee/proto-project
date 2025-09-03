@@ -18,7 +18,7 @@ const UserAvatar = (row) => (
 	}, [
 		Div({ class: 'relative' }, [
 			Avatar({
-				src: row.image,
+				src: '/files/users/profile/' + row.image,
 				alt: row.username,
 				fallbackText: `${row.firstName} ${row.lastName}`
 			}),

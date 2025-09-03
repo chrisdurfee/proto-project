@@ -19,7 +19,7 @@ export const UserHeader = ({ user }) => (
 		Div({ class: 'flex flex-auto items-center justify-center mt-6' }, [
 			Div({ class: 'relative mt-6 flex-none' }, [
 				Avatar({
-					src: '[[user.image]]',
+					src: '/files/users/profile/[[user.image]]',
 					alt: '[[user.firstName]] [[user.lastName]]',
 					watcherFallback: '[[user.firstName]] [[user.lastName]]',
 					size: "4xl",

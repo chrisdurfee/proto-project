@@ -22,6 +22,24 @@ class UnsubscribeService
 	 */
 	public function updateNotificationPreferences(object $data): bool
 	{
+		$allowEmail = $data->allowEmail ?? null;
+		if (isset($allowEmail))
+		{
+			$data->allowEmail = (int)$allowEmail;
+		}
+
+		$allowSms = $data->allowSms ?? null;
+		if (isset($allowSms))
+		{
+			$data->allowSms = (int)$allowSms;
+		}
+
+		$allowPush = $data->allowPush ?? null;
+		if (isset($allowPush))
+		{
+			$data->allowPush = (int)$allowPush;
+		}
+
 		return NotificationPreference::put($data);
 	}
 
@@ -76,19 +94,19 @@ class UnsubscribeService
 		$allowEmail = $settings->allowEmail ?? 0;
 		if (isset($allowEmail))
 		{
-			$data->allowEmail = $allowEmail;
+			$data->allowEmail = (int)$allowEmail;
 		}
 
 		$allowSms = $settings->allowSms ?? null;
 		if (isset($allowSms))
 		{
-			$data->allowSms = $allowSms;
+			$data->allowSms = (int)$allowSms;
 		}
 
 		$allowPush = $settings->allowPush ?? null;
 		if (isset($allowPush))
 		{
-			$data->allowPush = $allowPush;
+			$data->allowPush = (int)$allowPush;
 		}
 
 		return $this->updateNotificationPreferences($data);
