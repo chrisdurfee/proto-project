@@ -33,6 +33,11 @@ export default defineConfig({
 				changeOrigin: true,
 				secure: false,
 				ws: true
+			},
+			'/files': {
+				target: apiTarget,
+				changeOrigin: true,
+				secure: false
 			}
 		}
 	},
