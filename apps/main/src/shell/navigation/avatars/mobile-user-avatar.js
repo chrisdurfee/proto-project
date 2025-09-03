@@ -14,7 +14,7 @@ export const MobileUserAvatar = Jot(() =>
 		A({ class: "relative", href: 'settings' }, [
 			Div({ class: "relative mx-2" }, [
 				Avatar({
-					src: '[[image]]',
+					src: '/files/users/profile/[[image]]',
 					alt: '[[name]]',
 					watcherFallback: '[[name]]',
 					size: "xs",
