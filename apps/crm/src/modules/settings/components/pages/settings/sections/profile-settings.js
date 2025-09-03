@@ -1,12 +1,11 @@
 import { Div } from "@base-framework/atoms";
-import { DatePicker, TelInput } from "@base-framework/ui";
+import { DatePicker, ImageUploader, TelInput } from "@base-framework/ui";
 import { Button, Input, NumberInput, Select, Textarea } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import {
 	FormCard,
 	FormCardGroup,
-	FormField,
-	LogoUploader
+	FormField
 } from "@base-framework/ui/molecules";
 import { Page } from "@base-framework/ui/pages";
 import { SettingsSection } from "../atoms/settings-section.js";
@@ -77,7 +76,7 @@ export const ProfileSettings = () => (
 						label: "",
 						description: "Your avatar, shown on your profile."
 					}, [
-						new LogoUploader({
+						new ImageUploader({
 							src: "/files/users/profile/[[image]]",
 							onChange: (file, parent) =>
 							{
