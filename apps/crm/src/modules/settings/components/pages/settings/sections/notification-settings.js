@@ -1,5 +1,6 @@
 import { Div, H4, P } from "@base-framework/atoms";
 import { Button } from "@base-framework/ui/atoms";
+import { Icons } from "@base-framework/ui/icons";
 import { FormCard, FormCardContent, FormCardGroup, FormField, Toggle } from "@base-framework/ui/molecules";
 import { Page } from "@base-framework/ui/pages";
 import { SettingsSection } from "../atoms/settings-section.js";
@@ -25,7 +26,29 @@ export const NotificationSettings = () => (
             title: 'Notifications',
             description: 'Manage your notification preferences.',
             class: 'max-w-5xl mx-auto',
-            submit: (data) => console.log("Notification Settings:", data)
+            submit: (data, parent) =>
+            {
+                parent.data.xhr.update('', (response) =>
+				{
+					if (!response || response.success === false)
+					{
+						app.notify({
+							type: "destructive",
+							title: "Error",
+							description: "An error occurred while updating the profile.",
+							icon: Icons.shield
+						});
+						return;
+					}
+
+					app.notify({
+						type: "success",
+						title: "Profile Updated",
+						description: "The profile has been updated.",
+						icon: Icons.check
+					});
+				});
+            }
         }, [
 
             // Notification toggles wrapped in a FormCard
@@ -89,7 +112,7 @@ export const NotificationSettings = () => (
             // Save button
             FormCardContent([
                 Div({ class: 'mt-4 flex justify-end' }, [
-                    Button({ variant: 'primary' }, 'Save Preferences')
+                    Button({ variant: 'primary', type: 'submit' }, 'Save Preferences')
                 ])
             ])
         ])

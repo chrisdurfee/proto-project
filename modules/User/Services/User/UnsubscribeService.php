@@ -18,9 +18,9 @@ class UnsubscribeService
 	 * Update the user's notification preferences.
 	 *
 	 * @param object $data
-	 * @return object
+	 * @return bool
 	 */
-	protected function updateNotificationPreferences(object $data): bool
+	public function updateNotificationPreferences(object $data): bool
 	{
 		return NotificationPreference::put($data);
 	}

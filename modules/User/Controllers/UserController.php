@@ -119,7 +119,9 @@ class UserController extends ResourceController
 	 * @param object $data The data to set up the model with.
 	 * @return object The response object.
 	 */
-	protected function updateItem(object $data): object
+	protected function updateItem(
+		object $data
+	): object
 	{
 		if (!auth()->permission->hasPermission('user.edit'))
 		{
@@ -136,7 +138,33 @@ class UserController extends ResourceController
 		$this->restrictCredentials($data);
 		$this->restrictData($data);
 
+		/**
+		 * This will update the user's notification preferences.
+		 */
+		$this->updateNotifications($data);
+
 		return parent::updateItem($data);
+	}
+
+	/**
+	 * Updates the user's notification preferences.
+	 *
+	 * @param object $data
+	 * @return bool
+	 */
+	protected function updateNotifications(object $data): bool
+	{
+		/**
+		 * This will update the user's notification preferences.
+		 */
+		$settings = (object)[
+			'userId' => $data->id,
+			'allowEmail' => $data->allowEmail,
+			'allowSms' => $data->allowSms,
+			'allowPush' => $data->allowPush
+		];
+		$service = new UnsubscribeService();
+		return $service->updateNotificationPreferences($settings);
 	}
 
 	/**
