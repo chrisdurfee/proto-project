@@ -35,7 +35,7 @@ export const NotificationSettings = () => (
 						app.notify({
 							type: "destructive",
 							title: "Error",
-							description: "An error occurred while updating the profile.",
+							description: "An error occurred while updating the notification settings.",
 							icon: Icons.shield
 						});
 						return;
@@ -43,8 +43,8 @@ export const NotificationSettings = () => (
 
 					app.notify({
 						type: "success",
-						title: "Profile Updated",
-						description: "The profile has been updated.",
+						title: "Notification Settings Updated",
+						description: "The notification settings have been updated.",
 						icon: Icons.check
 					});
 				});
