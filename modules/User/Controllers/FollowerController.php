@@ -151,10 +151,7 @@ class FollowerController extends Controller
 	/**
 	 * Retrieve all records.
 	 *
-	 * @param array|object|null $filter Filter criteria.
-	 * @param int|null $offset Offset.
-	 * @param int|null $limit Count.
-	 * @param array|null $modifiers Modifiers.
+	 * @param Request $request The request object.
 	 * @return object
 	 */
 	public function all(Request $request): object
