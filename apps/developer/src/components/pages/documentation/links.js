@@ -125,9 +125,13 @@ export const Links = (path) => ([
 		]
 	},
 
-	// Testing & Development
-	// {
-	// 	label: 'Tests',
-	// 	href: `${path}/tests`
-	// }
+	{
+		group: 'Testing & Development',
+		options: [
+			{
+				label: 'Tests',
+				href: `${path}/tests`
+			}
+		]
+	}
 ]);

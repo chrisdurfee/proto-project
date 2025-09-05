@@ -42,8 +42,9 @@ const CodeBlock = Atom((props, children) => (
 /**
  * TestsPage
  *
- * This page explains how Proto uses PHPUnit for testing.
- * It covers naming conventions for tests, setup and teardown methods, and guidelines for naming test methods.
+ * This page explains the comprehensive Proto testing system built on PHPUnit.
+ * It covers enhanced features including database testing utilities, model helpers,
+ * HTTP testing, mocking, file system testing, and much more.
  *
  * @returns {DocPage}
  */
@@ -51,7 +52,7 @@ export const TestsPage = () =>
 	DocPage(
 		{
 			title: 'Tests',
-			description: 'Learn how to write tests in Proto using the PHPUnit library.'
+			description: 'Comprehensive testing system with powerful utilities for database, HTTP, and model testing.'
 		},
 		[
 			// Overview
@@ -59,150 +60,35 @@ export const TestsPage = () =>
 				H4({ class: "text-lg font-bold" }, "Overview"),
 				P(
 					{ class: "text-muted-foreground" },
-					`Proto uses the PHPUnit library to perform comprehensive testing including unit tests,
-					integration tests, and feature tests. The testing framework provides utilities for
-					testing API endpoints, database interactions, email dispatching, and more. Proto's
-					testing foundation ensures your application remains reliable and maintainable.`
+					`Proto's enhanced testing system is built on PHPUnit and provides powerful utilities
+					to make testing more efficient and maintainable. The system includes database testing
+					with automatic transactions, model creation helpers, HTTP request testing with fluent
+					assertions, comprehensive mocking capabilities, file system testing, and fake data
+					generation. This framework transforms testing from writing repetitive boilerplate to
+					focusing on actual test logic.`
 				)
 			]),
 
-			// Test Structure and Organization
+			// Getting Started
 			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Test Structure and Organization"),
+				H4({ class: "text-lg font-bold" }, "Getting Started"),
 				P(
 					{ class: "text-muted-foreground" },
-					`Tests are organized in module-specific test directories following these conventions:`
+					`All test classes should extend the Proto\\Tests\\Test base class which provides
+					access to all testing utilities:`
 				),
 				CodeBlock(
-`modules/
-  Example/
-    Tests/
-      Unit/          # Unit tests for individual classes/methods
-        ModelTest.php
-        ServiceTest.php
-      Feature/       # Feature tests for complete functionality
-        UserRegistrationTest.php
-        OrderProcessingTest.php
-      Integration/   # Integration tests for external services
-        PaymentGatewayTest.php
-        EmailServiceTest.php
-    Controllers/
-    Models/
-    Services/`
-				)
-			]),
-
-			// Test Types
-			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Test Types"),
-				P(
-					{ class: "text-muted-foreground" },
-					`Proto supports three primary types of tests:`
-				),
-				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
-					Li("**Unit Tests**: Test individual methods and classes in isolation"),
-					Li("**Feature Tests**: Test complete user workflows and API endpoints"),
-					Li("**Integration Tests**: Test interactions with external services and databases")
-				])
-			]),
-
-			// Naming
-			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Naming"),
-				P(
-					{ class: "text-muted-foreground" },
-					`The name of a test should always be singular and end with "Test". For example:`
-				),
-				CodeBlock(
-`<?php
-declare(strict_types=1);
-namespace Module\\User\\Tests\\Unit;
+`<?php declare(strict_types=1);
+namespace Modules\\YourModule\\Tests\\Unit;
 
 use Proto\\Tests\\Test;
 
-class ExampleTest extends Test
+class YourTest extends Test
 {
-    protected function setUp(): void
+    public function testSomething(): void
     {
-        // Setup code before each test
-		parent::setUp();
+        // Your test code here with access to all Proto testing utilities
     }
-
-    protected function tearDown(): void
-    {
-        // Cleanup code after each test
-		parent::tearDown();
-    }
-}`
-				)
-			]),
-
-			// Set-Up
-			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Set-Up"),
-				P(
-					{ class: "text-muted-foreground" },
-					`The setUp() method is called before each test is run.
-                    Use it to initialize any resources or state required for your tests.`
-				),
-				CodeBlock(
-`protected function setUp(): void
-{
-    // Execute code to set up the test environment
-	parent::setUp();
-}`
-				)
-			]),
-
-			// Tear-Down
-			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Tear-Down"),
-				P(
-					{ class: "text-muted-foreground" },
-					`The tearDown() method is called after each test completes.
-                    Use it to clean up any resources or reset state.`
-				),
-				CodeBlock(
-`protected function tearDown(): void
-{
-    // Execute code to clean up after tests
-	parent::tearDown();
-}`
-				)
-			]),
-
-			// Test Method Names
-			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Test Method Names"),
-				P(
-					{ class: "text-muted-foreground" },
-					`Test method names should begin with "test" followed by the action being tested.
-					Use descriptive names that clearly explain what is being tested:`
-				),
-				CodeBlock(
-`public function testUserCanBeCreatedWithValidData(): void
-{
-    $userData = [
-        'name' => 'John Doe',
-        'email' => 'john@example.com'
-    ];
-
-    $user = User::create($userData);
-
-    $this->assertInstanceOf(User::class, $user);
-    $this->assertEquals('John Doe', $user->name);
-}
-
-public function testApiReturnsErrorForInvalidInput(): void
-{
-    $response = $this->post('/api/users', []);
-
-    $this->assertEquals(422, $response->getStatusCode());
-}
-
-public function testEmailIsDispatchedWhenUserRegisters(): void
-{
-    // Test implementation
 }`
 				)
 			]),
@@ -212,464 +98,519 @@ public function testEmailIsDispatchedWhenUserRegisters(): void
 				H4({ class: "text-lg font-bold" }, "Database Testing"),
 				P(
 					{ class: "text-muted-foreground" },
-					`Proto provides utilities for testing database interactions including
-					model operations, migrations, and data integrity:`
+					`Proto provides powerful database testing utilities with automatic transaction handling
+					to ensure test isolation and fast cleanup:`
 				),
 				CodeBlock(
-`<?php declare(strict_types=1);
-
-class UserModelTest extends Test
+`class UserTest extends Test
 {
+    // Database transactions are enabled by default
+    public function testUserCreation(): void
+    {
+        // This will be rolled back automatically
+        $this->assertDatabaseCount('users', 0);
+    }
+
+    // Disable transactions for specific tests if needed
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Create test database tables
-        $this->createTestTables();
-
-        // Seed test data
-        $this->seedTestData();
+        $this->setUseTransactions(false);
     }
+}
 
-    public function testUserCanBeCreated(): void
-    {
-        $userData = [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'secure123'
-        ];
-
-        $user = User::create($userData);
-
-        $this->assertNotNull($user->id);
-        $this->assertEquals('Test User', $user->name);
-        $this->assertEquals('test@example.com', $user->email);
-
-        // Verify database record exists
-        $dbUser = User::get($user->id);
-        $this->assertEquals($user->id, $dbUser->id);
-    }
-
-    public function testUserValidationRules(): void
-    {
-        // Test required fields
-        $this->expectException(ValidationException::class);
-        User::create(['name' => '']); // Should fail validation
-    }
-
-    public function testUserPasswordIsHashed(): void
-    {
-        $user = User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'plaintext'
-        ]);
-
-        $this->assertNotEquals('plaintext', $user->password);
-        $this->assertTrue(password_verify('plaintext', $user->password));
-    }
-
-    protected function tearDown(): void
-    {
-        // Clean up test data
-        $this->cleanupTestData();
-        parent::tearDown();
-    }
-}`
-				)
-			]),
-
-			// API Testing
-			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "API Testing"),
-				P(
-					{ class: "text-muted-foreground" },
-					`Test your API endpoints thoroughly including authentication, authorization,
-					input validation, and response formats:`
-				),
-				CodeBlock(
-`<?php declare(strict_types=1);
-
-class UserApiTest extends Test
+// Database Assertions
+class DatabaseAssertionTest extends Test
 {
-    public function testGetUsersEndpoint(): void
-    {
-        // Create test users
-        $user1 = User::create(['name' => 'User 1', 'email' => 'user1@test.com']);
-        $user2 = User::create(['name' => 'User 2', 'email' => 'user2@test.com']);
-
-        $response = $this->get('/api/users');
-
-        $this->assertEquals(200, $response->getStatusCode());
-
-        $data = json_decode($response->getBody(), true);
-        $this->assertIsArray($data);
-        $this->assertCount(2, $data);
-    }
-
-    public function testCreateUserEndpoint(): void
-    {
-        $userData = [
-            'name' => 'New User',
-            'email' => 'new@example.com',
-            'password' => 'secure123'
-        ];
-
-        $response = $this->post('/api/users', $userData);
-
-        $this->assertEquals(201, $response->getStatusCode());
-
-        $responseData = json_decode($response->getBody(), true);
-        $this->assertEquals('New User', $responseData['name']);
-        $this->assertEquals('new@example.com', $responseData['email']);
-        $this->assertArrayNotHasKey('password', $responseData); // Should be hidden
-    }
-
-    public function testUpdateUserRequiresAuthentication(): void
-    {
-        $user = User::create(['name' => 'Test', 'email' => 'test@test.com']);
-
-        $response = $this->put("/api/users/{$user->id}", [
-            'name' => 'Updated Name'
-        ]);
-
-        $this->assertEquals(401, $response->getStatusCode());
-    }
-
-    public function testAuthenticatedUserCanUpdateProfile(): void
-    {
-        $user = User::create(['name' => 'Test', 'email' => 'test@test.com']);
-
-        // Authenticate user
-        $this->actingAs($user);
-
-        $response = $this->put("/api/users/{$user->id}", [
-            'name' => 'Updated Name'
-        ]);
-
-        $this->assertEquals(200, $response->getStatusCode());
-
-        // Verify update
-        $updatedUser = User::get($user->id);
-        $this->assertEquals('Updated Name', $updatedUser->name);
-    }
-
-    public function testValidationErrorsAreReturned(): void
-    {
-        $response = $this->post('/api/users', [
-            'name' => '', // Invalid
-            'email' => 'invalid-email' // Invalid
-        ]);
-
-        $this->assertEquals(422, $response->getStatusCode());
-
-        $errors = json_decode($response->getBody(), true);
-        $this->assertArrayHasKey('name', $errors);
-        $this->assertArrayHasKey('email', $errors);
-    }
-}`
-				)
-			]),
-
-			// Testing Utilities and Helpers
-			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Testing Utilities and Helpers"),
-				P(
-					{ class: "text-muted-foreground" },
-					`Proto provides testing utilities to simplify common testing scenarios:`
-				),
-				CodeBlock(
-`<?php declare(strict_types=1);
-
-class TestHelpers extends Test
-{
-    /**
-     * HTTP Testing Methods
-     */
-    public function testHttpMethods(): void
-    {
-        // GET request
-        $response = $this->get('/api/endpoint');
-
-        // POST request with data
-        $response = $this->post('/api/endpoint', ['key' => 'value']);
-
-        // PUT request
-        $response = $this->put('/api/endpoint/1', ['updated' => 'value']);
-
-        // DELETE request
-        $response = $this->delete('/api/endpoint/1');
-
-        // Custom headers
-        $response = $this->get('/api/endpoint', [
-            'Authorization' => 'Bearer token',
-            'Content-Type' => 'application/json'
-        ]);
-    }
-
-    /**
-     * Authentication Testing
-     */
-    public function testAuthentication(): void
-    {
-        $user = User::create(['name' => 'Test', 'email' => 'test@test.com']);
-
-        // Act as authenticated user
-        $this->actingAs($user);
-
-        $response = $this->get('/api/protected-endpoint');
-        $this->assertEquals(200, $response->getStatusCode());
-    }
-
-    /**
-     * Database Assertions
-     */
     public function testDatabaseAssertions(): void
     {
-        $user = User::create(['name' => 'Test', 'email' => 'test@test.com']);
-
-        // Assert record exists in database
-        $this->assertDatabaseHas('users', [
-            'email' => 'test@test.com'
+        $user = $this->createModel(User::class, [
+            'name' => 'John Doe',
+            'email' => 'john@example.com'
         ]);
+
+        // Assert table contains data
+        $this->assertDatabaseHas('users', ['email' => 'john@example.com']);
+
+        // Assert table doesn't contain data
+        $this->assertDatabaseMissing('users', ['email' => 'deleted@example.com']);
+
+        // Assert table count
+        $this->assertDatabaseCount('users', 1);
 
         $user->delete();
 
         // Assert record was deleted
-        $this->assertDatabaseMissing('users', [
-            'email' => 'test@test.com'
-        ]);
-    }
-
-    /**
-     * File Upload Testing
-     */
-    public function testFileUploads(): void
-    {
-        $file = $this->createTestFile('test.txt', 'Test content');
-
-        $response = $this->post('/api/upload', [], ['file' => $file]);
-
-        $this->assertEquals(200, $response->getStatusCode());
-    }
-
-    /**
-     * Email Testing
-     */
-    public function testEmailDispatching(): void
-    {
-        // Clear any previous emails
-        $this->clearDispatchedEmails();
-
-        // Trigger action that sends email
-        User::create(['name' => 'Test', 'email' => 'test@test.com']);
-
-        // Assert email was dispatched
-        $this->assertEmailSent('test@test.com', 'Welcome Subject');
-
-        // Get dispatched emails
-        $emails = $this->getDispatchedEmails();
-        $this->assertCount(1, $emails);
+        $this->assertDatabaseMissing('users', ['email' => 'john@example.com']);
     }
 }`
 				)
 			]),
 
-			// Test Data Management
+			// Database Seeding
 			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Test Data Management"),
+				H4({ class: "text-lg font-bold" }, "Database Seeding"),
 				P(
 					{ class: "text-muted-foreground" },
-					`Manage test data effectively with factories, fixtures, and cleanup strategies:`
+					`Automatically seed your test database with the data you need:`
 				),
 				CodeBlock(
-`<?php declare(strict_types=1);
-
-class TestDataManagement extends Test
+`class UserTest extends Test
 {
-    /**
-     * Using Model Factories
-     */
-    public function testWithFactories(): void
-    {
-        // Create single user
-        $user = $this->createUser();
+    // Define seeders to run before each test
+    protected array $seeders = [
+        UserSeeder::class,
+        RoleSeeder::class
+    ];
 
-        // Create user with specific attributes
-        $user = $this->createUser([
-            'name' => 'Specific Name',
-            'email' => 'specific@test.com'
+    public function testWithSeededData(): void
+    {
+        // Seeders run automatically before each test
+        $this->assertDatabaseCount('users', 10);
+        $this->assertDatabaseCount('roles', 3);
+
+        // Test with pre-seeded data
+        $adminUser = User::where('role', 'admin')->first();
+        $this->assertNotNull($adminUser);
+    }
+}`
+				)
+			]),
+
+			// Model Testing
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Model Testing"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Comprehensive model testing utilities for creation, manipulation, and assertions:`
+				),
+				CodeBlock(
+`class ModelTest extends Test
+{
+    public function testModelCreation(): void
+    {
+        // Create and persist a model
+        $user = $this->createModel(User::class, [
+            'name' => 'John Doe',
+            'email' => 'john@example.com'
         ]);
 
-        // Create multiple users
-        $users = $this->createUsers(5);
+        // Create model without persisting to database
+        $draftUser = $this->makeModel(User::class, [
+            'name' => 'Draft User'
+        ]);
+
+        // Create multiple models
+        $users = $this->createMultiple(User::class, 5, [
+            'status' => 'active'
+        ]);
 
         $this->assertCount(5, $users);
     }
 
-    /**
-     * Database Transactions for Isolation
-     */
+    public function testModelAssertions(): void
+    {
+        $user = $this->createModel(User::class, [
+            'name' => 'John Doe',
+            'status' => 'active'
+        ]);
+
+        // Assert model exists in database
+        $this->assertModelExists($user);
+
+        // Assert model has specific attributes
+        $this->assertModelHasAttributes($user, [
+            'name' => 'John Doe',
+            'status' => 'active'
+        ]);
+
+        // Test model equality
+        $sameUser = User::find($user->id);
+        $this->assertModelEquals($user, $sameUser);
+
+        $user->delete();
+
+        // Assert model doesn't exist
+        $this->assertModelMissing($user);
+    }
+}`
+				)
+			]),
+
+			// HTTP Testing
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "HTTP Testing"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Comprehensive HTTP testing with fluent assertions for API endpoints:`
+				),
+				CodeBlock(
+`class ApiTest extends Test
+{
+    public function testMakingRequests(): void
+    {
+        // JSON requests
+        $response = $this->getJson('/api/users');
+        $response = $this->postJson('/api/users', ['name' => 'John']);
+        $response = $this->putJson('/api/users/1', ['name' => 'Jane']);
+        $response = $this->patchJson('/api/users/1', ['status' => 'inactive']);
+        $response = $this->deleteJson('/api/users/1');
+
+        // Regular requests
+        $response = $this->get('/users');
+        $response = $this->post('/users', ['name' => 'John']);
+    }
+
+    public function testAuthentication(): void
+    {
+        $user = $this->createModel(User::class);
+
+        // Test as authenticated user
+        $response = $this->actingAs($user)->getJson('/api/profile');
+        $response->assertSuccessful();
+
+        // Test with token
+        $jwt = 'your-jwt-token';
+        $response = $this->withToken($jwt)->getJson('/api/protected');
+
+        // Test with session data
+        $response = $this->withSession(['user_id' => 1])->get('/dashboard');
+    }
+
+    public function testResponseAssertions(): void
+    {
+        $user = $this->createModel(User::class, [
+            'name' => 'John Doe',
+            'email' => 'john@example.com'
+        ]);
+
+        $response = $this->getJson("/api/users/{$user->id}");
+
+        // Status assertions
+        $response->assertStatus(200);
+        $response->assertSuccessful();
+
+        // JSON assertions
+        $response->assertJson([
+            'name' => 'John Doe',
+            'email' => 'john@example.com'
+        ]);
+
+        $response->assertJsonFragment(['name' => 'John Doe']);
+        $response->assertJsonMissing(['password']);
+
+        $response->assertJsonStructure([
+            'id',
+            'name',
+            'email',
+            'created_at'
+        ]);
+
+        // Test error responses
+        $response = $this->getJson('/api/users/999');
+        $response->assertStatus(404);
+
+        // Test validation errors
+        $response = $this->postJson('/api/users', ['email' => 'invalid']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['errors' => ['email']]);
+    }
+}`
+				)
+			]),
+
+			// Mock and Spy Helpers
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Mock and Spy Helpers"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Powerful mocking and spying capabilities for testing service interactions:`
+				),
+				CodeBlock(
+`class ServiceTest extends Test
+{
+    public function testCreatingMocks(): void
+    {
+        // Mock a service
+        $mockService = $this->mockService(EmailService::class);
+        $this->expectMethodCall($mockService, 'send', ['test@example.com'], true);
+
+        // Create a spy (tracks method calls on real object)
+        $spyService = $this->spyService(LogService::class);
+
+        // Partial mock (mock some methods, keep others real)
+        $partialMock = $this->partialMock(PaymentService::class, ['charge']);
+
+        // Stub with predefined returns
+        $stub = $this->createStub(ConfigService::class, [
+            'get' => 'test_value',
+            'has' => true
+        ]);
+
+        // Use the stub
+        $this->assertEquals('test_value', $stub->get('any_key'));
+        $this->assertTrue($stub->has('any_key'));
+    }
+
+    public function testMockExpectations(): void
+    {
+        $mock = $this->mockService(NotificationService::class);
+
+        // Expect method to be called with specific arguments
+        $this->expectMethodCall($mock, 'notify', ['user@example.com', 'Welcome!']);
+
+        // Expect method never to be called
+        $this->expectMethodNeverCalled($mock, 'sendSms');
+
+        // Fluent expectations
+        $mock = $this->mockWithExpectations(UserService::class, function($mock, $test) {
+            $mock->expects($test->once())
+                 ->method('create')
+                 ->with(['name' => 'John'])
+                 ->willReturn(new User());
+        });
+
+        // Trigger the mocked behavior
+        $user = $mock->create(['name' => 'John']);
+        $this->assertInstanceOf(User::class, $user);
+    }
+}`
+				)
+			]),
+
+			// File System Testing
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "File System Testing"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Test file operations, uploads, and file system interactions:`
+				),
+				CodeBlock(
+`class FileSystemTest extends Test
+{
+    public function testFileOperations(): void
+    {
+        // Create test file
+        $this->createTestFile('/tmp/test.txt', 'Hello World');
+
+        // Create test directory
+        $this->createTestDirectory('/tmp/test_dir');
+
+        // Copy file for testing
+        $this->copyFileForTest('/path/to/source', '/tmp/copy.txt');
+
+        // File assertions
+        $this->assertTestFileExists('/tmp/test.txt');
+        $this->assertTestFileNotExists('/tmp/deleted.txt');
+
+        // Assert file contents
+        $this->assertFileContains('/tmp/test.txt', 'Hello World');
+        $this->assertFileNotContains('/tmp/test.txt', 'Goodbye');
+
+        // Directory assertions
+        $this->assertTestDirectoryExists('/tmp/test_dir');
+        $this->assertDirectoryEmpty('/tmp/empty_dir');
+        $this->assertDirectoryContainsFile('/tmp/test_dir', 'file.txt');
+
+        // Get file properties
+        $content = $this->getFileContent('/tmp/test.txt');
+        $size = $this->getFileSize('/tmp/test.txt');
+
+        $this->assertEquals('Hello World', $content);
+        $this->assertGreaterThan(0, $size);
+    }
+
+    public function testFileUploads(): void
+    {
+        // Create a test file for upload
+        $tempFile = $this->createTempFile('test content', 'txt');
+
+        $response = $this->post('/api/upload', [], ['file' => $tempFile]);
+
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+}`
+				)
+			]),
+
+			// Test Data and Fixtures
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Test Data and Fixtures"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Comprehensive test data management with fake data generation and fixture loading:`
+				),
+				CodeBlock(
+`class TestDataTest extends Test
+{
+    public function testTestDataManagement(): void
+    {
+        // Set test data
+        $this->setTestData('api_key', 'test-key-123');
+        $this->withTestData([
+            'environment' => 'testing',
+            'debug' => true
+        ]);
+
+        // Get test data
+        $apiKey = $this->getTestData('api_key');
+        $debug = $this->getTestData('debug', false); // with default
+
+        $this->assertEquals('test-key-123', $apiKey);
+        $this->assertTrue($debug);
+    }
+
+    public function testFakeDataGeneration(): void
+    {
+        $faker = $this->fake();
+
+        // Generate fake data
+        $name = $faker->name();
+        $email = $faker->email();
+        $phone = $faker->phoneNumber();
+        $address = $faker->address();
+        $text = $faker->text(50); // 50 words
+        $number = $faker->numberBetween(1, 100);
+        $date = $faker->dateTimeBetween('-1 year', 'now');
+        $uuid = $faker->uuid();
+
+        // Use in model creation
+        $user = $this->createModel(User::class, [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone
+        ]);
+
+        $this->assertNotEmpty($user->name);
+        $this->assertNotEmpty($user->email);
+        $this->assertNotEmpty($user->phone);
+    }
+
+    public function testLoadingFixtures(): void
+    {
+        // Load fixture data (supports JSON, PHP, YAML)
+        $userData = $this->loadFixture('users.json');
+        $config = $this->loadFixture('config.php');
+
+        // Create temporary files
+        $tempFile = $this->createTempFile('test content', 'txt');
+        $tempDir = $this->createTempDirectory();
+
+        $this->assertIsArray($userData);
+        $this->assertFileExists($tempFile);
+        $this->assertDirectoryExists($tempDir);
+    }
+}`
+				)
+			]),
+
+			// Enhanced Assertions
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Enhanced Assertions"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Additional assertion methods for common testing scenarios:`
+				),
+				CodeBlock(
+`class EnhancedAssertionsTest extends Test
+{
+    public function testCollectionAssertions(): void
+    {
+        $collection = [1, 2, 3, 4, 5];
+
+        $this->assertCollectionContains(3, $collection);
+        $this->assertCollectionCount(5, $collection);
+        $this->assertCollectionEmpty([]);
+        $this->assertCollectionNotEmpty($collection);
+    }
+
+    public function testArrayAssertions(): void
+    {
+        $array = ['name' => 'John', 'age' => 30, 'city' => 'NYC'];
+
+        $this->assertArrayHasKeys(['name', 'age'], $array);
+        $this->assertArrayMissingKeys(['password', 'secret'], $array);
+    }
+
+    public function testStringAssertions(): void
+    {
+        $phoneNumber = '555-123-4567';
+        $text = 'hello beautiful world';
+
+        $this->assertStringMatchesPattern('/^\\d{3}-\\d{3}-\\d{4}$/', $phoneNumber);
+        $this->assertStringContainsAll(['hello', 'world'], $text);
+    }
+
+    public function testValidationAssertions(): void
+    {
+        $this->assertValidEmail('test@example.com');
+        $this->assertValidUrl('https://example.com');
+        $this->assertBetween(10, 20, 15);
+        $this->assertRecentTimestamp(time());
+        $this->assertRecentDate('2025-09-04 10:30:00');
+    }
+}`
+				)
+			]),
+
+			// Test Configuration and Setup
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Test Configuration and Setup"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Configure your test environment and customize test behavior:`
+				),
+				CodeBlock(
+`class MyTest extends Test
+{
+    // Disable database transactions for specific tests
+    protected bool $useTransactions = false;
+
+    // Set seeders to run before each test
+    protected array $seeders = [
+        UserSeeder::class,
+        ProductSeeder::class
+    ];
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Start database transaction
-        $this->beginDatabaseTransaction();
+        // Custom setup logic
+        $this->withTestData(['custom_config' => true]);
+
+        // Set up additional test state
+        $this->setTestEnvironment();
     }
 
     protected function tearDown(): void
     {
-        // Rollback transaction (cleans up all test data)
-        $this->rollbackDatabaseTransaction();
+        // Custom cleanup logic
+        $this->cleanupTestResources();
 
         parent::tearDown();
     }
 
-    /**
-     * Seeding Test Data
-     */
-    public function testWithSeededData(): void
+    private function setTestEnvironment(): void
     {
-        // Seed specific test data
-        $this->seed([
-            'users' => [
-                ['name' => 'Admin', 'email' => 'admin@test.com', 'role' => 'admin'],
-                ['name' => 'User', 'email' => 'user@test.com', 'role' => 'user']
-            ],
-            'posts' => [
-                ['title' => 'Test Post', 'user_id' => 1, 'content' => 'Content']
-            ]
-        ]);
-
-        $adminUser = User::where('role', 'admin')->first();
-        $this->assertEquals('Admin', $adminUser->name);
+        // Configure test-specific settings
+        $this->setTestData('environment', 'testing');
     }
 
-    /**
-     * Helper Methods for Test Data
-     */
-    protected function createUser(array $attributes = []): User
+    private function cleanupTestResources(): void
     {
-        $defaults = [
-            'name' => 'Test User',
-            'email' => 'test' . uniqid() . '@example.com',
-            'password' => 'password123'
-        ];
-
-        return User::create(array_merge($defaults, $attributes));
-    }
-
-    protected function createUsers(int $count): array
-    {
-        $users = [];
-        for ($i = 0; $i < $count; $i++) {
-            $users[] = $this->createUser([
-                'email' => "test{$i}@example.com"
-            ]);
-        }
-        return $users;
+        // Clean up any custom resources
     }
 }`
 				)
 			]),
 
-			// Performance and Load Testing
+			// PHPUnit Configuration
 			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Performance and Load Testing"),
+				H4({ class: "text-lg font-bold" }, "PHPUnit Configuration"),
 				P(
 					{ class: "text-muted-foreground" },
-					`Test performance characteristics and ensure your application can handle expected load:`
-				),
-				CodeBlock(
-`<?php declare(strict_types=1);
-
-class PerformanceTest extends Test
-{
-    public function testApiResponseTime(): void
-    {
-        $startTime = microtime(true);
-
-        $response = $this->get('/api/users');
-
-        $endTime = microtime(true);
-        $responseTime = ($endTime - $startTime) * 1000; // Convert to milliseconds
-
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertLessThan(100, $responseTime, 'API response took too long');
-    }
-
-    public function testDatabaseQueryPerformance(): void
-    {
-        // Create test data
-        $this->createUsers(1000);
-
-        $startTime = microtime(true);
-
-        // Test query performance
-        $users = User::where('status', 'active')->limit(10)->get();
-
-        $endTime = microtime(true);
-        $queryTime = ($endTime - $startTime) * 1000;
-
-        $this->assertLessThan(50, $queryTime, 'Database query took too long');
-    }
-
-    public function testMemoryUsage(): void
-    {
-        $initialMemory = memory_get_usage();
-
-        // Perform memory-intensive operation
-        $this->createUsers(500);
-
-        $finalMemory = memory_get_usage();
-        $memoryUsed = $finalMemory - $initialMemory;
-
-        // Assert memory usage is within acceptable limits (e.g., 10MB)
-        $this->assertLessThan(10 * 1024 * 1024, $memoryUsed, 'Memory usage too high');
-    }
-}`
-				)
-			]),
-
-			// Running Tests
-			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Running Tests"),
-				P(
-					{ class: "text-muted-foreground" },
-					`Proto provides several ways to run your tests:`
-				),
-				CodeBlock(
-`# Run all tests
-php vendor/bin/phpunit
-
-# Run tests in a specific directory
-php vendor/bin/phpunit modules/User/Tests/
-
-# Run a specific test file
-php vendor/bin/phpunit modules/User/Tests/Unit/UserModelTest.php
-
-# Run a specific test method
-php vendor/bin/phpunit --filter testUserCanBeCreated
-
-# Run tests with coverage report
-php vendor/bin/phpunit --coverage-html coverage/
-
-# Run tests in parallel (if configured)
-php vendor/bin/phpunit --parallel
-
-# Generate test report
-php vendor/bin/phpunit --log-junit results.xml`
-				)
-			]),
-
-			// Test Configuration
-			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Test Configuration"),
-				P(
-					{ class: "text-muted-foreground" },
-					`Configure PHPUnit through the phpunit.xml file in your project root.
-					Proto provides sensible defaults but you can customize as needed:`
+					`The testing system integrates with your existing phpunit.xml configuration:`
 				),
 				CodeBlock(
 `<?xml version="1.0" encoding="UTF-8"?>
@@ -690,6 +631,12 @@ php vendor/bin/phpunit --log-junit results.xml`
             <directory suffix="Test.php">./modules/*/Tests/Integration</directory>
         </testsuite>
     </testsuites>
+
+    <php>
+        <server name="APP_ENV" value="testing"/>
+        <server name="DB_CONNECTION" value="testing"/>
+    </php>
+
     <coverage processUncoveredFiles="true">
         <include>
             <directory suffix=".php">./modules</directory>
@@ -703,6 +650,171 @@ php vendor/bin/phpunit --log-junit results.xml`
 				)
 			]),
 
+			// Running Tests
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Running Tests"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Proto provides several ways to run your comprehensive test suite:`
+				),
+				CodeBlock(
+`# Run all tests
+php vendor/bin/phpunit
+
+# Run tests by test suite
+php vendor/bin/phpunit --testsuite Unit
+php vendor/bin/phpunit --testsuite Feature
+php vendor/bin/phpunit --testsuite Integration
+
+# Run tests in a specific directory
+php vendor/bin/phpunit modules/User/Tests/
+
+# Run a specific test file
+php vendor/bin/phpunit modules/User/Tests/Unit/UserModelTest.php
+
+# Run a specific test method
+php vendor/bin/phpunit --filter testUserCanBeCreatedWithValidData
+
+# Run tests with coverage report
+php vendor/bin/phpunit --coverage-html coverage/
+php vendor/bin/phpunit --coverage-text
+
+# Run tests in parallel (faster execution)
+php vendor/bin/phpunit --parallel
+
+# Generate detailed test reports
+php vendor/bin/phpunit --log-junit results.xml
+php vendor/bin/phpunit --testdox`
+				)
+			]),
+
+			// Complete Example Test
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Complete Example Test"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Here's a comprehensive example showing all the testing features in action:`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Modules\\User\\Tests\\Unit;
+
+use Proto\\Tests\\Test;
+use Modules\\User\\Models\\User;
+use Modules\\User\\Services\\UserService;
+
+class UserServiceTest extends Test
+{
+    // Run seeders before each test
+    protected array $seeders = [RoleSeeder::class];
+
+    public function testCreatesUserWithValidData(): void
+    {
+        // Arrange - Use fake data for realistic testing
+        $userData = [
+            'name' => $this->fake()->name(),
+            'email' => $this->fake()->unique()->email(),
+            'phone' => $this->fake()->phoneNumber(),
+            'role_id' => 1 // From seeder
+        ];
+
+        // Mock external service
+        $emailService = $this->mockService(EmailService::class);
+        $this->expectMethodCall($emailService, 'sendWelcome', [$userData['email']]);
+
+        $service = new UserService();
+
+        // Act
+        $user = $service->create($userData);
+
+        // Assert - Use enhanced assertions
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertModelExists($user);
+        $this->assertModelHasAttributes($user, [
+            'name' => $userData['name'],
+            'email' => $userData['email']
+        ]);
+
+        // Database assertions
+        $this->assertDatabaseHas('users', [
+            'email' => $userData['email']
+        ]);
+        $this->assertDatabaseCount('users', 1);
+
+        // Validation assertions
+        $this->assertValidEmail($user->email);
+        $this->assertRecentTimestamp($user->created_at);
+    }
+
+    public function testThrowsExceptionWithInvalidEmail(): void
+    {
+        // Arrange
+        $userData = [
+            'name' => 'John Doe',
+            'email' => 'invalid-email-format'
+        ];
+        $service = new UserService();
+
+        // Act & Assert
+        $this->expectException(ValidationException::class);
+        $service->create($userData);
+
+        // Ensure no database changes
+        $this->assertDatabaseCount('users', 0);
+    }
+
+    public function testApiEndpointReturnsUserData(): void
+    {
+        // Arrange
+        $user = $this->createModel(User::class, [
+            'name' => 'API Test User',
+            'email' => 'api@example.com'
+        ]);
+
+        // Act - Test API endpoint
+        $response = $this->actingAs($user)->getJson("/api/users/{$user->id}");
+
+        // Assert - HTTP response
+        $response->assertSuccessful();
+        $response->assertJsonStructure([
+            'id', 'name', 'email', 'created_at', 'updated_at'
+        ]);
+        $response->assertJson([
+            'name' => 'API Test User',
+            'email' => 'api@example.com'
+        ]);
+        $response->assertJsonMissing(['password']);
+    }
+
+    public function testFileUploadFunctionality(): void
+    {
+        // Arrange
+        $user = $this->createModel(User::class);
+        $testFile = $this->createTempFile('profile image content', 'jpg');
+
+        // Act
+        $response = $this->actingAs($user)
+            ->post('/api/users/avatar', [], ['avatar' => $testFile]);
+
+        // Assert
+        $response->assertSuccessful();
+        $this->assertFileContains($user->getAvatarPath(), 'profile image content');
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Set test environment data
+        $this->withTestData([
+            'upload_path' => '/tmp/test_uploads',
+            'max_file_size' => '5MB'
+        ]);
+    }
+}`
+				)
+			]),
+
 			// Best Practices
 			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Testing Best Practices"),
@@ -711,16 +823,18 @@ php vendor/bin/phpunit --log-junit results.xml`
 					`Follow these best practices for effective testing in Proto:`
 				),
 				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
-					Li("**Test one thing at a time**: Each test should verify a single behavior"),
-					Li("**Use descriptive test names**: Make it clear what is being tested"),
-					Li("**Arrange, Act, Assert**: Structure tests with clear setup, execution, and verification"),
-					Li("**Use database transactions**: Ensure test isolation and fast cleanup"),
-					Li("**Mock external services**: Don't rely on external APIs or services in tests"),
-					Li("**Test edge cases**: Include tests for error conditions and boundary values"),
-					Li("**Keep tests fast**: Aim for tests that run in milliseconds, not seconds"),
-					Li("**Test behavior, not implementation**: Focus on what the code does, not how it does it"),
-					Li("**Use factories for test data**: Create reusable, maintainable test data"),
-					Li("**Test at the right level**: Use unit tests for logic, integration tests for workflows")
+					Li("**Use descriptive test names** that explain behavior being tested"),
+					Li("**Arrange, Act, Assert** - structure tests with clear setup, execution, and verification"),
+					Li("**Use database transactions** for automatic test isolation and cleanup"),
+					Li("**Mock external dependencies** to keep tests fast, reliable, and focused"),
+					Li("**Leverage fake data** instead of hardcoded values for more realistic testing"),
+					Li("**Test both happy and error paths** to ensure robust error handling"),
+					Li("**Keep tests focused** - each test should verify a single behavior"),
+					Li("**Use model factories** and fixtures for maintainable test data"),
+					Li("**Test at the right level** - unit tests for logic, feature tests for workflows"),
+					Li("**Utilize enhanced assertions** for more expressive and clear test expectations"),
+					Li("**Take advantage of seeders** for consistent test database state"),
+					Li("**Clean up resources properly** - the framework handles this automatically")
 				])
 			])
 		]
