@@ -58,6 +58,10 @@ export const Links = (path) => ([
 			{
 				label: 'Migrations',
 				href: `${path}/migrations`
+			},
+			{
+				label: 'Seeders',
+				href: `${path}/seeders`
 			}
 		]
 	},
