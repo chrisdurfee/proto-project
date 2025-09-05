@@ -13,6 +13,13 @@ use Proto\Http\Router\Request;
 class BlockUserPolicy extends Policy
 {
 	/**
+	 * The type of the policy.
+	 *
+	 * @var string|null
+	 */
+	protected ?string $type = 'block-user';
+
+	/**
 	 * Determines if the user can unblock a user.
 	 *
 	 * @param Request $request The request object.

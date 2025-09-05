@@ -13,6 +13,13 @@ use Proto\Http\Router\Request;
 class FollowerPolicy extends Policy
 {
 	/**
+	 * The type of the policy.
+	 *
+	 * @var string|null
+	 */
+	protected ?string $type = 'follower';
+
+	/**
 	 * Determines if the user can unfollow a user.
 	 *
 	 * @param Request $request The request object.

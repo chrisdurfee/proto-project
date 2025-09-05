@@ -13,25 +13,11 @@ use Proto\Http\Router\Request;
 class ContentPolicy extends Policy
 {
 	/**
-	 * Default policy for methods that don't have an explicit policy method.
+	 * The type of the policy.
 	 *
-	 * @return bool True if the user can access the default policy, otherwise false.
+	 * @var string|null
 	 */
-	public function default(): bool
-	{
-		return $this->canAccess('content.view');
-	}
-
-	/**
-	 * Example: can the user "view all" content?
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can view all content, otherwise false.
-	 */
-	public function all(Request $request): bool
-	{
-		return $this->canAccess('content.view');
-	}
+	protected ?string $type = 'content';
 
 	/**
 	 * Example: can the user "get" a single content resource?
@@ -48,17 +34,6 @@ class ContentPolicy extends Policy
 		}
 
 		return $this->canAccess('content.view') || $this->ownsResource($id);
-	}
-
-	/**
-	 * Example: can the user "create" new content?
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can create content, otherwise false.
-	 */
-	public function add(Request $request): bool
-	{
-		return $this->canAccess('content.create');
 	}
 
 	/**
@@ -115,27 +90,5 @@ class ContentPolicy extends Policy
 	public function publish(Request $request): bool
 	{
 		return $this->can('content.publish', $request);
-	}
-
-	/**
-	 * Example: can the user "search" among content?
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can search content, otherwise false.
-	 */
-	public function search(Request $request): bool
-	{
-		return $this->canAccess('content.view');
-	}
-
-	/**
-	 * Another example: can the user "updateStatus" of content?
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can update the status, otherwise false.
-	 */
-	public function updateStatus(Request $request): bool
-	{
-		return $this->canAccess('content.edit');
 	}
 }

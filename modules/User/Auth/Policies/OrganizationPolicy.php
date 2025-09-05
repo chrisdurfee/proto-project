@@ -15,6 +15,13 @@ use Proto\Controllers\Controller;
 class OrganizationPolicy extends Policy
 {
 	/**
+	 * The type of the policy.
+	 *
+	 * @var string|null
+	 */
+	protected ?string $type = 'organization';
+
+	/**
 	 * This will set up the organization-based access control gate.
 	 *
 	 * @param ?Controller $controller
@@ -45,27 +52,6 @@ class OrganizationPolicy extends Policy
 	}
 
 	/**
-	 * Default fallback for methods without an explicit policy.
-	 *
-	 * @return bool
-	 */
-	public function default(): bool
-	{
-		return $this->canAccess('organization.view');
-	}
-
-	/**
-	 * Determine if the user can list all organizations.
-	 *
-	 * @param Request $request
-	 * @return bool
-	 */
-	public function all(Request $request): bool
-	{
-		return $this->canAccess('organization.view');
-	}
-
-	/**
 	 * Determine if the user can view a single organization.
 	 *
 	 * @param Request $request
@@ -80,17 +66,6 @@ class OrganizationPolicy extends Policy
 		}
 
 		return $this->can($id, 'organization.view');
-	}
-
-	/**
-	 * Determine if the user can create a new organization.
-	 *
-	 * @param Request $request
-	 * @return bool
-	 */
-	public function add(Request $request): bool
-	{
-		return $this->canAccess('organization.create');
 	}
 
 	/**
@@ -142,27 +117,5 @@ class OrganizationPolicy extends Policy
 		}
 
 		return $this->can($id, 'organization.delete');
-	}
-
-	/**
-	 * Determine if the user can search organizations.
-	 *
-	 * @param Request $request
-	 * @return bool
-	 */
-	public function search(Request $request): bool
-	{
-		return $this->canAccess('organization.view');
-	}
-
-	/**
-	 * Determine if the user can count organizations.
-	 *
-	 * @param Request $request
-	 * @return bool
-	 */
-	public function count(Request $request): bool
-	{
-		return $this->canAccess('organization.view');
 	}
 }

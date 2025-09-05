@@ -13,25 +13,11 @@ use Proto\Http\Router\Request;
 class UserPolicy extends Policy
 {
 	/**
-	 * Default policy for methods that don't have an explicit policy method.
+	 * The type of the policy.
 	 *
-	 * @return bool True if the user can view users, otherwise false.
+	 * @var string|null
 	 */
-	public function default(): bool
-	{
-		return $this->canAccess('users.view');
-	}
-
-	/**
-	 * Determines if the user can list all users.
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can view users, otherwise false.
-	 */
-	public function all(Request $request): bool
-	{
-		return $this->canAccess('users.view');
-	}
+	protected ?string $type = 'users';
 
 	/**
 	 * Determines if the user can get a single user's information.
@@ -48,17 +34,6 @@ class UserPolicy extends Policy
 		}
 
 		return $this->canAccess('users.view') || $this->ownsResource($id);
-	}
-
-	/**
-	 * Determines if the user can add/create a user.
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can create users, otherwise false.
-	 */
-	public function add(Request $request): bool
-	{
-		return $this->canAccess('users.create');
 	}
 
 	/**
@@ -102,6 +77,23 @@ class UserPolicy extends Policy
 	}
 
 	/**
+	 * Determines if the user can edit an existing user.
+	 *
+	 * @param Request $request The request object.
+	 * @return bool True if the user can edit users, otherwise false.
+	 */
+	protected function allowEdit(Request $request): bool
+	{
+		$userId = $this->getResourceId($request);
+		if ($userId === null)
+		{
+			return false;
+		}
+
+		return $this->canEdit((object) ['id' => $userId]);
+	}
+
+	/**
 	 * Determines if the user can update an existing user.
 	 *
 	 * @param Request $request The request object.
@@ -109,13 +101,24 @@ class UserPolicy extends Policy
 	 */
 	public function updateStatus(Request $request): bool
 	{
-		$id = $this->getResourceId($request);
-		if ($id === null)
+		return $this->allowEdit($request);
+	}
+
+	/**
+	 * Checks if the resource in the request is owned by the user.
+	 *
+	 * @param Request $request The request object.
+	 * @return bool True if the resource is owned by the user, otherwise false.
+	 */
+	protected function isOwned(Request $request): bool
+	{
+		$userId = $this->getResourceId($request);
+		if ($userId === null)
 		{
 			return false;
 		}
 
-		return $this->canEdit((object) ['id' => $id]);
+		return $this->ownsResource($userId);
 	}
 
 	/**
@@ -126,13 +129,7 @@ class UserPolicy extends Policy
 	 */
 	public function verifyEmail(Request $request): bool
 	{
-		$userId = $this->getResourceId($request);
-		if ($userId === null)
-		{
-			return false;
-		}
-
-		return $this->ownsResource($userId);
+		return $this->isOwned($request);
 	}
 
 	/**
@@ -143,13 +140,7 @@ class UserPolicy extends Policy
 	 */
 	public function acceptTerms(Request $request): bool
 	{
-		$userId = $this->getResourceId($request);
-		if ($userId === null)
-		{
-			return false;
-		}
-
-		return $this->ownsResource($userId);
+		return $this->isOwned($request);
 	}
 
 	/**
@@ -160,13 +151,7 @@ class UserPolicy extends Policy
 	 */
 	public function allowMarketing(Request $request): bool
 	{
-		$userId = $this->getResourceId($request);
-		if ($userId === null)
-		{
-			return false;
-		}
-
-		return $this->ownsResource($userId);
+		return $this->isOwned($request);
 	}
 
 	/**
@@ -188,13 +173,7 @@ class UserPolicy extends Policy
 	 */
 	public function updateCredentials(Request $request): bool
 	{
-		$userId = $this->getResourceId($request);
-		if ($userId === null)
-		{
-			return false;
-		}
-
-		return $this->canEdit((object) ['id' => $userId]);
+		return $this->allowEdit($request);
 	}
 
 	/**
@@ -211,40 +190,7 @@ class UserPolicy extends Policy
 			return false;
 		}
 
-		return $this->canEdit((object) ['id' => $id]);
-	}
-
-	/**
-	 * Determines if the user can delete a user.
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can delete users, otherwise false.
-	 */
-	public function delete(Request $request): bool
-	{
-		return $this->canAccess('users.delete');
-	}
-
-	/**
-	 * Determines if the user can search among users.
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can view users, otherwise false.
-	 */
-	public function search(Request $request): bool
-	{
-		return $this->canAccess('users.view');
-	}
-
-	/**
-	 * Determines if the user can count among users.
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can count users, otherwise false.
-	 */
-	public function count(Request $request): bool
-	{
-		return $this->canAccess('users.view');
+		return $this->ownsResource($id);
 	}
 
 	/**
@@ -257,12 +203,6 @@ class UserPolicy extends Policy
 		Request $request
 	): bool
 	{
-		$userId = $this->getResourceId($request);
-		if ($userId === null)
-		{
-			return false;
-		}
-
-		return $this->canEdit((object) ['id' => $userId]);
+		return $this->allowEdit($request);
 	}
 }

@@ -12,6 +12,13 @@ use Proto\Http\Router\Request;
  */
 class PushPolicy extends Policy
 {
+    /**
+	 * The type of the policy.
+	 *
+	 * @var string|null
+	 */
+	protected ?string $type = 'push';
+
 	/**
      * This will check if the user can subscribe to web push notifications.
      *

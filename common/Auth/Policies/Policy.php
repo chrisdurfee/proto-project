@@ -2,6 +2,7 @@
 namespace Common\Auth\Policies;
 
 use Proto\Auth\Policies\Policy as BasePolicy;
+use Proto\Http\Router\Request;
 
 /**
  * Policy
@@ -12,6 +13,56 @@ use Proto\Auth\Policies\Policy as BasePolicy;
  */
 class Policy extends BasePolicy
 {
+	/**
+	 * The type of the policy.
+	 *
+	 * @var string|null
+	 */
+	protected ?string $type = null;
+
+	/**
+	 * Default policy for methods that don't have an explicit policy method.
+	 *
+	 * @param Request $request
+	 * @return bool True if the user can view users, otherwise false.
+	 */
+	public function default(Request $request): bool
+	{
+		return $this->checkTypeByMethod($request);
+	}
+
+	/**
+	 * Checks the permission based on the request method and type.
+	 *
+	 * @param Request $request
+	 * @return boolean
+	 */
+	public function checkTypeByMethod(Request $request): bool
+	{
+		$type = $this->type;
+		if (!isset($type))
+		{
+			return true;
+		}
+
+		$action = 'view';
+		switch ($request->method())
+		{
+			case 'POST':
+				$action = 'create';
+				break;
+			case 'PUT':
+			case 'PATCH':
+				$action = 'edit';
+				break;
+			case 'DELETE':
+				$action = 'delete';
+				break;
+		}
+
+		return $this->hasPermission($type . '.' . $action);
+	}
+
     /**
 	 * Check if user is an admin.
 	 *

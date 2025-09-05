@@ -13,42 +13,11 @@ use Proto\Http\Router\Request;
 class PermissionPolicy extends Policy
 {
 	/**
-	 * Default policy for methods without an explicit handler.
+	 * The type of the policy.
 	 *
-	 * @return bool True if the user can view permissions, otherwise false.
+	 * @var string|null
 	 */
-	public function default(): bool
-	{
-		return $this->canAccess('permissions.view');
-	}
-
-	/**
-	 * Determines if the user can list all permissions.
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can view permissions, otherwise false.
-	 */
-	public function all(Request $request): bool
-	{
-		return $this->canAccess('permissions.view');
-	}
-
-	/**
-	 * Determines if the user can get a single permission resource.
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can view permissions, otherwise false.
-	 */
-	public function get(Request $request): bool
-	{
-		$id = $this->getResourceId($request);
-		if ($id === null)
-		{
-			return false;
-		}
-
-		return $this->canAccess('permissions.view');
-	}
+	protected ?string $type = 'permissions';
 
 	/**
 	 * Determines if the user can assign or create new permissions.
@@ -81,16 +50,5 @@ class PermissionPolicy extends Policy
 	public function delete(Request $request): bool
 	{
 		return $this->canAccess('permissions.assign');
-	}
-
-	/**
-	 * Determines if the user can search permissions.
-	 *
-	 * @param Request $request The request object.
-	 * @return bool True if the user can view permissions, otherwise false.
-	 */
-	public function search(Request $request): bool
-	{
-		return $this->canAccess('permissions.view');
 	}
 }

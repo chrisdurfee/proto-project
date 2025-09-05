@@ -2,8 +2,9 @@
 namespace Modules\Developer\Auth\Policies;
 
 use Modules\Developer\Auth\Gates\EnvGate;
-use Proto\Auth\Policies\Policy;
+use Common\Auth\Policies\Policy;
 use Proto\Controllers\ControllerInterface;
+use Proto\Http\Router\Request;
 
 /**
  * Class DeveloperPolicy
@@ -32,9 +33,10 @@ class DeveloperPolicy extends Policy
 	/**
 	 * Default policy for methods that don't have an explicit policy method.
 	 *
+	 * @param Request $request The request object.
 	 * @return bool True if the user can view users, otherwise false.
 	 */
-	public function default(): bool
+	public function default(Request $request): bool
 	{
 		return $this->gate->isDev();
 	}
