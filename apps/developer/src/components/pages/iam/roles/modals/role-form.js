@@ -1,14 +1,27 @@
+import { Div } from "@base-framework/atoms";
 import { Fieldset, Input, Select, Textarea } from "@base-framework/ui/atoms";
 import { FormField } from "@base-framework/ui/molecules";
+import { UnderlinedButtonTab } from "@base-framework/ui/organisms";
 import { RolePermissionFieldset } from "./role-permission-fieldset.js";
 
 /**
- * RoleForm
+ * This will create a tab content wrapper.
  *
- * @param {object} props - The properties for the form. *
- * @returns {Array} - Array of form field components.
+ * @param {object} props
+ * @param {object} children
+ * @returns {object}
  */
-export const RoleForm = ({ isEditing, role }) => ([
+const TabContent = (props, children) => (
+    Div({ class: 'py-4', ...props }, children)
+);
+
+/**
+ * This will create the role settings fieldset.
+ *
+ * @param {boolean} isEditing - Whether the role is being edited or not.
+ * @returns {object}
+ */
+const RoleSettingsFieldset = (isEditing) => (
 	Fieldset({ legend: "Role Settings" }, [
 		new FormField(
 			{ name: "name", label: "Role Name", description: "Enter the name of the role." },
@@ -42,8 +55,44 @@ export const RoleForm = ({ isEditing, role }) => ([
 				})
 			]
 		)
-	]),
-    isEditing && new RolePermissionFieldset({
-        role
-    })
-]);
+	])
+);
+
+/**
+ * RoleForm
+ *
+ * @param {object} props - The properties for the form. *
+ * @returns {Array} - Array of form field components.
+ */
+export const RoleForm = ({ isEditing, role }) => {
+	// If not editing, return the original form layout
+	if (!isEditing) {
+		return [
+			RoleSettingsFieldset(isEditing)
+		];
+	}
+
+	// If editing, use tabs to organize the form
+	return [
+		new UnderlinedButtonTab({
+			class: 'w-full',
+			options: [
+				{
+					label: 'Settings',
+					value: 'settings',
+					selected: true,
+					component: TabContent({}, [
+						RoleSettingsFieldset(isEditing)
+					])
+				},
+				{
+					label: 'Permissions',
+					value: 'permissions',
+					component: TabContent({}, [
+						new RolePermissionFieldset({ role })
+					])
+				}
+			]
+		})
+	];
+};

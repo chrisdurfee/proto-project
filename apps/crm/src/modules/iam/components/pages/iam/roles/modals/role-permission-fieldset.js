@@ -1,7 +1,7 @@
 import { Div, OnState, Span } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
 import { Toggle } from "@base-framework/ui";
-import { Fieldset, Skeleton } from "@base-framework/ui/atoms";
+import { Skeleton } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { FormField } from "@base-framework/ui/molecules";
 import { PermissionModel } from "../../permissions/models/permission-model.js";
@@ -198,21 +198,19 @@ export const RolePermissionFieldset = Jot(
 		// @ts-ignore
 		this.fetch();
 
-		return Fieldset({ legend: "Role Permissions" }, [
-			OnState('loaded', (loaded) =>
+		return OnState('loaded', (loaded) =>
+		{
+			if (!loaded)
 			{
-				if (!loaded)
-				{
-					return PermissionSkeleton();
-				}
+				return PermissionSkeleton();
+			}
 
-				return PermissionFields({
-					// @ts-ignore
-					hasPermission: this.hasPermission.bind(this),
-					// @ts-ignore
-					togglePermission: this.togglePermission.bind(this)
-				});
-			})
-		]);
+			return PermissionFields({
+				// @ts-ignore
+				hasPermission: this.hasPermission.bind(this),
+				// @ts-ignore
+				togglePermission: this.togglePermission.bind(this)
+			});
+		});
 	}
 });
