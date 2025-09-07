@@ -8,7 +8,7 @@ import { Avatar } from "@base-framework/ui/molecules";
  * @returns {Array<object>}
  */
 const UserDetails = () => [
-	Avatar({ src: '[[user.image]]', alt: '[[user.firstName]] [[user.lastName]]', watcherFallback: '[[user.firstName]] [[user.lastName]]', size: "sm" }),
+	Avatar({ src: '/files/users/profile/[[user.image]]', alt: '[[user.firstName]] [[user.lastName]]', watcherFallback: '[[user.firstName]] [[user.lastName]]', size: "sm" }),
 	Div({ class: "flex flex-auto flex-col" }, [
 		Span({ class: "text-sm truncate" }, '[[user.firstName]]'),
 		Span({ class: "text-xs truncate text-muted-foreground" }, '[[user.lastName]]'),
