@@ -1,8 +1,20 @@
-import { DatePicker } from "@base-framework/ui";
+import { Div } from "@base-framework/atoms";
 import { Fieldset, Input, Select, TelInput, Textarea } from "@base-framework/ui/atoms";
-import { FormField } from "@base-framework/ui/molecules";
+import { DatePicker, FormField } from "@base-framework/ui/molecules";
+import { UnderlinedButtonTab } from "@base-framework/ui/organisms";
 import { AuthFieldset } from "./auth-fieldset.js";
 import { UserRoleFieldset } from "./user-role-fieldset.js";
+
+/**
+ * This will create a tab content wrapper.
+ *
+ * @param {object} props
+ * @param {object} children
+ * @returns {object}
+ */
+const TabContent = (props, children) => (
+    Div({ class: 'py-4', ...props }, children)
+);
 
 /**
  * This will create the user fieldset.
@@ -305,13 +317,43 @@ const AccessFieldset = (isEditing) => (
  * @param {object} props - The properties for the form.
  * @returns {Array} - Array of form field components.
  */
-export const UserForm = ({ isEditing, user }) => ([
-	(!isEditing) && AuthFieldset(),
-	UserFieldset(isEditing),
-	ContactFieldset(isEditing),
-	LocationFieldset(isEditing),
-	isEditing && AccessFieldset(isEditing),
-	(isEditing) && new UserRoleFieldset({
-		user
-	})
-]);
+export const UserForm = ({ isEditing, user }) =>
+{
+	// If not editing, return the original form layout
+	if (!isEditing)
+	{
+		return [
+			AuthFieldset(),
+			UserFieldset(isEditing),
+			ContactFieldset(isEditing),
+			LocationFieldset(isEditing)
+		];
+	}
+
+	// If editing, use tabs to organize the form
+	return [
+		new UnderlinedButtonTab({
+			class: 'w-full',
+			options: [
+				{
+					label: 'Profile',
+					value: 'profile',
+					selected: true,
+					component: TabContent([
+						UserFieldset(isEditing),
+						ContactFieldset(isEditing),
+						LocationFieldset(isEditing),
+						AccessFieldset(isEditing)
+					])
+				},
+				{
+					label: 'Roles',
+					value: 'roles',
+					component: TabContent([
+						new UserRoleFieldset({ user })
+					])
+				}
+			]
+		})
+	];
+};

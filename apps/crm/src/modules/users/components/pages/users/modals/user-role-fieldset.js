@@ -1,6 +1,6 @@
 import { Div, OnState, Span } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
-import { Fieldset, Skeleton } from "@base-framework/ui/atoms";
+import { Skeleton } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { FormField, Toggle } from "@base-framework/ui/molecules";
 import { RoleModel } from "../models/role-model.js";
@@ -197,21 +197,19 @@ export const UserRoleFieldset = Jot(
 		// @ts-ignore
 		this.fetch();
 
-		return Fieldset({ legend: "User Roles" }, [
-			OnState('loaded', (loaded) =>
+		return OnState('loaded', (loaded) =>
+		{
+			if (!loaded)
 			{
-				if (!loaded)
-				{
-					return RoleSkeleton();
-				}
+				return RoleSkeleton();
+			}
 
-				return RoleFields({
-					// @ts-ignore
-					hasRole: this.hasRole.bind(this),
-					// @ts-ignore
-					toggleRole: this.toggleRole.bind(this)
-				});
-			})
-		]);
+			return RoleFields({
+				// @ts-ignore
+				hasRole: this.hasRole.bind(this),
+				// @ts-ignore
+				toggleRole: this.toggleRole.bind(this)
+			});
+		});
 	}
 });
