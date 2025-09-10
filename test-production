@@ -1,0 +1,3 @@
+#!/bin/bash
+# Quick wrapper to run production container test
+exec infrastructure/testing/quick-prod-test.sh "$@"

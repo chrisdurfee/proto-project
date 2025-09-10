@@ -72,6 +72,8 @@ RUN echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/uploads.ini \
 
 # Copy Apache configurations and entrypoint
 COPY infrastructure/docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY infrastructure/docker/apache-production.conf /etc/apache2/sites-available/001-production.conf
+COPY infrastructure/docker/apache-subdomain.conf /etc/apache2/sites-available/002-subdomain.conf
 COPY infrastructure/docker/performance.conf /etc/apache2/conf-available/performance.conf
 COPY infrastructure/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 

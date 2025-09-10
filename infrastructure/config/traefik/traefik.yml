@@ -1,0 +1,63 @@
+# Traefik Configuration for Production Testing
+# This file is used by the dynamic traefik configuration
+
+# Enable API and Dashboard
+api:
+  dashboard: true
+  insecure: true  # Only for testing
+
+# Entry points
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+# Certificate resolvers
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "admin@proto-test.local"
+      storage: "/certs/acme.json"
+      httpChallenge:
+        entryPoint: web
+      # Use staging for testing to avoid rate limits
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+
+# Providers
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: "proto-network"
+
+# Global redirect to HTTPS
+http:
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    secure-headers:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - OPTIONS
+          - PUT
+          - POST
+          - DELETE
+        accessControlAllowOriginList:
+          - "*"
+        accessControlMaxAge: 100
+        addVaryHeader: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+
+# Logging
+log:
+  level: INFO
+
+accessLog: {}

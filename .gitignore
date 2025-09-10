@@ -22,6 +22,7 @@ common/files/
 certs/
 private/
 certbot-webroot/
+letsencrypt/
 *.crt
 *.key
 *.pem
@@ -45,3 +46,8 @@ public/developer/
 
 # Docker volumes data
 docker/mysql/data/
+
+# Testing artifacts (generated during testing)
+docker-compose.*test*.yaml
+test-*.sh
+*-test.sh

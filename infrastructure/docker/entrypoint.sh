@@ -70,6 +70,29 @@ if [ -f /etc/apache2/conf-available/mpm-tuning.conf ]; then
     a2enconf mpm-tuning >/dev/null 2>&1 || true
 fi
 
+# Enable production Apache configuration if in production mode
+if [ "${APP_ENV}" = "production" ] || [ "${ENVIRONMENT}" = "production" ]; then
+    echo "⚙️ Enabling production Apache configuration with subdomain support"
+
+    # Enable subdomain configuration for production
+    if [ -f /etc/apache2/sites-available/002-subdomain.conf ]; then
+        a2ensite 002-subdomain >/dev/null 2>&1 || true
+        echo "✅ Subdomain configuration enabled"
+    fi
+
+    # Enable production site if available
+    if [ -f /etc/apache2/sites-available/001-production.conf ]; then
+        a2ensite 001-production >/dev/null 2>&1 || true
+    fi
+
+    # Disable default site
+    a2dissite 000-default >/dev/null 2>&1 || true
+
+    echo "✅ Production Apache configuration active"
+else
+    echo "⚙️ Using development Apache configuration"
+fi
+
 # Dynamic PHP performance tuning based on APP_ENV
 PHP_PERF_FILE="/usr/local/etc/php/conf.d/zz-env-performance.ini"
 if [ "${APP_ENV}" = "production" ]; then
