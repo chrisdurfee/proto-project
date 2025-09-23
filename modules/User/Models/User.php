@@ -82,7 +82,8 @@ class User extends Model
 
 		// social
 		'followerCount',
-		'followingCount'
+		'followingCount',
+		'verified'
 	];
 
 	/**
