@@ -38,16 +38,43 @@ fi
 # Runtime initialization (safe operations only)
 echo "� Running startup initialization..."
 
+# Wait for important app files to appear (helps when host bind-mounts may take a
+# short while to become available). This prevents running composer/migrations
+# before the source files are visible inside the container.
+WAIT_FOR_SECONDS=${WAIT_FOR_SECONDS:-30}
+count=0
+echo "⏳ Waiting up to ${WAIT_FOR_SECONDS}s for application files..."
+while [ $count -lt $WAIT_FOR_SECONDS ] && ( [ ! -f "/var/www/html/composer.json" ] || [ ! -f "/var/www/html/infrastructure/scripts/run-migrations.php" ] ); do
+    sleep 1
+    count=$((count+1))
+    if [ $((count % 5)) -eq 0 ]; then
+        echo "... waited ${count}s so far"
+    fi
+done
+
+if [ ! -f "/var/www/html/composer.json" ] || [ ! -f "/var/www/html/infrastructure/scripts/run-migrations.php" ]; then
+    echo "⚠️ Required application files still missing after ${count}s."
+    echo "   Present:"
+    [ -f "/var/www/html/composer.json" ] && echo "    - composer.json: yes" || echo "    - composer.json: MISSING"
+    [ -f "/var/www/html/infrastructure/scripts/run-migrations.php" ] && echo "    - run-migrations.php: yes" || echo "    - run-migrations.php: MISSING"
+    echo "   Proceeding but migrations may fail."
+fi
+
+# Ensure dependencies are installed BEFORE running migrations. When the project is
+# bind-mounted from the host, the image-built vendor/ can be absent at runtime.
+if [ ! -f "vendor/autoload.php" ]; then
+    if [ -f "composer.json" ]; then
+        echo "❌ Autoloader not found; running composer install to provision vendor/..."
+        composer install --no-interaction --no-dev --optimize-autoloader || echo "⚠️ Composer install failed"
+    else
+        echo "⚠️ composer.json not present; skipping composer install (expected in some workflows)"
+    fi
+fi
+
 # Check if we need to run migrations (only if requested via env var)
 if [ "$AUTO_MIGRATE" = "true" ]; then
     echo "📊 Running database migrations..."
     php infrastructure/scripts/run-migrations.php || echo "⚠️ Migration failed or skipped"
-fi
-
-# Verify critical files exist
-if [ ! -f "vendor/autoload.php" ]; then
-    echo "❌ Autoloader not found! Running composer install..."
-    composer install --no-dev --optimize-autoloader
 fi
 
 # Final health check
