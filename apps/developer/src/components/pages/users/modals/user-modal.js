@@ -10,9 +10,10 @@ import { validate } from "./validate.js";
  * Add a new user.
  *
  * @param {object} data
+ * @param {function|null} destroyCallback
  * @returns {void}
  */
-const add = (data) =>
+const add = (data, destroyCallback = null) =>
 {
 	data.xhr.add('', (response) =>
 	{
@@ -25,6 +26,11 @@ const add = (data) =>
 				icon: Icons.shield
 			});
 			return;
+		}
+
+		if (destroyCallback)
+		{
+			destroyCallback();
 		}
 
 		app.notify({
@@ -40,9 +46,10 @@ const add = (data) =>
  * Update an existing user.
  *
  * @param {object} data
+ * @param {function|null} destroyCallback
  * @returns {void}
  */
-const update = (data) =>
+const update = (data, destroyCallback = null) =>
 {
 	data.xhr.update('', (response) =>
 	{
@@ -55,6 +62,11 @@ const update = (data) =>
 				icon: Icons.shield
 			});
 			return;
+		}
+
+		if (destroyCallback)
+		{
+			destroyCallback();
 		}
 
 		app.notify({
@@ -129,11 +141,14 @@ export const UserModal = (props = {}) =>
 		type: 'right',
 		headerOptions: isEditing ? HeaderOptions(data, closeCallback, props.onSubmit) : () => [],
 		onClose: closeCallback,
-		onSubmit: ({ data }) =>
+		onSubmit: (parent) =>
 		{
+			const destroyCallback = () => parent.destroy();
+			const data = parent.data;
+
 			if (isEditing)
 			{
-				update(data);
+				update(data, destroyCallback);
 
 				if (props.onSubmit)
 				{
@@ -149,8 +164,9 @@ export const UserModal = (props = {}) =>
 					return false;
 				}
 
-				add(data);
+				add(data, destroyCallback);
 			}
+			return false;
 		}
 	}, [
 		Div({ class: 'flex flex-col lg:p-4 gap-y-8' }, [
