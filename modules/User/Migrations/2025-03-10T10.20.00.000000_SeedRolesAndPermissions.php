@@ -127,6 +127,12 @@ class SeedRolesAndPermissions extends Migration
                 'description' => 'Can assign permissions',
                 'module' => 'user',
             ],
+            [
+                'name' => 'CRM Access',
+                'slug' => 'crm.access',
+                'description' => 'Can access CRM features',
+                'module' => 'crm',
+            ],
         ];
 
         // Insert permissions
@@ -138,14 +144,19 @@ class SeedRolesAndPermissions extends Migration
         // Assign permissions to roles
 
         // Get the role IDs
-        $adminRoleId = $this->first('SELECT id FROM roles WHERE slug = ?', ['admin'])->id;
-        $managerRoleId = $this->first('SELECT id FROM roles WHERE slug = ?', ['manager'])->id;
-        $editorRoleId = $this->first('SELECT id FROM roles WHERE slug = ?', ['editor'])->id;
+        $adminRoleId = $this->getRoleId('admin');
+        $managerRoleId = $this->getRoleId('manager');
+        $editorRoleId = $this->getRoleId('editor');
 
         // Assign all permissions to the manager role
         $allPermissions = $this->fetch('SELECT id FROM permissions');
         foreach ($allPermissions as $permission)
         {
+            $this->insert('permission_roles', [
+                'role_id' => $adminRoleId,
+                'permission_id' => $permission->id,
+            ]);
+
             $this->insert('permission_roles', [
                 'role_id' => $managerRoleId,
                 'permission_id' => $permission->id,
@@ -161,6 +172,18 @@ class SeedRolesAndPermissions extends Migration
                 'permission_id' => $permission->id,
             ]);
         }
+    }
+
+    /**
+     * Get role ID by slug.
+     *
+     * @param string $slug Role slug.
+     * @return int|null Role ID or null if not found.
+     */
+    protected function getRoleId(string $slug): ?int
+    {
+        $role = $this->first('SELECT id FROM roles WHERE slug = ?', [$slug]);
+        return $role ? $role->id : null;
     }
 
     /**
