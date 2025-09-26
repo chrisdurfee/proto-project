@@ -3,6 +3,12 @@
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
 use Proto\Base;
+use Proto\Error\Error;
+
+/**
+ * Disable error tracking to prevent chicken-and-egg problem during migrations
+ */
+Error::disable();
 
 /**
  * Initialize the Proto framework
