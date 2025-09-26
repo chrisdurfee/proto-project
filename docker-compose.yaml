@@ -9,11 +9,8 @@ services:
       MARIADB_DATABASE: ${DB_DATABASE:-proto}
       MARIADB_USER: ${DB_USERNAME:-proto_app_user}
       MARIADB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env file}
-    # IMPORTANT: Database port is no longer published to the host for security.
-    # If you really need host access for debugging, temporarily uncomment below
-    # and restrict with a firewall / bind-address.
-    # ports:
-    #   - "3307:3306"
+    ports:
+      - "3307:3306"  # Database port exposed for development
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./infrastructure/config/mariadb/conf.d:/etc/mysql/mariadb.conf.d:ro
@@ -36,9 +33,8 @@ services:
     image: redis:7-alpine
     container_name: proto-redis
     restart: unless-stopped
-    # Redis no longer published to host. Uncomment only for controlled local debugging.
-    # ports:
-    #   - "6380:6379"
+    ports:
+      - "6380:6379"  # Redis port exposed for development
     volumes:
       - redis_data:/data
       - ./infrastructure/config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
@@ -53,7 +49,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # PHP Apache Web Server (Proto Backend)
+  # PHP Apache Web Server (Proto Backend) - PRODUCTION MODE WITH BUILT-IN FILES
   web:
     build:
       context: .
@@ -63,8 +59,9 @@ services:
     ports:
       - "8080:80"
     volumes:
+      # DEVELOPMENT MODE - live file sync with bind mounts
       - .:/var/www/html
-      - ./infrastructure/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./infrastructure/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
       - ./infrastructure/docker/apache-mpm.conf:/etc/apache2/conf-available/mpm-tuning.conf:ro
       # Persist/writable uploads
       - public_files:/var/www/html/public/files:rw
