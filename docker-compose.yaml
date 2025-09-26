@@ -118,6 +118,7 @@ services:
     #   - no-new-privileges:true
 
   # PHPMyAdmin (optional, for database management - DISABLE IN PRODUCTION)
+  # Default password matches .env.example - customize DB_ROOT_PASSWORD in .env if needed
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: proto-phpmyadmin
@@ -128,7 +129,7 @@ services:
       - PMA_HOST=${DB_HOST:-mariadb}
       - PMA_PORT=3306
       - PMA_USER=root
-      - PMA_PASSWORD=${DB_ROOT_PASSWORD:-root}
+      - PMA_PASSWORD=${DB_ROOT_PASSWORD:-ProtoRoot2025!AdminPass#456}
     depends_on:
       - mariadb
     networks:
