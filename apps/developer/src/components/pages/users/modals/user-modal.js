@@ -166,6 +166,10 @@ export const UserModal = (props = {}) =>
 
 				add(data, destroyCallback);
 			}
+
+			/**
+			 * If we return false, the modal will not close automatically.
+			 */
 			return false;
 		}
 	}, [
