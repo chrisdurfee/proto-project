@@ -8,9 +8,10 @@ import { RoleForm } from "./role-form.js";
  * Add a new role.
  *
  * @param {object} data
+ * @param {function|null} destroyCallback
  * @returns {void}
  */
-const add = (data) =>
+const add = (data, destroyCallback = null) =>
 {
 	data.xhr.add('', (response) =>
 	{
@@ -23,6 +24,11 @@ const add = (data) =>
 				icon: Icons.shield
 			});
 			return;
+		}
+
+		if (destroyCallback)
+		{
+			destroyCallback();
 		}
 
 		app.notify({
@@ -38,9 +44,10 @@ const add = (data) =>
  * Update an existing role.
  *
  * @param {object} data
+ * @param {function|null} destroyCallback
  * @returns {void}
  */
-const update = (data) =>
+const update = (data, destroyCallback = null) =>
 {
 	data.xhr.update('', (response) =>
 	{
@@ -53,6 +60,11 @@ const update = (data) =>
 				icon: Icons.shield
 			});
 			return;
+		}
+
+		if (destroyCallback)
+		{
+			destroyCallback();
 		}
 
 		app.notify({
@@ -86,16 +98,24 @@ export const RoleModal = (props = {}) =>
 		size: 'md',
 		type: 'right',
 		onClose: () => props.onClose && props.onClose(data),
-		onSubmit: ({ data }) =>
+		onSubmit: (parent) =>
 		{
+			const destroyCallback = () => parent.destroy();
+			const data = parent.data;
+
 			if (mode === 'edit')
 			{
-				update(data);
+				update(data, destroyCallback);
 			}
 			else
 			{
-				add(data);
+				add(data, destroyCallback);
 			}
+
+			/**
+			 * If we return false, the modal will not close automatically.
+			 */
+			return false;
 		}
 	}, [
 		Div({ class: 'flex flex-col lg:p-4 gap-y-8' }, [

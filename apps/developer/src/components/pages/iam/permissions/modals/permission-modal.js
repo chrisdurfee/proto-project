@@ -126,18 +126,32 @@ export const PermissionModal = (props = {}) =>
 		description: mode === 'edit' ? `Editing the '${item.name}' Permission` : 'Let\'s add a new Permission.',
 		size: 'md',
 		type: 'right',
-		onSubmit: ({ data }) =>
+		onSubmit: (parent) =>
 		{
-			const onClose = () => props.onClose && props.onClose(data);
+			const data = parent.data;
+			const destroyCallback = () =>
+			{
+				parent.destroy();
+
+				if (props.onClose)
+				{
+					props.onClose(data);
+				}
+			};
 
 			if (mode === 'edit')
 			{
-				update(data, onClose);
+				update(data, destroyCallback);
 			}
 			else
 			{
-				add(data, onClose);
+				add(data, destroyCallback);
 			}
+
+			/**
+			 * If we return false, the modal will not close automatically.
+			 */
+			return false;
 		}
 	}, [
 		Div({ class: 'flex flex-col lg:p-4 gap-y-8' }, [
