@@ -78,25 +78,36 @@ Key files to orient quickly:
 - Frontend proxy: each `apps/*/vite.config.js` + `infrastructure/config/domain.config.js`
 
 ## Base Framework (frontend) patterns
-- Component model
-  - Create components with `Atom((props, children) => ...)` from `@base-framework/base`.
-  - Compose UI using atoms from `@base-framework/atoms` (e.g., `Div`, `Section`, `H1`, `Pre`, `Code`, `Ul`, `Li`).
-  - Use plain `class` strings (Tailwind) and DOM-like event names (`click`, etc.).
+- Atoms (building blocks)
+  - Create with functions or `Atom((props, children)=>({...}))`; compose by nesting children.
+  - Events receive `(event, parentComponent)`; e.g., `click: (e, parent)=>{ /* use parent */ }`.
+  - Usage overloads: `Div(props)`, `Div('text')`, `Div([child1, child2])`, or `Div(props, children)`.
+  - Typical pattern (copy-to-clipboard): `Code({ click:()=>{ navigator.clipboard.writeText(...); app.notify({ title:'Code copied', icon: Icons.clipboard.checked }); } }, children)`.
+- Components (containers)
+  - Class-based components define `render()` and can use lifecycle hooks like `afterSetup()`.
+  - Scoped: atoms inherit parent component scope (state, data, directives). Routed components get `this.route` injected.
+- Data (aka jots/bindables)
+  - Bindable data via `new Data({...})` (deep) or `new SimpleData({...})` (shallow). Get/set with proxy or methods (`data.name`, `data.set({...})`).
+  - Helpers: `increment`, `decrement`, `toggle`, `scope(path)`, array ops (`push`, `splice`, `unshift`, `shift`, `pop`), `refresh`, `revert`.
+  - Local storage: `data.setKey('KEY'); data.resume(defaults); data.store();`
+- Directives (power-ups)
+  - Binding: `bind: 'prop'` or `bind: ['prop', filterOrFn]`; bind attribute: `bind: 'href:prop'`.
+  - Watchers: string placeholders `[[prop]]` in attributes or `{ watch: {...} }` for custom attr/callback.
+  - Reactive: `onSet: ['prop', fn]` and `onState: ['state', fn]` to update layout/classes.
+  - Routing: `route: { uri, component|import, title, persist? }` or an array; `switch: [...]` renders first match.
+  - Cache elements: `{ cache: 'propertyName' }` then use `this.propertyName` in parent after render.
+  - Lifecycle callbacks: `{ onCreated(ele, parent){...}, onDestroyed(ele){...}, debug:true }`.
+  - Context: `{ context: (ctx)=>({ text: ctx.data.name }) }` to pass data down without props.
+  - Mapping: `{ map: [items, (item,i)=> new Item(item)] }` or `for: ['prop', (item,i,scoped)=> ... ]` for bindable arrays.
+  - Dataset/ARIA/ID: `{ dataSet:[...], aria:{...}, getId:'prop' }`.
+  - Custom directives: `Directives.add('name', (ele, data, parent)=>{ /* ... */ })`.
+- Special atoms
+  - Conditional children: `On('prop', (v)=> v? ViewA(): ViewB())`, `OnState('state', fn)`, `OnRoute('prop', fn)`.
+  - Access parent: `UseParent((parent)=> Div({ class: parent.state.loaded? 'loaded':'loading' }))`.
 - Icons and notifications
-  - Import `Icons` from `@base-framework/ui/icons` and pass icons to components or notifications.
-  - Global notify: `app.notify({ title, description, icon: Icons.circleCheck })`.
-- Typical Atom pattern
-  - Example (copy-to-clipboard code block used across docs):
-    - Define once: `const CodeBlock = Atom((props, children) => Pre({ ...props, class: '...'}, [ Code({ class: 'font-mono ...', click: () => { navigator.clipboard.writeText(children[0].textContent); app.notify({ title: 'Code copied', description: '...', icon: Icons.clipboard.checked }); } }, children) ]));`
-- Project structure and aliases
-  - Each app defines aliases in `vite.config.js`: `@components`, `@pages`, `@modules`, `@shell` (used by imports under `src/`).
-  - Dev servers run on ports 3000/3001/3002 and proxy `/api` to the backend URL from `generateUrls(isDev)`.
-- Environment usage
-  - Access API in frontend via relative `/api/...`; for advanced cases, `process.env.VITE_API_URL` is defined in the Developer app `vite.config.js`.
-- UI composition tips
-  - Icons: use `Icons.*` like `Icons.loading`, `Icons.circleCheck`, `Icons.clipboard.checked`.
-  - Elements accept `html:` to inject icon SVGs when needed, or use the provided Icon helpers where available.
-  - Notifications and interactions are often wired on the `click` handler in Atom props.
-- Styling
-  - Tailwind via `@tailwindcss/vite`; write classes directly in the `class` prop.
+  - `Icons` from `@base-framework/ui/icons`; global notify via `app.notify({ title, description, icon: Icons.circleCheck })`.
+- Project wiring
+  - Aliases in `vite.config.js`: `@components`, `@pages`, `@modules`, `@shell`. Dev servers proxy `/api` using `generateUrls(isDev)`.
+  - Environment: use relative `/api/...`; Developer app exposes `process.env.VITE_API_URL`.
+  - Styling: Tailwind via `@tailwindcss/vite`; pass class strings directly via `class` prop.
 
