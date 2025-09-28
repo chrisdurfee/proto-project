@@ -76,3 +76,27 @@ Key files to orient quickly:
 - Backend boot: `public/api/index.php`, `Dockerfile`, `infrastructure/docker/entrypoint.sh`
 - Config flow: `common/Config/.env` (JSON) → `sync-config.js` → root `.env` used by `docker-compose.yaml`
 - Frontend proxy: each `apps/*/vite.config.js` + `infrastructure/config/domain.config.js`
+
+## Base Framework (frontend) patterns
+- Component model
+  - Create components with `Atom((props, children) => ...)` from `@base-framework/base`.
+  - Compose UI using atoms from `@base-framework/atoms` (e.g., `Div`, `Section`, `H1`, `Pre`, `Code`, `Ul`, `Li`).
+  - Use plain `class` strings (Tailwind) and DOM-like event names (`click`, etc.).
+- Icons and notifications
+  - Import `Icons` from `@base-framework/ui/icons` and pass icons to components or notifications.
+  - Global notify: `app.notify({ title, description, icon: Icons.circleCheck })`.
+- Typical Atom pattern
+  - Example (copy-to-clipboard code block used across docs):
+    - Define once: `const CodeBlock = Atom((props, children) => Pre({ ...props, class: '...'}, [ Code({ class: 'font-mono ...', click: () => { navigator.clipboard.writeText(children[0].textContent); app.notify({ title: 'Code copied', description: '...', icon: Icons.clipboard.checked }); } }, children) ]));`
+- Project structure and aliases
+  - Each app defines aliases in `vite.config.js`: `@components`, `@pages`, `@modules`, `@shell` (used by imports under `src/`).
+  - Dev servers run on ports 3000/3001/3002 and proxy `/api` to the backend URL from `generateUrls(isDev)`.
+- Environment usage
+  - Access API in frontend via relative `/api/...`; for advanced cases, `process.env.VITE_API_URL` is defined in the Developer app `vite.config.js`.
+- UI composition tips
+  - Icons: use `Icons.*` like `Icons.loading`, `Icons.circleCheck`, `Icons.clipboard.checked`.
+  - Elements accept `html:` to inject icon SVGs when needed, or use the provided Icon helpers where available.
+  - Notifications and interactions are often wired on the `click` handler in Atom props.
+- Styling
+  - Tailwind via `@tailwindcss/vite`; write classes directly in the `class` prop.
+
