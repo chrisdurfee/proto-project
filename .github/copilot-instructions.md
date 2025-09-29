@@ -119,5 +119,5 @@ Key files to orient quickly:
 - Project wiring
   - Aliases in `vite.config.js`: `@components`, `@pages`, `@modules`, `@shell`. Dev servers proxy `/api` using `generateUrls(isDev)`.
   - Environment: use relative `/api/...`; Developer app exposes `process.env.VITE_API_URL`.
-  - Styling: Tailwind via `@tailwindcss/vite`; pass class strings directly via `class` prop.
+  - Styling: Tailwind v4 via `@tailwindcss/vite`; pass class strings directly via `class` prop.
 
