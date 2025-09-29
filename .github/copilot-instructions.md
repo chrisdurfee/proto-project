@@ -104,6 +104,16 @@ Key files to orient quickly:
 - Special atoms
   - Conditional children: `On('prop', (v)=> v? ViewA(): ViewB())`, `OnState('state', fn)`, `OnRoute('prop', fn)`.
   - Access parent: `UseParent((parent)=> Div({ class: parent.state.loaded? 'loaded':'loading' }))`.
+- Smart atoms (conditional/render helpers)
+  - On/OnState/OnRoute: reactive child rendering when a bindable value changes. Two overloads:
+    - `On('prop', (value, ele, parent)=> Layout)` watches component data → context → state in order.
+    - `On(source, 'prop', (value, ele, parent)=> Layout)` watches a custom source (e.g., `this.route`).
+  - If/IfState: exact-match conditional rendering.
+    - `If('prop', 'expected', (val, ele, parent)=> Layout)` or `IfState('stateKey','expected', cb)`.
+    - With custom source: `If(parent.weatherData, 'condition','sunny', cb)`.
+  - OnLoad/OnStateLoad: shorthand of `On('loaded', ...)` and state-only variant for loading UX.
+  - OnOpen/OnStateOpen: shorthand of `On('open', ...)` and state-only variant for modals/menus.
+  - Callback signature for all: `(value, element, parent)=> mixed`.
 - Icons and notifications
   - `Icons` from `@base-framework/ui/icons`; global notify via `app.notify({ title, description, icon: Icons.circleCheck })`.
 - Project wiring
