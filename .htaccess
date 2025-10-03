@@ -1,10 +1,11 @@
 RewriteEngine On
 
-# Force HTTPS (if not already secure)
-<IfModule mod_rewrite.c>
-    RewriteCond %{HTTPS} !=on
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-</IfModule>
+# Force HTTPS (if not already secure) - DISABLED FOR DEVELOPMENT
+# Uncomment for production deployment
+#<IfModule mod_rewrite.c>
+#    RewriteCond %{HTTPS} !=on
+#    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+#</IfModule>
 
 # Disable directory listing
 Options -Indexes
@@ -114,15 +115,18 @@ AddType font/opentype .otf
 </IfModule>
 
 # URL rewriting rules for your app
+# Note: DocumentRoot is /var/www/html/public so paths are relative to that
 <IfModule mod_rewrite.c>
-    RewriteRule ^crm/(.*)$ /public/crm/$1 [L,NC,QSA]
-    RewriteRule ^developer/(.*)$ /public/developer/$1 [L,NC,QSA]
-    RewriteRule ^embed/(.*)$ /public/embed/$1 [L,NC,QSA]
-    RewriteRule ^api/(.*)$ /public/api/$1 [L,NC,QSA]
+    RewriteBase /
+
+    # Route to crm, developer, embed, and api subdirectories
+    RewriteRule ^crm/(.*)$ crm/$1 [L,NC,QSA]
+    RewriteRule ^developer/(.*)$ developer/$1 [L,NC,QSA]
+    RewriteRule ^embed/(.*)$ embed/$1 [L,NC,QSA]
+    RewriteRule ^api/(.*)$ api/$1 [L,NC,QSA]
 
     # Redirect non-existent files/directories to main index (adjust as needed)
-    RewriteBase /
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ /public/main/$1 [NC,L,QSA]
+    RewriteRule ^(.*)$ main/$1 [NC,L,QSA]
 </IfModule>
