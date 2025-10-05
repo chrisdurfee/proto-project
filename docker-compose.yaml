@@ -68,9 +68,8 @@ services:
       # Essential config files (PHP and Apache)
       - ./infrastructure/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
       - ./infrastructure/docker/apache-mpm.conf:/etc/apache2/conf-available/mpm-tuning.conf:ro
-      # Persist/writable uploads (use named volumes to avoid conflicts)
-      - public_files:/var/www/html/public/files:rw
-      - common_files:/var/www/html/common/files:rw
+      # NOTE: Removed nested volume mounts (public_files, common_files) that were masking parent bind mounts
+      # Files are now included in the bind mounts above for development flexibility
     depends_on:
       - mariadb
       - redis
@@ -142,10 +141,8 @@ volumes:
     driver: local
   redis_data:
     driver: local
-  public_files:
-    driver: local
-  common_files:
-    driver: local
+  # Removed public_files and common_files volumes - using bind mounts instead for development
+  # This prevents nested volumes from masking parent bind mounts
 
 networks:
   proto-network:
