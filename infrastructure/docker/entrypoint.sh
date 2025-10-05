@@ -120,6 +120,12 @@ else
     echo "⚙️ Using development Apache configuration"
 fi
 
+# Ensure preload.php exists to prevent OPcache errors (especially in production)
+if [ ! -f /var/www/html/preload.php ]; then
+    echo "⚠️ preload.php missing, creating dynamic stub..."
+    echo "<?php // dynamic preload stub - created at runtime ?>" > /var/www/html/preload.php
+fi
+
 # Dynamic PHP performance tuning based on APP_ENV
 PHP_PERF_FILE="/usr/local/etc/php/conf.d/zz-env-performance.ini"
 if [ "${APP_ENV}" = "production" ]; then
