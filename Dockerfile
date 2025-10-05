@@ -98,6 +98,9 @@ COPY sync-config.js* ./
 # Copy just the modules structure for autoloader (these will be overlaid by bind mount)
 COPY modules/ ./modules/
 
+# Copy common structure for autoloader (will be overlaid by bind mount in development)
+COPY common/ ./common/
+
 # Don't create directories that will be bind mounted - let Docker handle them
 # This avoids bind mount overlay conflicts
 
