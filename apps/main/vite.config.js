@@ -1,4 +1,5 @@
 import tailwindcss from '@tailwindcss/vite';
+import fs from 'fs';
 import path from 'path';
 import { defineConfig } from 'vite';
 import { generateUrls } from '../../infrastructure/config/domain.config.js';
@@ -27,6 +28,10 @@ export default defineConfig({
 		port: 3000,
 		cors: true,
 		open: true,
+		https: {
+			key: fs.readFileSync('../../infrastructure/docker/ssl/localhost.key'),
+			cert: fs.readFileSync('../../infrastructure/docker/ssl/localhost.crt'),
+		},
 		proxy: {
 			'/api': {
 				target: apiTarget,
