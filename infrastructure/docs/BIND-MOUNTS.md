@@ -292,10 +292,10 @@ COPY common/ ./common/
 
 The bind mount strategy provides:
 
-✅ **Self-contained images** (production-ready)  
-✅ **Live code editing** (development-friendly)  
-✅ **Automatic dependency management** (beginner-friendly)  
-✅ **Flexible installation** (works for any scenario)  
+✅ **Self-contained images** (production-ready)
+✅ **Live code editing** (development-friendly)
+✅ **Automatic dependency management** (beginner-friendly)
+✅ **Flexible installation** (works for any scenario)
 ✅ **IDE integration** (optional local vendor/)
 
 This approach balances convenience, performance, and production readiness without requiring users to understand Docker internals.
