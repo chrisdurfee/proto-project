@@ -8,7 +8,7 @@ This directory contains all development and deployment infrastructure for the Pr
 infrastructure/
 ├─ config/          # Configuration files
 │  ├─ domain.config.js              # Domain configuration system
-│  ├─ docker-compose.prod.yaml      # Production Docker setup
+│  ├─ docker-compose.production.yaml # Production Docker setup
 │  └─ docker-compose.traefik.yaml   # Traefik reverse proxy setup
 ├─ docker/          # Docker-related files
 │  ├─ apache-subdomain.conf         # Apache virtual host for subdomains
@@ -57,7 +57,7 @@ From the project root, you can run any script using the script runner:
 ## ⚙️ Configuration Files
 
 - **domain.config.js** - Centralized domain configuration system
-- **docker-compose.prod.yaml** - Production Docker Compose setup
+- **docker-compose.production.yaml** - Production Docker Compose setup
 - **docker-compose.traefik.yaml** - Traefik reverse proxy configuration
 
 All configuration files support the centralized domain configuration system that reads from `common/Config/.env`.

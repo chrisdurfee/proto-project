@@ -104,21 +104,28 @@ if [ "${APP_ENV}" = "production" ] || [ "${ENVIRONMENT}" = "production" ]; then
     # Enable subdomain configuration for production
     if [ -f /etc/apache2/sites-available/002-subdomain.conf ]; then
         a2ensite 002-subdomain >/dev/null 2>&1 || true
-        echo "✅ Subdomain configuration enabled"
+        echo "✅ Subdomain HTTP configuration enabled"
     fi
 
-    # Enable production site if available
-    if [ -f /etc/apache2/sites-available/001-production.conf ]; then
-        a2ensite 001-production >/dev/null 2>&1 || true
+    # Enable subdomain SSL configuration
+    if [ -f /etc/apache2/sites-available/003-subdomain-ssl.conf ]; then
+        a2ensite 003-subdomain-ssl >/dev/null 2>&1 || true
+        echo "✅ Subdomain HTTPS configuration enabled"
     fi
+
+    # Disable production site to avoid conflicts with subdomain routing
+    a2dissite 001-production >/dev/null 2>&1 || true
 
     # Disable default site
     a2dissite 000-default >/dev/null 2>&1 || true
+    a2dissite default-ssl >/dev/null 2>&1 || true
 
     echo "✅ Production Apache configuration active"
 else
     echo "⚙️ Using development Apache configuration"
 fi
+
+# Note: Apache will need a graceful restart after PHP-FPM starts to fully load subdomain configs
 
 # Ensure preload.php exists to prevent OPcache errors (especially in production)
 if [ ! -f /var/www/html/preload.php ]; then

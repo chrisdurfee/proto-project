@@ -128,7 +128,9 @@ Edit `common/Config/.env`:
 
 ```bash
 # Start production containers with SSL support
-docker-compose -f docker-compose.prod.yaml up -d
+```bash
+docker-compose -f docker-compose.production.yaml up -d
+```
 ```
 
 ### 3. Verify SSL
@@ -183,7 +185,9 @@ cp certs/live/$DOMAIN_NAME/fullchain.pem certs/$DOMAIN_NAME.crt
 cp certs/live/$DOMAIN_NAME/privkey.pem private/$DOMAIN_NAME.key
 
 # Restart web server
-docker-compose -f docker-compose.prod.yaml restart web
+```bash
+docker-compose -f docker-compose.production.yaml restart web
+```
 ```
 
 ## Troubleshooting

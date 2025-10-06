@@ -131,7 +131,7 @@ EOF
 
         echo "📋 Next steps:"
         echo "1. Update your domain configuration in common/Config/.env"
-        echo "2. Use docker-compose.prod.yaml for production deployment"
+        echo "2. Use docker-compose.production.yaml for production deployment"
         echo "3. Set up a cron job to run ./renew-certificates.sh monthly"
     else
         echo "❌ Failed to obtain production certificates"

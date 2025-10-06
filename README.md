@@ -216,7 +216,7 @@ proto-project/
 ├─ infrastructure/         # Development & deployment infrastructure
 │  ├─ config/              # Configuration files
 │  │  ├─ domain.config.js  # Domain configuration system
-│  │  ├─ docker-compose.prod.yaml # Production Docker setup
+│  │  ├─ docker-compose.production.yaml # Production Docker setup
 │  │  └─ docker-compose.traefik.yaml # Traefik reverse proxy
 │  ├─ docker/              # Docker-related files
 │  │  ├─ apache-subdomain.conf # Apache virtual host config
@@ -262,7 +262,7 @@ docker-compose exec web php infrastructure/scripts/run-migrations.php  # Alterna
 # Production
 ./run.sh setup-ssl yourdomain.com your-email@domain.com  # Setup SSL
 ./run.sh build                    # Build all apps for production
-docker-compose -f infrastructure/config/docker-compose.prod.yaml up -d  # Deploy production
+docker-compose -f docker-compose.production.yaml up -d  # Deploy production
 
 # Utilities
 ./run.sh help                     # Show all available scripts

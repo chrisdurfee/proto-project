@@ -224,7 +224,9 @@ After SSL setup, deploy with production configuration:
 
 ```bash
 # Use production Docker Compose with SSL support
-docker-compose -f docker-compose.prod.yaml up -d
+```bash
+docker-compose -f docker-compose.production.yaml up -d
+```
 ```
 
 This provides:

@@ -49,7 +49,9 @@ cp .env.example .env
 nano .env
 
 # Start with SSL support
-docker-compose -f docker-compose.prod.yaml up -d
+```bash
+docker-compose -f docker-compose.production.yaml up -d
+```
 ```
 
 **Required .env variables:**
@@ -80,7 +82,7 @@ If you have your own SSL certificates:
    chmod 600 private/yourdomain.com.key
    ```
 
-2. **Update docker-compose.prod.yaml** to mount your certificates:
+2. **Update docker-compose.production.yaml** to mount your certificates:
    ```yaml
    web:
      volumes:
