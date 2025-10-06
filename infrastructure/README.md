@@ -35,10 +35,15 @@ From the project root, you can run any script using the script runner:
 
 ```bash
 # Configuration
-./run.sh sync-config
+## Quick Commands
+
+```bash
+# Sync configuration
+./infrastructure/scripts/run.sh sync-config
 
 # SSL Setup
-./run.sh setup-ssl yourdomain.com admin@yourdomain.com
+# Setup SSL certificates
+./infrastructure/scripts/run.sh setup-ssl yourdomain.com admin@yourdomain.com
 
 # Production Build
 ./run.sh build

@@ -129,7 +129,7 @@ Edit `common/Config/.env`:
 ```bash
 # Start production containers with SSL support
 ```bash
-docker-compose -f docker-compose.production.yaml up -d
+docker-compose -f infrastructure/docker-compose.production.yaml up -d
 ```
 ```
 
@@ -186,7 +186,7 @@ cp certs/live/$DOMAIN_NAME/privkey.pem private/$DOMAIN_NAME.key
 
 # Restart web server
 ```bash
-docker-compose -f docker-compose.production.yaml restart web
+docker-compose -f infrastructure/docker-compose.production.yaml restart web
 ```
 ```
 

@@ -62,17 +62,16 @@ Update the environment variables as needed. Then, sync your Proto configuration 
 
 ```bash
 # Generate Docker .env from Proto configuration
-./run.sh sync-config
+./infrastructure/scripts/run.sh sync-config
 
-# Or run directly: node sync-config.js
+# Or run directly: node infrastructure/scripts/sync-config.js
 ```
 
 ### Quick Start
 
 **1. Start Backend Services:**
 ```bash
-docker-compose up -d
-```
+docker-compose -f infrastructure/docker-compose.yaml up -d      # Start development
 
 > **✨ Automatic Setup**:
 > - First run will build the Docker image (may take 2-3 minutes)
@@ -245,8 +244,9 @@ proto-project/
 
 ```bash
 # Configuration
-./run.sh sync-config              # Sync Proto config to Docker
-node sync-config.js               # Alternative: direct sync
+docker-compose -f infrastructure/docker-compose.yaml down         # Stop all services
+./infrastructure/scripts/run.sh sync-config              # Sync Proto config to Docker
+node infrastructure/scripts/sync-config.js               # Alternative: direct sync
 
 # Development
 docker-compose up -d              # Start backend services (auto-migrates by default)
@@ -256,13 +256,14 @@ cd apps/developer && npm run dev  # Start developer tools
 
 # Database
 AUTO_MIGRATE=false docker-compose up -d  # Start without auto-migration
-./run.sh migrations               # Run database migrations manually
+./infrastructure/scripts/run.sh migrations               # Run database migrations manually
 docker-compose exec web php infrastructure/scripts/run-migrations.php  # Alternative manual migration
 
 # Production
-./run.sh setup-ssl yourdomain.com your-email@domain.com  # Setup SSL
-./run.sh build                    # Build all apps for production
-docker-compose -f docker-compose.production.yaml up -d  # Deploy production
+# SSL & Production
+./infrastructure/scripts/run.sh setup-ssl yourdomain.com your-email@domain.com  # Setup SSL
+./infrastructure/scripts/run.sh build                    # Build all apps for production
+docker-compose -f infrastructure/docker-compose.production.yaml up -d  # Deploy production
 
 # Utilities
 ./run.sh help                     # Show all available scripts

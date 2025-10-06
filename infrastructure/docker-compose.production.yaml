@@ -1,5 +1,5 @@
 # Production Docker Compose Configuration
-# Usage: docker-compose -f docker-compose.production.yaml up -d
+# Usage: docker-compose -f infrastructure/docker-compose.production.yaml up -d
 # This is a standalone production configuration (does not extend development config)
 
 services:
@@ -62,8 +62,8 @@ services:
   # PHP Apache Web Server - PRODUCTION with baked-in assets
   web:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: infrastructure/docker/Dockerfile
     image: proto-project-web:latest
     container_name: proto-web
     restart: unless-stopped

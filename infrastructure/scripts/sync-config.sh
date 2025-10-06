@@ -3,7 +3,7 @@
 # Linux/macOS script to sync Proto configuration to Docker
 
 echo "🔄 Syncing configuration from Proto to Docker..."
-node sync-config.js
+node infrastructure/scripts/sync-config.js
 
 if [ $? -eq 0 ]; then
     echo ""

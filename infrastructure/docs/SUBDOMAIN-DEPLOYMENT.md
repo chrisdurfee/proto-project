@@ -50,7 +50,7 @@ nano .env
 
 # Start with SSL support
 ```bash
-docker-compose -f docker-compose.production.yaml up -d
+docker-compose -f infrastructure/docker-compose.production.yaml up -d
 ```
 ```
 

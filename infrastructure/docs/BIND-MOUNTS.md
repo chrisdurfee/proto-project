@@ -123,7 +123,7 @@ docker-compose up -d
 
 ```bash
 # Production doesn't use bind mounts
-docker-compose -f docker-compose.production.yaml up -d
+docker-compose -f infrastructure/docker-compose.production.yaml up -d
 ```
 
 **What happens:**
@@ -235,7 +235,7 @@ COPY common/ ./common/
 
 1. **Use dedicated production compose file**:
    ```bash
-   docker-compose -f docker-compose.production.yaml up -d
+   docker-compose -f infrastructure/docker-compose.production.yaml up -d
    ```
 
 2. **Build optimized image**:

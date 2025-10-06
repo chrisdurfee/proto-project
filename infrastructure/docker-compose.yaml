@@ -52,8 +52,8 @@ services:
   # PHP Apache Web Server (Proto Backend) - PRODUCTION MODE WITH BUILT-IN FILES
   web:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: infrastructure/docker/Dockerfile
     container_name: proto-web
     restart: unless-stopped
     ports:

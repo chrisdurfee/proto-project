@@ -33,33 +33,33 @@ The production setup uses a **standalone Docker image** that includes:
 
 ```bash
 # Build the production image (includes frontend builds)
-docker-compose -f docker-compose.production.yaml build web
+docker-compose -f infrastructure/docker-compose.production.yaml build web
 
 # Or build from scratch (recommended after code changes)
-docker-compose -f docker-compose.production.yaml build --no-cache web
+docker-compose -f infrastructure/docker-compose.production.yaml build --no-cache web
 ```
 
 ### Start Production Environment
 
 ```bash
 # Start all services (web, mariadb, redis)
-docker-compose -f docker-compose.production.yaml up -d
+docker-compose -f infrastructure/docker-compose.production.yaml up -d
 
 # Check status
-docker-compose -f docker-compose.production.yaml ps
+docker-compose -f infrastructure/docker-compose.production.yaml ps
 
 # View logs
-docker-compose -f docker-compose.production.yaml logs -f web
+docker-compose -f infrastructure/docker-compose.production.yaml logs -f web
 ```
 
 ### Stop Production Environment
 
 ```bash
 # Stop all containers
-docker-compose -f docker-compose.production.yaml down
+docker-compose -f infrastructure/docker-compose.production.yaml down
 
 # Stop and remove volumes (WARNING: deletes database)
-docker-compose -f docker-compose.production.yaml down -v
+docker-compose -f infrastructure/docker-compose.production.yaml down -v
 ```
 
 ---
@@ -68,7 +68,7 @@ docker-compose -f docker-compose.production.yaml down -v
 
 ### What Happens During Build
 
-When you run `docker-compose -f docker-compose.production.yaml build web`:
+When you run `docker-compose -f infrastructure/docker-compose.production.yaml build web`:
 
 1. **Base Image**: PHP 8.3-FPM from official Docker image
 2. **System Packages**: Apache, Node.js 18, build tools
@@ -178,7 +178,7 @@ volumes:
 
 ### Production Environment Variables
 
-Located in `docker-compose.production.yaml`:
+Located in `infrastructure/docker-compose.production.yaml`:
 
 ```yaml
 environment:
@@ -249,18 +249,18 @@ These files handle:
 
 ```bash
 # 1. Rebuild the image
-docker-compose -f docker-compose.production.yaml build web
+docker-compose -f infrastructure/docker-compose.production.yaml build web
 
 # 2. Recreate containers
-docker-compose -f docker-compose.production.yaml up -d --force-recreate web
+docker-compose -f infrastructure/docker-compose.production.yaml up -d --force-recreate web
 ```
 
 ### After Configuration Changes
 
 ```bash
 # Rebuild with no cache to ensure changes are picked up
-docker-compose -f docker-compose.production.yaml build --no-cache web
-docker-compose -f docker-compose.production.yaml up -d --force-recreate
+docker-compose -f infrastructure/docker-compose.production.yaml build --no-cache web
+docker-compose -f infrastructure/docker-compose.production.yaml up -d --force-recreate
 ```
 
 ### Database Migrations
@@ -269,7 +269,7 @@ Migrations run automatically on container startup when `AUTO_MIGRATE=true`.
 
 To run manually:
 ```bash
-docker-compose -f docker-compose.production.yaml exec web php infrastructure/scripts/run-migrations.php
+docker-compose -f infrastructure/docker-compose.production.yaml exec web php infrastructure/scripts/run-migrations.php
 ```
 
 ---
@@ -280,7 +280,7 @@ docker-compose -f docker-compose.production.yaml exec web php infrastructure/scr
 
 ```bash
 # Check logs
-docker-compose -f docker-compose.production.yaml logs web
+docker-compose -f infrastructure/docker-compose.production.yaml logs web
 
 # Common issues:
 # - Port conflicts (80, 443 already in use)
@@ -311,10 +311,10 @@ If incorrect, update the config files and rebuild the image.
 cat /etc/hosts | grep localhost
 
 # 2. Check Apache vhost configuration
-docker-compose -f docker-compose.production.yaml exec web apache2ctl -S
+docker-compose -f infrastructure/docker-compose.production.yaml exec web apache2ctl -S
 
 # 3. Verify subdomain configs are enabled
-docker-compose -f docker-compose.production.yaml exec web ls -la /etc/apache2/sites-enabled/
+docker-compose -f infrastructure/docker-compose.production.yaml exec web ls -la /etc/apache2/sites-enabled/
 ```
 
 ### Host Apache Interfering
@@ -327,20 +327,20 @@ sudo systemctl stop apache2
 sudo systemctl disable apache2
 
 # Then restart containers
-docker-compose -f docker-compose.production.yaml restart web
+docker-compose -f infrastructure/docker-compose.production.yaml restart web
 ```
 
 ### Database Connection Issues
 
 ```bash
 # Check MariaDB is running
-docker-compose -f docker-compose.production.yaml ps mariadb
+docker-compose -f infrastructure/docker-compose.production.yaml ps mariadb
 
 # Check logs
-docker-compose -f docker-compose.production.yaml logs mariadb
+docker-compose -f infrastructure/docker-compose.production.yaml logs mariadb
 
 # Connect to database
-docker-compose -f docker-compose.production.yaml exec mariadb mysql -u proto_app_user -p proto
+docker-compose -f infrastructure/docker-compose.production.yaml exec mariadb mysql -u proto_app_user -p proto
 ```
 
 ---
@@ -381,7 +381,7 @@ MaxConnectionsPerChild   0
 
 ### Resource Limits
 
-Configured in `docker-compose.production.yaml`:
+Configured in `infrastructure/docker-compose.production.yaml`:
 
 ```yaml
 deploy:
@@ -408,7 +408,7 @@ Adjust based on your server's capacity.
 ### Before Production Deployment
 
 1. **Change all passwords**:
-   - Database passwords in `docker-compose.production.yaml`
+   - Database passwords in `infrastructure/docker-compose.production.yaml`
    - Redis password
    - Any API keys in configuration
 
@@ -446,8 +446,8 @@ Adjust based on your server's capacity.
 If you encounter issues:
 
 1. Check the [Troubleshooting](#-troubleshooting) section above
-2. Review container logs: `docker-compose -f docker-compose.production.yaml logs -f`
-3. Verify container health: `docker-compose -f docker-compose.production.yaml ps`
+2. Review container logs: `docker-compose -f infrastructure/docker-compose.production.yaml logs -f`
+3. Verify container health: `docker-compose -f infrastructure/docker-compose.production.yaml ps`
 4. Check GitHub issues or create a new one
 
 ---
@@ -458,23 +458,23 @@ If you encounter issues:
 
 ```bash
 # Build
-docker-compose -f docker-compose.production.yaml build web
-docker-compose -f docker-compose.production.yaml build --no-cache web
+docker-compose -f infrastructure/docker-compose.production.yaml build web
+docker-compose -f infrastructure/docker-compose.production.yaml build --no-cache web
 
 # Start/Stop
-docker-compose -f docker-compose.production.yaml up -d
-docker-compose -f docker-compose.production.yaml down
+docker-compose -f infrastructure/docker-compose.production.yaml up -d
+docker-compose -f infrastructure/docker-compose.production.yaml down
 
 # Logs & Status
-docker-compose -f docker-compose.production.yaml logs -f web
-docker-compose -f docker-compose.production.yaml ps
+docker-compose -f infrastructure/docker-compose.production.yaml logs -f web
+docker-compose -f infrastructure/docker-compose.production.yaml ps
 
 # Execute Commands
-docker-compose -f docker-compose.production.yaml exec web bash
-docker-compose -f docker-compose.production.yaml exec web php artisan migrate
+docker-compose -f infrastructure/docker-compose.production.yaml exec web bash
+docker-compose -f infrastructure/docker-compose.production.yaml exec web php artisan migrate
 
 # Cleanup
-docker-compose -f docker-compose.production.yaml down -v
+docker-compose -f infrastructure/docker-compose.production.yaml down -v
 docker system prune -a
 ```
 
@@ -482,8 +482,8 @@ docker system prune -a
 
 | Item | Path |
 |------|------|
-| Production Compose | `docker-compose.production.yaml` |
-| Dockerfile | `Dockerfile` |
+| Production Compose | `infrastructure/docker-compose.production.yaml` |
+| infrastructure/docker/Dockerfile | `infrastructure/docker/Dockerfile` |
 | Apache HTTP Config | `infrastructure/docker/apache-subdomain.conf` |
 | Apache HTTPS Config | `infrastructure/docker/apache-subdomain-ssl.conf` |
 | Entrypoint Script | `infrastructure/docker/entrypoint.sh` |

@@ -9,10 +9,9 @@ shift # Remove script name from arguments
 SCRIPTS_DIR="./infrastructure/scripts"
 
 case "$SCRIPT_NAME" in
-    "sync"|"sync-config")
-        echo "🔄 Syncing configuration..."
-        node sync-config.js
-        ;;
+    "sync-config")
+        echo "� Syncing configuration..."
+        node infrastructure/scripts/sync-config.js
     "build"|"build-production")
         echo "🏗️ Running production build..."
         if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then

@@ -128,9 +128,9 @@ fi
 # Note: Apache will need a graceful restart after PHP-FPM starts to fully load subdomain configs
 
 # Ensure preload.php exists to prevent OPcache errors (especially in production)
-if [ ! -f /var/www/html/preload.php ]; then
+if [ ! -f /var/www/html/infrastructure/config/preload.php ]; then
     echo "⚠️ preload.php missing, creating dynamic stub..."
-    echo "<?php // dynamic preload stub - created at runtime ?>" > /var/www/html/preload.php
+    echo "<?php // dynamic preload stub - created at runtime ?>" > /var/www/html/infrastructure/config/preload.php
 fi
 
 # Dynamic PHP performance tuning based on APP_ENV
@@ -141,7 +141,7 @@ if [ "${APP_ENV}" = "production" ]; then
 ; Runtime generated (production)
 opcache.validate_timestamps=0
 opcache.revalidate_freq=0
-opcache.preload=/var/www/html/preload.php
+opcache.preload=/var/www/html/infrastructure/config/preload.php
 opcache.preload_user=www-data
 opcache.save_comments=1
 opcache.max_wasted_percentage=5
@@ -156,8 +156,8 @@ opcache.max_wasted_percentage=15
 EOF
 fi
 
-if [ ! -f /var/www/html/preload.php ]; then
-    echo "<?php // dynamic preload stub ?>" > /var/www/html/preload.php
+if [ ! -f /var/www/html/infrastructure/config/preload.php ]; then
+    echo "<?php // dynamic preload stub ?>" > /var/www/html/infrastructure/config/preload.php
 fi
 
 php -i | grep -E 'opcache.jit_buffer_size|opcache.jit=|validate_timestamps|revalidate_freq' || true

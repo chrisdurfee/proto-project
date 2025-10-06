@@ -338,7 +338,7 @@ setup-ssl.bat yourdomain.com your-email@yourdomain.com
 ```bash
 # After SSL setup, use production configuration
 ```bash
-docker-compose -f docker-compose.production.yaml up -d
+docker-compose -f infrastructure/docker-compose.production.yaml up -d
 ```
 ```
 
