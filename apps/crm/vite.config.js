@@ -8,13 +8,14 @@ import { generateUrls } from '../../infrastructure/config/domain.config.js';
 const isDev = process.env.NODE_ENV !== 'production';
 const urls = generateUrls(isDev);
 const apiTarget = urls.api;
+const BASE_URL = (isDev ? '/' : '/crm/');
 
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [
 		tailwindcss()
 	],
-	base: '/', // Changed for subdomain serving
+	base: BASE_URL,
 	resolve: {
 		alias: {
 			'@components': path.resolve(__dirname, 'src/components'),
