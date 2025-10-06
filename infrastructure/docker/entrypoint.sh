@@ -89,8 +89,8 @@ try {
 }
 "
 
-echo "✅ Initialization complete, starting Apache..."
-echo "🌐 Application will be available on port 80"
+echo "✅ Initialization complete, starting services..."
+echo "🌐 Application will be available on ports 80 (HTTP) and 443 (HTTPS)"
 
 # Enable Apache MPM tuning config if mounted
 if [ -f /etc/apache2/conf-available/mpm-tuning.conf ]; then
@@ -155,5 +155,21 @@ fi
 
 php -i | grep -E 'opcache.jit_buffer_size|opcache.jit=|validate_timestamps|revalidate_freq' || true
 
-# Start Apache in foreground
-exec apache2-foreground
+echo "🚀 Starting PHP-FPM..."
+# Start PHP-FPM in the background
+php-fpm -D
+
+# Wait a moment for PHP-FPM to start
+sleep 2
+
+# Verify PHP-FPM is running
+if ! ps aux | grep -q "[p]hp-fpm: master"; then
+    echo "❌ PHP-FPM failed to start!"
+    exit 1
+fi
+
+echo "✅ PHP-FPM started successfully"
+echo "🚀 Starting Apache with Event MPM and HTTP/2..."
+
+# Start Apache in foreground (this keeps the container running)
+exec /usr/sbin/apache2ctl -D FOREGROUND

@@ -28,7 +28,8 @@ const DEFAULT_CONFIG = {
 
     // Development ports
     ports: {
-        api: 8080,
+        //api: 8080, // http
+        api: 8443, // https
         main: 3000,
         crm: 3001,
         developer: 3002
@@ -79,7 +80,7 @@ const DOMAIN_CONFIG = loadProtoConfig();
  */
 function generateUrls(isDev = false)
 {
-    const protocol = isDev ? 'http' : (DOMAIN_CONFIG.ssl ? 'https' : 'http');
+    const protocol = DOMAIN_CONFIG.ssl ? 'https' : 'http';
     const baseDomain = isDev ? DOMAIN_CONFIG.development : DOMAIN_CONFIG.production;
 
     if (isDev)

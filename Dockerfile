@@ -1,8 +1,11 @@
 ARG PHP_VERSION=8.3
-FROM php:${PHP_VERSION}-apache
+FROM php:${PHP_VERSION}-fpm
 
-# Install system dependencies
+# Install system dependencies including Apache2
 RUN apt-get update && apt-get install -y \
+    apache2 \
+    apache2-utils \
+    libapache2-mod-fcgid \
     zip \
     unzip \
     curl \
@@ -15,8 +18,8 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libicu-dev \
-    apache2-utils \
     brotli \
+    supervisor \
     && apt-get install -y libapache2-mod-brotli || echo "Brotli module not available" \
     && rm -rf /var/lib/apt/lists/*
 
@@ -74,11 +77,44 @@ RUN echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/uploads.ini \
 COPY infrastructure/docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY infrastructure/docker/apache-production.conf /etc/apache2/sites-available/001-production.conf
 COPY infrastructure/docker/apache-subdomain.conf /etc/apache2/sites-available/002-subdomain.conf
+COPY infrastructure/docker/apache-ssl-vhost.conf /etc/apache2/sites-available/default-ssl.conf
 COPY infrastructure/docker/performance.conf /etc/apache2/conf-available/performance.conf
+COPY infrastructure/docker/apache-mpm-event.conf /etc/apache2/conf-available/mpm-event.conf
 COPY infrastructure/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# Enable performance configuration and set entrypoint permissions
-RUN a2enconf performance && chmod +x /usr/local/bin/entrypoint.sh
+# Copy PHP-FPM configurations
+COPY infrastructure/docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
+COPY infrastructure/docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Generate self-signed SSL certificate for local development
+RUN mkdir -p /etc/ssl/private && \
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/ssl/private/localhost.key \
+    -out /etc/ssl/certs/localhost.crt \
+    -subj "/C=US/ST=Development/L=Local/O=Proto/OU=Development/CN=localhost" \
+    -addext "subjectAltName=DNS:localhost,DNS:*.localhost,IP:127.0.0.1" && \
+    chmod 600 /etc/ssl/private/localhost.key
+
+# Disable prefork MPM and enable event MPM for HTTP/2 support
+RUN a2dismod mpm_prefork && \
+    a2dismod php* || true && \
+    a2enmod mpm_event && \
+    a2enmod proxy && \
+    a2enmod proxy_fcgi && \
+    a2enmod ssl && \
+    a2enmod http2 && \
+    a2enmod socache_shmcb && \
+    a2enmod rewrite && \
+    a2enmod headers && \
+    a2enmod expires && \
+    a2enmod deflate && \
+    a2ensite default-ssl && \
+    a2enconf performance && \
+    a2enconf mpm-event && \
+    chmod +x /usr/local/bin/entrypoint.sh
+
+# Configure Apache to use Event MPM and proxy to PHP-FPM
+RUN echo "SetEnvIf Authorization \"(.*)\" HTTP_AUTHORIZATION=\$1" >> /etc/apache2/apache2.conf
 
 # Set working directory
 WORKDIR /var/www/html
@@ -114,8 +150,8 @@ RUN composer dump-autoload --optimize --no-dev || echo "Autoloader generation sk
 # Set ownership for www-data (bind mounts will override content but keep permissions)
 RUN chown -R www-data:www-data /var/www/html
 
-# Expose port 80
-EXPOSE 80
+# Expose ports 80 (HTTP) and 443 (HTTPS)
+EXPOSE 80 443
 
 # Use custom entrypoint for initialization
 CMD ["/usr/local/bin/entrypoint.sh"]
