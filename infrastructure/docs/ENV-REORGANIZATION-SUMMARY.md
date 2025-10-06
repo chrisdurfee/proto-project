@@ -39,7 +39,7 @@ public/robots.txt
    ```javascript
    // Old (when script was in root)
    const configPath = path.join(__dirname, 'common', 'Config', '.env')
-   
+
    // New (script now in infrastructure/scripts/)
    const configPath = path.join(__dirname, '..', '..', 'common', 'Config', '.env')
    ```
@@ -48,7 +48,7 @@ public/robots.txt
    ```javascript
    // Old (wrote to root)
    const envPath = path.join(__dirname, '.env')
-   
+
    // New (writes to infrastructure/)
    const envPath = path.join(__dirname, '..', '.env')
    ```
@@ -57,7 +57,7 @@ public/robots.txt
    ```javascript
    // Old
    console.log('✅ Generated .env file for Docker')
-   
+
    // New
    console.log('✅ Generated infrastructure/.env file for Docker')
    ```
@@ -66,14 +66,14 @@ public/robots.txt
    ```bash
    # Old
    # Do not edit manually - run: node sync-config.js
-   
+
    # New
    # Do not edit manually - run: ./infrastructure/scripts/run.sh sync-config
    ```
 
 ### Docker Compose Updates
 
-**Files**: 
+**Files**:
 - `infrastructure/docker-compose.yaml`
 - `infrastructure/docker-compose.production.yaml`
 
