@@ -12,33 +12,44 @@ services:
 
   # Production-specific web service overrides
   web:
+    ports:
+      - "80:80"    # HTTP
+      - "443:443"  # HTTPS
     environment:
       - APP_ENV=production
       - CORS_ENABLED=true
       - AUTO_MIGRATE=true
-    # Enable security hardening for production
-    read_only: true
-    tmpfs:
-      - /tmp:rw,noexec,nosuid,size=100m
-      - /var/run:rw,noexec,nosuid,size=50m
-    cap_drop:
-      - ALL
-    cap_add:
-      - NET_BIND_SERVICE
-      - CHOWN
-      - SETGID
-      - SETUID
-    security_opt:
-      - no-new-privileges:true
-    # Re-state volumes because compose replaces arrays on override.
-    volumes:
-      # Code can be RO in prod (optional). If you prefer, leave as :rw.
-      - .:/var/www/html:ro
-      - ./infrastructure/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
-      - ./infrastructure/docker/apache-mpm.conf:/etc/apache2/conf-available/mpm-tuning.conf:ro
-      # Writable uploads even with read_only root FS
-      - public_files:/var/www/html/public/files:rw
-      - common_files:/var/www/html/common/files:rw
+    # Security hardening disabled for local testing
+    # Enable these for actual production deployment
+    # read_only: true
+    # tmpfs:
+    #   - /tmp:rw,noexec,nosuid,size=100m
+    #   - /var/run:rw,noexec,nosuid,size=50m
+    # cap_drop:
+    #   - ALL
+    # cap_add:
+    #   - NET_BIND_SERVICE
+    #   - CHOWN
+    #   - SETGID
+    #   - SETUID
+    # security_opt:
+    #   - no-new-privileges:true
+    # Production deployment uses image-baked assets
+    # Built frontend apps (main, crm) and all PHP code are included in the Docker image
+    # Override ALL volumes from base compose (Docker Compose MERGES volume arrays by default)
+    # We only mount configuration files and writable directories for production
+    volumes: []  # Clear all volumes from base compose
+    # Then add back only what we need for production:
+    # NOTE: We use a separate volumes key below to work around Docker Compose array merging
+
+    # For development testing with live editing, use these bind mounts instead:
+    # volumes:
+    #   - ./common:/var/www/html/common:rw
+    #   - ./modules:/var/www/html/modules:rw
+    #   - ./public:/var/www/html/public:rw
+    #   - ./apps:/var/www/html/apps:rw
+    #   - ./infrastructure/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+    #   - ./infrastructure/docker/apache-mpm.conf:/etc/apache2/conf-available/mpm-tuning.conf:ro
     # Resource limits for production
     deploy:
       resources:

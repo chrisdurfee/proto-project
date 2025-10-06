@@ -233,7 +233,7 @@ server {
 
         # CORS headers
         add_header Access-Control-Allow-Origin "https://app.domain.com, https://crm.domain.com, https://dev.domain.com" always;
-        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS" always;
         add_header Access-Control-Allow-Headers "Content-Type, Authorization, CSRF-TOKEN, X-Requested-With" always;
     }
 
@@ -299,7 +299,7 @@ Update `public/api/index.php` for production CORS:
 
 // Production CORS headers for subdomains
 header("Access-Control-Allow-Origin: https://app.domain.com, https://crm.domain.com, https://dev.domain.com");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, CSRF-TOKEN, X-Requested-With");
 header("Access-Control-Allow-Credentials: true");
 
