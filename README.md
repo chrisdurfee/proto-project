@@ -74,7 +74,7 @@ Update the environment variables as needed. Then, sync your Proto configuration 
 docker-compose up -d
 ```
 
-> **✨ Automatic Setup**: 
+> **✨ Automatic Setup**:
 > - First run will build the Docker image (may take 2-3 minutes)
 > - Dependencies install automatically if `vendor/` is missing
 > - Database migrations run automatically (disable with `AUTO_MIGRATE=false`)
