@@ -74,7 +74,11 @@ Update the environment variables as needed. Then, sync your Proto configuration 
 docker-compose up -d
 ```
 
-> **✨ New**: Database migrations now run automatically when the container starts! This ensures your database schema is always up-to-date. To disable this behavior, set `AUTO_MIGRATE=false` in your `.env` file.
+> **✨ Automatic Setup**: 
+> - First run will build the Docker image (may take 2-3 minutes)
+> - Dependencies install automatically if `vendor/` is missing
+> - Database migrations run automatically (disable with `AUTO_MIGRATE=false`)
+> - Bind mounts provide live code editing while keeping container benefits
 
 **2. Start Frontend Apps** (in separate terminals):
 ```bash
