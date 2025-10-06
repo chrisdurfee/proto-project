@@ -13,7 +13,7 @@ const path = require('path');
 
 function loadProtoConfig() {
     try {
-        const configPath = path.join(__dirname, 'common', 'Config', '.env');
+        const configPath = path.join(__dirname, '..', '..', 'common', 'Config', '.env');
         const configData = fs.readFileSync(configPath, 'utf8');
         return JSON.parse(configData);
     } catch (error) {
@@ -27,7 +27,7 @@ function generateDockerEnv(protoConfig) {
 
     // Header comment
     envVars.push('# Auto-generated from common/Config/.env');
-    envVars.push('# Do not edit manually - run: node sync-config.js');
+    envVars.push('# Do not edit manually - run: ./infrastructure/scripts/run.sh sync-config');
     envVars.push('');
 
     // Redis configuration from Proto config
@@ -132,10 +132,10 @@ function syncConfiguration() {
     // Generate Docker .env content
     const dockerEnv = generateDockerEnv(protoConfig);
 
-    // Write to .env file
-    const envPath = path.join(__dirname, '.env');
+    // Write to infrastructure/.env file
+    const envPath = path.join(__dirname, '..', '.env');
     fs.writeFileSync(envPath, dockerEnv);
-    console.log('✅ Generated .env file for Docker');
+    console.log('✅ Generated infrastructure/.env file for Docker');
 
     // Show what was configured
     console.log('\n📋 Configuration Summary:');

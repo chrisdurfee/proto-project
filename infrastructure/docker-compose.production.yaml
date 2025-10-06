@@ -2,6 +2,11 @@
 # Usage: docker-compose -f infrastructure/docker-compose.production.yaml up -d
 # This is a standalone production configuration (does not extend development config)
 
+# Production Docker Compose Configuration
+# Expects .env file in the same directory (infrastructure/.env)
+# Generate with: ./infrastructure/scripts/run.sh sync-config
+# See infrastructure/docs/PRODUCTION-DEPLOYMENT.md for complete guide
+
 services:
   # MariaDB Database
   mariadb:
@@ -9,10 +14,10 @@ services:
     container_name: proto-mariadb
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Please set DB_ROOT_PASSWORD in .env file}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Please set DB_ROOT_PASSWORD in infrastructure/.env file}
       MARIADB_DATABASE: ${DB_DATABASE:-proto}
       MARIADB_USER: ${DB_USERNAME:-proto_app_user}
-      MARIADB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env file}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in infrastructure/.env file}
       MARIADB_AUTO_UPGRADE: "yes"
     ports:
       - "3307:3306"
@@ -49,7 +54,7 @@ services:
     networks:
       - proto-network
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:?Please set REDIS_PASSWORD in .env file}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?Please set REDIS_PASSWORD in infrastructure/.env file}
     deploy:
       resources:
         limits:

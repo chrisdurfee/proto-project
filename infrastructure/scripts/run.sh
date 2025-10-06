@@ -10,8 +10,9 @@ SCRIPTS_DIR="./infrastructure/scripts"
 
 case "$SCRIPT_NAME" in
     "sync-config")
-        echo "� Syncing configuration..."
+        echo "🔄 Syncing configuration..."
         node infrastructure/scripts/sync-config.js
+        ;;
     "build"|"build-production")
         echo "🏗️ Running production build..."
         if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then

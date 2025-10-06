@@ -14,6 +14,7 @@ public/developer
 error.log
 .DS_Store
 .phpunit.result.cache
+infrastructure/.env
 .env
 user-settings.txt
 common/files/

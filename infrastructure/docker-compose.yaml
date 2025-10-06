@@ -1,3 +1,7 @@
+# Development Docker Compose Configuration
+# Expects .env file in the same directory (infrastructure/.env)
+# Generate with: ./infrastructure/scripts/run.sh sync-config
+
 services:
   # MariaDB Database
   mariadb:
@@ -5,10 +9,10 @@ services:
     container_name: proto-mariadb
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Please set DB_ROOT_PASSWORD in .env file}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Please set DB_ROOT_PASSWORD in infrastructure/.env file}
       MARIADB_DATABASE: ${DB_DATABASE:-proto}
       MARIADB_USER: ${DB_USERNAME:-proto_app_user}
-      MARIADB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env file}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in infrastructure/.env file}
     ports:
       - "3307:3306"  # Database port exposed for development
     volumes:
@@ -42,7 +46,7 @@ services:
     networks:
       - proto-network
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:?Please set REDIS_PASSWORD in .env file}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?Please set REDIS_PASSWORD in infrastructure/.env file}
     healthcheck:
       test: ["CMD-SHELL", "redis-cli -a \"${REDIS_PASSWORD}\" ping | grep PONG || exit 1"]
       interval: 30s
@@ -120,7 +124,7 @@ services:
     #   - no-new-privileges:true
 
   # PHPMyAdmin (optional, for database management - DISABLE IN PRODUCTION)
-  # Default password matches .env.example - customize DB_ROOT_PASSWORD in .env if needed
+  # Default password matches infrastructure/.env.example - customize DB_ROOT_PASSWORD in infrastructure/.env if needed
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: proto-phpmyadmin
