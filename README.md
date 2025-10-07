@@ -116,16 +116,16 @@ npm run dev
 **Backend Changes:**
 ```bash
 # View API logs
-docker-compose logs -f web
+docker-compose -f infrastructure/docker-compose.yaml logs -f web
 
 # Access PHP container
-docker-compose exec web bash
+docker-compose -f infrastructure/docker-compose.yaml exec web bash
 
 # Restart backend if needed
-docker-compose restart web
+docker-compose -f infrastructure/docker-compose.yaml restart web
 
 # Manual migration control (if AUTO_MIGRATE=false)
-docker-compose exec web php infrastructure/scripts/run-migrations.php
+docker-compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php
 ```
 
 **Frontend Changes:**
@@ -136,7 +136,7 @@ docker-compose exec web php infrastructure/scripts/run-migrations.php
 **Database Management:**
 ```bash
 # Access database directly
-docker-compose exec mariadb mariadb -uroot -proot proto
+docker-compose -f infrastructure/docker-compose.yaml exec mariadb mariadb -uroot -proot proto
 
 # Or use phpMyAdmin at http://localhost:8081
 ```
@@ -159,14 +159,14 @@ For detailed setup instructions, see [infrastructure/docs/DEVELOPMENT.md](infras
 The Docker setup includes several automation features to streamline development:
 
 ### **Build-Time Automation**
-When you build the Docker image (`docker-compose build`), the following happens automatically:
+When you build the Docker image (`docker-compose -f infrastructure/docker-compose.yaml build`), the following happens automatically:
 - ✅ **Configuration Sync**: Reads `common/Config/.env` and generates Docker environment variables
 - ✅ **PHP Validation**: Checks PHP syntax across the codebase
 - ✅ **Apache Module Setup**: Enables all required modules for `.htaccess` functionality
 - ✅ **Build Verification**: Ensures all critical files and directories are present
 
 ### **Runtime Automation**
-When you start the container (`docker-compose up`), the following happens automatically:
+When you start the container (`docker-compose -f infrastructure/docker-compose.yaml up`), the following happens automatically:
 - ✅ **Service Dependencies**: Waits for database and Redis to be ready before starting
 - ✅ **Database Migrations**: Runs pending migrations automatically (configurable)
 - ✅ **Health Checks**: Verifies autoloader and critical dependencies
@@ -178,7 +178,7 @@ By default, database migrations run automatically for convenience:
 
 ```bash
 # Default behavior - migrations run automatically
-docker-compose up -d
+docker-compose -f infrastructure/docker-compose.yaml up -d
 ```
 
 For production or when you want manual control:
@@ -186,10 +186,10 @@ For production or when you want manual control:
 ```bash
 # Disable auto-migrations
 echo "AUTO_MIGRATE=false" >> .env
-docker-compose up -d
+docker-compose -f infrastructure/docker-compose.yaml up -d
 
 # Then run migrations manually when ready
-docker-compose exec web php infrastructure/scripts/run-migrations.php
+docker-compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php
 ```
 
 ### **SSL Setup (Manual)**
@@ -198,7 +198,7 @@ For security reasons, SSL certificate setup remains manual:
 
 ```bash
 # Set up SSL certificates (production only)
-./run.sh setup-ssl yourdomain.com your-email@yourdomain.com
+./infrastructure/scripts/run.sh setup-ssl yourdomain.com your-email@yourdomain.com
 ```
 
 This automation makes the development experience much smoother while maintaining production safety controls.
@@ -251,25 +251,25 @@ docker-compose -f infrastructure/docker-compose.yaml down         # Stop all ser
 node infrastructure/scripts/sync-config.js               # Alternative: direct sync
 
 # Development
-docker-compose up -d              # Start backend services (auto-migrates by default)
+docker-compose -f infrastructure/docker-compose.yaml up -d              # Start backend services (auto-migrates by default)
 cd apps/main && npm run dev       # Start main app
 cd apps/crm && npm run dev        # Start CRM app
 cd apps/developer && npm run dev  # Start developer tools
 
 # Database
-AUTO_MIGRATE=false docker-compose up -d  # Start without auto-migration
+AUTO_MIGRATE=false docker-compose -f infrastructure/docker-compose.yaml up -d  # Start without auto-migration
 ./infrastructure/scripts/run.sh migrations               # Run database migrations manually
-docker-compose exec web php infrastructure/scripts/run-migrations.php  # Alternative manual migration
+docker-compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php  # Alternative manual migration
 
 # Production
 # SSL & Production
 ./infrastructure/scripts/run.sh setup-ssl yourdomain.com your-email@domain.com  # Setup SSL
 ./infrastructure/scripts/run.sh build                    # Build all apps for production
-docker-compose -f infrastructure/docker-compose.production.yaml up -d  # Deploy production
+docker-compose -f infrastructure/config/docker-compose.production.yaml up -d  # Deploy production
 
 # Utilities
-./run.sh help                     # Show all available scripts
-docker-compose logs -f web        # Watch container startup and migration logs
+./infrastructure/scripts/run.sh help                     # Show all available scripts
+docker-compose -f infrastructure/docker-compose.yaml logs -f web        # Watch container startup and migration logs
 ```
 
 ### Application Settings
@@ -329,10 +329,10 @@ For production deployment with HTTPS, use the automated SSL setup:
 **Quick SSL Setup:**
 ```bash
 # Linux/macOS
-./run.sh setup-ssl yourdomain.com your-email@yourdomain.com
+./infrastructure/scripts/run.sh setup-ssl yourdomain.com your-email@yourdomain.com
 
 # Windows
-run.bat setup-ssl yourdomain.com your-email@yourdomain.com
+infrastructure\scripts\run.bat setup-ssl yourdomain.com your-email@yourdomain.com
 ```
 
 This automatically:
@@ -399,7 +399,7 @@ A simple admin UI lets you:
 * Manage users, permissions, and system settings
 
 **Access Developer Tools:**
-1. Start backend: `docker-compose up -d`
+1. Start backend: `docker-compose -f infrastructure/docker-compose.yaml up -d`
 2. Start developer app: `cd apps/developer && npm run dev`
 3. Visit: http://localhost:3002
 
@@ -476,18 +476,18 @@ See the [Test Coverage Proposal](infrastructure/docs/TEST-COVERAGE-PROPOSAL.md) 
 
 **Port conflicts:**
 - Default ports: 3000-3002 (Vite dev servers), 8080 (API), 8081 (PHPMyAdmin), 3307 (DB), 6380 (Redis)
-- Stop conflicting services or modify ports in `docker-compose.yaml` (backend) or `vite.config.js` (frontend)
+- Stop conflicting services or modify ports in `infrastructure/docker-compose.yaml` (backend) or `vite.config.js` (frontend)
 
 **Database connection issues:**
 ```bash
 # Check if containers are running
-docker-compose ps
+docker-compose -f infrastructure/docker-compose.yaml ps
 
 # Restart database
-docker-compose restart mariadb
+docker-compose -f infrastructure/docker-compose.yaml restart mariadb
 
 # Check logs
-docker-compose logs mariadb
+docker-compose -f infrastructure/docker-compose.yaml logs mariadb
 ```
 
 **Frontend issues:**
@@ -503,7 +503,7 @@ cd ../developer && npm install
 
 **API connectivity issues:**
 - Frontend apps proxy `/api` requests to `http://localhost:8080`
-- Check if backend container is running: `docker-compose ps`
+- Check if backend container is running: `docker-compose -f infrastructure/docker-compose.yaml ps`
 - Test API directly: visit `http://localhost:8080/api/auth/csrf-token`
 
 For more detailed troubleshooting, see [DEVELOPMENT.md](DEVELOPMENT.md).
