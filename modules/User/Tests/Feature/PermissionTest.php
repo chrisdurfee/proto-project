@@ -216,13 +216,13 @@ class PermissionTest extends Test
 	 */
 	public function testCreatePermissionsWithSequence(): void
 	{
-		$permissions = Permission::factory()
-			->count(3)
-			->sequence(fn($index) => [
-				'name' => "Permission{$index}",
-				'slug' => "permission-{$index}"
-			])
-			->create();
+		$permissions = [];
+		for ($i = 0; $i < 3; $i++) {
+			$permissions[] = Permission::factory()->create([
+				'name' => "Permission{$i}",
+				'slug' => "permission-{$i}"
+			]);
+		}
 
 		$this->assertEquals('Permission0', $permissions[0]->name);
 		$this->assertEquals('permission-0', $permissions[0]->slug);

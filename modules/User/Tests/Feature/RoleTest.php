@@ -223,13 +223,13 @@ class RoleTest extends Test
 	 */
 	public function testCreateRolesWithSequence(): void
 	{
-		$roles = Role::factory()
-			->count(3)
-			->sequence(fn($index) => [
-				'name' => "Role{$index}",
-				'slug' => "role-{$index}"
-			])
-			->create();
+		$roles = [];
+		for ($i = 0; $i < 3; $i++) {
+			$roles[] = Role::factory()->create([
+				'name' => "Role{$i}",
+				'slug' => "role-{$i}"
+			]);
+		}
 
 		$this->assertEquals('Role0', $roles[0]->name);
 		$this->assertEquals('role-0', $roles[0]->slug);

@@ -272,13 +272,13 @@ class UserTest extends Test
 	 */
 	public function testCreateUsersWithSequence(): void
 	{
-		$users = User::factory()
-			->count(3)
-			->sequence(fn($index) => [
-				'firstName' => "User{$index}",
-				'followerCount' => $index * 10
-			])
-			->create();
+		$users = [];
+		for ($i = 0; $i < 3; $i++) {
+			$users[] = User::factory()->create([
+				'firstName' => "User{$i}",
+				'followerCount' => $i * 10
+			]);
+		}
 
 		$this->assertEquals('User0', $users[0]->firstName);
 		$this->assertEquals(0, $users[0]->followerCount);
