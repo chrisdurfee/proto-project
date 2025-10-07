@@ -105,7 +105,7 @@ npm run dev
 | 🌐 Main App | http://localhost:3000 | Main application (Vite dev server) |
 | 🌐 CRM App | http://localhost:3001 | CRM interface (Vite dev server) |
 | 🌐 Developer Tools | http://localhost:3002 | Developer UI with scaffolding tools (Vite dev server) |
-| 🚀 HTTPS API Server | http://localhost:8443 | PHP backend API (containerized) |
+| 🚀 HTTPS API Server | https://localhost:8443 | PHP backend API (containerized) |
 | 🚀 API Server | http://localhost:8080 | PHP backend API (containerized) |
 | 🗄️ PHPMyAdmin | http://localhost:8081 | Database management interface |
 | 🗄️ Database | localhost:3307 | MariaDB 11.7.2 server |
