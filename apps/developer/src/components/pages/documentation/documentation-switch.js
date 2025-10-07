@@ -35,6 +35,7 @@ export const DocumentationSwitch = (basePath) => ([
 	Page(`${basePath}/models`, 'Models', () => import('./models/models-page.js')),
 	Page(`${basePath}/migrations`, 'Migrations', () => import('./migrations/migrations-page.js')),
 	Page(`${basePath}/seeders`, 'Seeders', () => import('./seeders/seeders-page.js')),
+	Page(`${basePath}/factories`, 'Factories', () => import('./factories/factories-page.js')),
 
 	// Security & Validation
 	Page(`${basePath}/security`, 'Security & Authorization', () => import('./security/security-page.js')),

@@ -72,6 +72,7 @@ Update the environment variables as needed. Then, sync your Proto configuration 
 **1. Start Backend Services:**
 ```bash
 docker-compose -f infrastructure/docker-compose.yaml up -d      # Start development
+```
 
 > **✨ Automatic Setup**:
 > - First run will build the Docker image (may take 2-3 minutes)

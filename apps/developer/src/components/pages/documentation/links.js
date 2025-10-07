@@ -62,6 +62,10 @@ export const Links = (path) => ([
 			{
 				label: 'Seeders',
 				href: `${path}/seeders`
+			},
+			{
+				label: 'Factories',
+				href: `${path}/factories`
 			}
 		]
 	},
