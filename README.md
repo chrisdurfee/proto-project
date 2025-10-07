@@ -222,6 +222,8 @@ proto-project/
 │  ├─ docker/              # Docker-related files
 │  │  ├─ apache-subdomain.conf # Apache virtual host config
 │  │  ├─ apache-vhost.conf # Standard Apache config
+│  │  ├─ Dockerfile        # Docker image definition
+│  │  ├─ entrypoint.sh     # Container startup script
 │  │  ├─ php/              # PHP configuration
 │  │  └─ mysql/            # MySQL initialization scripts
 │  ├─ docs/                # Documentation
@@ -229,14 +231,14 @@ proto-project/
 │  │  ├─ SSL-SETUP.md      # SSL certificate setup
 │  │  ├─ SUBDOMAIN-DEPLOYMENT.md # Production deployment
 │  │  └─ ...               # Other documentation
-│  └─ scripts/             # Build and setup scripts
-│     ├─ build-production.* # Production build scripts
-│     ├─ setup-ssl.*       # SSL certificate setup
-│     ├─ sync-config.*     # Configuration sync scripts
-│     └─ ...               # Other utility scripts
-├─ docker-compose.yaml     # Development Docker setup
-├─ sync-config.js          # Configuration sync utility
-├─ run.sh / run.bat        # Script runner
+│  ├─ scripts/             # Build and setup scripts
+│  │  ├─ build-production.* # Production build scripts
+│  │  ├─ setup-ssl.*       # SSL certificate setup
+│  │  ├─ sync-config.*     # Configuration sync scripts
+│  │  ├─ run.sh / run.bat  # Script runner
+│  │  └─ ...               # Other utility scripts
+│  ├─ docker-compose.yaml  # Development Docker setup
+│  └─ sync-config.js       # Configuration sync utility
 └─ README.md               # This file
 ```
 
