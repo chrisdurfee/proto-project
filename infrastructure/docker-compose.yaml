@@ -66,10 +66,10 @@ services:
     volumes:
       # DEVELOPMENT MODE - selective bind mounts for editable content
       # Mount individual directories to avoid empty directory conflicts
-      - ../common:/var/www/html/common:rw
-      - ../modules:/var/www/html/modules:rw
-      - ../public:/var/www/html/public:rw
-      - ../apps:/var/www/html/apps:rw
+      - ${PWD}/../common:/var/www/html/common:rw
+      - ${PWD}/../modules:/var/www/html/modules:rw
+      - ${PWD}/../public:/var/www/html/public:rw
+      - ${PWD}/../apps:/var/www/html/apps:rw
       # Essential config files (PHP and Apache)
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
       - ./docker/apache-mpm.conf:/etc/apache2/conf-available/mpm-tuning.conf:ro

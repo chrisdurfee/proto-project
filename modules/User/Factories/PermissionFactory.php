@@ -30,15 +30,19 @@ class PermissionFactory extends Factory
 	 */
 	public function definition(): array
 	{
-		$action = $this->faker()->randomElement(['create', 'read', 'update', 'delete', 'manage']);
-		$resource = $this->faker()->randomElement(['user', 'post', 'product', 'order', 'report']);
+		$actions = ['create', 'read', 'update', 'delete', 'manage'];
+		$resources = ['user', 'post', 'product', 'order', 'report'];
+
+		$action = $actions[$this->faker()->numberBetween(0, count($actions) - 1)];
+		$resource = $resources[$this->faker()->numberBetween(0, count($resources) - 1)];
 		$name = ucfirst($action) . ' ' . ucfirst($resource);
 
 		return [
 			'name' => $name,
 			'slug' => strtolower($action . '-' . $resource),
 			'description' => "Permission to {$action} {$resource} records",
-			'module' => ucfirst($resource),
+			'module' => null,
+			'resource' => $resource,
 			'createdAt' => date('Y-m-d H:i:s'),
 			'updatedAt' => date('Y-m-d H:i:s')
 		];

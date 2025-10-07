@@ -30,12 +30,13 @@ class RoleFactory extends Factory
 	 */
 	public function definition(): array
 	{
-		$name = $this->faker()->word();
+		$words = ['Admin', 'User', 'Manager', 'Editor', 'Viewer', 'Moderator', 'Guest'];
+		$name = $words[$this->faker()->numberBetween(0, count($words) - 1)];
 
 		return [
-			'name' => ucfirst($name),
+			'name' => $name,
 			'slug' => strtolower($name),
-			'description' => $this->faker()->sentence(),
+			'description' => $this->faker()->text(10),
 			'resource' => null,
 			'createdAt' => date('Y-m-d H:i:s'),
 			'updatedAt' => date('Y-m-d H:i:s')

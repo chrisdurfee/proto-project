@@ -30,14 +30,18 @@ class UserFactory extends Factory
 	 */
 	public function definition(): array
 	{
+		$firstName = $this->faker()->firstName();
+		$lastName = $this->faker()->lastName();
+		$username = strtolower($firstName . $lastName . $this->faker()->numberBetween(1, 999));
+
 		return [
 			'uuid' => $this->faker()->uuid(),
-			'username' => $this->faker()->unique()->userName(),
-			'email' => $this->faker()->unique()->email(),
+			'username' => $username,
+			'email' => strtolower($firstName . '.' . $lastName . $this->faker()->numberBetween(1, 999)) . '@' . ['example.com', 'test.com', 'sample.org'][$this->faker()->numberBetween(0, 2)],
 			'password' => password_hash('password', PASSWORD_BCRYPT),
-			'firstName' => $this->faker()->firstName(),
-			'lastName' => $this->faker()->lastName(),
-			'displayName' => $this->faker()->name(),
+			'firstName' => $firstName,
+			'lastName' => $lastName,
+			'displayName' => $firstName . ' ' . $lastName,
 			'status' => 'active',
 			'enabled' => true,
 			'multiFactorEnabled' => false,
@@ -49,7 +53,7 @@ class UserFactory extends Factory
 			'timezone' => 'UTC',
 			'language' => 'en',
 			'currency' => 'USD',
-			'country' => $this->faker()->country(),
+			'country' => ['USA', 'Canada', 'UK', 'Australia', 'Germany'][$this->faker()->numberBetween(0, 4)],
 			'followerCount' => 0,
 			'followingCount' => 0,
 			'verified' => false,
@@ -144,15 +148,17 @@ class UserFactory extends Factory
 	public function stateCompleteProfile(): array
 	{
 		return [
-			'image' => $this->faker()->imageUrl(200, 200, 'people'),
-			'coverImageUrl' => $this->faker()->imageUrl(800, 200, 'nature'),
-			'bio' => $this->faker()->paragraph(),
-			'dob' => $this->faker()->date('Y-m-d', '-18 years'),
-			'gender' => $this->faker()->randomElement(['male', 'female', 'other']),
-			'street1' => $this->faker()->streetAddress(),
+			'phone' => $this->faker()->phoneNumber(),
+			'phoneVerified' => true,
+			'profilePicture' => 'https://via.placeholder.com/150',
+			'coverPhoto' => 'https://via.placeholder.com/800x200',
+			'bio' => $this->faker()->text(20),
+			'birthdate' => $this->faker()->dateTimeBetween('-60 years', '-18 years'),
+			'gender' => ['male', 'female', 'other'][$this->faker()->numberBetween(0, 2)],
+			'address' => $this->faker()->address(),
 			'city' => $this->faker()->city(),
-			'state' => $this->faker()->state(),
-			'postalCode' => $this->faker()->postcode()
+			'state' => ['CA', 'NY', 'TX', 'FL', 'IL'][$this->faker()->numberBetween(0, 4)],
+			'zipcode' => sprintf('%05d', $this->faker()->numberBetween(10000, 99999))
 		];
 	}
 
@@ -164,8 +170,12 @@ class UserFactory extends Factory
 	 */
 	public function stateWithDomain(string $domain): array
 	{
+		$firstName = $this->faker()->firstName();
+		$lastName = $this->faker()->lastName();
+		$username = strtolower($firstName . '.' . $lastName . $this->faker()->numberBetween(1, 999));
+
 		return [
-			'email' => $this->faker()->unique()->userName() . "@{$domain}"
+			'email' => $username . '@' . $domain
 		];
 	}
 }
