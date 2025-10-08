@@ -30,33 +30,18 @@ class UserFactory extends Factory
 	 */
 	public function definition(): array
 	{
-		$firstName = $this->faker()->firstName();
-		$lastName = $this->faker()->lastName();
-		$username = strtolower($firstName . $lastName . $this->faker()->numberBetween(1, 999));
+		$num = $this->faker()->numberBetween(1, 999999);
 
 		return [
 			'uuid' => $this->faker()->uuid(),
-			'username' => $username,
-			'email' => strtolower($firstName . '.' . $lastName . $this->faker()->numberBetween(1, 999)) . '@' . ['example.com', 'test.com', 'sample.org'][$this->faker()->numberBetween(0, 2)],
+			'username' => 'user' . $num,
+			'email' => 'user' . $num . '@example.com',
 			'password' => password_hash('password', PASSWORD_BCRYPT),
-			'firstName' => $firstName,
-			'lastName' => $lastName,
-			'displayName' => $firstName . ' ' . $lastName,
+			'firstName' => 'Test',
+			'lastName' => 'User',
+			'displayName' => 'Test User',
 			'status' => 'offline',
-			'enabled' => true,
-			'multiFactorEnabled' => false,
-			'emailVerifiedAt' => null,
-			'marketingOptIn' => false,
-			'acceptedTermsAt' => date('Y-m-d H:i:s'),
-			'trialMode' => false,
-			'trialDaysLeft' => 0,
-			'timezone' => 'UTC',
-			'language' => 'en',
-			'currency' => 'USD',
-			'country' => ['USA', 'Canada', 'UK', 'Australia', 'Germany'][$this->faker()->numberBetween(0, 4)],
-			'followerCount' => 0,
-			'followingCount' => 0,
-			'verified' => false,
+			'enabled' => 1,
 			'createdAt' => date('Y-m-d H:i:s'),
 			'updatedAt' => date('Y-m-d H:i:s')
 		];
@@ -71,7 +56,7 @@ class UserFactory extends Factory
 	{
 		return [
 			'status' => 'online',
-			'enabled' => true,
+			'enabled' => 1,
 			'emailVerifiedAt' => date('Y-m-d H:i:s')
 		];
 	}
@@ -85,7 +70,7 @@ class UserFactory extends Factory
 	{
 		return [
 			'emailVerifiedAt' => date('Y-m-d H:i:s'),
-			'verified' => true
+			'verified' => 1
 		];
 	}
 
@@ -98,7 +83,7 @@ class UserFactory extends Factory
 	{
 		return [
 			'emailVerifiedAt' => null,
-			'verified' => false
+			'verified' => 0
 		];
 	}
 
@@ -110,7 +95,7 @@ class UserFactory extends Factory
 	public function stateDisabled(): array
 	{
 		return [
-			'enabled' => false,
+			'enabled' => 0,
 			'status' => 'offline'
 		];
 	}
