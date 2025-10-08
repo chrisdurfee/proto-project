@@ -1,0 +1,16 @@
+parameters:
+    level: 5
+    paths:
+        - common
+        - modules
+    excludePaths:
+        - common/Tests
+        - modules/*/Tests
+        - vendor
+    ignoreErrors:
+        # Ignore dynamic property access patterns common in Proto Framework
+        - '#Access to an undefined property#'
+        # Ignore magic method calls
+        - '#Call to an undefined method [a-zA-Z0-9\\_]+::[a-zA-Z0-9_]+\(\)#'
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
