@@ -297,14 +297,14 @@ class UserTest extends Test
 	 */
 	public function testUserStatusTransitions(): void
 	{
-		$user = User::factory()->create(['status' => 'active']);
-		$this->assertEquals('active', $user->status);
+		$user = User::factory()->create(['status' => 'online']);
+		$this->assertEquals('online', $user->status);
 
-		$user->status = 'inactive';
+		$user->status = 'away';
 		$user->update();
 
 		$updated = User::getById($user->id);
-		$this->assertEquals('inactive', $updated->status);
+		$this->assertEquals('away', $updated->status);
 	}
 
 	/**
