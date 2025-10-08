@@ -17,8 +17,10 @@ Use these repo-specific rules to be productive immediately.
   - Logs: `docker-compose -f infrastructure/docker-compose.yaml logs -f web` • Shell: `docker-compose -f infrastructure/docker-compose.yaml exec web bash`
   - Manual migrations: `docker-compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php`
 - Frontend dev: in each app, `npm install` then `npm run dev` (ports 3000/3001/3002; `/api` is proxied to the container at 8080)
-- Tests: run inside the `web` container. Suites are defined in `phpunit.xml`:
+- Tests: run locally with `php vendor/bin/phpunit` or in Docker container. Suites defined in `phpunit.xml`:
   - Unit: `common/Tests/Unit` • Feature: `common/Tests/Feature`, `modules/*/Tests/Feature` • Module tests under `modules/**`
+  - Run specific tests: `php vendor/bin/phpunit modules/User/Tests/Feature/PermissionTest.php`
+  - Run with output: `php vendor/bin/phpunit --testdox` for readable test names
 
 ## Conventions and patterns
 - Configuration is JSON in `common/Config/.env`. Access in PHP via Proto Config helpers (e.g., `env('siteName')`).
@@ -152,5 +154,16 @@ Key files to orient quickly:
   - Seeders: Initialize sample/reference data via module seeder classes and run alongside migrations (see “Seeders”).
   - Dispatch/Events: Send Email/Text/Push via `common/Email/*`, `common/Text/*`, `common/Push/*`; controllers/services can dispatch notifications (see “Dispatch” and “Events”).
   - WebSockets: Dev servers proxy WS (`ws: true`) in `apps/developer/vite.config.js`. Keep WS endpoints relative (e.g., `/api/ws/...`) and let the proxy route.
-  - Tests: Place Unit tests under `common/Tests/Unit`, Feature tests under `common/Tests/Feature` and `modules/*/Tests/Feature`; run inside the `web` container with phpunit.
+  - Tests: Place Unit tests under `common/Tests/Unit`, Feature tests under `common/Tests/Feature` and `modules/*/Tests/Feature`; run locally with phpunit.
+
+## Testing (backend)
+- Framework auto-wraps each test in a transaction (no setUp/tearDown needed). Just extend `Proto\Tests\Test` and write tests—changes rollback automatically.
+- Factories: `Model::factory()->create()` (persisted), `->make()` (unpersisted), `->count(5)->create()` (bulk), `->state('admin')->create()` (with state).
+- Assertions: `$this->assertDatabaseHas('table', [...])`, `assertDatabaseMissing(...)`, `assertDatabaseCount('table', 5)`.
+- Retrieval in tests: Always use `Model::get($id)`, `Model::getBy(['field' => $val])`, `Model::fetchWhere([...])`, or `$model->refresh()` (transaction-safe). **Avoid custom static methods**—they may create new connections outside the test transaction → deadlocks/timeouts.
+- Relationships: Create parent records first or use `->for(ParentModel::factory())`. Foreign keys stay enforced (constraint errors = good, they catch real bugs).
+- Seeders: Set `protected array $seeders = [SomeSeeder::class];` for data that auto-rollbacks.
+- Anti-patterns: Don't disable foreign key checks (`SET FOREIGN_KEY_CHECKS=0`), don't manually delete data in `tearDown()`, don't call custom `getById()` methods in tests.
+- Disable transactions (rare): `protected bool $useTransactions = false;` then handle cleanup manually.
+- Run: `php vendor/bin/phpunit` (all), `--filter testName` (one test), `--testdox` (readable names), `--testsuite Feature` (suite).
 
