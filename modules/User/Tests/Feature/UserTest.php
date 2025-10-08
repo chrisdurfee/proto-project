@@ -27,7 +27,7 @@ class UserTest extends Test
 		$this->assertNotNull($user->id);
 		$this->assertNotNull($user->email);
 		$this->assertNotNull($user->username);
-		$this->assertEquals('active', $user->status);
+		$this->assertEquals('offline', $user->status);
 		$this->assertTrue($user->enabled);
 	}
 
@@ -88,7 +88,7 @@ class UserTest extends Test
 	{
 		$user = User::factory()->state('admin')->create();
 
-		$this->assertEquals('active', $user->status);
+		$this->assertEquals('online', $user->status);
 		$this->assertTrue($user->enabled);
 		$this->assertNotNull($user->emailVerifiedAt);
 	}
@@ -103,7 +103,7 @@ class UserTest extends Test
 		$user = User::factory()->state('disabled')->create();
 
 		$this->assertFalse($user->enabled);
-		$this->assertEquals('disabled', $user->status);
+		$this->assertEquals('offline', $user->status);
 	}
 
 	/**
