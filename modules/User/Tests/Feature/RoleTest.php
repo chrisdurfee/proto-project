@@ -44,7 +44,8 @@ class RoleTest extends Test
 
 		$this->assertCount(5, $roles);
 
-		foreach ($roles as $role) {
+		foreach ($roles as $role)
+		{
 			$this->assertNotNull($role->id);
 			$this->assertNotNull($role->name);
 			$this->assertNotNull($role->slug);
@@ -228,7 +229,8 @@ class RoleTest extends Test
 	public function testCreateRolesWithSequence(): void
 	{
 		$roles = [];
-		for ($i = 0; $i < 3; $i++) {
+		for ($i = 0; $i < 3; $i++)
+		{
 			$roles[] = Role::factory()->create([
 				'name' => "Role{$i}",
 				'slug' => "role-{$i}"

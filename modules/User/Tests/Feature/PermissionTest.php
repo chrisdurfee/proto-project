@@ -232,7 +232,8 @@ class PermissionTest extends Test
 	public function testCreatePermissionsWithSequence(): void
 	{
 		$permissions = [];
-		for ($i = 0; $i < 3; $i++) {
+		for ($i = 0; $i < 3; $i++)
+		{
 			$permissions[] = Permission::factory()->create([
 				'name' => "Permission{$i}",
 				'slug' => "permission-{$i}"
