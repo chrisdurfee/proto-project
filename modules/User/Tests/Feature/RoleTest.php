@@ -214,7 +214,8 @@ class RoleTest extends Test
 
 		$this->assertTrue($result);
 
-		$updated = Role::getById($role->id);
+		$updated = Role::get($role->id);
+		$this->assertNotNull($updated);
 		$this->assertEquals('Updated Role', $updated->name);
 		$this->assertEquals('Updated description', $updated->description);
 	}
@@ -233,7 +234,7 @@ class RoleTest extends Test
 
 		$this->assertTrue($result);
 
-		$deleted = Role::getById($roleId);
+		$deleted = Role::get($roleId);
 		$this->assertNull($deleted);
 	}
 

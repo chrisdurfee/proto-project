@@ -238,7 +238,7 @@ class PermissionTest extends Test
 
 		$this->assertTrue($result);
 
-		$deleted = Permission::getById($permissionId);
+		$deleted = Permission::get($permissionId);
 		$this->assertNull($deleted);
 	}
 
