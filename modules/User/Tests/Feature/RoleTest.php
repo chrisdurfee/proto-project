@@ -15,27 +15,9 @@ use Modules\User\Models\Permission;
  */
 class RoleTest extends Test
 {
-	/**
-	 * Set up before each test
-	 */
-	protected function setUp(): void
-	{
-		parent::setUp();
+	// Framework automatically handles test isolation using transactions
+	// No setUp/tearDown needed for basic tests!
 
-		// Disable foreign key checks to prevent deadlocks
-		$this->getTestDatabase()->execute('SET FOREIGN_KEY_CHECKS=0');
-	}
-
-	/**
-	 * Clean up after each test
-	 */
-	protected function tearDown(): void
-	{
-		// Re-enable foreign key checks
-		$this->getTestDatabase()->execute('SET FOREIGN_KEY_CHECKS=1');
-
-		parent::tearDown();
-	}
 	/**
 	 * Test creating a role with factory
 	 *
