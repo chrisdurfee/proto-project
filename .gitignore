@@ -5,6 +5,7 @@ error_log
 .jshintrc
 _notes/
 .idea/
+.vscode/
 /vendor/
 node_modules/
 *.code-workspace
