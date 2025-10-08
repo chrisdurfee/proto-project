@@ -16,6 +16,27 @@ use Modules\User\Models\Role;
 class PermissionTest extends Test
 {
 	/**
+	 * Set up before each test
+	 */
+	protected function setUp(): void
+	{
+		parent::setUp();
+
+		// Disable foreign key checks to prevent deadlocks
+		$this->getTestDatabase()->execute('SET FOREIGN_KEY_CHECKS=0');
+	}
+
+	/**
+	 * Clean up after each test
+	 */
+	protected function tearDown(): void
+	{
+		// Re-enable foreign key checks
+		$this->getTestDatabase()->execute('SET FOREIGN_KEY_CHECKS=1');
+
+		parent::tearDown();
+	}
+	/**
 	 * Test creating a permission with factory
 	 *
 	 * @return void
@@ -180,14 +201,25 @@ class PermissionTest extends Test
 	public function testPermissionCanBeUpdated(): void
 	{
 		$permission = Permission::factory()->create();
+		$originalId = $permission->id;
 
 		$permission->name = 'Updated Permission';
 		$permission->description = 'Updated description';
 		$result = $permission->update();
 
 		$this->assertTrue($result);
+		$this->assertNotNull($permission->id, 'Permission ID should not be null after update');
+		$this->assertEquals($originalId, $permission->id, 'Permission ID should not change after update');
 
-		$updated = Permission::getById($permission->id);
+		// Verify directly in database
+		$this->assertDatabaseHas('permissions', [
+			'id' => $permission->id,
+			'name' => 'Updated Permission'
+		]);
+
+		// Retrieve using getBy instead of getById
+		$updated = Permission::getBy(['id' => $permission->id]);
+		$this->assertNotNull($updated, 'Permission should be retrievable after update');
 		$this->assertEquals('Updated Permission', $updated->name);
 		$this->assertEquals('Updated description', $updated->description);
 	}

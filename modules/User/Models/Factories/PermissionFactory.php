@@ -38,10 +38,11 @@ class PermissionFactory extends Factory
 		$resource = $resources[$this->faker()->numberBetween(0, count($resources) - 1)];
 		$module = $modules[$this->faker()->numberBetween(0, count($modules) - 1)];
 		$name = ucfirst($action) . ' ' . ucfirst($resource);
+		$uniqueId = $this->faker()->numberBetween(1000, 9999);
 
 		return [
 			'name' => $name,
-			'slug' => strtolower($action . '-' . $resource),
+			'slug' => strtolower($action . '-' . $resource . '-' . $uniqueId),
 			'description' => "Permission to {$action} {$resource} records",
 			'module' => $module,
 			'resource' => $resource,

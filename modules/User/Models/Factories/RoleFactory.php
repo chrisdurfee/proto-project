@@ -33,10 +33,11 @@ class RoleFactory extends Factory
 		$words = ['Admin', 'User', 'Manager', 'Editor', 'Viewer', 'Moderator', 'Guest'];
 		$resources = ['global', 'organization', 'group', 'team'];
 		$name = $words[$this->faker()->numberBetween(0, count($words) - 1)];
+		$uniqueId = $this->faker()->numberBetween(1000, 9999);
 
 		return [
 			'name' => $name,
-			'slug' => strtolower($name),
+			'slug' => strtolower($name . '-' . $uniqueId),
 			'description' => $this->faker()->text(10),
 			'resource' => $resources[$this->faker()->numberBetween(0, count($resources) - 1)],
 			'createdAt' => date('Y-m-d H:i:s'),
