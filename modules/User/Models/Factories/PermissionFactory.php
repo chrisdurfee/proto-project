@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace Modules\User\Factories;
+namespace Modules\User\Models\Factories;
 
 use Proto\Models\Factory;
 use Modules\User\Models\Permission;
