@@ -42,7 +42,8 @@ class PermissionTest extends Test
 
 		$this->assertCount(5, $permissions);
 
-		foreach ($permissions as $permission) {
+		foreach ($permissions as $permission)
+		{
 			$this->assertNotNull($permission->id);
 			$this->assertNotNull($permission->name);
 			$this->assertNotNull($permission->slug);
