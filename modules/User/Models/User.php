@@ -103,22 +103,28 @@ class User extends Model
 	 */
 	protected static function joins(object $builder): void
 	{
+		// Temporarily commented out all joins to prevent circular dependencies
+		// User->Role->Permission->Role (circular)
+		// User->Permission->Role->Permission (circular)
+		// User->Organization->User (circular)
+		// TODO: Refactor to use lazy loading or one-way relationships
+
 		/**
 		 * This will join the user roles and permissions.
 		 */
-		$builder
-			->belongsToMany(Role::class, ['id', 'name', 'slug'], pivotFields: ['organizationId'])
-			->belongsToMany(Permission::class, ['id', 'name', 'slug', 'module']);
+		// $builder
+		// 	->belongsToMany(Role::class, ['id', 'name', 'slug'], pivotFields: ['organizationId'])
+		// 	->belongsToMany(Permission::class, ['id', 'name', 'slug', 'module']);
 
-		$builder
-			->belongsToMany(Organization::class, ['id', 'name']);
+		// $builder
+		// 	->belongsToMany(Organization::class, ['id', 'name']);
 
-		$builder
-			->one(NotificationPreference::class, fields: [
-				[['IF(allow_email = 0, 0, 1)'], 'allowEmail'],
-				[['IF(allow_sms = 0, 0, 1)'], 'allowSms'],
-				[['IF(allow_push = 0, 0, 1)'], 'allowPush']
-			]);
+		// $builder
+		// 	->one(NotificationPreference::class, fields: [
+		// 		[['IF(allow_email = 0, 0, 1)'], 'allowEmail'],
+		// 		[['IF(allow_sms = 0, 0, 1)'], 'allowSms'],
+		// 		[['IF(allow_push = 0, 0, 1)'], 'allowPush']
+		// 	]);
 	}
 
 	/**

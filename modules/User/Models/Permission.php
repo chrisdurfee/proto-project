@@ -44,13 +44,15 @@ class Permission extends Model
 	 */
 	protected static function joins(object $builder): void
 	{
-		$builder
-			->belongsToMany(Role::class, [
-				'id',
-				'name',
-				'slug',
-				'description'
-			]);
+		// Commented out to prevent circular dependency: User->Permission->Role->Permission
+		// TODO: Refactor to use lazy loading
+		// $builder
+		// 	->belongsToMany(Role::class, [
+		// 		'id',
+		// 		'name',
+		// 		'slug',
+		// 		'description'
+		// 	]);
 	}
 
 	/**

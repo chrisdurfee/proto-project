@@ -242,7 +242,7 @@ class UserTest extends Test
 
 		$this->assertTrue($result);
 
-		$updated = User::getById($user->id);
+		$updated = User::get($user->id);
 		$this->assertEquals('Updated', $updated->firstName);
 		$this->assertEquals('Name', $updated->lastName);
 	}
@@ -261,7 +261,7 @@ class UserTest extends Test
 
 		$this->assertTrue($result);
 
-		$deleted = User::getById($userId);
+		$deleted = User::get($userId);
 		$this->assertNull($deleted);
 	}
 
@@ -303,7 +303,7 @@ class UserTest extends Test
 		$user->status = 'away';
 		$user->update();
 
-		$updated = User::getById($user->id);
+		$updated = User::get($user->id);
 		$this->assertEquals('away', $updated->status);
 	}
 

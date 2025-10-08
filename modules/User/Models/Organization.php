@@ -40,7 +40,10 @@ class Organization extends Model
 	 */
 	protected static function joins(object $builder): void
 	{
-		$builder
-			->belongsToMany(User::class);
+		// Commented out to prevent circular dependency with User model
+		// User->joins() loads Organization, Organization->joins() loads User = deadlock
+		// TODO: Refactor to use lazy loading or one-way relationship
+		// $builder
+		// 	->belongsToMany(User::class);
 	}
 }

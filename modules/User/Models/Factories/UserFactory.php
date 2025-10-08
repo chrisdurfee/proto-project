@@ -147,18 +147,20 @@ class UserFactory extends Factory
 	 */
 	public function stateCompleteProfile(): array
 	{
+		$streets = ['Main St', 'Oak Ave', 'Elm Street', 'Park Blvd', 'Maple Dr'];
+		$cities = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'];
+		$genders = ['male', 'female', 'other'];
+
 		return [
-			'phone' => $this->faker()->phoneNumber(),
-			'phoneVerified' => true,
-			'profilePicture' => 'https://via.placeholder.com/150',
-			'coverPhoto' => 'https://via.placeholder.com/800x200',
-			'bio' => $this->faker()->text(20),
-			'birthdate' => $this->faker()->dateTimeBetween('-60 years', '-18 years'),
-			'gender' => ['male', 'female', 'other'][$this->faker()->numberBetween(0, 2)],
-			'address' => $this->faker()->address(),
-			'city' => $this->faker()->city(),
+			'image' => 'https://via.placeholder.com/150',
+			'coverImageUrl' => 'https://via.placeholder.com/800x200',
+			'bio' => $this->faker()->text(200),
+			'dob' => date('Y-m-d', strtotime('-' . $this->faker()->numberBetween(18, 60) . ' years')),
+			'gender' => $genders[$this->faker()->numberBetween(0, 2)],
+			'street1' => $this->faker()->numberBetween(100, 9999) . ' ' . $streets[$this->faker()->numberBetween(0, 4)],
+			'city' => $cities[$this->faker()->numberBetween(0, 4)],
 			'state' => ['CA', 'NY', 'TX', 'FL', 'IL'][$this->faker()->numberBetween(0, 4)],
-			'zipcode' => sprintf('%05d', $this->faker()->numberBetween(10000, 99999))
+			'postalCode' => sprintf('%05d', $this->faker()->numberBetween(10000, 99999))
 		];
 	}
 
