@@ -53,7 +53,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # PHP Apache Web Server (Proto Backend) - PRODUCTION MODE WITH BUILT-IN FILES
+  # PHP Apache Web Server (Proto Backend) - DEVELOPMENT WITH FALLBACK
   web:
     build:
       context: ..
@@ -64,17 +64,14 @@ services:
       - "8080:80"    # HTTP
       - "8443:443"   # HTTPS/HTTP2
     volumes:
-      # DEVELOPMENT MODE - selective bind mounts for editable content
-      # Mount individual directories to avoid empty directory conflicts
+      # BIND MOUNTS for live editing - now using native Docker Engine in WSL
       - ../common:/var/www/html/common:rw
       - ../modules:/var/www/html/modules:rw
       - ../public:/var/www/html/public:rw
-      - ../apps:/var/www/html/apps:rw
-      # Essential config files (PHP and Apache)
+
+      # Config files only
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
       - ./docker/apache-mpm.conf:/etc/apache2/conf-available/mpm-tuning.conf:ro
-      # NOTE: Removed nested volume mounts (public_files, common_files) that were masking parent bind mounts
-      # Files are now included in the bind mounts above for development flexibility
     depends_on:
       - mariadb
       - redis
@@ -146,8 +143,6 @@ volumes:
     driver: local
   redis_data:
     driver: local
-  # Removed public_files and common_files volumes - using bind mounts instead for development
-  # This prevents nested volumes from masking parent bind mounts
 
 networks:
   proto-network:
