@@ -44,16 +44,14 @@ class Role extends Model
 	 */
 	protected static function joins(object $builder): void
 	{
-		// Commented out to prevent circular dependency: User->Role->Permission->Role
-		// TODO: Refactor to use lazy loading
-		// $builder
-		// 	->belongsToMany(Permission::class, [
-		// 		'id',
-		// 		'name',
-		// 		'slug',
-		// 		'description',
-		// 		'module'
-		// 	]);
+		$builder
+			->belongsToMany(Permission::class, [
+				'id',
+				'name',
+				'slug',
+				'description',
+				'module'
+			]);
 	}
 
 	/**
