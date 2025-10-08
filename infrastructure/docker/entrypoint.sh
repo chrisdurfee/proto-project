@@ -69,6 +69,13 @@ if [ ! -f "vendor/autoload.php" ]; then
     else
         echo "⚠️ composer.json not present; skipping composer install (expected in some workflows)"
     fi
+else
+    echo "✅ Vendor directory exists"
+    # Regenerate autoloader to pick up any new files from bind mounts
+    if [ -f "composer.json" ]; then
+        echo "🔄 Regenerating autoloader for bind-mounted directories..."
+        composer dump-autoload --optimize || echo "⚠️ Autoloader regeneration failed"
+    fi
 fi
 
 # Check if we need to run migrations (only if requested via env var)

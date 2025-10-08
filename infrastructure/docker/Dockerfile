@@ -132,14 +132,9 @@ COPY infrastructure/ ./infrastructure/
 # Copy sync-config.js if it exists (needed for configuration)
 COPY sync-config.js* ./
 
-# Copy just the modules structure for autoloader (these will be overlaid by bind mount)
-COPY modules/ ./modules/
-
-# Copy common structure for autoloader (will be overlaid by bind mount in development)
-COPY common/ ./common/
-
-# Copy public directory structure
-COPY public/ ./public/
+# NOTE: NOT copying modules/, common/, public/ here - they are mounted via bind mount in docker-compose.yaml
+# This allows real-time file changes without rebuilding the image
+# For production, use a separate Dockerfile that does COPY these directories
 
 # Install Node.js for building frontend apps
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
