@@ -1,0 +1,12 @@
+{
+  "phpunit.php": "/usr/bin/php",
+  "phpunit.phpunit": "${workspaceFolder}/vendor/bin/phpunit",
+  "phpunit.args": [
+    "-c",
+    "${workspaceFolder}/phpunit.xml"
+  ],
+  "phpunit.clearOutputOnRun": true,
+  "phpunit.showAfterExecution": "always",
+  "php.validate.executablePath": "/usr/bin/php",
+  "php.executablePath": "/usr/bin/php"
+}
