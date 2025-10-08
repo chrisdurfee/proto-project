@@ -42,7 +42,7 @@ class UserFactory extends Factory
 			'firstName' => $firstName,
 			'lastName' => $lastName,
 			'displayName' => $firstName . ' ' . $lastName,
-			'status' => 'active',
+			'status' => 'offline',
 			'enabled' => true,
 			'multiFactorEnabled' => false,
 			'emailVerifiedAt' => null,
@@ -70,7 +70,7 @@ class UserFactory extends Factory
 	public function stateAdmin(): array
 	{
 		return [
-			'status' => 'active',
+			'status' => 'online',
 			'enabled' => true,
 			'emailVerifiedAt' => date('Y-m-d H:i:s')
 		];
@@ -111,7 +111,7 @@ class UserFactory extends Factory
 	{
 		return [
 			'enabled' => false,
-			'status' => 'disabled'
+			'status' => 'offline'
 		];
 	}
 

@@ -238,7 +238,7 @@ class UserTest extends Test
 
 		$user->firstName = 'Updated';
 		$user->lastName = 'Name';
-		$result = $user->save();
+		$result = $user->update();
 
 		$this->assertTrue($result);
 
@@ -301,7 +301,7 @@ class UserTest extends Test
 		$this->assertEquals('active', $user->status);
 
 		$user->status = 'inactive';
-		$user->save();
+		$user->update();
 
 		$updated = User::getById($user->id);
 		$this->assertEquals('inactive', $updated->status);

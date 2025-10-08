@@ -31,13 +31,14 @@ class RoleFactory extends Factory
 	public function definition(): array
 	{
 		$words = ['Admin', 'User', 'Manager', 'Editor', 'Viewer', 'Moderator', 'Guest'];
+		$resources = ['global', 'organization', 'group', 'team'];
 		$name = $words[$this->faker()->numberBetween(0, count($words) - 1)];
 
 		return [
 			'name' => $name,
 			'slug' => strtolower($name),
 			'description' => $this->faker()->text(10),
-			'resource' => null,
+			'resource' => $resources[$this->faker()->numberBetween(0, count($resources) - 1)],
 			'createdAt' => date('Y-m-d H:i:s'),
 			'updatedAt' => date('Y-m-d H:i:s')
 		];

@@ -32,16 +32,18 @@ class PermissionFactory extends Factory
 	{
 		$actions = ['create', 'read', 'update', 'delete', 'manage'];
 		$resources = ['user', 'post', 'product', 'order', 'report'];
+		$modules = ['User', 'Content', 'Product', 'Order', 'Report', 'Admin'];
 
 		$action = $actions[$this->faker()->numberBetween(0, count($actions) - 1)];
 		$resource = $resources[$this->faker()->numberBetween(0, count($resources) - 1)];
+		$module = $modules[$this->faker()->numberBetween(0, count($modules) - 1)];
 		$name = ucfirst($action) . ' ' . ucfirst($resource);
 
 		return [
 			'name' => $name,
 			'slug' => strtolower($action . '-' . $resource),
 			'description' => "Permission to {$action} {$resource} records",
-			'module' => null,
+			'module' => $module,
 			'resource' => $resource,
 			'createdAt' => date('Y-m-d H:i:s'),
 			'updatedAt' => date('Y-m-d H:i:s')

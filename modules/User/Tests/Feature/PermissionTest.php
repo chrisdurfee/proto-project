@@ -183,7 +183,7 @@ class PermissionTest extends Test
 
 		$permission->name = 'Updated Permission';
 		$permission->description = 'Updated description';
-		$result = $permission->save();
+		$result = $permission->update();
 
 		$this->assertTrue($result);
 

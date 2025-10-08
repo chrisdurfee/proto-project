@@ -126,9 +126,9 @@ class RoleTest extends Test
 	 */
 	public function testCreateRoleWithResource(): void
 	{
-		$role = Role::factory()->state('withResource', 'api')->create();
+		$role = Role::factory()->state('withResource', 'organization')->create();
 
-		$this->assertEquals('api', $role->resource);
+		$this->assertEquals('organization', $role->resource);
 	}
 
 	/**
@@ -189,7 +189,7 @@ class RoleTest extends Test
 
 		$role->name = 'Updated Role';
 		$role->description = 'Updated description';
-		$result = $role->save();
+		$result = $role->update();
 
 		$this->assertTrue($result);
 
