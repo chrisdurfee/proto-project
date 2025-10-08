@@ -29,10 +29,12 @@ export default defineConfig({
 		port: 3000,
 		cors: true,
 		open: true,
-		https: {
-			key: fs.readFileSync('../../infrastructure/docker/ssl/localhost.key'),
-			cert: fs.readFileSync('../../infrastructure/docker/ssl/localhost.crt'),
-		},
+		...(fs.existsSync('../../infrastructure/docker/ssl/localhost.key') && fs.existsSync('../../infrastructure/docker/ssl/localhost.crt') ? {
+			https: {
+				key: fs.readFileSync('../../infrastructure/docker/ssl/localhost.key'),
+				cert: fs.readFileSync('../../infrastructure/docker/ssl/localhost.crt'),
+			}
+		} : {}),
 		proxy: {
 			'/api': {
 				target: apiTarget,

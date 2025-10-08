@@ -177,6 +177,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup SSL stub files
+        run: |
+          mkdir -p infrastructure/docker/ssl
+          # Create stub SSL files for build process
+          touch infrastructure/docker/ssl/localhost.key
+          touch infrastructure/docker/ssl/localhost.crt
+
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -195,6 +202,8 @@ jobs:
 
       - name: Build
         working-directory: apps/${{ matrix.app }}
+        env:
+          NODE_ENV: production
         run: npm run build
 
       - name: Upload build artifacts
