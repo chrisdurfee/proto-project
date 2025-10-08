@@ -266,7 +266,7 @@ class RoleTest extends Test
 		$userRole = Role::factory()->state('user')->create();
 		$guestRole = Role::factory()->state('guest')->create();
 
-		$roles = Role::fetchAll();
+		$roles = Role::fetchWhere([]);
 
 		$this->assertGreaterThanOrEqual(3, count($roles));
 
