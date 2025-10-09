@@ -62,7 +62,7 @@ COPY infrastructure/docker/php/php.ini /usr/local/etc/php/conf.d/custom-php.ini
 if [ "${APP_ENV}" = "production" ]; then
     # Copy production config over development config
     cp infrastructure/docker/php/php-production.ini /usr/local/etc/php/conf.d/custom-php.ini
-    
+
     # Apply production OPcache overrides
     # (preload, validate_timestamps=0, etc.)
 else
