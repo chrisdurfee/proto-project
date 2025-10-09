@@ -1,6 +1,12 @@
 # Proto Project
 
-This repository is a **project skeleton** for building applications on top of the [Proto Framework](https://github.com/protoframework/proto). It wires up Composer, your folder structure, and a minimal entrypoint so you can start writing modules and apps right away.
+This repository is a **project skeleton** for building applications on top of the [Proto Framework](https://github.com/protoframework/proto). It comes with all the files, settings, and configuration needed to create a large platform project using Proto and [Base Framework](https://github.com/chrisdurfee/base) on the front end.
+
+The project is packaged in Packagist and can be installed and running in a few command lines. It uses Docker, Composer, NPM, Vite, Base, PHP 8.4+, MariaDB, Redis, and more.
+
+This project wires up Docker, folder structure, and a minimal entrypoint so you can start writing modules and apps right away.
+
+The project includes three frontend apps (Main - Consumer, CRM - Admin, Developer) built with Base Framework and Vite, plus a PHP backend API container. These are all connected to the Proto backend via RESTful APIs and WebSocket for real-time features. These applications come with the Base UI package which included pre-built components and styles for rapid development. These applications are all PWA (Progressive Web Apps) with installation prompts and support light and dark mode which can be themed.
 
 ---
 

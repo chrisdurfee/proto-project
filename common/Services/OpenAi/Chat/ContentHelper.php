@@ -8,7 +8,7 @@ namespace Common\Services\OpenAi\Chat;
  *
  * @package Common\Services\OpenAi\Chat
  */
-class ContentHelper
+final class ContentHelper
 {
 	/**
 	 * Handles content formatting for OpenAI API requests.

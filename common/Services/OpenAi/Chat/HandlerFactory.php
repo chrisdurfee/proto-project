@@ -13,7 +13,7 @@ use Common\Services\OpenAI\Chat\Handlers\ChatHandler;
  *
  * @package Common\Services\OpenAi\Chat
  */
-class HandlerFactory
+final class HandlerFactory
 {
 	/**
 	 * Returns an instance of the chat handler for the given type if the handler class exists.
