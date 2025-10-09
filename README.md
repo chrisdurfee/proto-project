@@ -1,20 +1,20 @@
 # Proto Project
 
-This repository is a **project skeleton** for building applications on top of the [Proto Framework](https://github.com/protoframework/proto). It comes with all the files, settings, and configuration needed to create a large platform project using Proto and [Base Framework](https://github.com/chrisdurfee/base) on the front end.
+This repository is a **project skeleton** for building applications on the [Proto Framework](https://github.com/protoframework/proto), with [Base Framework](https://github.com/chrisdurfee/base) on the front end. It includes the files, settings, and configuration you need to bootstrap a large, multi-app platform.
 
-The project is packaged in Packagist and can be installed and running in a few command lines. It uses Docker, Composer, NPM, Vite, Base, PHP 8.4+, MariaDB, Redis, and more.
+The project is published on Packagist and can be set up in just a few commands. It uses Docker, Composer, NPM, Vite, Base, PHP 8.4+, MariaDB, Redis, and more.
 
-This project wires up Docker, folder structure, and a minimal entrypoint so you can start writing modules and apps right away. It has a document that helps AI agents build and understand the project structure, dependencies, and configurations.
+It wires up Docker, a sensible folder structure, and a minimal entry point so you can start writing modules and apps right away. It also includes a companion document to help AI agents understand the project structure, dependencies, and configuration.
 
-The project includes three front-end apps (Main - Consumer, CRM - Admin, Developer) built with Base Framework and Vite, plus a PHP backend API container. These are all connected to the Proto backend via RESTful APIs and WebSocket for real-time features.
+The template ships with three front-end apps—**Main (Consumer)**, **CRM (Admin)**, and **Developer**—built with Base + Vite, plus a PHP backend API service. These apps connect to the Proto backend via REST APIs and WebSockets for real-time features.
 
-These applications come with the [Base UI](https://github.com/chrisdurfee/ui) package which included pre-built components and styles for rapid development. These applications are all PWAs (Progressive Web Apps) with installation prompts and support light and dark mode which can be themed.
+Each app includes the [Base UI](https://github.com/chrisdurfee/ui) package for pre-built components and styles to speed up development. All apps are **PWAs** with install prompts, support for light/dark mode, and theme customization.
 
-The front-end applications already have working user login, password reset, forgot password, multifactor authentication, user activity tracking, session resume, session heartbeat, push notification support, caching, and more.
+Out of the box, the front end includes working user auth flows: login, password reset, “forgot password,” multi-factor authentication, user activity tracking, session resume, session heartbeat, push-notification support, caching, and more.
 
-The applications have a user system with roles, permissions, organizations, followers, following, blocking, and more.
+The application layer includes a robust user system with roles, permissions, organizations, followers/following, blocking, and more.
 
-The backend application included a OpenAI service for AI-powered features which can be used for chat, completions, embeddings, and more.
+On the backend, an integrated **OpenAI** service powers AI features such as chat, completions, embeddings, and other intelligent workflows.
 
 ---
 
