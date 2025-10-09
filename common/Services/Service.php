@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 namespace Common\Services;
 
+use Common\Services\Traits\ResponseTrait;
+
 /**
  * Service
  *
@@ -10,4 +12,5 @@ namespace Common\Services;
  */
 abstract class Service
 {
+    use ResponseTrait;
 }
