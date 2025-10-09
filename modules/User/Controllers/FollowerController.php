@@ -173,6 +173,11 @@ class FollowerController extends Controller
 		$groupBy = $this->setGroupByModifier($request);
 
 		$user = User::get($userId);
+		if ($user === null)
+		{
+			return $this->error('User not found.');
+		}
+
 		$result = $user->followers()->all($filter, $offset, $limit, [
 			'search' => $search,
 			'custom' => $custom,
