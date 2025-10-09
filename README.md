@@ -463,23 +463,6 @@ docker compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit
 
 - **[Test Coverage Proposal](infrastructure/docs/TEST-COVERAGE-PROPOSAL.md)** - Comprehensive testing strategy with 130+ proposed tests across all critical systems
 - **[Quick Test Guide](infrastructure/docs/QUICK-TEST-GUIDE.md)** - Templates, examples, and patterns for writing tests quickly
-- **Current Coverage**: ~5% (User module has basic tests)
-- **Target Coverage**: 75%+ across critical paths (Auth, User, API, Database)
-
-### Priority Testing Areas
-
-**P0 - Critical** (Start here):
-1. 🔐 **Authentication System** - Login, MFA, password reset (0% → 90% target)
-2. 👤 **User Management** - CRUD, permissions, roles (5% → 85% target)
-3. 🌐 **API Layer** - Routing, middleware, CSRF, throttling (0% → 80% target)
-4. 💾 **Database Layer** - Models, storage, migrations (0% → 75% target)
-
-**P1 - High**:
-5. 📧 **Email/SMS** - Dispatch, templates, queuing (0% → 70% target)
-6. ⚙️ **Configuration** - JSON config, sync script (0% → 70% target)
-7. 📁 **File Storage** - Uploads, Vault system (0% → 65% target)
-
-See the [Test Coverage Proposal](infrastructure/docs/TEST-COVERAGE-PROPOSAL.md) for detailed test specifications and implementation timeline.
 
 ---
 
