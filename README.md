@@ -21,18 +21,20 @@ On the backend, an integrated **OpenAI** service powers AI features such as chat
 ## � Prerequisites
 
 ### For Containerized Development (Recommended)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/macOS) or Docker Engine (Linux)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/macOS) or Docker Engine (Linux or if you are using WSL2)
 - Git
+- Composer
+- Node.js (for frontend development)
 
 ### For Traditional Development
+- Git
 - PHP 8.4+
 - Composer
 - MySQL/MariaDB
 - Node.js (for frontend development)
 
 ### Framework Requirements
-- **Proto Framework**: v1.0.15+ (includes enhanced Email/SMTP support)
-- **PHPMailer**: Included with Proto framework for universal email sending
+- **Proto Framework**: v1.0+
 
 ---
 
@@ -40,7 +42,7 @@ On the backend, an integrated **OpenAI** service powers AI features such as chat
 
 Choose one of the two approaches:
 
-### 1. Create a brand-new project via Composer
+### 1. Create a brand-new project via Composer (Recommended)
 
 ```bash
 composer create-project protoframework/proto-project my-app
