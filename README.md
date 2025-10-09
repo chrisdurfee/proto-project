@@ -4,9 +4,17 @@ This repository is a **project skeleton** for building applications on top of th
 
 The project is packaged in Packagist and can be installed and running in a few command lines. It uses Docker, Composer, NPM, Vite, Base, PHP 8.4+, MariaDB, Redis, and more.
 
-This project wires up Docker, folder structure, and a minimal entrypoint so you can start writing modules and apps right away.
+This project wires up Docker, folder structure, and a minimal entrypoint so you can start writing modules and apps right away. It has a document that helps AI agents build and understand the project structure, dependencies, and configurations.
 
-The project includes three frontend apps (Main - Consumer, CRM - Admin, Developer) built with Base Framework and Vite, plus a PHP backend API container. These are all connected to the Proto backend via RESTful APIs and WebSocket for real-time features. These applications come with the Base UI package which included pre-built components and styles for rapid development. These applications are all PWA (Progressive Web Apps) with installation prompts and support light and dark mode which can be themed.
+The project includes three front-end apps (Main - Consumer, CRM - Admin, Developer) built with Base Framework and Vite, plus a PHP backend API container. These are all connected to the Proto backend via RESTful APIs and WebSocket for real-time features.
+
+These applications come with the [Base UI](https://github.com/chrisdurfee/ui) package which included pre-built components and styles for rapid development. These applications are all PWAs (Progressive Web Apps) with installation prompts and support light and dark mode which can be themed.
+
+The front-end applications already have working user login, password reset, forgot password, multifactor authentication, user activity tracking, session resume, session heartbeat, push notification support, caching, and more.
+
+The applications have a user system with roles, permissions, organizations, followers, following, blocking, and more.
+
+The backend application included a OpenAI service for AI-powered features which can be used for chat, completions, embeddings, and more.
 
 ---
 
