@@ -20,15 +20,7 @@ export const UsersPage = () =>
 		filter: {}
 	});
 
-	/**
-	 * @type {object} Props
-	 */
-	const Props =
-	{
-		data,
-	};
-
-	return FullTablePage(Props, [
+	return FullTablePage({ data }, [
 		PageHeader(),
 		TableContainer([
 			UserTable(data)

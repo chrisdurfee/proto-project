@@ -13,7 +13,7 @@ import { TestEmailModal } from "./modals/test-email-modal.js";
  * @returns {object}
  */
 export const ContentSwitch = (props) => (
-	Div({ class: 'flex-1 flex-col w-full h-full hidden lg:flex px-6 py-4 gap-y-4' }, [
+	Div({ class: 'flex-1 flex-col w-full h-full flex px-6 py-4 gap-y-4' }, [
 		Div({ class: 'flex justify-between' }, [
 			Div({ class: "items-center pb-2" }, [
 				Span({ class: "text-xl font-semibold text-foreground" }, "Email Template Preview")

@@ -74,13 +74,15 @@ const Dropdown = () => (
  */
 export const PageHeader = () => (
 	TablePageHeader({ title: 'Users' }, [
-		SearchInput({
-			class: 'min-w-40 lg:min-w-96',
-			placeholder: 'Search users...',
-			bind: 'search',
-			keyup: (e, parent) => parent.list.refresh(),
-			icon: Icons.magnifyingGlass.default
-		}),
+		Div({ class: 'hidden md:block' }, [
+			SearchInput({
+				class: 'min-w-40 lg:min-w-96',
+				placeholder: 'Search users...',
+				bind: 'search',
+				keyup: (e, parent) => parent.list.refresh(),
+				icon: Icons.magnifyingGlass.default
+			})
+		]),
 		Div({ class: 'hidden lg:flex' }, [
 			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.refresh, click: refresh }, 'Refresh')
 		]),

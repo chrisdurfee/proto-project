@@ -26,11 +26,7 @@ export const ListContainer = (children) => (
  */
 export const ListPage = Atom((props, children) => (
 	new BlankPage({
-		...props,
-		/**
-		 * This will remove the padding.
-		 */
-		class: 'pt-0',
+		...props
 	}, [
 		Div({ class: 'grid grid-cols-1 flex-auto' }, [
 			Div({ class: 'flex flex-auto flex-col p-6 pt-0 gap-y-6 md:gap-y-12 md:pt-6 lg:p-8 w-full mx-auto lg:max-w-7xl' }, children)
