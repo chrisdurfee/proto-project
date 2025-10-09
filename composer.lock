@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bf9e9d0b6b985b31f6e742967b55a88a",
+    "content-hash": "e590bd35019f3ddbd138da873bcaea1e",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -816,31 +816,30 @@
         },
         {
             "name": "protoframework/proto",
-            "version": "1.0.61",
+            "version": "1.0.62",
             "source": {
                 "type": "git",
                 "url": "https://github.com/chrisdurfee/proto.git",
-                "reference": "1ff595df3857961d33fe25b30e99d2c4dc748b23"
+                "reference": "5ac7abdf264dae6d326ac6dff3b01c14e11ea2b2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/1ff595df3857961d33fe25b30e99d2c4dc748b23",
-                "reference": "1ff595df3857961d33fe25b30e99d2c4dc748b23",
+                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/5ac7abdf264dae6d326ac6dff3b01c14e11ea2b2",
+                "reference": "5ac7abdf264dae6d326ac6dff3b01c14e11ea2b2",
                 "shasum": ""
             },
             "require": {
-                "aws/aws-sdk-php": "^3.283",
+                "aws/aws-sdk-php": "^3.356",
                 "minishlink/web-push": "^9.0",
-                "orhanerday/open-ai": "^5.0",
-                "php": ">=8.1",
-                "phpmailer/phpmailer": "^6.9",
-                "twilio/sdk": "^7.9",
+                "php": ">=8.4",
+                "phpmailer/phpmailer": "^6.10",
+                "twilio/sdk": "^7.16",
                 "web-token/jwt-library": "*"
             },
             "require-dev": {
-                "fakerphp/faker": "^1.21",
-                "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "^10.0"
+                "fakerphp/faker": "^1.24",
+                "phpstan/phpstan": "^1.12",
+                "phpunit/phpunit": "^10.5"
             },
             "type": "project",
             "extra": {
@@ -876,9 +875,9 @@
             ],
             "support": {
                 "issues": "https://github.com/chrisdurfee/proto/issues",
-                "source": "https://github.com/chrisdurfee/proto/tree/1.0.61"
+                "source": "https://github.com/chrisdurfee/proto/tree/1.0.62"
             },
-            "time": "2025-10-08T23:07:39+00:00"
+            "time": "2025-10-09T02:55:16+00:00"
         },
         {
             "name": "psr/clock",
@@ -3447,7 +3446,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.2"
+        "php": ">=8.4"
     },
     "platform-dev": [],
     "plugin-api-version": "2.6.0"

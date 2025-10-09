@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.3
+ARG PHP_VERSION=8.4
 FROM php:${PHP_VERSION}-fpm
 
 # Install system dependencies including Apache2
@@ -51,27 +51,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin \
     --filename=composer
 
-# Base OPcache + JIT defaults (env-specific overrides in entrypoint)
-RUN { \
-    echo 'opcache.enable=1'; \
-    echo 'opcache.enable_cli=1'; \
-    echo 'opcache.jit_buffer_size=128M'; \
-    echo 'opcache.jit=1255'; \
-    echo 'opcache.memory_consumption=256'; \
-    echo 'opcache.interned_strings_buffer=32'; \
-    echo 'opcache.max_accelerated_files=20000'; \
-    echo 'opcache.revalidate_freq=1'; \
-    echo 'opcache.validate_timestamps=1'; \
-    echo 'opcache.fast_shutdown=1'; \
-    echo 'realpath_cache_size=4096K'; \
-    echo 'realpath_cache_ttl=600'; \
-} >> /usr/local/etc/php/conf.d/opcache.ini
-
-# Set recommended PHP settings
-RUN echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/memory.ini \
-    && echo "max_execution_time=300" >> /usr/local/etc/php/conf.d/execution.ini
+# Copy custom PHP configuration
+COPY infrastructure/docker/php/php.ini /usr/local/etc/php/conf.d/custom-php.ini
 
 # Copy Apache configurations and entrypoint
 COPY infrastructure/docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf

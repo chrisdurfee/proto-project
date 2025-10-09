@@ -3,7 +3,7 @@
 Use these repo-specific rules to be productive immediately.
 
 ## Big picture
-- Backend: PHP 8.2+/8.3 monolith using Proto Framework. Entry: `public/api/index.php` boots `Proto\Api\ApiRouter::initialize()`.
+- Backend: PHP 8.4 monolith using Proto Framework. Entry: `public/api/index.php` boots `Proto\Api\ApiRouter::initialize()`.
 - Code layout: `modules/*` (feature modules), `common/*` (shared framework glue), `public/*` (HTTP entrypoints/assets).
 - Autoloading: PSR-4 maps `Modules\` → `modules/`, `Common\` → `common/` (see `composer.json`). Migrations are classmapped from `common/Migrations` and `modules/*/Migrations`.
 - Frontend: Three Vite apps in `apps/{main,crm,developer}` using Base Framework UI libs. Each proxies `/api` to the backend based on `infrastructure/config/domain.config.js`.

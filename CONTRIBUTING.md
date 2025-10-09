@@ -39,7 +39,7 @@ Before contributing, ensure you have:
 - **Docker Desktop** (or Docker Engine on Linux)
 - **Node.js 18+** for frontend development
 - **Git** for version control
-- **PHP 8.2+** knowledge (for backend contributions)
+- **PHP 8.4+** knowledge (for backend contributions)
 - **Familiarity with Proto Framework** (see [documentation](https://github.com/protoframework/proto))
 
 ### Initial Setup
@@ -435,7 +435,7 @@ What actually happened.
 ## Environment
 - OS: [e.g., Ubuntu 22.04]
 - Docker version: [e.g., 24.0.5]
-- PHP version: [e.g., 8.3]
+- PHP version: [e.g., 8.4]
 - Node version: [e.g., 18.17.0]
 - Browser: [e.g., Chrome 118]
 

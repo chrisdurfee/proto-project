@@ -7,7 +7,7 @@ This guide covers building and deploying the Proto Project production Docker con
 ## 🐳 Production Container Overview
 
 The production setup uses a **standalone Docker image** that includes:
-- ✅ PHP 8.3-FPM with production optimizations
+- ✅ PHP 8.4-FPM with production optimizations
 - ✅ Apache 2.4 with Event MPM + HTTP/2 support
 - ✅ Built frontend apps (Main & CRM) included in the image
 - ✅ Subdomain routing for clean URLs
@@ -70,7 +70,7 @@ docker-compose -f infrastructure/docker-compose.production.yaml down -v
 
 When you run `docker-compose -f infrastructure/docker-compose.production.yaml build web`:
 
-1. **Base Image**: PHP 8.3-FPM from official Docker image
+1. **Base Image**: PHP 8.4-FPM from official Docker image
 2. **System Packages**: Apache, Node.js 18, build tools
 3. **PHP Extensions**: opcache, redis, gd, mysqli, pdo_mysql, zip
 4. **Apache Configuration**:

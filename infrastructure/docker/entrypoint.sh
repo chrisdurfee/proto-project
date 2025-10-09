@@ -140,11 +140,19 @@ if [ ! -f /var/www/html/infrastructure/config/preload.php ]; then
     echo "<?php // dynamic preload stub - created at runtime ?>" > /var/www/html/infrastructure/config/preload.php
 fi
 
-# Dynamic PHP performance tuning based on APP_ENV
-PHP_PERF_FILE="/usr/local/etc/php/conf.d/zz-env-performance.ini"
+# Dynamic PHP configuration based on APP_ENV
 if [ "${APP_ENV}" = "production" ]; then
-    echo "⚙️ Applying production PHP performance optimizations";
-    cat > "$PHP_PERF_FILE" <<'EOF'
+    echo "⚙️ Applying production PHP configuration";
+    # Copy production-optimized php.ini if it exists
+    if [ -f /var/www/html/infrastructure/docker/php/php-production.ini ]; then
+        cp /var/www/html/infrastructure/docker/php/php-production.ini /usr/local/etc/php/conf.d/custom-php.ini
+        echo "✅ Production PHP configuration loaded"
+    else
+        echo "⚠️ Production php.ini not found, using development config"
+    fi
+
+    # Additional production-specific overrides
+    cat > /usr/local/etc/php/conf.d/zz-env-overrides.ini <<'EOF'
 ; Runtime generated (production)
 opcache.validate_timestamps=0
 opcache.revalidate_freq=0
@@ -154,8 +162,10 @@ opcache.save_comments=1
 opcache.max_wasted_percentage=5
 EOF
 else
-    echo "⚙️ Applying development PHP performance settings";
-    cat > "$PHP_PERF_FILE" <<'EOF'
+    echo "⚙️ Using development PHP configuration";
+    # Development config is already copied during build
+    # Additional development-specific overrides
+    cat > /usr/local/etc/php/conf.d/zz-env-overrides.ini <<'EOF'
 ; Runtime generated (development)
 opcache.validate_timestamps=1
 opcache.revalidate_freq=1

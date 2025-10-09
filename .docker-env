@@ -1,0 +1,5 @@
+#!/bin/bash
+# Docker Environment Configuration for Native Docker Engine
+# This file sets the DOCKER_HOST to use native Linux Docker Engine instead of Docker Desktop
+
+export DOCKER_HOST=unix:///var/run/docker.sock

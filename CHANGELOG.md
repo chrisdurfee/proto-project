@@ -58,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker Compose for production
 - Dockerfile with multi-stage build support
 - Apache MPM Event configuration
-- PHP 8.3 with FPM
+- PHP 8.4 with FPM
 - Automated composer installation
 - Automated database migrations on container start
 - Health checks for MariaDB and Redis
@@ -129,7 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This is the first stable release of Proto Project, a comprehensive project skeleton for building applications with the Proto Framework.
 
 **What's Included:**
-- Complete backend infrastructure with PHP 8.3 and Proto Framework
+- Complete backend infrastructure with PHP 8.4 and Proto Framework
 - Three customizable frontend applications
 - Docker-based development and production environments
 - Extensive documentation and guides

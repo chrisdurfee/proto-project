@@ -11,7 +11,7 @@ This repository is a **project skeleton** for building applications on top of th
 - Git
 
 ### For Traditional Development
-- PHP 8.3+
+- PHP 8.4+
 - Composer
 - MySQL/MariaDB
 - Node.js (for frontend development)
