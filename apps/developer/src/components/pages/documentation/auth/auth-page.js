@@ -147,34 +147,35 @@ $auth->user->isUser(1);`
 namespace Common\\Auth\\Policies;
 
 use Proto\\Auth\\Policies\\Policy;
+use Proto\\Http\\Router\\Request;
 
 class ExamplePolicy extends Policy
 {
-    public function default(): bool
+    public function default(Request $request): bool
     {
         // Return true to allow all non-standard methods, or false to deny
         return true;
     }
 
-    public function get(int $id = 0): bool
+    public function get(Request $request): bool
     {
         // Check if a user can get a resource
         return true;
     }
 
-    public function before(): bool
+    public function before(Request $request): bool
     {
         // Called before the policy method
         return true;
     }
 
-    public function after($result): bool
+    public function after(mixed $result): bool
     {
         // Called after the policy method
         return $result;
     }
 
-    public function afterGet($result): bool
+    public function afterGet(mixed $result): bool
     {
         // Called after the get() method
         return $result;

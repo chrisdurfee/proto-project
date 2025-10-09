@@ -30,12 +30,12 @@ const HeaderRow = () => (
 		Tr({ class: 'text-muted-foreground border-b' }, [
 			CheckboxCol({ class: 'hidden md:table-cell' }),
 			HeaderCol({ key: 'errorFile', label: 'File', class: 'max-w-[150px]' }),
-			HeaderCol({ key: 'errorLine', label: 'Line' }),
-			HeaderCol({ key: 'errorMessage', label: 'Message', class: 'max-w-[150px]' }),
+			HeaderCol({ key: 'errorLine', label: 'Line', class: 'hidden md:table-cell' }),
+			HeaderCol({ key: 'errorMessage', label: 'Message', class: 'max-w-[150px] hidden md:table-cell' }),
 			HeaderCol({ key: 'createdAt', label: 'Date', class: 'hidden md:table-cell' }),
-			HeaderCol({ key: 'env', label: 'Env' }),
-			HeaderCol({ key: 'errorIp', label: 'IP' }),
-			HeaderCol({ key: 'resolved', label: 'Resolved' })
+			HeaderCol({ key: 'env', label: 'Env', class: 'hidden md:table-cell' }),
+			HeaderCol({ key: 'errorIp', label: 'IP', class: 'hidden md:table-cell' }),
+			HeaderCol({ key: 'resolved', label: 'Resolved', class: 'hidden md:table-cell' })
 		])
 	])
 );
@@ -60,12 +60,12 @@ export const Row = (row, onSelect) => (
 			})
 		]),
 		Td({ class: 'p-4 truncate max-w-[150px]' }, row.errorFile),
-		Td({ class: 'p-4' }, String(row.errorLine)),
-		Td({ class: 'p-4 truncate max-w-[150px]' }, row.errorMessage),
+		Td({ class: 'p-4 hidden md:table-cell' }, String(row.errorLine)),
+		Td({ class: 'p-4 truncate max-w-[150px] hidden md:table-cell' }, row.errorMessage),
 		Td({ class: 'p-4 hidden md:table-cell' }, row.createdAt),
-		Td({ class: 'p-4' }, row.env),
-		Td({ class: 'p-4' }, row.errorIp),
-		Td({ class: 'p-4' }, [
+		Td({ class: 'p-4 hidden md:table-cell' }, row.env),
+		Td({ class: 'p-4 hidden md:table-cell' }, row.errorIp),
+		Td({ class: 'p-4 hidden md:table-cell' }, [
 			new ResultButtons({
 				id: row.id,
 				resolved: row.resolved
