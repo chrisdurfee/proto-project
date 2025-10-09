@@ -816,16 +816,16 @@
         },
         {
             "name": "protoframework/proto",
-            "version": "1.0.62",
+            "version": "1.0.64",
             "source": {
                 "type": "git",
                 "url": "https://github.com/chrisdurfee/proto.git",
-                "reference": "5ac7abdf264dae6d326ac6dff3b01c14e11ea2b2"
+                "reference": "a9e822f4193639c0f9e7165d0fc2b0adf5ad58b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/5ac7abdf264dae6d326ac6dff3b01c14e11ea2b2",
-                "reference": "5ac7abdf264dae6d326ac6dff3b01c14e11ea2b2",
+                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/a9e822f4193639c0f9e7165d0fc2b0adf5ad58b4",
+                "reference": "a9e822f4193639c0f9e7165d0fc2b0adf5ad58b4",
                 "shasum": ""
             },
             "require": {
@@ -875,9 +875,9 @@
             ],
             "support": {
                 "issues": "https://github.com/chrisdurfee/proto/issues",
-                "source": "https://github.com/chrisdurfee/proto/tree/1.0.62"
+                "source": "https://github.com/chrisdurfee/proto/tree/1.0.64"
             },
-            "time": "2025-10-09T02:55:16+00:00"
+            "time": "2025-10-09T03:40:56+00:00"
         },
         {
             "name": "psr/clock",
@@ -3442,12 +3442,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.4"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

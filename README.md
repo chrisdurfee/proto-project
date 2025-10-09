@@ -71,7 +71,7 @@ Update the environment variables as needed. Then, sync your Proto configuration 
 
 **1. Start Backend Services:**
 ```bash
-docker-compose -f infrastructure/docker-compose.yaml up -d      # Start development
+docker compose -f infrastructure/docker-compose.yaml up -d      # Start development
 ```
 
 > **✨ Automatic Setup**:
@@ -116,16 +116,16 @@ npm run dev
 **Backend Changes:**
 ```bash
 # View API logs
-docker-compose -f infrastructure/docker-compose.yaml logs -f web
+docker compose -f infrastructure/docker-compose.yaml logs -f web
 
 # Access PHP container
-docker-compose -f infrastructure/docker-compose.yaml exec web bash
+docker compose -f infrastructure/docker-compose.yaml exec web bash
 
 # Restart backend if needed
-docker-compose -f infrastructure/docker-compose.yaml restart web
+docker compose -f infrastructure/docker-compose.yaml restart web
 
 # Manual migration control (if AUTO_MIGRATE=false)
-docker-compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php
+docker compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php
 ```
 
 **Frontend Changes:**
@@ -136,7 +136,7 @@ docker-compose -f infrastructure/docker-compose.yaml exec web php infrastructure
 **Database Management:**
 ```bash
 # Access database directly
-docker-compose -f infrastructure/docker-compose.yaml exec mariadb mariadb -uroot -proot proto
+docker compose -f infrastructure/docker-compose.yaml exec mariadb mariadb -uroot -proot proto
 
 # Or use phpMyAdmin at http://localhost:8081
 ```
@@ -178,7 +178,7 @@ By default, database migrations run automatically for convenience:
 
 ```bash
 # Default behavior - migrations run automatically
-docker-compose -f infrastructure/docker-compose.yaml up -d
+docker compose -f infrastructure/docker-compose.yaml up -d
 ```
 
 For production or when you want manual control:
@@ -186,10 +186,10 @@ For production or when you want manual control:
 ```bash
 # Disable auto-migrations
 echo "AUTO_MIGRATE=false" >> .env
-docker-compose -f infrastructure/docker-compose.yaml up -d
+docker compose -f infrastructure/docker-compose.yaml up -d
 
 # Then run migrations manually when ready
-docker-compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php
+docker compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php
 ```
 
 ### **SSL Setup (Manual)**
@@ -248,30 +248,30 @@ proto-project/
 
 ```bash
 # Configuration
-docker-compose -f infrastructure/docker-compose.yaml down         # Stop all services
+docker compose -f infrastructure/docker-compose.yaml down         # Stop all services
 ./infrastructure/scripts/run.sh sync-config              # Sync Proto config to Docker
 node infrastructure/scripts/sync-config.js               # Alternative: direct sync
 
 # Development
-docker-compose -f infrastructure/docker-compose.yaml up -d              # Start backend services (auto-migrates by default)
+docker compose -f infrastructure/docker-compose.yaml up -d              # Start backend services (auto-migrates by default)
 cd apps/main && npm run dev       # Start main app
 cd apps/crm && npm run dev        # Start CRM app
 cd apps/developer && npm run dev  # Start developer tools
 
 # Database
-AUTO_MIGRATE=false docker-compose -f infrastructure/docker-compose.yaml up -d  # Start without auto-migration
+AUTO_MIGRATE=false docker compose -f infrastructure/docker-compose.yaml up -d  # Start without auto-migration
 ./infrastructure/scripts/run.sh migrations               # Run database migrations manually
-docker-compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php  # Alternative manual migration
+docker compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php  # Alternative manual migration
 
 # Production
 # SSL & Production
 ./infrastructure/scripts/run.sh setup-ssl yourdomain.com your-email@domain.com  # Setup SSL
 ./infrastructure/scripts/run.sh build                    # Build all apps for production
-docker-compose -f infrastructure/config/docker-compose.production.yaml up -d  # Deploy production
+docker compose -f infrastructure/config/docker-compose.production.yaml up -d  # Deploy production
 
 # Utilities
 ./infrastructure/scripts/run.sh help                     # Show all available scripts
-docker-compose -f infrastructure/docker-compose.yaml logs -f web        # Watch container startup and migration logs
+docker compose -f infrastructure/docker-compose.yaml logs -f web        # Watch container startup and migration logs
 ```
 
 ### Application Settings
@@ -430,17 +430,17 @@ This project uses PHPUnit for backend testing. Tests are organized into Unit and
 
 ```bash
 # Run all tests
-docker-compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit
+docker compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit
 
 # Run specific test suite
-docker-compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit --testsuite=Feature
-docker-compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit --testsuite=Unit
+docker compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit --testsuite=Feature
+docker compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit --testsuite=Unit
 
 # Run specific test file
-docker-compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit modules/User/Tests/Unit/UserRolesTest.php
+docker compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit modules/User/Tests/Unit/UserRolesTest.php
 
 # Generate coverage report
-docker-compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit --coverage-html coverage/
+docker compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit --coverage-html coverage/
 ```
 
 ### Test Documentation
@@ -483,13 +483,13 @@ See the [Test Coverage Proposal](infrastructure/docs/TEST-COVERAGE-PROPOSAL.md) 
 **Database connection issues:**
 ```bash
 # Check if containers are running
-docker-compose -f infrastructure/docker-compose.yaml ps
+docker compose -f infrastructure/docker-compose.yaml ps
 
 # Restart database
-docker-compose -f infrastructure/docker-compose.yaml restart mariadb
+docker compose -f infrastructure/docker-compose.yaml restart mariadb
 
 # Check logs
-docker-compose -f infrastructure/docker-compose.yaml logs mariadb
+docker compose -f infrastructure/docker-compose.yaml logs mariadb
 ```
 
 **Frontend issues:**
@@ -505,7 +505,7 @@ cd ../developer && npm install
 
 **API connectivity issues:**
 - Frontend apps proxy `/api` requests to `http://localhost:8080`
-- Check if backend container is running: `docker-compose -f infrastructure/docker-compose.yaml ps`
+- Check if backend container is running: `docker compose -f infrastructure/docker-compose.yaml ps`
 - Test API directly: visit `http://localhost:8080/api/auth/csrf-token`
 
 For more detailed troubleshooting, see [DEVELOPMENT.md](DEVELOPMENT.md).
