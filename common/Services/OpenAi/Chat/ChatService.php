@@ -50,7 +50,7 @@ class ChatService extends Service
 	 *
 	 * @param string|array $content
 	 * @param string $type
-	 * @param mixed $settings
+	 * @param array|object|null $settings
 	 * @param object $event
 	 * @param callable|null $callBack
 	 * @return void
@@ -58,7 +58,7 @@ class ChatService extends Service
 	public function stream(
 		string|array $content,
 		string $type,
-		mixed $settings = null,
+		array|object|null $settings = null,
 		?object $event = null,
 		?callable $callBack = null
 	): void
