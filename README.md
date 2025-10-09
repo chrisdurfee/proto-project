@@ -503,9 +503,9 @@ cd ../developer && npm install
 ```
 
 **API connectivity issues:**
-- Frontend apps proxy `/api` requests to `http://localhost:8080`
+- Frontend apps proxy `/api` requests to `https://localhost:8443`
 - Check if backend container is running: `docker compose -f infrastructure/docker-compose.yaml ps`
-- Test API directly: visit `http://localhost:8080/api/auth/csrf-token`
+- Test API directly: visit `https://localhost:8443/api/auth/csrf-token`
 
 For more detailed troubleshooting, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
