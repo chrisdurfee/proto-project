@@ -14,15 +14,7 @@ export const RolePage = () =>
 		filter: {}
 	});
 
-	/**
-	 * @type {object}
-	 */
-	const Props =
-	{
-		data
-	};
-
-	return FullTablePage(Props, [
+	return FullTablePage({ data, class: 'pt-0' }, [
 		PageHeader(),
 		TableContainer([
 			RoleTable(data)

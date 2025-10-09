@@ -15,15 +15,7 @@ export const PermissionPage = () =>
 		filter: {}
 	});
 
-	/**
-	 * @type {object}
-	 */
-	const Props =
-	{
-		data
-	};
-
-	return FullTablePage(Props, [
+	return FullTablePage({ data, class: 'pt-0' }, [
 		PageHeader(),
 		TableContainer([
 			Div({ class: 'flex flex-auto flex-col overflow-x-auto' }, [
