@@ -59,7 +59,7 @@ class ChatService extends Service
 		string|array $content,
 		string $type,
 		mixed $settings = null,
-		object $event,
+		?object $event = null,
 		?callable $callBack = null
 	): void
 	{
