@@ -134,13 +134,13 @@ class ChatService extends Service
 	 *
 	 * @param string|array $content
 	 * @param string $type
-	 * @param mixed $settings
+	 * @param array|object|null $settings
 	 * @return object
 	 */
 	public function generate(
 		string|array $content,
 		string $type,
-		mixed $settings = null
+		array|object|null $settings = null
 	): object
 	{
 		/**
