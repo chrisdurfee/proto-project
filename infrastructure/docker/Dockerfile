@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     brotli \
     supervisor \
+    inotify-tools \
     && apt-get install -y libapache2-mod-brotli || echo "Brotli module not available" \
     && rm -rf /var/lib/apt/lists/*
 

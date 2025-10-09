@@ -78,6 +78,11 @@ else
     fi
 fi
 
+# Fix permissions for bind-mounted directories (allow www-data to write)
+echo "🔐 Setting write permissions for bind-mounted directories..."
+chown -R www-data:www-data /var/www/html/modules /var/www/html/common/files /var/www/html/public/files 2>/dev/null || true
+chmod -R 775 /var/www/html/modules 2>/dev/null || true
+
 # Check if we need to run migrations (only if requested via env var)
 if [ "$AUTO_MIGRATE" = "true" ]; then
     echo "📊 Running database migrations..."
@@ -193,6 +198,13 @@ if ! ps aux | grep -q "[p]hp-fpm: master"; then
 fi
 
 echo "✅ PHP-FPM started successfully"
+
+# Start module ownership watcher in background (for bind-mounted modules)
+if [ -f "/var/www/html/infrastructure/scripts/watch-and-fix-ownership.sh" ]; then
+    echo "🔍 Starting module ownership watcher..."
+    bash /var/www/html/infrastructure/scripts/watch-and-fix-ownership.sh &
+fi
+
 echo "🚀 Starting Apache with Event MPM and HTTP/2..."
 
 # Start Apache in foreground (this keeps the container running)
