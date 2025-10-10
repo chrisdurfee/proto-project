@@ -4,7 +4,6 @@ namespace Modules\User\Http\Middleware;
 use Proto\Http\Router\Request;
 use Modules\User\Auth\Gates\SecureRequestGate;
 use Proto\Http\Router\Response;
-use Proto\Utils\Format\JsonFormat;
 
 /**
  * SecureRequestMiddleware
@@ -54,14 +53,13 @@ class SecureRequestMiddleware
 	 */
 	protected static function exitWithResponse(): void
 	{
-		$responseCode = 403;
-		$response = new Response();
-		$response->render($responseCode);
-
-		JsonFormat::encodeAndRender([
+		$UNAUTHORIZED_CODE = 403;
+		$message = (object)[
 			'message' => 'The secure request is invalid.',
 			'success' => false
-		]);
+		];
+
+		(new Response())->json($message, $UNAUTHORIZED_CODE);
 
 		exit;
 	}
