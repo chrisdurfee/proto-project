@@ -30,13 +30,13 @@ cp common/Config/.env-example common/Config/.env
 
 ```bash
 # Start backend services (PHP, MariaDB, Redis)
-docker-compose -f infrastructure/docker-compose.yaml up -d
+docker compose -f infrastructure/docker-compose.yaml up -d
 
 # Wait for services to be healthy (~30 seconds)
-docker-compose -f infrastructure/docker-compose.yaml ps
+docker compose -f infrastructure/docker-compose.yaml ps
 
 # Check logs
-docker-compose -f infrastructure/docker-compose.yaml logs -f web
+docker compose -f infrastructure/docker-compose.yaml logs -f web
 ```
 
 ### 4. Start Frontend Development
@@ -112,22 +112,22 @@ proto-project/
 
 ```bash
 # Start all services
-docker-compose -f infrastructure/docker-compose.yaml up -d
+docker compose -f infrastructure/docker-compose.yaml up -d
 
 # Stop all services
-docker-compose -f infrastructure/docker-compose.yaml down
+docker compose -f infrastructure/docker-compose.yaml down
 
 # View logs
-docker-compose -f infrastructure/docker-compose.yaml logs -f web
+docker compose -f infrastructure/docker-compose.yaml logs -f web
 
 # Restart after code changes
-docker-compose -f infrastructure/docker-compose.yaml restart web
+docker compose -f infrastructure/docker-compose.yaml restart web
 
 # Run migrations manually
-docker-compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php
+docker compose -f infrastructure/docker-compose.yaml exec web php infrastructure/scripts/run-migrations.php
 
 # Access container shell
-docker-compose -f infrastructure/docker-compose.yaml exec web bash
+docker compose -f infrastructure/docker-compose.yaml exec web bash
 ```
 
 ### Frontend (Development)
@@ -176,20 +176,20 @@ sudo lsof -i :3307
 
 ```bash
 # Check if MariaDB is running
-docker-compose -f infrastructure/docker-compose.yaml ps mariadb
+docker compose -f infrastructure/docker-compose.yaml ps mariadb
 
 # Check MariaDB logs
-docker-compose -f infrastructure/docker-compose.yaml logs mariadb
+docker compose -f infrastructure/docker-compose.yaml logs mariadb
 
 # Restart database
-docker-compose -f infrastructure/docker-compose.yaml restart mariadb
+docker compose -f infrastructure/docker-compose.yaml restart mariadb
 ```
 
 ### Vendor Directory Missing
 
 ```bash
 # Install PHP dependencies
-docker-compose -f infrastructure/docker-compose.yaml exec web composer install
+docker compose -f infrastructure/docker-compose.yaml exec web composer install
 ```
 
 ### Frontend Build Errors
@@ -226,8 +226,8 @@ npm install
 ## 🆘 Getting Help
 
 - Check the [Troubleshooting](#-troubleshooting) section above
-- Review logs: `docker-compose -f infrastructure/docker-compose.yaml logs -f`
-- Check container health: `docker-compose -f infrastructure/docker-compose.yaml ps`
+- Review logs: `docker compose -f infrastructure/docker-compose.yaml logs -f`
+- Check container health: `docker compose -f infrastructure/docker-compose.yaml ps`
 - See full documentation in `README.md` and `infrastructure/docs/`
 
 ---
