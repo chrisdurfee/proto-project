@@ -1,6 +1,6 @@
 # Proto Project
 
-This repository is a **project skeleton** for building applications on the [Proto Framework](https://github.com/protoframework/proto), with [Base Framework](https://github.com/chrisdurfee/base) on the front end. It includes the files, settings, and configuration you need to bootstrap a large, multi-app platform.
+This repository is a **project skeleton** for building applications on the [Proto Framework](https://github.com/chrisdurfee/proto), with [Base Framework](https://github.com/chrisdurfee/base) on the front end. It includes the files, settings, and configuration you need to bootstrap a large, multi-app platform.
 
 The project is published on Packagist and can be set up in just a few commands. It uses Docker, Composer, NPM, Vite, Base, PHP 8.4+, MariaDB, Redis, and more.
 
