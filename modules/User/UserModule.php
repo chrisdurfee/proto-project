@@ -24,7 +24,7 @@ class UserModule extends Module
 	 */
 	public function activate(): void
 	{
-		$this->setAutGates();
+		$this->setAuthGates();
 	}
 
 	/**
@@ -32,7 +32,7 @@ class UserModule extends Module
 	 *
 	 * @return void
 	 */
-	private function setAutGates(): void
+	private function setAuthGates(): void
 	{
 		$auth = auth();
 		$auth->user = new UserGate();
