@@ -161,7 +161,7 @@ $connections = env('connections');
 require_once __DIR__ . '/proto/autoload.php';
 
 // Once included, you can call modules, controllers, etc.
-modules()->user()->v1()->createUser($data);`
+modules()->user()->v1()->add($data);`
 				),
 				P(
 					{ class: 'text-muted-foreground' },

@@ -67,36 +67,40 @@ export const IntroPage = () => (
 					`Proto includes items for creating complex applications, including:`),
 				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
 					Li('Modules system to encpasulate features'),
-					Li("API Systems (Both Resource and REST Routers)"),
+					Li("API Systems with REST Router"),
 					Li('Validation'),
 					Li('Server Sent Events (SSE)'),
-					Li('Websockets'),
-					Li('Sockets'),
+					Li('Websockets & Sockets'),
 					Li("HTTP Resources"),
 					Li("Security Gates and Policies"),
+					Li("Error Tracking and Handling"),
 					Li("Authentication using roles and permissions"),
 					Li("Controllers"),
 					Li("Caching (Redis)"),
-					Li("Configs"),
-					Li("Models"),
-					Li("Storage Layers"),
-					Li("Session"),
-					Li("Services"),
-					Li("Service Providers"),
-					Li('Jobs'),
-					Li("Routines"),
-					Li("Patterns"),
-					Li("HTML Templates"),
-					Li("Email Rendering"),
+					Li("Configs with .env JSON support"),
+					Li("Models with complex relationships (eager and lazy)"),
+					Li("Collections for data manipulation"),
+					Li("Storage Layers to abstract data storage from data sources"),
+					Li("Session Management (database and file support)"),
+					Li("Services & Service Providers"),
+					Li("Events, Event Loops with async support"),
+					Li('Jobs with event queues (database, Kafka support)'),
+					Li("Design Patterns"),
+					Li("HTML Templates using components"),
+					Li("Email Rendering with Templates"),
 					Li("Dispatching Email, SMS, and Web Push"),
-					Li("Events"),
-					Li("Resource Generators"),
-					Li("Database Adapter"),
+					Li("Resource Generators for quick code scaffolding"),
+					Li("Database Abstractions"),
+					Li("Database Adapters with MySQLi support"),
 					Li("Query Builders"),
-					Li("Migrations"),
+					Li("Database Migrations with seeding support"),
+					Li("Seeding for testing"),
+					Li("Factories for generating test data"),
+					Li("Testing with PHPUnit, data faking, and robust utilities"),
+					Li("Automations to create routine tasks"),
 					Li("File Storage (Local, S3)"),
-					Li("Integrations"),
-					Li("Utils")
+					Li("Integrations to third-party services (REST, JWT, Oauth2 support)"),
+					Li("Utilities for dates, strings, files, encryption, and more")
 				])
 			]),
 
@@ -139,8 +143,13 @@ vendor/protoframework/proto/src/          // The core framework. This folder is 
 					It is a singleton; use Proto\\Config::getInstance() to access configurations.`),
 				CodeBlock(
 					`// The "Config" class can be accessed using a global function:
-env('settingName');`
-										)
+// get value
+$value = env('settingName');
+
+// set value
+setEnv('settingName', $value);
+`
+				)
 			]),
 
 			// Bootstrapping
