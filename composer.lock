@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "48dfa226925d08d38e1b0998bb57b0db",
+    "content-hash": "d0425cb216fd0d4e297377024cb7c7b8",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -816,16 +816,16 @@
         },
         {
             "name": "protoframework/proto",
-            "version": "1.0.69",
+            "version": "1.0.70",
             "source": {
                 "type": "git",
                 "url": "https://github.com/chrisdurfee/proto.git",
-                "reference": "ecfc99d30648508f82230ce3ceae6392577e1e17"
+                "reference": "3f5770144e8c39c49d6e40a8da55a18fbfe8b887"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/ecfc99d30648508f82230ce3ceae6392577e1e17",
-                "reference": "ecfc99d30648508f82230ce3ceae6392577e1e17",
+                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/3f5770144e8c39c49d6e40a8da55a18fbfe8b887",
+                "reference": "3f5770144e8c39c49d6e40a8da55a18fbfe8b887",
                 "shasum": ""
             },
             "require": {
@@ -875,9 +875,9 @@
             ],
             "support": {
                 "issues": "https://github.com/chrisdurfee/proto/issues",
-                "source": "https://github.com/chrisdurfee/proto/tree/1.0.69"
+                "source": "https://github.com/chrisdurfee/proto/tree/1.0.70"
             },
-            "time": "2025-10-10T23:35:59+00:00"
+            "time": "2025-10-11T22:55:58+00:00"
         },
         {
             "name": "psr/clock",
