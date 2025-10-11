@@ -18,7 +18,7 @@
 	],
 	"require": {
 		"php": ">=8.4",
-		"protoframework/proto": "^1.0.60",
+		"protoframework/proto": "^1.0.69",
 		"orhanerday/open-ai": "^5.3"
 	},
 	"require-dev": {
