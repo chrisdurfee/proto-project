@@ -816,16 +816,16 @@
         },
         {
             "name": "protoframework/proto",
-            "version": "1.0.68",
+            "version": "1.0.69",
             "source": {
                 "type": "git",
                 "url": "https://github.com/chrisdurfee/proto.git",
-                "reference": "0340dd7d2af85b17c0bc363d87eea8f8ecadd648"
+                "reference": "ecfc99d30648508f82230ce3ceae6392577e1e17"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/0340dd7d2af85b17c0bc363d87eea8f8ecadd648",
-                "reference": "0340dd7d2af85b17c0bc363d87eea8f8ecadd648",
+                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/ecfc99d30648508f82230ce3ceae6392577e1e17",
+                "reference": "ecfc99d30648508f82230ce3ceae6392577e1e17",
                 "shasum": ""
             },
             "require": {
@@ -875,9 +875,9 @@
             ],
             "support": {
                 "issues": "https://github.com/chrisdurfee/proto/issues",
-                "source": "https://github.com/chrisdurfee/proto/tree/1.0.68"
+                "source": "https://github.com/chrisdurfee/proto/tree/1.0.69"
             },
-            "time": "2025-10-10T22:36:10+00:00"
+            "time": "2025-10-10T23:35:59+00:00"
         },
         {
             "name": "psr/clock",
