@@ -61,6 +61,7 @@ trait AuthTrait
 	 */
 	protected function updateUserStatus(User $user, string $status, string $ip): bool
 	{
+		$user->status = $status;
 		$success = $this->user->updateStatus($user->id, $status);
 		if (!$success)
 		{
