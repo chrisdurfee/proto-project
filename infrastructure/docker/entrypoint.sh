@@ -78,10 +78,15 @@ else
     fi
 fi
 
+# Create file storage directories if they don't exist
+echo "📁 Ensuring file storage directories exist..."
+mkdir -p /var/www/html/public/files/users/profile 2>/dev/null || true
+mkdir -p /var/www/html/common/files/attachments 2>/dev/null || true
+
 # Fix permissions for bind-mounted directories (allow www-data to write)
 echo "🔐 Setting write permissions for bind-mounted directories..."
 chown -R www-data:www-data /var/www/html/modules /var/www/html/common/files /var/www/html/public/files 2>/dev/null || true
-chmod -R 775 /var/www/html/modules 2>/dev/null || true
+chmod -R 775 /var/www/html/modules /var/www/html/common/files /var/www/html/public/files 2>/dev/null || true
 
 # Check if we need to run migrations (only if requested via env var)
 if [ "$AUTO_MIGRATE" = "true" ]; then

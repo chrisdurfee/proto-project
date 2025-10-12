@@ -398,7 +398,7 @@ class UserController extends ResourceController
 		 */
 		$files = $request->files();
 		$this->validateRules($files, [
-			'image' => 'image:30000|required|mime:jpeg,jpg,png,gif'
+			'image' => 'image:30000|required|mimes:jpeg,jpg,png,gif,webp'
 		]);
 
 		/**
