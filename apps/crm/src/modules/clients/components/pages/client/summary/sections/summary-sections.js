@@ -1,10 +1,9 @@
 import { A, Div, H2, Header, P } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
 import { List } from "@base-framework/organisms";
-import { Card, Icon } from "@base-framework/ui";
-import { Badge } from "@base-framework/ui/atoms";
+import { Badge, Card, Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { Avatar } from "@base-framework/ui/molecules";
+import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { Format } from "@base-framework/ui/utils";
 import { ClientSummaryCard } from "./client-summary-card.js";
 
@@ -184,6 +183,22 @@ export const ContractSection = Atom(({client}) =>
 );
 
 /**
+ * Creates a list empty state.
+ *
+ * @param {object} props
+ * @param {Array} children - Child elements to render.
+ * @returns {object}
+ */
+export const ListEmptyState = Atom((props, children = []) => (
+	Div({ class: 'flex flex-auto flex-col items-center border rounded-md' }, [
+		EmptyState({
+			title: props.title || 'No Data',
+			description: props.description || 'No description available.'
+		}, children)
+	])
+));
+
+/**
  * TicketIcon
  *
  * @param {string} priority - The priority of the ticket.
@@ -237,9 +252,13 @@ export const TicketsSection = Atom(({ client }) =>
 		new List({
 			cache: "tickets",
 			key: "id",
-			items: client.tickets,
+			items: client.tickets ?? [],
 			role: "list",
-			rowItem: TicketListItem
+			rowItem: TicketListItem,
+			emptyState: () => ListEmptyState({
+				title: 'No Tickets',
+				description: 'The client has not submitted any tickets.'
+			})
 		})
 	])
 );
@@ -292,7 +311,11 @@ export const InvoicesSection = Atom(({ client }) =>
 				{ id: 3, number: "INV-1003", date: "Jul 1, 2024", amount: "$175.00", status: "Paid" }
 			],
 			role: "list",
-			rowItem: InvoiceListItem(client)
+			rowItem: InvoiceListItem(client),
+			emptyState: () => ListEmptyState({
+				title: 'No Invoices',
+				description: 'The client has no previous invoices.'
+			})
 		})
 	])
 );
