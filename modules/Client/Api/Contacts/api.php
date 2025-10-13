@@ -9,4 +9,4 @@ use Modules\Client\Controllers\ClientContactController;
  * This file contains the API routes for the Client Contact Controller.
  */
 router()
-    ->resource('client/:clientId/contacts', ClientContactController::class);
+	->resource('client/:clientId/contact', ClientContactController::class);

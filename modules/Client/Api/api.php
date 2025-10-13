@@ -9,4 +9,4 @@ use Modules\Client\Controllers\ClientController;
  * This file contains the API routes for the Client module.
  */
 router()
-    ->resource('client', ClientController::class);
+	->resource('client', ClientController::class);

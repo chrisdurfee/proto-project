@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Client\Controllers;
 
+use Modules\Client\Policies\ClientPolicy;
 use Proto\Controllers\ResourceController as Controller;
 use Modules\Client\Models\Client;
 
@@ -11,6 +12,11 @@ use Modules\Client\Models\Client;
  */
 class ClientController extends Controller
 {
+	/**
+	 * @var string|null $policy
+	 */
+	protected ?string $policy = ClientPolicy::class;
+
 	/**
 	 * Initializes the model class.
 	 *
