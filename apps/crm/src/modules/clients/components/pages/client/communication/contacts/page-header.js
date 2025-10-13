@@ -2,6 +2,7 @@ import { Div, H1, Header } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { SearchInput as BaseSearch } from "@base-framework/ui/organisms";
+import { ContactModal } from "./modals/contact-modal.js";
 
 /**
  * This will create a search input for the contacts page.
@@ -19,6 +20,24 @@ const SearchInput = () => (
 );
 
 /**
+ * This will create a contact modal.
+ *
+ * @param {object} item
+ * @param {object} parent
+ * @returns {object}
+ */
+const Modal = (item, parent) => (
+	ContactModal({
+		item,
+		clientId: parent.route.clientId,
+		onClose: (data) =>
+		{
+			parent.list?.refresh();
+		}
+	})
+);
+
+/**
  * This will create a page header for the contacts page.
  *
  * @returns {object}
@@ -32,10 +51,10 @@ export const PageHeader = () => (
 			]),
 			Div({ class: 'flex items-center gap-2' }, [
 				Div({ class: 'hidden lg:flex' }, [
-					Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: Icons.circlePlus, click: () => null }, 'Add Contact')
+					Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add Contact')
 				]),
 				Div({ class: 'flex lg:hidden mr-0' }, [
-					Tooltip({ content: 'Add Contact', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: () => null }))
+					Tooltip({ content: 'Add Contact', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }))
 				])
 			])
 		]),
