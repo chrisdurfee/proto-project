@@ -1,9 +1,8 @@
 import { Div, On } from "@base-framework/atoms";
-import { Data } from "@base-framework/base";
 import { Page } from "@base-framework/ui/pages";
+import { ClientContactModel } from "../../../clients/models/client-contact-model.js";
 import { ContactList } from "./contact-list.js";
 import ContactSkeleton from "./contact-skeleton.js";
-import { FakeContacts } from "./fake-contacts.js";
 import { PageHeader } from "./page-header.js";
 
 /**
@@ -20,12 +19,14 @@ const props =
 	 *
 	 * Initializes component state.
 	 *
-	 * @returns {object} Data instance with loaded and client.
+	 * @returns {object} ClientContactModel instance with loaded and contacts.
 	 */
 	setData()
 	{
-		return new Data(
+		const clientId = this.route.clientId;
+		return new ClientContactModel(
 		{
+			clientId,
 			loaded: false,
 			contacts: []
 		});
@@ -34,15 +35,24 @@ const props =
 	/**
 	 * afterSetup
 	 *
-	 * Fetches client data after mount.
+	 * Fetches contact data after mount.
 	 *
 	 * @returns {void}
 	 */
 	afterSetup()
 	{
-		const route = this.route;
-		const DELAY = 500;
-		setTimeout(() => this.data.set({ contacts: FakeContacts, loaded: true }), DELAY);
+		const data = this.data;
+		data.xhr.get('', (response) =>
+		{
+			if (!response || response.success === false)
+			{
+				data.set({ contacts: [], loaded: true });
+				return;
+			}
+
+			const contacts = response.rows || [];
+			data.set({ contacts, loaded: true });
+		});
 	},
 
 	/**

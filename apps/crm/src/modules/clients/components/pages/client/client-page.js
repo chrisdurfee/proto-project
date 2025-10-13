@@ -1,19 +1,19 @@
-import { Div, UseParent } from "@base-framework/atoms";
-import { Data } from "@base-framework/base";
+import { Div, OnRoute } from "@base-framework/atoms";
 import { Overlay } from "@base-framework/ui/organisms";
-import { getClientById } from "../clients/clients.js";
+import { FullScreenOverlay } from "@components/organisms/overlays/full/full-screen-overlay.js";
+import { ClientModel } from "../clients/models/client-model.js";
 import { ContentSection } from "./content-section.js";
 import { Sidebar } from "./sidebar.js";
 
 /**
- * ClientPage properties.
+ * Props for the ClientPage component.
  *
- * @type {object} props
+ * @typedef {object} Props
  */
-const props =
+const Props =
 {
 	/**
-	 * Sets the context data for the user page.
+	 * Sets the context data for the client page.
 	 *
 	 * @param {object|null} context
 	 * @returns {object}
@@ -21,7 +21,7 @@ const props =
 	setContext(context)
 	{
 		return {
-			data: new Data({
+			data: new ClientModel({
 				client: null,
 				loaded: false
 			})
@@ -29,17 +29,23 @@ const props =
 	},
 
 	/**
-	 * Simulates loading and fetches the client by ID after a delay.
-	 *
-	 * @returns {void}
+	 * Updates the client data by fetching the latest information.
 	 */
-	afterSetup()
+	updateClient()
 	{
-		const route = this.route;
-		const client = getClientById(route.clientId);
+		const data = this.context.data;
+		data.id = this.route.clientId;
+		data.xhr.get('', (response) =>
+		{
+			if (!response || response.success === false)
+			{
+				data.set({ client: null, loaded: true });
+				return;
+			}
 
-		const DELAY = 500;
-		setTimeout(() => this.context.data.set({ client, loaded: true }), DELAY);
+			const client = response.row || null;
+			data.set({ client, loaded: true });
+		});
 	},
 
 	/**
@@ -49,8 +55,9 @@ const props =
 	 */
 	beforeDestroy()
 	{
-		this.context.data.delete();
-		this.context.data.loaded = false;
+		const data = this.context.data;
+		data.delete();
+		data.loaded = false;
 	}
 };
 
@@ -62,20 +69,17 @@ const props =
  * @returns {Overlay}
  */
 export const ClientPage = () => (
-	new Overlay(props, [
-		Div({ class: "flex flex-auto flex-col w-full" }, [
-			Div({ class: "flex flex-auto flex-col gap-6 w-full" }, [
-				Div({ class: 'flex flex-auto flex-col pt-0 sm:pt-2 lg:pt-0 lg:flex-row h-full' }, [
-					UseParent(({ route }) => (
-						Div({ class: 'flex flex-auto flex-row' }, [
-							Sidebar({ clientId: route.clientId }),
-							ContentSection({ clientId: route.clientId })
-						])
-					))
-				])
+	FullScreenOverlay(Props, (parent) => ([
+		OnRoute('clientId', (clientId) =>
+		{
+			parent.updateClient();
+
+			return Div({ class: 'flex flex-auto flex-col lg:flex-row' }, [
+				Sidebar({ clientId: clientId }),
+				ContentSection({ clientId: clientId })
 			])
-		])
-	])
+		})
+	]))
 );
 
 export default ClientPage;

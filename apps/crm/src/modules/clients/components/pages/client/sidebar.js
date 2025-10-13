@@ -36,27 +36,27 @@ export const Sidebar = ({ clientId }) => (
 	SidebarMenu({
 		topNav: Toolbar(),
 		options: [
-			{ label: 'Summary', href: `clients/client/${clientId}`, icon: Icons.office.single, exact: true },
+			{ label: 'Summary', href: `clients/${clientId}`, icon: Icons.office.single, exact: true },
 			{
 				label: 'Communication',
 				icon: Icons.chat.group,
 				options: [
-					{ label: 'Contacts', href: `clients/client/${clientId}/communication/contacts` },
-					{ label: 'Messages', href: `clients/client/${clientId}/communication/messages` },
-					{ label: 'Calls', href: `clients/client/${clientId}/communication/calls` },
-					{ label: 'Notes', href: `clients/client/${clientId}/communication/notes` }
+					{ label: 'Contacts', href: `clients/${clientId}/contacts` },
+					{ label: 'Messages', href: `clients/${clientId}/messages` },
+					{ label: 'Calls', href: `clients/${clientId}/calls` },
+					{ label: 'Notes', href: `clients/${clientId}/notes` }
 				]
 			},
 			{
 				label: 'Billing',
 				icon: Icons.currency.dollar,
 				options: [
-					{ label: 'Invoices', href: `clients/client/${clientId}/billing/invoices` },
-					{ label: 'Payments', href: `clients/client/${clientId}/billing/payments` },
-					{ label: 'Orders', href: `clients/client/${clientId}/billing/orders` }
+					{ label: 'Invoices', href: `clients/${clientId}/invoices` },
+					{ label: 'Payments', href: `clients/${clientId}/payments` },
+					{ label: 'Orders', href: `clients/${clientId}/orders` }
 				]
 			},
-			{ label: 'Support', href: `clients/client/${clientId}/support`, icon: Icons.ticket }
+			{ label: 'Support', href: `clients/${clientId}/support`, icon: Icons.ticket }
 		]
 	})
 );

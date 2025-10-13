@@ -8,11 +8,8 @@ import { Module } from '../module/module.js';
  */
 const routes = Module.convertRoutes(
 [
-    /**
-     * Clients route
-     */
-    { path: '/clients/client/:clientId?*', import: () => import('./components/pages/client/client-page.js'), title: 'Client' },
-    { path: '/clients/:clientId?*', import: () => import('./components/pages/clients/client-list-page.js'), title: 'Clients' }
+	{ path: '/clients/:clientId/:page?*', import: () => import('./components/pages/client/client-page.js'), title: 'Client' },
+	{ path: '/clients*', import: () => import('./components/pages/clients/client-list-page.js'), title: 'Clients' }
 ]);
 
 /**
@@ -22,7 +19,7 @@ const routes = Module.convertRoutes(
  */
 const links =
 [
-    { label: 'Clients', href: 'clients', icon: Icons.user.group, mobileOrder: 6 }
+    { label: 'Clients', href: 'clients', icon: Icons.identification, mobileOrder: 6 }
 ];
 
 /**

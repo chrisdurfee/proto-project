@@ -1,27 +1,70 @@
-import { Div, H1, Header } from "@base-framework/atoms";
+import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { SearchDropdown } from "@base-framework/ui/organisms";
+import { Combobox } from "@base-framework/ui/molecules";
+import { SearchInput } from "@base-framework/ui/organisms";
+import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
 import { ClientModal } from "./client-modal.js";
-import { clients } from "./clients.js";
 
 /**
- * This will convert clients to options.
+ * This will refresh the list.
  *
- * @param {array} clients
- * @returns {array}
+ * @param {object} e - The event object.
+ * @param {object} parent - The parent object.
+ * @returns {void}
  */
-const convertClientsToOptions = (clients) => clients.map((client) => ({ label: client.name, value: client.id }));
+const refresh = (e, { list }) => list.refresh();
 
 /**
- * This will create a search input for the clients page.
+ * This will create a client modal.
+ *
+ * @param {object} item
+ * @param {object} parent
+ * @returns {object}
+ */
+const Modal = (item, parent) => (
+	ClientModal({
+		item,
+		onClose: (data) =>
+		{
+			parent.list.refresh();
+		}
+	})
+);
+
+/**
+ * This will create a dropdown for the page.
  *
  * @returns {object}
  */
-const SearchInput = () => (
-	new SearchDropdown({
-		options: convertClientsToOptions(clients),
-		onSelect: (item) => app.navigate(`/clients/client/${item.value}`),
+const Dropdown = () => (
+	new Combobox({
+		width: 'w-full',
+		maxWidth: 'max-w-[250px]',
+		class: '',
+		selectFirst: true,
+		onSelect: (item, { data, list }) =>
+		{
+			const val = item.value;
+			if (val === 'all')
+			{
+				data.filter = {};
+				list.refresh();
+				return;
+			}
+
+			data.filter.status = val;
+			list.refresh();
+		},
+		items: [
+			{ value: 'all', label: 'All' },
+			{ value: 'active', label: 'Active' },
+			{ value: 'inactive', label: 'Inactive' },
+			{ value: 'prospect', label: 'Prospect' },
+			{ value: 'lead', label: 'Lead' },
+			{ value: 'customer', label: 'Customer' },
+			{ value: 'former', label: 'Former' }
+		]
 	})
 );
 
@@ -31,23 +74,26 @@ const SearchInput = () => (
  * @returns {object}
  */
 export const PageHeader = () => (
-	Header({ class: 'flex flex-auto flex-col pt-0 sm:pt-2 md:pt-0' }, [
-		Div({ class: 'flex flex-auto items-center justify-between w-full' }, [
-			H1({ class: 'text-3xl font-bold' }, 'Clients'),
-			Div({ class: 'hidden lg:flex min-w-[440px]' }, [
-				SearchInput()
-			]),
-			Div({ class: 'flex items-center gap-2' }, [
-				Div({ class: 'hidden lg:flex' }, [
-					Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: Icons.circlePlus, click: () => ClientModal() }, 'Add Client')
-				]),
-				Div({ class: 'flex lg:hidden mr-0' }, [
-					Tooltip({ content: 'Add Client', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: () => ClientModal() }))
-				])
-			])
+	TablePageHeader({ title: 'Clients' }, [
+		SearchInput({
+			class: 'min-w-40 lg:min-w-96',
+			placeholder: 'Search clients...',
+			bind: 'search',
+			keyup: (e, parent) => parent.list.refresh(),
+			icon: Icons.magnifyingGlass.default
+		}),
+		Div({ class: 'hidden lg:flex' }, [
+			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.refresh, click: refresh }, 'Refresh')
 		]),
-		Div({ class: 'flex lg:hidden w-full mx-auto my-4' }, [
-			SearchInput()
+		Div({ class: 'flex lg:hidden mr-0' }, [
+			Tooltip({ content: 'Refresh', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.refresh, click: refresh }))
+		]),
+		Dropdown(),
+		Div({ class: 'hidden lg:flex' }, [
+			Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add Client')
+		]),
+		Div({ class: 'flex lg:hidden mr-0' }, [
+			Tooltip({ content: 'Add Client', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }))
 		])
 	])
 );

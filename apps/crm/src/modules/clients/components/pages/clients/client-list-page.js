@@ -1,29 +1,31 @@
-import { Div } from "@base-framework/atoms";
+import { Model } from "@base-framework/base";
 import { BlankPage } from "@base-framework/ui/pages";
-import { ClientSummaryCards } from "./client-summary-cards.js";
+import FullTablePage, { TableContainer } from "@pages/types/full/table/full-table-page.js";
 import { ClientTable } from "./client-table.js";
-import { clients } from "./clients.js";
+import { ClientModel } from "./models/client-model.js";
 import { PageHeader } from "./page-header.js";
 
 /**
  * This will create the client list page.
  *
- * @returns {object}
+ * @returns {BlankPage}
  */
-export const ClientListPage = () => (
-	new BlankPage([
-		Div({ class: 'grid grid-cols-1' }, [
-			Div({ class: 'flex flex-auto flex-col p-6 pt-0 lg:gap-y-12 md:pt-6 lg:p-8 w-full mx-auto 2xl:max-w-[1600px]' }, [
-				PageHeader(),
-				Div({ class: 'flex flex-auto flex-col gap-y-4 lg:gap-y-2' }, [
-					ClientSummaryCards(),
-					Div({ class: 'flex flex-col overflow-x-auto' }, [
-						ClientTable({ clients })
-					])
-				])
-			])
+export const ClientListPage = () =>
+{
+	/**
+	 * @type {Model} data
+	 */
+	const data = new ClientModel({
+		search: '',
+		filter: {}
+	});
+
+	return FullTablePage({ data }, [
+		PageHeader(),
+		TableContainer([
+			ClientTable(data)
 		])
-	])
-);
+	]);
+};
 
 export default ClientListPage;
