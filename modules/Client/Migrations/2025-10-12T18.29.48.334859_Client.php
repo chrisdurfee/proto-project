@@ -106,11 +106,8 @@ class Client extends Migration
 			$table->deletedAt();
 
 			// Indexes for performance
-			$table->index('email')->fields('email');
 			$table->index('company_name')->fields('company_name');
 			$table->index('client_number')->fields('client_number');
-			$table->index('first_name')->fields('first_name', 'last_name');
-			$table->index('last_name')->fields('last_name', 'first_name');
 			$table->index('status')->fields('status', 'priority');
 			$table->index('assigned_to')->fields('assigned_to', 'status');
 			$table->index('created_at')->fields('created_at');
