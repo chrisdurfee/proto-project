@@ -1,11 +1,11 @@
 import { Div, H2, Header, P } from "@base-framework/atoms";
 import {
-    AboutSection,
-    ClientAvatarSection,
-    ClientSummaryCardsSection,
-    ContractSection,
-    InvoicesSection,
-    TicketsSection
+	AboutSection,
+	ClientAvatarSection,
+	ClientSummaryCardsSection,
+	ContractSection,
+	InvoicesSection,
+	TicketsSection
 } from "./sections/summary-sections.js";
 
 /**

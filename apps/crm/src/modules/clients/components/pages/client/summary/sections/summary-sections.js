@@ -5,6 +5,7 @@ import { Card, Icon } from "@base-framework/ui";
 import { Badge } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar } from "@base-framework/ui/molecules";
+import { Format } from "@base-framework/ui/utils";
 import { ClientSummaryCard } from "./client-summary-card.js";
 
 /**
@@ -45,8 +46,8 @@ export const ClientAvatarSection = Atom(({ client }) =>
 		}),
 		Div({ class: "flex flex-col gap-y-1" }, [
 			Div({ class: "flex items-baseline gap-x-2" }, [
-				H2({ class: "text-2xl font-semibold text-foreground" }, client.name),
-				P({ class: "text-sm text-muted-foreground" }, client.code)
+				H2({ class: "text-2xl font-semibold text-foreground" }, client.companyName),
+				P({ class: "text-sm text-muted-foreground" }, `#${client.id}`)
 			]),
 			Div({ class: "flex items-center gap-x-2" }, [
 				P({ class: "text-sm text-muted-foreground" }, client.contactName),
@@ -78,30 +79,30 @@ export const ClientSummaryCardsSection = Atom(({ client }) =>
 			Div({ class: "flex gap-x-4 pb-4 max-w-xs" }, [
 				ClientSummaryCard({
 					title: "Payment Amount",
-					value: `$${client.payment}`,
+					value: Format.money("[[client.paymentAmount]]", "$", "0.00"),
 					icon: Icons.creditCard,
 					url: `clients/client/${client.id}/billing/payments`
 				}),
 				ClientSummaryCard({
 					title: "Package",
-					value: client.package,
+					value: Format.default('[[client.package]]', 'Basic'),
 					icon: Icons.cube,
 					url: `clients/client/${client.id}/billing/orders`
 				}),
 				ClientSummaryCard({
 					title: "Next Due Date",
-					value: client.nextDue,
+					value: Format.date('[[client.nextDue]]', 'N/A'),
 					icon: Icons.calendar.default,
 					url: `clients/client/${client.id}/billing/payments`
 				}),
 				ClientSummaryCard({
 					title: "Secret Passphrase",
-					value: client.passphrase,
+					value: Format.default('[[client.passphrase]]', 'N/A'),
 					icon: Icons.locked
 				}),
 				ClientSummaryCard({
 					title: "Client Since",
-					value: client.since,
+					value: Format.date("[[client.createdAt]]"),
 					icon: Icons.clock
 				})
 			])
