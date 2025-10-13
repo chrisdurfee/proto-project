@@ -1,0 +1,109 @@
+import { Div } from "@base-framework/atoms";
+import { Skeleton } from "@base-framework/ui/atoms";
+
+/**
+ * ClientSkeleton
+ *
+ * A 1:1 skeleton of the ProfilePage layout:
+ * – cover image
+ * – sidebar (avatar, name, role, dept, contact, icons)
+ * – main content sections (About, Work Progress, Projects, Skills, Reviews)
+ *
+ * @returns {object}
+ */
+export const ClientSkeleton = () =>
+{
+	// About section
+	const aboutSectionSkeleton = Div({ class: "flex flex-col gap-y-4" }, [
+		Skeleton({ width: "w-24", height: "h-6", class: "rounded-md" }),
+		Skeleton({ width: "w-full", height: "h-24", class: "rounded-md" })
+	]);
+
+	// Work Progress section
+	const workProgressSectionSkeleton = Div({ class: "flex flex-col gap-y-4" }, [
+		Skeleton({ width: "w-32", height: "h-6", class: "rounded-md" }),
+		Div({ class: "flex flex-col pl-6 gap-y-6" },
+			[0, 1].map(() =>
+				Div({ class: "flex items-center gap-x-4" }, [
+					Skeleton({ width: "w-5", height: "h-5", class: "rounded-full" }),
+					Div({ class: "flex flex-col gap-y-1" }, [
+						Skeleton({ width: "w-1/3", height: "h-4", class: "rounded-md" }),
+						Skeleton({ width: "w-1/4", height: "h-3", class: "rounded-md" })
+					])
+				])
+			)
+		)
+	]);
+
+	// Projects section
+	const projectsSectionSkeleton = Div({ class: "flex flex-col gap-y-4" }, [
+		Skeleton({ width: "w-36", height: "h-6", class: "rounded-md" }),
+		Div({ class: "overflow-x-auto" }, [
+			Div({ class: "min-w-full divide-y divide-muted-200" }, [
+				Div({ class: "grid grid-cols-3 gap-4 pb-2" },
+					Array(3).fill().map(() => Skeleton({ width: "w-full", height: "h-4", class: "rounded-md" }))
+				),
+				...[0, 1].map(() =>
+					Div({ class: "grid grid-cols-3 gap-4 py-3" }, [
+						Skeleton({ width: "w-2/3", height: "h-4", class: "rounded-md" }),
+						Skeleton({ width: "w-1/2", height: "h-4", class: "rounded-md" }),
+						Skeleton({ width: "w-1/3", height: "h-6", class: "rounded-full" })
+					])
+				)
+			])
+		])
+	]);
+
+	// Skills section
+	const skillsSectionSkeleton = Div({ class: "flex flex-col gap-y-4" }, [
+		Skeleton({ width: "w-20", height: "h-6", class: "rounded-md" }),
+		Div({ class: "flex flex-wrap gap-2" },
+			Array(5).fill().map(() => Skeleton({ width: "w-20", height: "h-6", class: "rounded-full" }))
+		)
+	]);
+
+	// Reviews section
+	const reviewsSectionSkeleton = Div({ class: "flex flex-col gap-y-4" }, [
+		Skeleton({ width: "w-40", height: "h-6", class: "rounded-md" }),
+		Skeleton({ width: "w-1/3", height: "h-4", class: "rounded-md" }),
+		Div({ class: "overflow-x-auto" }, [
+			Div({ class: "min-w-full divide-y divide-muted-200" }, [
+				Div({ class: "grid grid-cols-3 gap-4 pb-2" },
+					Array(3).fill().map(() => Skeleton({ width: "w-full", height: "h-4", class: "rounded-md" }))
+				),
+				...[0, 1].map(() =>
+					Div({ class: "grid grid-cols-3 gap-4 py-3" }, [
+						Skeleton({ width: "w-1/4", height: "h-4", class: "rounded-md" }),
+						Skeleton({ width: "w-1/3", height: "h-4", class: "rounded-md" }),
+						Skeleton({ width: "w-1/5", height: "h-4", class: "rounded-md" })
+					])
+				)
+			])
+		])
+	]);
+
+	// main content
+	const mainContentSkeleton = Div({ class: "flex flex-auto flex-col gap-y-12 mt-6 px-6" }, [
+		aboutSectionSkeleton,
+		workProgressSectionSkeleton,
+		projectsSectionSkeleton,
+		skillsSectionSkeleton,
+		reviewsSectionSkeleton
+	]);
+
+	// full layout
+	return Div({ class: 'flex flex-auto p-0 pt-0 w-full' }, [
+		Div({ class: 'flex flex-auto flex-col lg:flex-row'}, [
+			Div({ class: 'flex flex-auto flex-col min-w-0' }, [
+				Div({ class: 'flex flex-col w-full max-w-[1400px] p-6 mx-auto' }, [
+					mainContentSkeleton
+				])
+			]),
+			Div({ class: 'hidden 2xl:flex flex-none min-w-[420px] border-l' }, [
+
+			])
+		])
+	]);
+};
+
+export default ClientSkeleton;
