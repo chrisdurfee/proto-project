@@ -120,7 +120,7 @@ const HeaderRow = () => (
 			HeaderCol({ key: 'status', label: 'Status', class: 'hidden md:table-cell' }),
 			HeaderCol({ key: 'clientType', label: 'Type', class: 'hidden md:table-cell' }),
 			HeaderCol({ key: 'industry', label: 'Industry', class: 'hidden md:table-cell' }),
-			HeaderCol({ key: 'totalRevenue', label: 'Total Revenue', class: 'hidden md:table-cell', align: 'text-right' })
+			HeaderCol({ key: 'totalRevenue', label: 'Total Revenue', class: 'hidden md:table-cell', align: 'justify-end' })
 		])
 	])
 );

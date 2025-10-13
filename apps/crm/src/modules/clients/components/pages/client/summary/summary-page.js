@@ -8,14 +8,22 @@ import ClientSkeleton from "./client-skeleton.js";
 import { ConversationSection } from "./conversation/conversation-section.js";
 
 /**
- * ClientPage properties.
+ * This will create a permission modal.
  *
- * @type {object} props
+ * @param {object} item
+ * @param {object} parent
+ * @returns {object}
  */
-const props =
-{
-	class: 'flex flex-auto flex-col w-full'
-};
+const Modal = (item, parent) => (
+	ClientModal({
+		item,
+		onClose: (data) =>
+		{
+			console.log(data)
+			parent.list.refresh();
+		}
+	})
+);
 
 /**
  * PageHeader
@@ -30,14 +38,24 @@ const PageHeader = (client) => (
 		H2({ class: 'text-2xl font-medium' }, 'Client Summary'),
 		Div({ class: 'flex flex-row gap-x-2' }, [
 			Div({ class: 'hidden lg:inline-flex' }, [
-				Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.pencil.square, click: ClientModal }, 'Edit'),
+				Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.pencil.square, click: (e, parent) => Modal(client, parent) }, 'Edit'),
 			]),
 			Div({ class: 'flex lg:hidden mr-4' }, [
-				Tooltip({ content: 'Edit', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.pencil.square, click: ClientModal }))
+				Tooltip({ content: 'Edit', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.pencil.square, click: (e, parent) => Modal(client, parent) }))
 			])
 		])
 	])
 );
+
+/**
+ * ClientPage properties.
+ *
+ * @type {object} props
+ */
+const props =
+{
+	class: 'flex flex-auto flex-col w-full'
+};
 
 /**
  * SummaryPage

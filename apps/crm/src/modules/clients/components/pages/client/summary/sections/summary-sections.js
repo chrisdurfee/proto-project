@@ -40,8 +40,8 @@ export const ClientAvatarSection = Atom(({ client }) =>
 	Div({ class: "flex items-center gap-x-4 my-0" }, [
 		Avatar({
 			src: client.avatar,
-			alt: client.name,
-			fallbackText: client.name,
+			alt: "[[client.companyName]]",
+			watcherFallback: "[[client.companyName]]",
 			size: "lg"
 		}),
 		Div({ class: "flex flex-col gap-y-1" }, [
