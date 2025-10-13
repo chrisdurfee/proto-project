@@ -1,6 +1,6 @@
 import { Div, P } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
-import { List } from "@base-framework/organisms";
+import { ScrollableList } from "@base-framework/organisms";
 import { Badge, Card } from "@base-framework/ui/atoms";
 import { Avatar } from "@base-framework/ui/molecules";
 
@@ -39,12 +39,12 @@ const ContactItem = Atom(contact =>
  * @param {Array} props.contacts
  * @returns {object}
  */
-export const ContactList = Atom(({ contacts }) =>
+export const ContactList = Atom(({ data }) =>
 	Div({ class: "flex flex-col gap-y-6 mt-12" }, [
-		new List({
-			cache: "contacts",
+		ScrollableList({
+			data,
+			cache: "list",
 			key: "id",
-			items: contacts || [],
 			role: "list",
 			rowItem: ContactItem
 		})

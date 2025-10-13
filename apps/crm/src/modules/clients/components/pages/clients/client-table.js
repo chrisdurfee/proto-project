@@ -13,7 +13,7 @@ import { ClientModal } from "./client-modal.js";
  */
 const ClientAvatar = (row) => (
 	A({
-		href: `clients/client/${row.id}`,
+		href: `clients/${row.id}`,
 		class: 'flex items-center gap-x-4 no-underline text-inherit hover:text-primary'
 	}, [
 		Avatar({
@@ -86,7 +86,7 @@ export const ClientRow = (row, onSelect) => (
 			})
 		]),
 		Td({ class: 'p-4 hidden md:table-cell' }, [
-			A({ href: `clients/client/${row.id}`, class: 'text-muted-foreground' }, String(row.id))
+			A({ href: `clients/${row.id}`, class: 'text-muted-foreground' }, String(row.id))
 		]),
 		Td({ class: 'p-4' }, [
 			ClientAvatar(row)
@@ -98,10 +98,10 @@ export const ClientRow = (row, onSelect) => (
 			ClientTypeBadge(row.clientType)
 		]),
 		Td({ class: 'p-4 hidden md:table-cell' }, [
-			A({ href: `clients/client/${row.id}`, class: 'text-muted-foreground' }, row.industry || '-')
+			A({ href: `clients/${row.id}`, class: 'text-muted-foreground' }, row.industry || '-')
 		]),
 		Td({ class: 'p-4 text-right hidden md:table-cell' }, [
-			A({ href: `clients/client/${row.id}`, class: 'text-muted-foreground' }, row.totalRevenue ? `$${parseFloat(row.totalRevenue).toFixed(2)}` : '-')
+			A({ href: `clients/${row.id}`, class: 'text-muted-foreground' }, row.totalRevenue ? `$${parseFloat(row.totalRevenue).toFixed(2)}` : '-')
 		])
 	])
 );
