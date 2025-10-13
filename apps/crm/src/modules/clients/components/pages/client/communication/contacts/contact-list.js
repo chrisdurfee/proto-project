@@ -50,9 +50,9 @@ export const ContactList = Atom(({ data }) =>
 			skeleton: true,
 			rowItem: ContactItem,
 			emptyState: () => EmptyState({
-				title: 'Who Hurt Them?',
-				description: 'No login attempts have been found. Maybe we should send them flowers.',
-				icon: Icons.clock
+				title: 'No Contacts Found',
+				description: 'No contacts have been added for this client yet.',
+				icon: Icons.user.default
 			})
 		})
 	])
