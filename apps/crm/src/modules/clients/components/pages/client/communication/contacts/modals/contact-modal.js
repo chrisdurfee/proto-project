@@ -13,7 +13,7 @@ import { ContactForm } from "./contact-form.js";
  */
 const add = (data, destroyCallback = null) =>
 {
-	data.xhr.post('', (response) =>
+	data.xhr.add('', (response) =>
 	{
 		if (!response || response.success === false)
 		{
@@ -49,7 +49,7 @@ const add = (data, destroyCallback = null) =>
  */
 const update = (data, destroyCallback = null) =>
 {
-	data.xhr.patch('', (response) =>
+	data.xhr.update('', (response) =>
 	{
 		if (!response || response.success === false)
 		{

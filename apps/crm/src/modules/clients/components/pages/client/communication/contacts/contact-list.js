@@ -26,7 +26,7 @@ const ContactItem = (contact, onClick) =>
 		class: "flex items-center justify-between p-4 cursor-pointer",
 		margin: "m-2",
 		hover: true,
-		click: () => onClick && onClick(contact)
+		click: (e, parent) => onClick && onClick(contact, parent)
 	}, [
 		Div({ class: "flex items-center gap-x-4" }, [
 			Avatar({
@@ -69,11 +69,8 @@ export const ContactList = Atom(({ data }) =>
 	{
 		ContactModal({
 			item: contact,
-			clientId: parent.route.clientId,
-			onClose: () =>
-			{
-				parent.list?.refresh();
-			}
+			clientId: data.clientId,
+			onSubmit: (data) => parent?.mingle([ data.get() ])
 		});
 	};
 
@@ -84,7 +81,7 @@ export const ContactList = Atom(({ data }) =>
 			key: "id",
 			role: "list",
 			skeleton: true,
-			rowItem: (contact, onSelect, parent) => ContactItem(contact, (c) => openContactModal(c, parent)),
+			rowItem: (contact) => ContactItem(contact, openContactModal),
 			emptyState: () => EmptyState({
 				title: 'No Contacts Found',
 				description: 'No contacts have been added for this client yet.',
