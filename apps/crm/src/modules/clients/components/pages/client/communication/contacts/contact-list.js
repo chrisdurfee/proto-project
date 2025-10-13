@@ -2,7 +2,8 @@ import { Div, P } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Badge, Card } from "@base-framework/ui/atoms";
-import { Avatar } from "@base-framework/ui/molecules";
+import { Icons } from "@base-framework/ui/icons";
+import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 
 /**
  * ContactItem
@@ -46,7 +47,13 @@ export const ContactList = Atom(({ data }) =>
 			cache: "list",
 			key: "id",
 			role: "list",
-			rowItem: ContactItem
+			skeleton: true,
+			rowItem: ContactItem,
+			emptyState: () => EmptyState({
+				title: 'Who Hurt Them?',
+				description: 'No login attempts have been found. Maybe we should send them flowers.',
+				icon: Icons.clock
+			})
 		})
 	])
 );
