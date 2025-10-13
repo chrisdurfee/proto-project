@@ -1,5 +1,5 @@
 import { Fieldset, Input, Select, Textarea } from "@base-framework/ui/atoms";
-import { FormField } from "@base-framework/ui/molecules";
+import { DatePicker, FormField } from "@base-framework/ui/molecules";
 
 /**
  * ContactForm
@@ -199,8 +199,7 @@ export const ContactForm = ({ isEditing = false, contact }) => [
 			})
 		]),
 		new FormField({ name: "birthday", label: "Birthday", description: "Contact's birthday." }, [
-			Input({
-				type: "date",
+			new DatePicker({
 				bind: 'birthday'
 			})
 		]),
