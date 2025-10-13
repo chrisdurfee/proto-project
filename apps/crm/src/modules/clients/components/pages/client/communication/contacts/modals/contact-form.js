@@ -113,18 +113,29 @@ export const ContactForm = ({ isEditing = false, contact }) => [
 			})
 		]),
 		new FormField({ name: "language", label: "Language", description: "Preferred language." }, [
-			Input({
-				type: "text",
-				placeholder: "en",
+			Select({
 				bind: 'language',
-				maxlength: 10
+				options: [
+					{ value: "en", label: "English" }
+				]
 			})
 		]),
 		new FormField({ name: "timezone", label: "Timezone", description: "Contact's timezone." }, [
-			Input({
-				type: "text",
-				placeholder: "America/New_York",
-				bind: 'timezone'
+			Select({
+				bind: 'timezone',
+				options: [
+					{ value: "utc", label: "UTC" },
+					{ value: "est", label: "Eastern Standard Time" },
+					{ value: "pst", label: "Pacific Standard Time" },
+					{ value: "cst", label: "Central Standard Time" },
+					{ value: "mst", label: "Mountain Standard Time" },
+					{ value: "gmt", label: "Greenwich Mean Time" },
+					{ value: "cet", label: "Central European Time" },
+					{ value: "eet", label: "Eastern European Time" },
+					{ value: "ist", label: "Indian Standard Time" },
+					{ value: "jst", label: "Japan Standard Time" },
+					{ value: "aest", label: "Australian Eastern Standard Time" }
+				]
 			})
 		])
 	]),

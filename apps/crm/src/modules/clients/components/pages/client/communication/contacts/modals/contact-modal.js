@@ -151,13 +151,13 @@ export const ContactModal = (props = { item: {}, clientId: '', onClose: undefine
 	const item = props.item || {};
 	const mode = item.id ? 'edit' : 'add';
 	const isEditing = mode === 'edit';
-	
+
 	// Ensure clientId is set
 	const contactData = {
 		...item,
 		clientId: props.clientId || item.clientId
 	};
-	
+
 	const data = new ClientContactModel(contactData);
 	const closeCallback = (parent) => props.onClose && props.onClose(data, parent);
 
@@ -187,7 +187,7 @@ export const ContactModal = (props = { item: {}, clientId: '', onClose: undefine
 			else
 			{
 				add(data, destroyCallback);
-				
+
 				if (props.onSubmit)
 				{
 					props.onSubmit(data);
