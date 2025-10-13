@@ -1,8 +1,7 @@
 import { Div, H1, Header } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { SearchDropdown } from "@base-framework/ui/organisms";
-import { FakeContacts } from "./fake-contacts.js";
+import { SearchInput as BaseSearch } from "@base-framework/ui/organisms";
 
 /**
  * This will convert contacts to options.
@@ -18,9 +17,12 @@ const convertContactsToOptions = (contacts) => contacts.map((contact) => ({ labe
  * @returns {object}
  */
 const SearchInput = () => (
-	new SearchDropdown({
-		options: convertContactsToOptions(FakeContacts),
-		onSelect: (item) => console.log(item)
+	BaseSearch({
+		class: 'min-w-40 lg:min-w-96',
+		placeholder: 'Search clients...',
+		bind: 'search',
+		keyup: (e, parent) => parent.list.refresh(),
+		icon: Icons.magnifyingGlass.default
 	})
 );
 
