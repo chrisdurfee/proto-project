@@ -4,14 +4,6 @@ import { Icons } from "@base-framework/ui/icons";
 import { SearchInput as BaseSearch } from "@base-framework/ui/organisms";
 
 /**
- * This will convert contacts to options.
- *
- * @param {array} contacts
- * @returns {array}
- */
-const convertContactsToOptions = (contacts) => contacts.map((contact) => ({ label: contact.name, value: contact.id }));
-
-/**
  * This will create a search input for the contacts page.
  *
  * @returns {object}
@@ -19,7 +11,7 @@ const convertContactsToOptions = (contacts) => contacts.map((contact) => ({ labe
 const SearchInput = () => (
 	BaseSearch({
 		class: 'min-w-40 lg:min-w-96',
-		placeholder: 'Search clients...',
+		placeholder: 'Search contacts...',
 		bind: 'search',
 		keyup: (e, parent) => parent.list.refresh(),
 		icon: Icons.magnifyingGlass.default
@@ -27,7 +19,7 @@ const SearchInput = () => (
 );
 
 /**
- * This will create a page header for the clients page.
+ * This will create a page header for the contacts page.
  *
  * @returns {object}
  */
