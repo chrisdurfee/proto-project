@@ -1,7 +1,7 @@
 import { Div, UseParent } from "@base-framework/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu, Modal } from "@base-framework/ui/molecules";
-import { ClientContactModel } from "../../../../clients/models/client-contact-model.js";
+import { ClientContactModel } from "../../../../../models/client-contact-model.js";
 import { ContactForm } from "./contact-form.js";
 
 /**

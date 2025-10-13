@@ -46,14 +46,14 @@ export const ClientAvatarSection = Atom(({ client }) =>
 		}),
 		Div({ class: "flex flex-col gap-y-1" }, [
 			Div({ class: "flex items-baseline gap-x-2" }, [
-				H2({ class: "text-2xl font-semibold text-foreground" }, client.companyName),
-				P({ class: "text-sm text-muted-foreground" }, `#${client.id}`)
+				H2({ class: "text-2xl font-semibold text-foreground" }, Format.default("[[client.companyName]]", "Unnamed Client")),
+				P({ class: "text-sm text-muted-foreground" }, "#[[client.id]]")
 			]),
 			Div({ class: "flex items-center gap-x-2" }, [
-				P({ class: "text-sm text-muted-foreground" }, client.contactName),
+				P({ class: "text-sm text-muted-foreground" }, Format.default("[[client.contactName]]", "No contact")),
 				Badge({
 					variant: client.status === "Active" ? "primary" : "secondary"
-				}, client.status)
+				}, Format.default("[[client.status]]", "Unknown"))
 			])
 		])
 	])
@@ -85,19 +85,19 @@ export const ClientSummaryCardsSection = Atom(({ client }) =>
 				}),
 				ClientSummaryCard({
 					title: "Package",
-					value: Format.default('[[client.package]]', 'Basic'),
+					value: Format.default("[[client.package]]", "Basic"),
 					icon: Icons.cube,
 					url: `clients/client/${client.id}/billing/orders`
 				}),
 				ClientSummaryCard({
 					title: "Next Due Date",
-					value: Format.date('[[client.nextDue]]', 'N/A'),
+					value: Format.date("[[client.nextDue]]", "N/A"),
 					icon: Icons.calendar.default,
 					url: `clients/client/${client.id}/billing/payments`
 				}),
 				ClientSummaryCard({
 					title: "Secret Passphrase",
-					value: Format.default('[[client.passphrase]]', 'N/A'),
+					value: Format.default("[[client.passphrase]]", "N/A"),
 					icon: Icons.locked
 				}),
 				ClientSummaryCard({
@@ -126,7 +126,7 @@ export const ClientSummaryCardsSection = Atom(({ client }) =>
  */
 export const AboutSection = ({ about }) =>
 	ProfileSection({ title: "About"}, [
-		P({ class: "text-base text-muted-foreground max-w-[800px]" }, about)
+		P({ class: "text-base text-muted-foreground max-w-[800px]" }, Format.default("[[client.notes]]", "No information available."))
 	]);
 
 
@@ -148,29 +148,34 @@ export const ContractSection = Atom(({client}) =>
 					Div({ class: "flex flex-col gap-y-1" }, [
 						P({ class: "text-sm text-muted-foreground" }, "Contract expiration in 8 months"),
 						Div({ class: "flex items-center gap-x-2" }, [
-							P({ class: "font-medium text-foreground" }, client.contractExpires),
-							Badge({ variant: "secondary" }, client.contractStatus)
+							P({ class: "font-medium text-foreground" }, Format.date("[[client.contractExpires]]", "No contract")),
+							Badge({ variant: "secondary" }, Format.default("[[client.contractStatus]]", "N/A"))
 						])
 					]),
 					// billing row
 					Div({ class: "flex flex-col gap-y-1" }, [
 						P({ class: "text-sm text-muted-foreground" }, "Billing"),
-						P({ class: "font-medium text-foreground" },
-							`${client.package} (ID: ${client.contractId}), $${client.payment} monthly`
-						)
+						P({ class: "font-medium text-foreground", watch: ['[[client.package]][[client.contractId]][[client.payment]]', ([pkg, id, payment]) => {
+							if (!pkg && !id && !payment) return "No billing information";
+							const packageName = pkg || "No package";
+							const contractId = id || "N/A";
+							const paymentAmount = payment ? `$${parseFloat(payment).toFixed(2)}` : "$0.00";
+							return `${packageName} (ID: ${contractId}), ${paymentAmount} monthly`;
+						}] })
 					])
 				]),
 				// right side
 				Div({ class: "flex flex-col gap-y-12" }, [
 					Div({ class: "flex flex-col gap-y-1" }, [
 						P({ class: "text-sm text-muted-foreground" }, "Upgrades"),
-						Div({ class: "flex flex-wrap gap-2" },
-							client.addOns && client.addOns.map(a => Badge({ variant: "outline" }, a))
-						)
+						Div({ class: "flex flex-wrap gap-2", onSet: ['client.addOns', (addOns) => {
+							if (!addOns || !addOns.length) return P({ class: "text-sm text-muted-foreground" }, "No upgrades");
+							return addOns.map(a => Badge({ variant: "outline" }, a));
+						}] })
 					]),
 					Div({ class: "flex flex-col gap-y-1" }, [
 						P({ class: "text-sm text-muted-foreground" }, "Sales Agent"),
-						P({ class: "font-medium text-foreground" }, client.salesAgent || "Not Assigned")
+						P({ class: "font-medium text-foreground" }, Format.default("[[client.salesAgent]]", "Not Assigned"))
 					])
 				])
 			])
@@ -210,11 +215,11 @@ const TicketListItem = Atom(ticket =>
 		Div({ class: "flex items-center gap-x-4" }, [
 			Icon(TicketIcon(ticket.priority)),
 			Div({ class: "flex flex-col" }, [
-				P({ class: "font-medium" }, ticket.subject),
-				P({ class: "text-sm text-muted-foreground" }, ticket.owner)
+				P({ class: "font-medium" }, Format.default("[[subject]]", "No subject")),
+				P({ class: "text-sm text-muted-foreground" }, Format.default("[[owner]]", "Unassigned"))
 			])
 		]),
-		Badge({ variant: ticket.status === "Open" ? "primary" : "secondary" }, ticket.status)
+		Badge({ variant: ticket.status === "Open" ? "primary" : "secondary" }, Format.default("[[status]]", "Unknown"))
 	])
 );
 
@@ -254,13 +259,13 @@ const InvoiceListItem = (client) => (
 				Div({ class: "flex items-center gap-x-4" }, [
 					Icon(Icons.document.default),
 					Div({ class: "flex flex-col" }, [
-						P({ class: "font-medium" }, invoice.number),
-						P({ class: "text-sm text-muted-foreground" }, invoice.date)
+						P({ class: "font-medium" }, Format.default("[[number]]", "N/A")),
+						P({ class: "text-sm text-muted-foreground" }, Format.date("[[date]]", "No date"))
 					])
 				]),
 				Div({ class: "flex items-center gap-x-4" }, [
-					P({ class: "font-medium text-foreground" }, invoice.amount),
-					Badge({ variant: invoice.status === "Paid" ? "secondary" : "outline" }, invoice.status)
+					P({ class: "font-medium text-foreground" }, Format.money("[[amount]]", "$", "0.00")),
+					Badge({ variant: invoice.status === "Paid" ? "secondary" : "outline" }, Format.default("[[status]]", "Unknown"))
 				])
 			])
 		])

@@ -9,9 +9,9 @@ import { Avatar } from "@base-framework/ui/molecules";
  */
 const ClientDetails = () => (
 	[
-		Avatar({ src: '[[client.avatar]]', alt: '[[client.name]]', watcherFallback: '[[client.name]]', size: "sm" }),
+		Avatar({ src: '[[client.avatar]]', alt: '[[client.companyName]]', watcherFallback: '[[client.companyName]]', size: "sm" }),
 		Div({ class: "flex flex-auto flex-col" }, [
-			Span({ class: "text-sm truncate" }, '[[client.name]]'),
+			Span({ class: "text-sm truncate" }, '[[client.companyName]]'),
 			Span({ class: "text-xs truncate text-muted-foreground" }, '#[[client.id]]'),
 		])
 	]

@@ -1,8 +1,8 @@
 import { Model } from "@base-framework/base";
 import { BlankPage } from "@base-framework/ui/pages";
 import FullTablePage, { TableContainer } from "@pages/types/full/table/full-table-page.js";
+import { ClientModel } from "../../models/client-model.js";
 import { ClientTable } from "./client-table.js";
-import { ClientModel } from "./models/client-model.js";
 import { PageHeader } from "./page-header.js";
 
 /**

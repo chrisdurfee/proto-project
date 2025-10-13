@@ -1,6 +1,6 @@
 import { Div, UseParent } from "@base-framework/atoms";
 import { Page } from "@base-framework/ui/pages";
-import { ClientContactModel } from "../../../clients/models/client-contact-model.js";
+import { ClientContactModel } from "../../../../models/client-contact-model.js";
 import { ContactList } from "./contact-list.js";
 import { PageHeader } from "./page-header.js";
 

@@ -4,7 +4,7 @@ import { Icons } from "@base-framework/ui/icons";
 import { Combobox } from "@base-framework/ui/molecules";
 import { SearchInput } from "@base-framework/ui/organisms";
 import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
-import { ClientModal } from "./client-modal.js";
+import { ClientModal } from "../../organisms/modals/client-modal.js";
 
 /**
  * This will refresh the list.

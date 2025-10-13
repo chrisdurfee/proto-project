@@ -1,7 +1,7 @@
 import { Div, OnRoute } from "@base-framework/atoms";
 import { Overlay } from "@base-framework/ui/organisms";
 import { FullScreenOverlay } from "@components/organisms/overlays/full/full-screen-overlay.js";
-import { ClientModel } from "../clients/models/client-model.js";
+import { ClientModel } from "../../models/client-model.js";
 import { ContentSection } from "./content-section.js";
 import { Sidebar } from "./sidebar.js";
 

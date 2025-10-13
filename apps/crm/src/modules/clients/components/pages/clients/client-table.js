@@ -3,7 +3,7 @@ import { Badge, Button, Checkbox } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
-import { ClientModal } from "./client-modal.js";
+import { ClientModal } from "../../organisms/modals/client-modal.js";
 
 /**
  * This will create a client avatar with company name.
