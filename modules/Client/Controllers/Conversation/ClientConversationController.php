@@ -5,6 +5,7 @@ use Proto\Controllers\ResourceController as Controller;
 use Proto\Http\Router\Request;
 use Modules\Client\Models\Conversation\ClientConversation;
 use Modules\Client\Models\Conversation\ClientConversationAttachment;
+use Proto\Http\UploadFile;
 
 /**
  * ClientConversationController
@@ -68,7 +69,7 @@ class ClientConversationController extends Controller
 		}
 
 		$attachmentCount = $this->storeAttachments(
-			$files['attachments'],
+			$request,
 			$result->id,
 			(int)$userId
 		);
@@ -86,55 +87,33 @@ class ClientConversationController extends Controller
 	/**
 	 * Store multiple file attachments for a conversation.
 	 *
-	 * @param array $files Array of uploaded files.
+	 * @param Request $request The HTTP request object.
 	 * @param int $conversationId The conversation ID.
 	 * @param int $userId The user ID who uploaded the files.
 	 * @return int Number of successfully stored attachments.
 	 */
-	private function storeAttachments(array $files, int $conversationId, int $userId): int
+	private function storeAttachments(Request $request, int $conversationId, int $userId): int
 	{
 		$count = 0;
+		$files = $request->files();
+		$attachments = $files['attachments'] ?? [];
 
-		foreach ($files as $uploadFile)
+		foreach ($attachments as $uploadFile)
 		{
 			try
 			{
-				$this->validateRules(['file' => $uploadFile], [
+				$request->validateFile('file', [
 					'file' => 'file:10240|required|mimes:pdf,doc,docx,xls,xlsx,txt,csv,jpg,jpeg,png,gif,webp,zip'
 				]);
 
 				// Store the file
-				if (!$uploadFile->store('local', 'attachments'))
+				if (!$uploadFile->store('local', 'conversation'))
 				{
 					continue;
 				}
 
 				// Prepare attachment data
-				$attachmentData = [
-					'conversationId' => $conversationId,
-					'uploadedBy' => $userId,
-					'fileName' => $uploadFile->getOriginalName(),
-					'filePath' => $uploadFile->getNewName(),
-					'fileType' => $uploadFile->getMimeType(),
-					'fileExtension' => strtolower(pathinfo($uploadFile->getOriginalName(), PATHINFO_EXTENSION)),
-					'fileSize' => $uploadFile->getSize(),
-					'displayName' => $uploadFile->getOriginalName()
-				];
-
-				// If it's an image, get dimensions
-				if (str_starts_with($uploadFile->getMimeType(), 'image/'))
-				{
-					$tmpPath = $uploadFile->getTempPath();
-					if ($tmpPath && file_exists($tmpPath))
-					{
-						$imageInfo = @getimagesize($tmpPath);
-						if ($imageInfo)
-						{
-							$attachmentData['width'] = $imageInfo[0];
-							$attachmentData['height'] = $imageInfo[1];
-						}
-					}
-				}
+				$attachmentData = $this->setupAttachmentData($uploadFile, $conversationId, $userId);
 
 				// Create attachment record
 				if (ClientConversationAttachment::create((object)$attachmentData))
@@ -153,80 +132,41 @@ class ClientConversationController extends Controller
 	}
 
 	/**
-	 * Store multiple file attachments for a conversation.
+	 * Prepare attachment data for storage.
 	 *
-	 * @param array $files Array of uploaded files.
-	 * @param int $conversationId The conversation ID.
-	 * @param int $userId The user ID who uploaded the files.
-	 * @return int Number of successfully stored attachments.
+	 * @param UploadFile $uploadFile The uploaded file object.
+	 * @param int $conversationId The ID of the conversation.
+	 * @param int $userId The ID of the user uploading the file.
+	 * @return array The prepared attachment data.
 	 */
-	private function storeAttachments(array $files, int $conversationId, int $userId): int
+	protected function setupAttachmentData(UploadFile $uploadFile, int $conversationId, int $userId): array
 	{
-		$count = 0;
+		$attachmentData = [
+			'conversationId' => $conversationId,
+			'uploadedBy' => $userId,
+			'fileName' => $uploadFile->getOriginalName(),
+			'filePath' => $uploadFile->getNewName(),
+			'fileType' => $uploadFile->getMimeType(),
+			'fileExtension' => strtolower(pathinfo($uploadFile->getOriginalName(), PATHINFO_EXTENSION)),
+			'fileSize' => $uploadFile->getSize(),
+			'displayName' => $uploadFile->getOriginalName()
+		];
 
-		foreach ($files as $uploadFile)
+		// If it's an image, get dimensions
+		if (str_starts_with($uploadFile->getMimeType(), 'image/'))
 		{
-			try
+			$tmpPath = $uploadFile->getTempPath();
+			if ($tmpPath && file_exists($tmpPath))
 			{
-				// Validate file using the validation system
-				$this->validateRules(['file' => $uploadFile], [
-					'file' => 'file:10240|required|mimes:pdf,doc,docx,xls,xlsx,txt,csv,jpg,jpeg,png,gif,webp,zip' // 10MB max
-				]);
-
-				// Store the file
-				$storedPath = $uploadFile->store('local', 'attachments');
-				if (!$storedPath)
+				$imageInfo = @getimagesize($tmpPath);
+				if ($imageInfo)
 				{
-					continue;
+					$attachmentData['width'] = $imageInfo[0];
+					$attachmentData['height'] = $imageInfo[1];
 				}
-
-				// Get file information
-				$fileName = $uploadFile->getOriginalName();
-				$fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-				$fileType = $uploadFile->getMimeType();
-				$fileSize = $uploadFile->getSize();
-
-				// Prepare attachment data
-				$attachmentData = [
-					'conversationId' => $conversationId,
-					'uploadedBy' => $userId,
-					'fileName' => $fileName,
-					'filePath' => $uploadFile->getNewName(),
-					'fileType' => $fileType,
-					'fileExtension' => $fileExtension,
-					'fileSize' => $fileSize,
-					'displayName' => $fileName
-				];
-
-				// If it's an image, get dimensions
-				if (str_starts_with($fileType, 'image/'))
-				{
-					$tmpPath = $uploadFile->getTempPath();
-					if ($tmpPath && file_exists($tmpPath))
-					{
-						$imageInfo = @getimagesize($tmpPath);
-						if ($imageInfo)
-						{
-							$attachmentData['width'] = $imageInfo[0];
-							$attachmentData['height'] = $imageInfo[1];
-						}
-					}
-				}
-
-				// Store attachment record
-				$attachment = ClientConversationAttachment::create((object)$attachmentData);
-				if ($attachment)
-				{
-					$count++;
-				}
-			}
-			catch (\Exception $e)
-			{
-				// Log error but continue with other files
-				continue;
 			}
 		}
 
-		return $count;
+		return $attachmentData;
 	}
 }
