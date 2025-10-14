@@ -1,7 +1,7 @@
 import { Div, H1 } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { UserModal } from "../../modals/user-modal.js";
+import { UserModal } from "../../users/modals/user-modal.js";
 
 /**
  * This will create a permission modal.
