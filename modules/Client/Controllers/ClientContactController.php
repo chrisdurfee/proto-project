@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Client\Controllers;
 
-use Modules\Client\Policies\ClientContactPolicy;
+use Modules\Client\Auth\Policies\ClientContactPolicy;
 use Proto\Controllers\ResourceController as Controller;
 use Modules\Client\Models\ClientContact;
 
