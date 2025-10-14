@@ -36,7 +36,7 @@ const SendButton = () => (
 		Button({
 			type: "button",
 			variant: "icon",
-			icon: Icons.paperClip,
+			icon: Icons.paperclip,
 			class: "text-foreground hover:text-accent",
 			click: (e, parent) => parent.fileInput?.click()
 		}),
