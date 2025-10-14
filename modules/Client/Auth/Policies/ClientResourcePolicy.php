@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace Modules\Client\Policies;
+namespace Modules\Client\Auth\Policies;
 
 use Common\Auth\Policies\Policy;
 use Proto\Http\Router\Request;

@@ -155,7 +155,7 @@ class ClientConversationController extends Controller
 		// If it's an image, get dimensions
 		if (str_starts_with($uploadFile->getMimeType(), 'image/'))
 		{
-			$tmpPath = $uploadFile->getTempPath();
+			$tmpPath = $uploadFile->getFilePath();
 			if ($tmpPath && file_exists($tmpPath))
 			{
 				$imageInfo = @getimagesize($tmpPath);
