@@ -1,5 +1,5 @@
 import { Div, H2, Header, Img, P, Span } from "@base-framework/atoms";
-import { Atom } from "@base-framework/base";
+import { Atom, DateTime } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Avatar } from "@base-framework/ui/molecules";
 import { ConversationModel } from "../../../../models/conversation-model.js";
@@ -17,7 +17,7 @@ const DateDivider = (date) =>
 	Div({ class: "flex justify-center mt-4" }, [
 		Span(
 			{ class: "text-xs text-muted-foreground bg-background p-2" },
-			date.split("T")[0]
+			DateTime.format('standard', date)
 		)
 	]);
 
@@ -104,7 +104,7 @@ export const ConversationSection = Atom(({ client }) =>
 				divider: {
 					itemProperty: "createdAt",
 					layout: DateDivider,
-					customCompare: (a, b) => a.split("T")[0] !== b.split("T")[0]
+					customCompare: (a, b) => DateTime.format('standard', a) !== DateTime.format('standard', b)
 				},
 				rowItem: ConversationListItem
 			})
