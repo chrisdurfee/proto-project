@@ -16,7 +16,7 @@ import { ThreadComposer } from "./thread-composer.js";
 const DateDivider = (date) =>
 	Div({ class: "flex justify-center mt-4" }, [
 		Span(
-			{ class: "text-xs text-muted-foreground bg-background p-2" },
+			{ class: "text-xs text-muted-foreground p-2" },
 			DateTime.format('standard', date)
 		)
 	]);
