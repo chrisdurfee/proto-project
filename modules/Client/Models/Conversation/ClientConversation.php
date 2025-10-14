@@ -57,7 +57,7 @@ class ClientConversation extends Model
 			'lastName',
 			'displayName',
 			'image'
-		])->on(['id', 'userId']);
+		])->on(['userId', 'id']);
 
 		/**
 		 * Join attachments for this conversation.
@@ -74,6 +74,6 @@ class ClientConversation extends Model
 			'width',
 			'height',
 			'thumbnailPath'
-		])->on(['conversationId', 'id']);
+		])->on(['id', 'conversationId']);
 	}
 }
