@@ -76,11 +76,12 @@ export const ConversationSection = Atom(({ client }) =>
 	});
 
 	// Create conversation model
-	const conversationModel = new ConversationModel();
-	conversationModel.url = `/api/client/${client.id}/conversation`;
+	const conversationModel = new ConversationModel({
+		clientId: client.id
+	});
 
 	// Load conversations
-	conversationModel.xhr.getAll('', (response) =>
+	conversationModel.xhr.all('', (response) =>
 	{
 		// @ts-ignore
 		conversationData.loading = false;

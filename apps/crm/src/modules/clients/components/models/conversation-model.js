@@ -13,7 +13,7 @@ export const ConversationModel = Model.extend({
 	 * Base URL for conversation endpoints.
 	 * Will be completed with clientId in the component.
 	 */
-	url: '/api/client/:clientId/conversation',
+	url: '/api/client/[[clientId]]/conversation',
 
 	xhr: {
 		/**
