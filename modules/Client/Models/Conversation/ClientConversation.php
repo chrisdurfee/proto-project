@@ -58,5 +58,22 @@ class ClientConversation extends Model
 			'displayName',
 			'image'
 		])->on(['id', 'userId']);
+
+		/**
+		 * Join attachments for this conversation.
+		 */
+		$builder->many(ClientConversationAttachment::class, fields: [
+			'id',
+			'fileName',
+			'filePath',
+			'fileType',
+			'fileExtension',
+			'fileSize',
+			'displayName',
+			'description',
+			'width',
+			'height',
+			'thumbnailPath'
+		])->on(['conversationId', 'id']);
 	}
 }
