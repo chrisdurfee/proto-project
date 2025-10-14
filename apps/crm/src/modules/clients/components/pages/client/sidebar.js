@@ -19,7 +19,7 @@ const Toolbar = () => (
 					margin: 'm-0 ml-0',
 					backUrl: '/clients'
 				}),
-				H1({ class: 'scroll-m-20 text-2xl lg:text-lg font-bold tracking-tight truncate' }, '[[client.name]]'),
+				H1({ class: 'scroll-m-20 text-2xl lg:text-lg font-bold tracking-tight truncate' }, '[[client.companyName]]'),
 			])
 		]),
 		ClientAvatar()

@@ -14,14 +14,10 @@ import { ConversationSection } from "./conversation/conversation-section.js";
  * @param {object} parent
  * @returns {object}
  */
-const Modal = (item, parent) => (
+const Modal = (item, { context }) => (
 	ClientModal({
 		item,
-		onClose: (data) =>
-		{
-			console.log(data)
-			parent.list.refresh();
-		}
+		onSubmit: (data) => context.data.client = data.get()
 	})
 );
 
