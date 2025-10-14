@@ -1,8 +1,9 @@
-import { Div, Textarea } from "@base-framework/atoms";
+import { Div, Input, Textarea } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
+import { ConversationModel } from "../../../../models/conversation-model.js";
 
 
 /**
@@ -31,11 +32,17 @@ const TextCount = () => (
  * @returns {object}
  */
 const SendButton = () => (
-	Div({ class: "flex justify-between" }, [
+	Div({ class: "flex items-center gap-x-2" }, [
+		Button({
+			type: "button",
+			variant: "icon",
+			icon: Icons.paperClip,
+			class: "text-foreground hover:text-accent",
+			click: (e, parent) => parent.fileInput?.click()
+		}),
 		Button({
 			type: "submit",
 			variant: "icon",
-			click: () => console.log("Send email"),
 			icon: Icons.airplane,
 			class: "text-foreground hover:text-accent",
 			onSet: ['empty', (empty, el) => el.disabled = empty]
@@ -56,6 +63,37 @@ const SendButton = () => (
 export const ThreadComposer = Jot(
 {
 	/**
+	 * This will set up after the component is created.
+	 *
+	 * @returns {void}
+	 */
+	afterSetup()
+	{
+		// Create conversation model with data binding
+		// @ts-ignore
+		const clientId = this.client?.id;
+		if (!clientId)
+		{
+			console.error('ThreadComposer: client.id is required');
+			return;
+		}
+
+		// @ts-ignore
+		this.conversationModel = new ConversationModel({
+			clientId: clientId,
+			userId: window.app?.user?.id || 1,
+			message: '',
+			messageType: 'comment',
+			isInternal: 0,
+			isPinned: 0,
+			attachments: []
+		});
+
+		// @ts-ignore
+		this.conversationModel.url = `/api/client/${clientId}/conversation`;
+	},
+
+	/**
 	 * This will set the state object.
 	 *
 	 * @returns {object}
@@ -72,25 +110,115 @@ export const ThreadComposer = Jot(
 	},
 
 	/**
+	 * Handle file selection.
+	 *
+	 * @param {Event} e
+	 * @returns {void}
+	 */
+	handleFileSelect(e)
+	{
+		// @ts-ignore
+		const files = Array.from(e.target.files || []);
+		// @ts-ignore
+		this.conversationModel.set('attachments', files);
+
+		if (files.length > 0)
+		{
+			app.notify({
+				icon: Icons.document,
+				type: 'default',
+				title: 'Files Selected',
+				description: `${files.length} file(s) ready to upload.`,
+			});
+		}
+	},
+
+	/**
 	 * This will submit the form.
 	 *
 	 * @returns {void}
 	 */
 	submit()
 	{
-		console.log('message sent');
+		// @ts-ignore
+		const message = this.textarea.value;
+		if (!message || message.trim() === '')
+		{
+			return;
+		}
 
+		// Update model with message
 		// @ts-ignore
-		this.add(this.textarea.value, this);
+		this.conversationModel.set('message', message);
 
+		// Send via API
 		// @ts-ignore
-		this.textarea.value = '';
-		// @ts-ignore
-		this.state.charCount = 0;
-		// @ts-ignore
-		this.state.isOverLimit = false;
-		// @ts-ignore
-		this.state.empty = true;
+		this.conversationModel.xhr.add('', (response) =>
+		{
+			if (response && response.success)
+			{
+				app.notify({
+					type: "success",
+					title: "Message Sent",
+					description: "Your message has been added.",
+					icon: Icons.circleCheck
+				});
+
+				// Add optimistic update to conversation list
+				// @ts-ignore
+				const userData = window.app?.user || {};
+				const newMessage = {
+					id: response.id,
+					// @ts-ignore
+					clientId: this.client.id,
+					// @ts-ignore
+					userId: this.conversationModel.get('userId'),
+					message: message,
+					messageType: 'comment',
+					isInternal: 0,
+					isPinned: 0,
+					attachmentCount: 0,
+					createdAt: new Date().toISOString(),
+					userDisplayName: userData.displayName || 'You',
+					userFirstName: userData.firstName || 'You',
+					userLastName: userData.lastName || '',
+					userImage: userData.image || null,
+					attachments: []
+				};
+
+				// @ts-ignore
+				this.conversationData?.items?.push(newMessage);
+
+				// Reset form
+				// @ts-ignore
+				this.textarea.value = '';
+				// @ts-ignore
+				if (this.fileInput)
+				{
+					// @ts-ignore
+					this.fileInput.value = '';
+				}
+				// @ts-ignore
+				this.conversationModel.set('message', '');
+				// @ts-ignore
+				this.conversationModel.set('attachments', []);
+				// @ts-ignore
+				this.state.charCount = 0;
+				// @ts-ignore
+				this.state.isOverLimit = false;
+				// @ts-ignore
+				this.state.empty = true;
+			}
+			else
+			{
+				app.notify({
+					type: "destructive",
+					title: "Error",
+					description: response?.message || "Failed to send message.",
+					icon: Icons.warning
+				});
+			}
+		});
 	},
 
 	/**
@@ -183,6 +311,16 @@ export const ThreadComposer = Jot(
 		return Div({ class: "fadeIn p-4 w-full lg:max-w-5xl m-auto" }, [
 			// @ts-ignore
 			Form({ class: "relative flex border rounded-lg p-3 bg-surface", submit: () => this.submit() }, [
+				// Hidden file input
+				Input({
+					type: "file",
+					multiple: true,
+					cache: 'fileInput',
+					class: "hidden",
+					accept: "image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip",
+					// @ts-ignore
+					change: (e) => this.handleFileSelect(e)
+				}),
 				// Textarea for reply
 				Textarea({
 					class: "w-full border-none bg-transparent resize-none focus:outline-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground",
