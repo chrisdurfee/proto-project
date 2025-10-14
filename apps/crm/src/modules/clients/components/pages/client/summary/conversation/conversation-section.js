@@ -22,6 +22,35 @@ const DateDivider = (date) =>
 	]);
 
 /**
+ * Attachment
+ *
+ * @param {object} att
+ * @returns {object}
+ */
+const Attachment = (att) =>
+	Div({ class: "flex items-center gap-x-2 p-2 border rounded hover:bg-muted/50" }, [
+		att.fileType?.startsWith('image/')
+			? Img({ src: `/files/${att.filePath}`, alt: att.fileName, class: "w-16 h-16 rounded object-cover" })
+			: Div({ class: "flex items-center gap-x-2" }, [
+				Span({ class: "text-xs text-muted-foreground" }, att.fileExtension?.toUpperCase()),
+				Span({ class: "text-xs" }, att.displayName)
+			])
+	]);
+
+/**
+ * Attachments
+ *
+ * @param {array} attachments
+ * @returns {object}
+ */
+const Attachments = (attachments) =>
+	Div({ class: "flex gap-x-2 mt-2 flex-wrap" },
+		attachments.map((att) =>
+			Attachment(att)
+		)
+	);
+
+/**
  * ConversationListItem
  *
  * Renders a single conversation entry with avatar, text, and attachments.
@@ -30,29 +59,18 @@ const DateDivider = (date) =>
  * @returns {object}
  */
 const ConversationListItem = Atom((msg) =>
-	Div({ class: "flex gap-x-3 px-6 py-4 hover:bg-muted/50 rounded" }, [
+	Div({ class: "flex gap-x-3 px-6 py-4 hover:bg-muted/50" }, [
 		Avatar({
-			src: msg.userImage || msg.avatar,
-			alt: msg.userDisplayName || msg.user,
-			fallbackText: msg.userDisplayName || msg.user,
+			src: msg.image || msg.avatar,
+			alt: msg.firstName + ' ' + msg.lastName,
+			fallbackText: msg.firstName + ' ' + msg.lastName,
 			size: "sm"
 		}),
 		Div({ class: "flex-1 gap-y-1" }, [
-			P({ class: "text-sm font-medium" }, msg.userDisplayName || msg.user),
+			P({ class: "text-sm font-medium" }, msg.firstName + ' ' + msg.lastName),
 			P({ class: "text-sm text-muted-foreground" }, msg.message || msg.text),
 			msg.attachments && msg.attachments.length > 0 &&
-				Div({ class: "flex gap-x-2 mt-2 flex-wrap" },
-					msg.attachments.map((att) =>
-						Div({ class: "flex items-center gap-x-2 p-2 border rounded hover:bg-muted/50" }, [
-							att.fileType?.startsWith('image/')
-								? Img({ src: `/files/${att.filePath}`, alt: att.fileName, class: "w-16 h-16 rounded object-cover" })
-								: Div({ class: "flex items-center gap-x-2" }, [
-									Span({ class: "text-xs text-muted-foreground" }, att.fileExtension?.toUpperCase()),
-									Span({ class: "text-xs" }, att.displayName)
-								])
-						])
-					)
-				)
+				Attachments(msg.attachments)
 		])
 	])
 );

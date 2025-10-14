@@ -107,7 +107,7 @@ class ClientConversationController extends Controller
 			try
 			{
 				$request->validateFile('file', [
-					'file' => 'file:10240|required|mimes:pdf,doc,docx,xls,xlsx,txt,csv,jpg,jpeg,png,gif,webp,zip'
+					'file' => 'file:50240|required|mimes:pdf,doc,docx,xls,xlsx,txt,csv,jpg,jpeg,png,gif,webp,zip'
 				]);
 
 				// Store the file
