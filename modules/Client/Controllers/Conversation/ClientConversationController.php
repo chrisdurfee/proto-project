@@ -77,8 +77,12 @@ class ClientConversationController extends Controller
 		// Update attachment count if files were uploaded
 		if ($attachmentCount > 0)
 		{
-			$result->attachmentCount = $attachmentCount;
-			$result->update();
+			$conversation = ClientConversation::get($result->id);
+			if ($conversation)
+			{
+				$conversation->attachmentCount = $attachmentCount;
+				$conversation->update();
+			}
 		}
 
 		return $result;
@@ -153,17 +157,13 @@ class ClientConversationController extends Controller
 		];
 
 		// If it's an image, get dimensions
-		if (str_starts_with($uploadFile->getMimeType(), 'image/'))
+		if ($uploadFile->isImageFile())
 		{
-			$tmpPath = $uploadFile->getFilePath();
-			if ($tmpPath && file_exists($tmpPath))
+			[$width, $height] = $uploadFile->getDimensions();
+			if ($width > 0 && $height > 0)
 			{
-				$imageInfo = @getimagesize($tmpPath);
-				if ($imageInfo)
-				{
-					$attachmentData['width'] = $imageInfo[0];
-					$attachmentData['height'] = $imageInfo[1];
-				}
+				$attachmentData['width'] = $width;
+				$attachmentData['height'] = $height;
 			}
 		}
 
