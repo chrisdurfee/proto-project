@@ -81,7 +81,7 @@ export const ThreadComposer = Jot(
 		// @ts-ignore
 		this.conversationModel = new ConversationModel({
 			clientId: clientId,
-			userId: window.app?.user?.id || 1,
+			userId: app.data?.user?.id || 1,
 			message: '',
 			messageType: 'comment',
 			isInternal: 0,
