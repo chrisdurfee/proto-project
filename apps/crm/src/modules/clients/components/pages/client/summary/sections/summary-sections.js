@@ -255,6 +255,7 @@ export const TicketsSection = Atom(({ client }) =>
 			items: client.tickets ?? [],
 			role: "list",
 			rowItem: TicketListItem,
+			linkParent: false,
 			emptyState: () => ListEmptyState({
 				title: 'No Tickets',
 				description: 'The client has not submitted any tickets.'
@@ -312,6 +313,7 @@ export const InvoicesSection = Atom(({ client }) =>
 			],
 			role: "list",
 			rowItem: InvoiceListItem(client),
+			linkParent: false,
 			emptyState: () => ListEmptyState({
 				title: 'No Invoices',
 				description: 'The client has no previous invoices.'
