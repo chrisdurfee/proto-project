@@ -56,27 +56,28 @@ class ClientConversationController extends Controller
 		}
 
 		$files = $request->files();
-		if (!empty($files['attachments']))
+		if (empty($files['attachments']))
 		{
-			$userId = getSession('user')->id ?? null;
-			if ($userId === null)
-			{
-				// Handle the case where user ID is not available
-				return $this->error('User not authenticated.');
-			}
+			return $result;
+		}
 
-			$attachmentCount = $this->storeAttachments(
-				$files['attachments'],
-				$result->id,
-				(int)$userId
-			);
+		$userId = getSession('user')->id ?? null;
+		if ($userId === null)
+		{
+			return $this->error('User not authenticated.');
+		}
 
-			// Update attachment count if files were uploaded
-			if ($attachmentCount > 0)
-			{
-				$result->attachmentCount = $attachmentCount;
-				$result->update();
-			}
+		$attachmentCount = $this->storeAttachments(
+			$files['attachments'],
+			$result->id,
+			(int)$userId
+		);
+
+		// Update attachment count if files were uploaded
+		if ($attachmentCount > 0)
+		{
+			$result->attachmentCount = $attachmentCount;
+			$result->update();
 		}
 
 		return $result;
