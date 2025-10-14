@@ -41,6 +41,12 @@ class ClientConversationController extends Controller
 		];
 	}
 
+	/**
+	 * Override the add method to handle file attachments.
+	 *
+	 * @param Request $request The HTTP request object.
+	 * @return object Response with created conversation and attachments.
+	 */
 	public function add(Request $request): object
 	{
 		$result = parent::add($request);
@@ -49,83 +55,100 @@ class ClientConversationController extends Controller
 			return $result;
 		}
 
-		// store attachments
-		$attachmentResult = $this->uploadAttachments($request, $result->id);
+		$files = $request->files();
+		if (!empty($files['attachments']))
+		{
+			$userId = getSession('user')->id ?? null;
+			if ($userId === null)
+			{
+				// Handle the case where user ID is not available
+				return $this->error('User not authenticated.');
+			}
+
+			$attachmentCount = $this->storeAttachments(
+				$files['attachments'],
+				$result->id,
+				(int)$userId
+			);
+
+			// Update attachment count if files were uploaded
+			if ($attachmentCount > 0)
+			{
+				$result->attachmentCount = $attachmentCount;
+				$result->update();
+			}
+		}
+
+		return $result;
 	}
 
 	/**
-	 * Upload attachments for a conversation.
+	 * Store multiple file attachments for a conversation.
 	 *
-	 * @param Request $request
-	 * @param int $conversationId
-	 * @return int
+	 * @param array $files Array of uploaded files.
+	 * @param int $conversationId The conversation ID.
+	 * @param int $userId The user ID who uploaded the files.
+	 * @return int Number of successfully stored attachments.
 	 */
-	protected function uploadAttachments(Request $request, int $conversationId): int
+	private function storeAttachments(array $files, int $conversationId, int $userId): int
 	{
-		$files = $request->files();
-		$attachmentCount = 0;
+		$count = 0;
 
-		if (!empty($files['attachments']))
+		foreach ($files as $uploadFile)
 		{
-			$attachmentCount = $this->storeAttachments($files['attachments'], $conversationId, (int)$data['userId']);
+			try
+			{
+				$this->validateRules(['file' => $uploadFile], [
+					'file' => 'file:10240|required|mimes:pdf,doc,docx,xls,xlsx,txt,csv,jpg,jpeg,png,gif,webp,zip'
+				]);
+
+				// Store the file
+				if (!$uploadFile->store('local', 'attachments'))
+				{
+					continue;
+				}
+
+				// Prepare attachment data
+				$attachmentData = [
+					'conversationId' => $conversationId,
+					'uploadedBy' => $userId,
+					'fileName' => $uploadFile->getOriginalName(),
+					'filePath' => $uploadFile->getNewName(),
+					'fileType' => $uploadFile->getMimeType(),
+					'fileExtension' => strtolower(pathinfo($uploadFile->getOriginalName(), PATHINFO_EXTENSION)),
+					'fileSize' => $uploadFile->getSize(),
+					'displayName' => $uploadFile->getOriginalName()
+				];
+
+				// If it's an image, get dimensions
+				if (str_starts_with($uploadFile->getMimeType(), 'image/'))
+				{
+					$tmpPath = $uploadFile->getTempPath();
+					if ($tmpPath && file_exists($tmpPath))
+					{
+						$imageInfo = @getimagesize($tmpPath);
+						if ($imageInfo)
+						{
+							$attachmentData['width'] = $imageInfo[0];
+							$attachmentData['height'] = $imageInfo[1];
+						}
+					}
+				}
+
+				// Create attachment record
+				if (ClientConversationAttachment::create((object)$attachmentData))
+				{
+					$count++;
+				}
+			}
+			catch (\Exception $e)
+			{
+				// Log error but continue with other files
+				continue;
+			}
 		}
 
-		// Update attachment count if files were uploaded
-		if ($attachmentCount > 0)
-		{
-			$conversation->attachmentCount = $attachmentCount;
-			$conversation->update();
-		}
-
-		return $attachmentCount;
-	}
-
-	/**
-	 * Override the create method to handle file attachments.
-	 *
-	 * @param Request $request The HTTP request object.
-	 * @return object Response with created conversation and attachments.
-	 */
-	public function create(Request $request): object
-	{
-		// Get the request data
-		$data = $this->getRequestItem($request);
-
-		// Validate the conversation data
-		$this->validateRules($data, [
-			'clientId' => 'int|required',
-			'userId' => 'int|required',
-			'message' => 'string:5000|required',
-			'isInternal' => 'int',
-			'isPinned' => 'int',
-			'messageType' => 'string:50',
-			'parentId' => 'int'
-		]);
-
-		// Create the conversation
-		$conversation = ClientConversation::create((object)$data);
-		if (!$conversation || !is_object($conversation))
-		{
-			return $this->error('Failed to create conversation.');
-		}
-
-		// Handle file attachments if present
-		$files = $request->files();
-		$attachmentCount = 0;
-
-		if (!empty($files['attachments']))
-		{
-			$attachmentCount = $this->storeAttachments($files['attachments'], $conversation->id, (int)$data['userId']);
-		}
-
-		// Update attachment count if files were uploaded
-		if ($attachmentCount > 0)
-		{
-			$conversation->attachmentCount = $attachmentCount;
-			$conversation->update();
-		}
-
-		return $this->response($conversation);
+		return $count;
 	}
 
 	/**
