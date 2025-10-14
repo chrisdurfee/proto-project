@@ -2,6 +2,7 @@
 namespace Modules\Client\Models\Conversation;
 
 use Proto\Models\Model;
+use Modules\User\Models\User;
 
 /**
  * ClientConversation
@@ -40,4 +41,22 @@ class ClientConversation extends Model
 		'deletedAt'
 	];
 
+	/**
+	 * Define joins for eager loading user data.
+	 *
+	 * @param object $builder The query builder object
+	 * @return void
+	 */
+	protected static function joins(object $builder): void
+	{
+		/**
+		 * Join the user who created the conversation message.
+		 */
+		$builder->one(User::class, fields: [
+			'firstName',
+			'lastName',
+			'displayName',
+			'image'
+		])->on(['id', 'userId']);
+	}
 }

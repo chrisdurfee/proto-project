@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
-namespace Modules\Client\Api\Conversation;
+namespace Modules\Client\Api;
 
 use Modules\Client\Controllers\Conversation\ClientConversationController;
 
 /**
- * ClientConversation Routes
+ * Client Conversation Routes
  *
- * This file contains the API routes for the ClientConversation module.
+ * This file contains the API routes for the Client Conversation Controller.
  */
 router()
-    ->resource('client/:userId/conversation', ClientConversationController::class);
+	->resource('client/:clientId/conversation', ClientConversationController::class);
