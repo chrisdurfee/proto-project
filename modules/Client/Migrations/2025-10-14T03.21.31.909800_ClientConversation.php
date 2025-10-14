@@ -35,13 +35,13 @@ class ClientConversation extends Migration
 
 			// Message content
 			$table->text('message');
-			$table->boolean('is_internal')->default(1); // internal team note vs client-visible
-			$table->boolean('is_pinned')->default(0);
-			$table->boolean('is_edited')->default(0);
+			$table->tinyInteger('is_internal')->default('1'); // internal team note vs client-visible
+			$table->tinyInteger('is_pinned')->default('0');
+			$table->tinyInteger('is_edited')->default('0');
 
 			// Metadata
 			$table->varchar('message_type', 50)->default("'text'"); // text, system, file_upload, etc.
-			$table->integer('attachment_count', 10)->default(0);
+			$table->integer('attachment_count', 10)->default('0');
 
 			// Timestamps
 			$table->timestamp('edited_at')->nullable();
@@ -49,16 +49,15 @@ class ClientConversation extends Migration
 			$table->deletedAt();
 
 			// Indexes
-			$table->index('client_id');
-			$table->index('user_id');
-			$table->index('parent_id');
-			$table->index('created_at');
-			$table->index(['client_id', 'created_at']);
-
+			$table->index('client_id')->fields('client_id');
+			$table->index('user_id')->fields('user_id');
+			$table->index('parent_id')->fields('parent_id');
+			$table->index('created_at')->fields('created_at');
+			$table->index('client_id_created')->fields('client_id', 'created_at');
 			// Foreign key constraints
-			$table->foreignKey('client_id')->references('id')->on('clients')->onDelete('CASCADE');
-			$table->foreignKey('user_id')->references('id')->on('users')->onDelete('CASCADE');
-			$table->foreignKey('parent_id')->references('id')->on('client_conversations')->onDelete('CASCADE');
+			$table->foreign('client_id')->references('id')->on('clients')->onDelete('CASCADE');
+			$table->foreign('user_id')->references('id')->on('users')->onDelete('CASCADE');
+			$table->foreign('parent_id')->references('id')->on('client_conversations')->onDelete('CASCADE');
 		});
 	}
 

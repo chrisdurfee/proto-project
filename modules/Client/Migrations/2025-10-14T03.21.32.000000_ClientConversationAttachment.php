@@ -37,12 +37,12 @@ class ClientConversationAttachment extends Migration
 			$table->varchar('file_path', 500);
 			$table->varchar('file_type', 100); // MIME type
 			$table->varchar('file_extension', 10);
-			$table->integer('file_size', 10)->default(0); // size in bytes
+			$table->integer('file_size', 10)->default('0'); // size in bytes
 
 			// Optional metadata
 			$table->varchar('display_name', 255)->nullable(); // custom display name
 			$table->text('description')->nullable();
-			$table->integer('download_count', 10)->default(0);
+			$table->integer('download_count', 10)->default('0');
 
 			// Image-specific (if applicable)
 			$table->integer('width', 10)->nullable();
@@ -54,17 +54,17 @@ class ClientConversationAttachment extends Migration
 			$table->deletedAt();
 
 			// Indexes
-			$table->index('conversation_id');
-			$table->index('uploaded_by');
-			$table->index('file_type');
-			$table->index('created_at');
+			$table->index('conversation_id')->fields('conversation_id');
+			$table->index('uploaded_by')->fields('uploaded_by');
+			$table->index('file_type')->fields('file_type');
+			$table->index('created_at')->fields('created_at');
 
 			// Foreign key constraints
-			$table->foreignKey('conversation_id')
+			$table->foreign('conversation_id')
 				->references('id')
 				->on('client_conversations')
 				->onDelete('CASCADE');
-			$table->foreignKey('uploaded_by')
+			$table->foreign('uploaded_by')
 				->references('id')
 				->on('users')
 				->onDelete('CASCADE');
