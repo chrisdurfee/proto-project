@@ -1,7 +1,6 @@
 import { Div, H2, Header, Img, P, Span } from "@base-framework/atoms";
-import { Atom, Data } from "@base-framework/base";
-import { List } from "@base-framework/organisms";
-import { Icons } from "@base-framework/ui/icons";
+import { Atom } from "@base-framework/base";
+import { ScrollableList } from "@base-framework/organisms";
 import { Avatar } from "@base-framework/ui/molecules";
 import { ConversationModel } from "../../../../models/conversation-model.js";
 import { ThreadComposer } from "./thread-composer.js";
@@ -69,37 +68,8 @@ const ConversationListItem = Atom((msg) =>
  */
 export const ConversationSection = Atom(({ client }) =>
 {
-	// Create conversation data with bindable array
-	const conversationData = new Data({
-		items: [],
-		loading: true
-	});
-
-	// Create conversation model
-	const conversationModel = new ConversationModel({
+	const data = new ConversationModel({
 		clientId: client.id
-	});
-
-	// Load conversations
-	conversationModel.xhr.all('', (response) =>
-	{
-		// @ts-ignore
-		conversationData.loading = false;
-
-		if (response && response.success && response.rows)
-		{
-			// @ts-ignore
-			conversationData.items = response.rows;
-		}
-		else
-		{
-			app.notify({
-				type: "destructive",
-				title: "Error Loading Conversations",
-				description: "Failed to load conversation history.",
-				icon: Icons.warning
-			});
-		}
 	});
 
 	return Div({ class: "flex flex-auto flex-col h-full gap-y-4 p-0" }, [
@@ -107,11 +77,10 @@ export const ConversationSection = Atom(({ client }) =>
 			H2({ class: "text-lg text-muted-foreground" }, "Conversation")
 		]),
 		Div({ class: "flex-1 overflow-y-auto gap-y-2" }, [
-			new List({
-				cache: "conversationList",
+			ScrollableList({
+				data,
+				cache: "list",
 				key: "id",
-				// @ts-ignore
-				items: conversationData.items,
 				role: "list",
 				class: "flex flex-col",
 				divider: {
@@ -125,7 +94,7 @@ export const ConversationSection = Atom(({ client }) =>
 		new ThreadComposer({
 			placeholder: "Add a comment...",
 			client: client,
-			conversationData: conversationData
+			conversationData: data
 		})
 	]);
 });

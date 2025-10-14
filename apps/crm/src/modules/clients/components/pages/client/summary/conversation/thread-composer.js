@@ -88,9 +88,6 @@ export const ThreadComposer = Jot(
 			isPinned: 0,
 			attachments: []
 		});
-
-		// @ts-ignore
-		this.conversationModel.url = `/api/client/${clientId}/conversation`;
 	},
 
 	/**
