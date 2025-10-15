@@ -144,21 +144,23 @@ const Attachments = (attachments) =>
  * @returns {object}
  */
 const ConversationListItem = Atom((msg) =>
-	Div({ class: "flex gap-x-3 px-6 py-4 hover:bg-muted/50" }, [
+{
+	const name = `${msg.firstName} ${msg.lastName}`;
+	return Div({ class: "flex gap-x-3 px-6 py-4 hover:bg-muted/50" }, [
 		Avatar({
-			src: msg.image || msg.avatar,
-			alt: msg.firstName + ' ' + msg.lastName,
-			fallbackText: msg.firstName + ' ' + msg.lastName,
+			src: msg.image && `/files/users/profile/${msg.image}`,
+			alt: name,
+			fallbackText: name,
 			size: "sm"
 		}),
 		Div({ class: "flex-1 gap-y-1" }, [
-			P({ class: "text-sm font-medium" }, msg.firstName + ' ' + msg.lastName),
-			P({ class: "text-sm text-muted-foreground" }, msg.message || msg.text),
+			P({ class: "text-sm font-medium" }, name),
+			P({ class: "text-sm text-muted-foreground" }, msg.message),
 			msg.attachments && msg.attachments.length > 0 &&
 				Attachments(msg.attachments)
 		])
-	])
-);
+	]);
+});
 
 /**
  * ConversationSection
