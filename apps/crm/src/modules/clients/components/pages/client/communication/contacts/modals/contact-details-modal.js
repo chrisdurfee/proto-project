@@ -1,4 +1,4 @@
-import { Div, P } from "@base-framework/atoms";
+import { Div, P, UseParent } from "@base-framework/atoms";
 import { Data } from "@base-framework/base";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
@@ -151,32 +151,93 @@ const StatusPersonalSection = () =>
 /**
  * Header options for the modal.
  *
- * @param {function} onEdit - Callback when edit is selected
- * @param {function} onDelete - Callback when delete is selected
- * @returns {Array}
+ * @param {object} contact - The contact data
+ * @param {string} clientId - The client ID
+ * @param {function} onUpdate - Callback when contact is updated
+ * @returns {function}
  */
-const HeaderOptions = (onEdit, onDelete) => [
-	new DropdownMenu({
-		icon: Icons.ellipsis.vertical,
-		groups: [
-			[
-				{ icon: Icons.pencil.square, label: 'Edit Contact', value: 'edit-contact' },
-				{ icon: Icons.trash, label: 'Delete Contact', value: 'delete-contact' }
-			]
-		],
-		onSelect: (item) =>
-		{
-			if (item.value === 'edit-contact')
-			{
-				onEdit && onEdit();
-			}
-			else if (item.value === 'delete-contact')
-			{
-				onDelete && onDelete();
-			}
-		},
-	})
-];
+const HeaderOptions = (contact, clientId, onUpdate) =>
+{
+	return () => [
+		UseParent((parent) => (
+			new DropdownMenu({
+				icon: Icons.ellipsis.vertical,
+				groups: [
+					[
+						{ icon: Icons.pencil.square, label: 'Edit Contact', value: 'edit-contact' },
+						{ icon: Icons.trash, label: 'Delete Contact', value: 'delete-contact' }
+					]
+				],
+				onSelect: (selected) =>
+				{
+					if (selected.value === 'edit-contact')
+					{
+						parent.close();
+
+						ContactModal({
+							item: contact,
+							clientId,
+							onSubmit: (data) =>
+							{
+								if (onUpdate)
+								{
+									onUpdate(data);
+								}
+							}
+						});
+					}
+					else if (selected.value === 'delete-contact')
+					{
+						// Use fetch to delete the contact
+						fetch(`/api/client/${clientId}/contact/${contact.id}`, {
+							method: 'DELETE',
+							headers: {
+								'Content-Type': 'application/json'
+							}
+						})
+						.then(res => res.json())
+						.then((response) =>
+						{
+							if (!response || response.success === false)
+							{
+								app.notify({
+									type: "destructive",
+									title: "Error",
+									description: "An error occurred while deleting the contact.",
+									icon: Icons.shield
+								});
+								return;
+							}
+
+							parent.destroy();
+
+							app.notify({
+								type: "success",
+								title: "Contact Deleted",
+								description: "The contact has been deleted.",
+								icon: Icons.check
+							});
+
+							if (onUpdate)
+							{
+								onUpdate(null);
+							}
+						})
+						.catch(() =>
+						{
+							app.notify({
+								type: "destructive",
+								title: "Error",
+								description: "An error occurred while deleting the contact.",
+								icon: Icons.shield
+							});
+						});
+					}
+				}
+			})
+		))
+	];
+};
 
 /**
  * Notes section
@@ -273,87 +334,9 @@ export const ContactDetailsModal = (props = { contact: {}, clientId: '', onUpdat
 {
 	const contact = props.contact || {};
 	const clientId = props.clientId || contact.clientId;
-	let modalInstance = null;
+	const closeCallback = (parent) => props.onClose && props.onClose(parent);
 
-	/**
-	 * Handle edit action
-	 */
-	const handleEdit = () =>
-	{
-		// Close the details modal
-		if (modalInstance)
-		{
-			modalInstance.destroy();
-		}
-
-		// Open the edit modal
-		ContactModal({
-			item: contact,
-			clientId,
-			onSubmit: (data) =>
-			{
-				if (props.onUpdate)
-				{
-					props.onUpdate(data);
-				}
-			}
-		});
-	};
-
-	/**
-	 * Handle delete action
-	 */
-	const handleDelete = () =>
-	{
-		if (!modalInstance) return;
-
-		// Use fetch to delete the contact
-		fetch(`/api/client/${clientId}/contact/${contact.id}`, {
-			method: 'DELETE',
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		})
-		.then(res => res.json())
-		.then((response) =>
-		{
-			if (!response || response.success === false)
-			{
-				app.notify({
-					type: "destructive",
-					title: "Error",
-					description: "An error occurred while deleting the contact.",
-					icon: Icons.shield
-				});
-				return;
-			}
-
-			modalInstance.destroy();
-
-			app.notify({
-				type: "success",
-				title: "Contact Deleted",
-				description: "The contact has been deleted.",
-				icon: Icons.check
-			});
-
-			if (props.onUpdate)
-			{
-				props.onUpdate(null);
-			}
-		})
-		.catch(() =>
-		{
-			app.notify({
-				type: "destructive",
-				title: "Error",
-				description: "An error occurred while deleting the contact.",
-				icon: Icons.shield
-			});
-		});
-	};
-
-	modalInstance = new Modal({
+	return new Modal({
 		title: formatContactData(contact).displayName,
 		icon: Icons.user.default,
 		description: formatContactData(contact).contactTypeLabel,
@@ -374,20 +357,14 @@ export const ContactDetailsModal = (props = { contact: {}, clientId: '', onUpdat
 		/**
 		 * Header options for the modal.
 		 */
-		headerOptions: () => HeaderOptions(handleEdit, handleDelete),
+		headerOptions: HeaderOptions(contact, clientId, props.onUpdate),
 
 		/**
 		 * This will close the modal.
 		 *
 		 * @returns {void}
 		 */
-		onClose: (parent) =>
-		{
-			if (props.onClose)
-			{
-				props.onClose(parent);
-			}
-		}
+		onClose: closeCallback
 	},
 	[
 		// Quick connect buttons
@@ -416,6 +393,4 @@ export const ContactDetailsModal = (props = { contact: {}, clientId: '', onUpdat
 			NotesSection()
 		])
 	]).open();
-
-	return modalInstance;
 };
