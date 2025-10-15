@@ -1,8 +1,8 @@
-import { Div, H3, P, Span } from "@base-framework/atoms";
+import { Div, P } from "@base-framework/atoms";
 import { Data } from "@base-framework/base";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { Avatar, DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
+import { DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
 import { Format } from "@base-framework/ui/utils";
 import { ContactModal } from "./contact-modal.js";
 
@@ -239,10 +239,10 @@ const formatContactData = (contact) =>
 	const firstName = contact.firstName || '';
 	const lastName = contact.lastName || '';
 	const displayName = `${firstName} ${lastName}`.trim() || 'Unknown';
-	
+
 	const contactType = contact.contactType || 'other';
 	const contactTypeLabel = formatLabel(contactType);
-	
+
 	const isPrimary = contact.isPrimary === 1 || contact.isPrimary === true;
 	const isPrimaryLabel = formatBoolean(isPrimary);
 
@@ -301,7 +301,7 @@ export const ContactDetailsModal = (props = { contact: {}, clientId: '', onUpdat
 		{
 			modalInstance.destroy();
 		}
-		
+
 		// Open the edit modal
 		ContactModal({
 			item: contact,
@@ -322,7 +322,7 @@ export const ContactDetailsModal = (props = { contact: {}, clientId: '', onUpdat
 	const handleDelete = () =>
 	{
 		if (!modalInstance) return;
-		
+
 		// Use fetch to delete the contact
 		fetch(`/api/client/${clientId}/contact/${contact.id}`, {
 			method: 'DELETE',
