@@ -1,4 +1,4 @@
-import { Div, H2, Header, Img, P, Span } from "@base-framework/atoms";
+import { Div, H2, Header, Img, P, Span, UseParent } from "@base-framework/atoms";
 import { Atom, DateTime } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Avatar } from "@base-framework/ui/molecules";
@@ -87,33 +87,46 @@ const ConversationListItem = Atom((msg) =>
 export const ConversationSection = Atom(({ client }) =>
 {
 	const data = new ConversationModel({
-		clientId: client.id
+		clientId: client.id,
+		orderBy: {
+			createdAt: 'desc'
+		}
 	});
 
-	return Div({ class: "flex flex-auto flex-col h-full gap-y-4 p-0" }, [
-		Header({ class: "flex flex-col gap-y-2 p-6" }, [
+	return Div({ class: "flex flex-auto flex-col max-h-screen gap-y-4 p-0 overflow-y-auto", cache: "listContainer" }, [
+		Header({ class: "flex flex-col gap-y-2 p-6 bg-background/80 backdrop-blur-md sticky top-0 z-10" }, [
 			H2({ class: "text-lg text-muted-foreground" }, "Conversation")
 		]),
-		Div({ class: "flex-1 overflow-y-auto gap-y-2" }, [
-			ScrollableList({
-				scrollDirection: 'up',
-				data,
-				cache: "list",
-				key: "id",
-				role: "list",
-				class: "flex flex-col",
-				divider: {
-					itemProperty: "createdAt",
-					layout: DateDivider,
-					customCompare: (a, b) => DateTime.format('standard', a) !== DateTime.format('standard', b)
-				},
-				rowItem: ConversationListItem
+		Div({ class: "flex-1 gap-y-2" }, [
+			UseParent((parent)=>
+			{
+				return ScrollableList({
+					scrollDirection: 'up',
+					data,
+					cache: "list",
+					key: "id",
+					role: "list",
+					class: "flex flex-col",
+					limit: 25,
+					divider: {
+						skipFirst: true,
+						itemProperty: "createdAt",
+						layout: DateDivider,
+						customCompare: (a, b) => DateTime.format('standard', a) !== DateTime.format('standard', b)
+					},
+					rowItem: ConversationListItem,
+					scrollContainer: parent.listContainer
+				});
 			})
 		]),
 		new ThreadComposer({
 			placeholder: "Add a comment...",
 			client: client,
-			submitCallBack: (parent) => parent.list.fetchNew()
+			submitCallBack: (parent) =>
+			{
+				const shouldScroll = true;
+				parent.list.fetchNew(shouldScroll);
+			}
 		})
 	]);
 });

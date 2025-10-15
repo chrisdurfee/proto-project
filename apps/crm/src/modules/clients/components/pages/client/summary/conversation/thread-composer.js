@@ -154,13 +154,6 @@ export const ThreadComposer = Jot(
 		{
 			if (response && response.success)
 			{
-				app.notify({
-					type: "success",
-					title: "Message Sent",
-					description: "Your message has been added.",
-					icon: Icons.circleCheck
-				});
-
 				// Add optimistic update to conversation list
 				// @ts-ignore
 				const userData = window.app?.user || {};
@@ -309,7 +302,7 @@ export const ThreadComposer = Jot(
 			state.empty = text.length === 0;
 		};
 
-		return Div({ class: "fadeIn p-4 w-full lg:max-w-5xl m-auto" }, [
+		return Div({ class: "fadeIn p-4 w-full lg:max-w-5xl m-auto sticky bg-background/80 backdrop-blur-md z-10 bottom-0" }, [
 			// @ts-ignore
 			Form({ class: "relative flex border rounded-lg p-3 bg-surface", submit: () => this.submit() }, [
 				// Hidden file input
