@@ -82,13 +82,17 @@ class ClientConversationController extends Controller
 			{
 				$conversation->attachmentCount = $attachmentCount;
 				$conversation->update();
+			}
 
-				// Re-fetch with joins to include attachments in response
-				$result = ClientConversation::get($result->id);
+			// Re-fetch with joins to include attachments in response
+			$updatedConversation = ClientConversation::get($result->id);
+			if ($updatedConversation)
+			{
+				return $this->response(true);
 			}
 		}
 
-		return $this->response($result);
+		return $this->success($result);
 	}
 
 	/**
