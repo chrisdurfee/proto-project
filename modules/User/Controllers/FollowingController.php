@@ -41,6 +41,7 @@ class FollowingController extends Controller
 		$dates = $this->setDateModifier($request);
 		$orderBy = $this->setOrderByModifier($request);
 		$groupBy = $this->setGroupByModifier($request);
+		$sinceId = $request->input('sinceId') ?? null;
 
 		$user = User::get($userId);
 		if ($user === null)
@@ -54,7 +55,8 @@ class FollowingController extends Controller
 			'dates' => $dates,
 			'orderBy' => $orderBy,
 			'groupBy' => $groupBy,
-			'cursor' => $lastCursor
+			'cursor' => $lastCursor,
+			'sinceId' => $sinceId
 		]);
 		return $this->response($result);
 	}

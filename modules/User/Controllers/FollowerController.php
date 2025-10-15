@@ -171,6 +171,7 @@ class FollowerController extends Controller
 		$dates = $this->setDateModifier($request);
 		$orderBy = $this->setOrderByModifier($request);
 		$groupBy = $this->setGroupByModifier($request);
+		$since = $request->input('since') ?? null;
 
 		$user = User::get($userId);
 		if ($user === null)
@@ -184,7 +185,8 @@ class FollowerController extends Controller
 			'dates' => $dates,
 			'orderBy' => $orderBy,
 			'groupBy' => $groupBy,
-			'cursor' => $lastCursor
+			'cursor' => $lastCursor,
+			'since' => $since
 		]);
 		return $this->response($result);
 	}
