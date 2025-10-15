@@ -1,9 +1,10 @@
-import { Div, P, Span } from "@base-framework/atoms";
+import { Div, P } from "@base-framework/atoms";
 import { Atom, DateTime } from "@base-framework/base";
-import { List } from "@base-framework/organisms";
-import { Card, Icon } from "@base-framework/ui/atoms";
+import { ScrollableList } from "@base-framework/organisms";
+import { Badge, Card, Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { Avatar } from "@base-framework/ui/molecules";
+import { Avatar, EmptyState } from "@base-framework/ui/molecules";
+import { CallDetailsModal } from "./modals/call-details-modal.js";
 
 /**
  * This will get the icon for the call status.
@@ -15,12 +16,14 @@ const CallIcon = (status) =>
 {
 	switch (status)
 	{
-		case "Missed":
+		case "missed":
 			return Icon({ class: 'text-red-500' }, Icons.phone.missed);
-		case "Incoming":
+		case "inbound":
 			return Icon({ class: 'text-blue-500' }, Icons.phone.inbound);
-		case "Outgoing":
+		case "outbound":
 			return Icon({ class: 'text-yellow-500' }, Icons.phone.outbound);
+		case "voicemail":
+			return Icon({ class: 'text-purple-500' }, Icons.voicemail);
 		default:
 			return Icon({ class: 'text-base' }, Icons.phone.default);
 	}
@@ -32,43 +35,43 @@ const CallIcon = (status) =>
  * Renders a single call row as a card.
  *
  * @param {object} call
- * @param {number} call.id
- * @param {string} call.contactName
- * @param {string} call.avatar
- * @param {string} call.time
- * @param {string} call.duration
- * @param {string} call.status
+ * @param {function} onClick
  * @returns {object}
  */
-const CallItem = Atom(call =>
-	Card({ class: "flex items-center justify-between p-4 cursor-pointer", margin: "m-2", hover: true }, [
+const CallItem = (call, onClick) =>
+{
+	const displayName = call.callerName || call.recipientName || 'Unknown';
+	const callType = call.callType || 'outbound';
+	const duration = call.duration ? `${Math.floor(call.duration / 60)}:${String(call.duration % 60).padStart(2, '0')}` : '00:00';
+	const startedAt = call.startedAt ? DateTime.format('standard', call.startedAt) : 'Not started';
+
+	return Card({
+		class: "flex items-center justify-between p-4 cursor-pointer",
+		margin: "m-2",
+		hover: true,
+		click: (e, parent) => onClick && onClick(call, parent)
+	}, [
 		Div({ class: "flex items-center gap-x-4" }, [
-			Avatar({ src: call.avatar, alt: call.contactName, fallbackText: call.contactName, size: "sm" }),
+			Avatar({
+				src: call.avatar,
+				alt: displayName,
+				fallbackText: displayName,
+				size: "sm"
+			}),
 			Div({ class: "flex flex-col" }, [
-				P({ class: "font-medium" }, call.contactName),
-				P({ class: "text-sm text-muted-foreground" }, call.time),
-				P({ class: "text-sm text-muted-foreground" }, `Duration: ${call.duration}`)
+				P({ class: "font-medium m-0" }, call.subject || 'Untitled Call'),
+				P({ class: "text-sm text-muted-foreground m-0" }, displayName),
+				P({ class: "text-sm text-muted-foreground m-0" }, `${startedAt} • ${duration}`)
 			])
 		]),
-		CallIcon(call.status)
-	])
-);
-
-/**
- * DateDivider
- *
- * Renders a date divider between messages.
- *
- * @param {string} date
- * @returns {object}
- */
-const DateDivider = (date) =>
-	Div({ class: "flex mt-4" }, [
-		Span(
-			{ class: "text-base text-muted-foreground bg-background p-2 pl-2" },
-			DateTime.format('standard', date.split(" ")[0])
-		)
+		Div({ class: "flex items-center gap-2" }, [
+			Badge({ type: call.priority === 'urgent' ? 'destructive' : call.priority === 'high' ? 'warning' : 'outline' },
+				call.priority ? call.priority.toUpperCase() : 'NORMAL'
+			),
+			CallIcon(callType)
+		])
 	]);
+};
 
 /**
  * CallList
@@ -76,21 +79,51 @@ const DateDivider = (date) =>
  * Lists all of a client's calls.
  *
  * @param {object} props
- * @param {Array<object>} props.calls
+ * @param {object} props.data
  * @returns {object}
  */
-export const CallList = Atom(({ calls }) =>
-	Div({ class: "flex flex-col gap-y-6 mt-12" }, [
-		new List({
-			cache: "calls",
+export const CallList = Atom(({ data }) =>
+{
+	/**
+	 * Opens the call details modal
+	 *
+	 * @param {object} call
+	 * @param {object} parent
+	 */
+	const openCallDetailsModal = (call, parent) =>
+	{
+		CallDetailsModal({
+			call,
+			clientId: data.clientId,
+			onUpdate: (updatedData) =>
+			{
+				if (updatedData === null)
+				{
+					// Call was deleted, refresh the list
+					parent?.refresh();
+				}
+				else
+				{
+					// Call was updated, update the list
+					parent?.mingle([ updatedData.get() ]);
+				}
+			}
+		});
+	};
+
+	return Div({ class: "flex flex-col gap-y-6 mt-12" }, [
+		ScrollableList({
+			data,
+			cache: "list",
 			key: "id",
-			items: calls || [],
-			divider: {
-				itemProperty: 'time',
-				layout: DateDivider
-			},
 			role: "list",
-			rowItem: CallItem
+			skeleton: true,
+			rowItem: (call) => CallItem(call, openCallDetailsModal),
+			emptyState: () => EmptyState({
+				title: 'No Calls Found',
+				description: 'No call records have been added for this client yet.',
+				icon: Icons.phone.default
+			})
 		})
-	])
-);
+	]);
+});

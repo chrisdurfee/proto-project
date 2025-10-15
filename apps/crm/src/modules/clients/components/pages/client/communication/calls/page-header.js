@@ -1,36 +1,48 @@
 import { Div, H1, Header } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { SearchDropdown } from "@base-framework/ui/organisms";
-import { FakeCalls } from "./fake-calls.js";
+import { SearchInput as BaseSearch } from "@base-framework/ui/organisms";
+import { CallModal } from "./modals/call-modal.js";
 
 /**
- * convertCallsToOptions
- *
- * @param {Array<object>} calls
- * @returns {Array<object>}
- */
-const convertCallsToOptions = (calls) => calls.map(c => ({ label: c.contactName, value: c.id }));
-
-/**
- * SearchInput
+ * This will create a search input for the calls page.
  *
  * @returns {object}
  */
-const SearchInput = () =>
-	new SearchDropdown({
-		options: convertCallsToOptions(FakeCalls),
-		onSelect: item => console.log(item)
-	});
+const SearchInput = () => (
+	BaseSearch({
+		class: 'min-w-40 lg:min-w-96',
+		placeholder: 'Search calls...',
+		bind: 'search',
+		keyup: (e, parent) => parent.list.refresh(),
+		icon: Icons.magnifyingGlass.default
+	})
+);
 
 /**
- * PageHeader
+ * This will create a call modal.
  *
- * Renders the header for the calls page.
+ * @param {object} item
+ * @param {object} parent
+ * @returns {object}
+ */
+const Modal = (item, parent) => (
+	CallModal({
+		item,
+		clientId: parent.route.clientId,
+		onClose: (data) =>
+		{
+			parent.list?.refresh();
+		}
+	})
+);
+
+/**
+ * This will create a page header for the calls page.
  *
  * @returns {object}
  */
-export const PageHeader = () =>
+export const PageHeader = () => (
 	Header({ class: 'flex flex-auto flex-col pt-0 sm:pt-2 md:pt-0' }, [
 		Div({ class: 'flex flex-auto items-center justify-between w-full' }, [
 			H1({ class: 'text-3xl font-bold' }, 'Calls'),
@@ -39,16 +51,15 @@ export const PageHeader = () =>
 			]),
 			Div({ class: 'flex items-center gap-2' }, [
 				Div({ class: 'hidden lg:flex' }, [
-					Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: Icons.phone.default, click: () => null }, 'New Call')
+					Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: Icons.phone.default, click: (e, parent) => Modal(null, parent) }, 'Add Call')
 				]),
 				Div({ class: 'flex lg:hidden mr-0' }, [
-					Tooltip({ content: 'New Call', position: 'left' },
-						Button({ variant: 'icon', class: 'outline', icon: Icons.phone.default, click: () => null })
-					)
+					Tooltip({ content: 'Add Call', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.phone.default, click: (e, parent) => Modal(null, parent) }))
 				])
 			])
 		]),
 		Div({ class: 'flex lg:hidden w-full mx-auto my-4' }, [
 			SearchInput()
 		])
-	]);
+	])
+);
