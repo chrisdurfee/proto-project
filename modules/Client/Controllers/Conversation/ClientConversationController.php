@@ -88,7 +88,7 @@ class ClientConversationController extends Controller
 			}
 		}
 
-		return $result;
+		return $this->response($result);
 	}
 
 	/**
