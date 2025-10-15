@@ -74,6 +74,6 @@ class ClientConversation extends Model
 			'width',
 			'height',
 			'thumbnailPath'
-		])->on(['id', 'conversationId']);
+		])->on(['id', 'conversationId'])->as('attachments');
 	}
 }
