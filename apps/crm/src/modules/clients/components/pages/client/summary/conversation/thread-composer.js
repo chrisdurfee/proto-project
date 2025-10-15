@@ -126,7 +126,7 @@ export const ThreadComposer = Jot(
 		if (files.length > 0)
 		{
 			app.notify({
-				icon: Icons.document,
+				icon: Icons.document.default,
 				type: 'default',
 				title: 'Files Selected',
 				description: `${files.length} file(s) ready to upload.`,

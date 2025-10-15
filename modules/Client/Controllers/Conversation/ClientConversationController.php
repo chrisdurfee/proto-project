@@ -99,14 +99,45 @@ class ClientConversationController extends Controller
 	private function storeAttachments(Request $request, int $conversationId, int $userId): int
 	{
 		$count = 0;
-		$files = $request->files();
-		$attachments = $files['attachments'] ?? [];
+		
+		// Get raw $_FILES data for attachments
+		$rawFiles = $_FILES['attachments'] ?? null;
+		if (!$rawFiles || empty($rawFiles['name']))
+		{
+			return 0;
+		}
 
-		foreach ($attachments as $uploadFile)
+		// Handle single file vs multiple files
+		$fileCount = is_array($rawFiles['name']) ? count($rawFiles['name']) : 1;
+
+		for ($i = 0; $i < $fileCount; $i++)
 		{
 			try
 			{
-				$request->validateFile('file', [
+				// Extract file data
+				$fileName = is_array($rawFiles['name']) ? $rawFiles['name'][$i] : $rawFiles['name'];
+				$fileTmpName = is_array($rawFiles['tmp_name']) ? $rawFiles['tmp_name'][$i] : $rawFiles['tmp_name'];
+				$fileSize = is_array($rawFiles['size']) ? $rawFiles['size'][$i] : $rawFiles['size'];
+				$fileError = is_array($rawFiles['error']) ? $rawFiles['error'][$i] : $rawFiles['error'];
+				$fileType = is_array($rawFiles['type']) ? $rawFiles['type'][$i] : $rawFiles['type'];
+
+				// Skip if error
+				if ($fileError !== UPLOAD_ERR_OK)
+				{
+					continue;
+				}
+
+				// Create UploadFile instance
+				$uploadFile = new UploadFile([
+					'name' => $fileName,
+					'tmp_name' => $fileTmpName,
+					'size' => $fileSize,
+					'error' => $fileError,
+					'type' => $fileType
+				]);
+
+				// Validate file
+				$this->validateRules(['file' => $uploadFile], [
 					'file' => 'file:50240|required|mimes:pdf,doc,docx,xls,xlsx,txt,csv,jpg,jpeg,png,gif,webp,zip'
 				]);
 
