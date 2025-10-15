@@ -71,21 +71,9 @@ const ContactInformation = () =>
 		Div({ class: 'flex flex-col gap-y-3' }, [
 			SplitRow('Name', '[[displayName]]'),
 			SplitRow('Email', '[[email]]'),
-			SplitRow('Phone', {
-				watch: {
-					phone: (value) => value ? Format.phone(value) : '-'
-				}
-			}),
-			SplitRow('Mobile', {
-				watch: {
-					mobile: (value) => value ? Format.phone(value) : '-'
-				}
-			}),
-			SplitRow('Fax', {
-				watch: {
-					fax: (value) => value ? Format.phone(value) : '-'
-				}
-			})
+			SplitRow('Phone', Format.phone('[[phone]]', '-')),
+			SplitRow('Mobile', Format.phone('[[mobile]]', '-')),
+			SplitRow('Fax', Format.phone('[[fax]]', '-'))
 		])
 	]);
 
@@ -156,11 +144,7 @@ const StatusPersonalSection = () =>
 			SplitRow('Status', '[[statusLabel]]'),
 			SplitRow('Birthday', '[[birthdayFormatted]]'),
 			SplitRow('Assistant Name', '[[assistantName]]'),
-			SplitRow('Assistant Phone', {
-				watch: {
-					assistantPhone: (value) => value ? Format.phone(value) : '-'
-				}
-			})
+			SplitRow('Assistant Phone', Format.phone('[[assistantPhone]]', '-'))
 		])
 	]);
 
@@ -393,16 +377,6 @@ export const ContactDetailsModal = (props = { contact: {}, clientId: '', onUpdat
 		headerOptions: () => HeaderOptions(handleEdit, handleDelete),
 
 		/**
-		 * This will show the modal after setup.
-		 *
-		 * @returns {void}
-		 */
-		afterSetup()
-		{
-			this.showModal();
-		},
-
-		/**
 		 * This will close the modal.
 		 *
 		 * @returns {void}
@@ -441,7 +415,7 @@ export const ContactDetailsModal = (props = { contact: {}, clientId: '', onUpdat
 			// Notes Section
 			NotesSection()
 		])
-	]);
+	]).open();
 
 	return modalInstance;
 };
