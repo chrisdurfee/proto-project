@@ -1,8 +1,6 @@
-import { Div, H1, Header } from "@base-framework/atoms";
-import { Button, Tooltip } from "@base-framework/ui/atoms";
+import { Div, H1, Header, P } from "@base-framework/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { SearchInput as BaseSearch } from "@base-framework/ui/organisms";
-import { CallModal } from "./modals/call-modal.js";
 
 /**
  * This will create a search input for the calls page.
@@ -20,24 +18,6 @@ const SearchInput = () => (
 );
 
 /**
- * This will create a call modal.
- *
- * @param {object} item
- * @param {object} parent
- * @returns {object}
- */
-const Modal = (item, parent) => (
-	CallModal({
-		item,
-		clientId: parent.route.clientId,
-		onClose: (data) =>
-		{
-			parent.list?.refresh();
-		}
-	})
-);
-
-/**
  * This will create a page header for the calls page.
  *
  * @returns {object}
@@ -45,17 +25,12 @@ const Modal = (item, parent) => (
 export const PageHeader = () => (
 	Header({ class: 'flex flex-auto flex-col pt-0 sm:pt-2 md:pt-0' }, [
 		Div({ class: 'flex flex-auto items-center justify-between w-full' }, [
-			H1({ class: 'text-3xl font-bold' }, 'Calls'),
+			Div({ class: 'flex flex-col gap-1' }, [
+				H1({ class: 'text-3xl font-bold' }, 'Call History'),
+				P({ class: 'text-sm text-muted-foreground' }, 'View all calls made to and from this client')
+			]),
 			Div({ class: 'hidden lg:flex min-w-[440px]' }, [
 				SearchInput()
-			]),
-			Div({ class: 'flex items-center gap-2' }, [
-				Div({ class: 'hidden lg:flex' }, [
-					Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: Icons.phone.default, click: (e, parent) => Modal(null, parent) }, 'Add Call')
-				]),
-				Div({ class: 'flex lg:hidden mr-0' }, [
-					Tooltip({ content: 'Add Call', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.phone.default, click: (e, parent) => Modal(null, parent) }))
-				])
 			])
 		]),
 		Div({ class: 'flex lg:hidden w-full mx-auto my-4' }, [
