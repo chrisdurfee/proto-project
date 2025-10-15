@@ -6,9 +6,13 @@ use Proto\Base;
 use Proto\Error\Error;
 
 /**
- * Disable error tracking to prevent chicken-and-egg problem during migrations
+ * Enable error tracking for debugging
  */
-Error::disable();
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
+// Error::disable();
 
 /**
  * Initialize the Proto framework
@@ -18,23 +22,40 @@ new Base();
 // Now try to run Proto migrations
 echo "Running Proto migrations...\n";
 
-try
-{
-    // Use Proto's migration system
+echo "About to create Guide instance...\n";
+// Use Proto's migration system
+try {
     $guide = new \Proto\Database\Migrations\Guide();
+    echo "Guide created successfully\n";
+    
+    // Try to get new migrations to debug
+    $reflection = new ReflectionClass($guide);
+    $method = $reflection->getMethod('getNewMigrations');
+    $method->setAccessible(true);
+    
+    echo "About to get new migrations...\n";
+    $migrations = $method->invoke($guide);
+    echo "Found " . count($migrations) . " migrations\n";
+    
+    echo "Running migrations...\n";
     $result = $guide->run();
-    if ($result)
-    {
-        echo "Migrations completed successfully!\n";
-    }
-    else
-    {
-        echo "No migrations to run or migrations failed.\n";
-    }
+    echo "Migration run completed...\n";
+    echo "Migration result: " . var_export($result, true) . "\n";
+    
+} catch (Throwable $e) {
+    echo "EXCEPTION: " . $e->getMessage() . "\n";
+    echo "File: " . $e->getFile() . ":" . $e->getLine() . "\n";
+    echo "Trace:\n" . $e->getTraceAsString() . "\n";
+    exit(1);
 }
-catch (Exception $e)
+
+if ($result)
 {
-    echo "Migration error: " . $e->getMessage() . "\n";
+    echo "Migrations completed successfully!\n";
+}
+else
+{
+    echo "No migrations to run or migrations failed.\n";
 }
 
 echo "Database setup complete!\n";

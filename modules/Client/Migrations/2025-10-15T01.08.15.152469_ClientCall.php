@@ -48,7 +48,7 @@ class ClientCall extends Migration
 			$table->timestamp('scheduled_at')->nullable();
 			$table->timestamp('started_at')->nullable();
 			$table->timestamp('ended_at')->nullable();
-			$table->integer('duration', 10)->default(0)->comment('Duration in seconds');
+			$table->integer('duration', 10)->default(0);
 
 			// Call outcome
 			$table->enum('outcome', 'successful','busy','no_answer','voicemail','disconnected','other')->nullable();
@@ -65,7 +65,7 @@ class ClientCall extends Migration
 
 			// Priority & Tags
 			$table->enum('priority', 'low','normal','high','urgent')->default("'normal'");
-			$table->varchar('tags', 500)->nullable()->comment('Comma-separated tags');
+			$table->varchar('tags', 500)->nullable();
 
 			// Audit
 			$table->timestamps();
