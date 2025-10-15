@@ -57,4 +57,17 @@ class ClientContact extends Model
 		'deletedAt'
 	];
 
+	/**
+	 * Get searchable fields for the model.
+	 *
+	 * @return array
+	 */
+	public function getSearchableFields(): array
+	{
+		return [
+			'id',
+			["CONCAT(cc.first_name, ' ', cc.last_name)"],
+			["CONCAT(cc.last_name, ', ', cc.first_name)"]
+		];
+	}
 }

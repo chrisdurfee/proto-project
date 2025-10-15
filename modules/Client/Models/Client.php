@@ -83,4 +83,18 @@ class Client extends Model
 		'deletedAt'
 	];
 
+	/**
+	 * Get searchable fields for the model.
+	 *
+	 * @return array
+	 */
+	public function getSearchableFields(): array
+	{
+		return [
+			'id',
+			'company_name',
+			'client_number'
+		];
+	}
+
 }

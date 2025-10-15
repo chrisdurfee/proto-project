@@ -4,7 +4,7 @@ import { ScrollableList } from "@base-framework/organisms";
 import { Badge, Card } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
-import { ContactModal } from "./modals/contact-modal.js";
+import { ContactDetailsModal } from "./modals/contact-details-modal.js";
 
 /**
  * ContactItem
@@ -60,17 +60,29 @@ const ContactItem = (contact, onClick) =>
 export const ContactList = Atom(({ data }) =>
 {
 	/**
-	 * Opens the contact modal for editing
+	 * Opens the contact details modal
 	 *
 	 * @param {object} contact
 	 * @param {object} parent
 	 */
-	const openContactModal = (contact, parent) =>
+	const openContactDetailsModal = (contact, parent) =>
 	{
-		ContactModal({
-			item: contact,
+		ContactDetailsModal({
+			contact,
 			clientId: data.clientId,
-			onSubmit: (data) => parent?.mingle([ data.get() ])
+			onUpdate: (updatedData) =>
+			{
+				if (updatedData === null)
+				{
+					// Contact was deleted, refresh the list
+					parent?.refresh();
+				}
+				else
+				{
+					// Contact was updated, update the list
+					parent?.mingle([ updatedData.get() ]);
+				}
+			}
 		});
 	};
 
@@ -81,7 +93,7 @@ export const ContactList = Atom(({ data }) =>
 			key: "id",
 			role: "list",
 			skeleton: true,
-			rowItem: (contact) => ContactItem(contact, openContactModal),
+			rowItem: (contact) => ContactItem(contact, openContactDetailsModal),
 			emptyState: () => EmptyState({
 				title: 'No Contacts Found',
 				description: 'No contacts have been added for this client yet.',
