@@ -56,8 +56,8 @@ class ClientConversationController extends Controller
 			return $result;
 		}
 
-		$files = $request->files();
-		if (empty($files['attachments']))
+		// Check if files were uploaded
+		if (empty($_FILES['attachments']) || empty($_FILES['attachments']['name']))
 		{
 			return $result;
 		}
@@ -99,7 +99,7 @@ class ClientConversationController extends Controller
 	private function storeAttachments(Request $request, int $conversationId, int $userId): int
 	{
 		$count = 0;
-		
+
 		// Get raw $_FILES data for attachments
 		$rawFiles = $_FILES['attachments'] ?? null;
 		if (!$rawFiles || empty($rawFiles['name']))
