@@ -3,6 +3,7 @@ import { DateTime } from "@base-framework/base";
 import { Badge, Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { DetailBody, DetailSection, Modal, SplitRow } from "@base-framework/ui/molecules";
+import { ClientNoteModel } from "../../../../../models/client-note-model.js";
 import { NoteModal } from "./note-modal.js";
 
 /**
@@ -108,16 +109,14 @@ const formatNoteData = (note) =>
 export const NoteDetailsModal = ({ note, clientId, onUpdate }) =>
 {
 	const formatted = formatNoteData(note);
+    const model = new ClientNoteModel({ ...note, clientId });
 
 	/**
 	 * Deletes the note
 	 */
 	const deleteNote = function()
 	{
-		const { ClientNoteModel } = require('../../../../../models/client-note-model.js');
-		const model = new ClientNoteModel({ clientId });
-
-		model.xhr.delete('', () =>
+		model.xhr.delete(note.id, () =>
 		{
 			this.close();
 			onUpdate?.(null);
@@ -132,7 +131,7 @@ export const NoteDetailsModal = ({ note, clientId, onUpdate }) =>
 		size: 'md',
 		type: 'right',
 		hidePrimaryButton: true,
-		data: note,
+		data: model,
 		clientId,
 		onUpdate,
 		destroy: deleteNote
