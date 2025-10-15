@@ -199,7 +199,7 @@ export const ThreadComposer = Jot(
 				// @ts-ignore
 				this.data.message = '';
 				// @ts-ignore
-				this.data.attachments = [];
+				this.selectedFiles = [];
 				// @ts-ignore
 				this.state.charCount = 0;
 				// @ts-ignore
