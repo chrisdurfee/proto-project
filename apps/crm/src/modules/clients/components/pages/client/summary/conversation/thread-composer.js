@@ -63,11 +63,11 @@ const SendButton = () => (
 export const ThreadComposer = Jot(
 {
 	/**
-	 * This will set up after the component is created.
+	 * This will set the data.
 	 *
 	 * @returns {void}
 	 */
-	afterSetup()
+	setData()
 	{
 		// Create conversation model with data binding
 		// @ts-ignore
@@ -79,7 +79,7 @@ export const ThreadComposer = Jot(
 		}
 
 		// @ts-ignore
-		this.conversationModel = new ConversationModel({
+		return new ConversationModel({
 			clientId: clientId,
 			userId: app.data?.user?.id || 1,
 			message: '',
@@ -117,7 +117,7 @@ export const ThreadComposer = Jot(
 		// @ts-ignore
 		const files = Array.from(e.target.files || []);
 		// @ts-ignore
-		this.conversationModel.set('attachments', files);
+		this.data.set('attachments', files);
 
 		if (files.length > 0)
 		{
@@ -146,11 +146,11 @@ export const ThreadComposer = Jot(
 
 		// Update model with message
 		// @ts-ignore
-		this.conversationModel.set('message', message);
+		this.data.set('message', message);
 
 		// Send via API
 		// @ts-ignore
-		this.conversationModel.xhr.add('', (response) =>
+		this.data.xhr.add('', (response) =>
 		{
 			if (response && response.success)
 			{
@@ -169,7 +169,7 @@ export const ThreadComposer = Jot(
 					// @ts-ignore
 					clientId: this.client.id,
 					// @ts-ignore
-					userId: this.conversationModel.get('userId'),
+					userId: this.data.get('userId'),
 					message: message,
 					messageType: 'comment',
 					isInternal: 0,
@@ -184,7 +184,11 @@ export const ThreadComposer = Jot(
 				};
 
 				// @ts-ignore
-				this.conversationData?.items?.push(newMessage);
+				if (this.submitCallBack)
+				{
+					// @ts-ignore
+					this.submitCallBack(this.parent);
+				}
 
 				// Reset form
 				// @ts-ignore
@@ -196,9 +200,9 @@ export const ThreadComposer = Jot(
 					this.fileInput.value = '';
 				}
 				// @ts-ignore
-				this.conversationModel.set('message', '');
+				this.data.message = '';
 				// @ts-ignore
-				this.conversationModel.set('attachments', []);
+				this.data.attachments = [];
 				// @ts-ignore
 				this.state.charCount = 0;
 				// @ts-ignore

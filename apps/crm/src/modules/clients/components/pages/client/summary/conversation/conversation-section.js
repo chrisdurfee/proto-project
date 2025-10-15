@@ -96,6 +96,7 @@ export const ConversationSection = Atom(({ client }) =>
 		]),
 		Div({ class: "flex-1 overflow-y-auto gap-y-2" }, [
 			ScrollableList({
+				scrollDirection: 'up',
 				data,
 				cache: "list",
 				key: "id",
@@ -112,7 +113,7 @@ export const ConversationSection = Atom(({ client }) =>
 		new ThreadComposer({
 			placeholder: "Add a comment...",
 			client: client,
-			conversationData: data
+			submitCallBack: (parent) => parent.list.fetchNew()
 		})
 	]);
 });
