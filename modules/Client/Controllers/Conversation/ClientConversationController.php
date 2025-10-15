@@ -19,7 +19,9 @@ class ClientConversationController extends Controller
 	 *
 	 * @param string|null $model The model class reference using ::class.
 	 */
-	public function __construct(protected ?string $model = ClientConversation::class)
+	public function __construct(
+		protected ?string $model = ClientConversation::class
+	)
 	{
 		parent::__construct();
 	}
@@ -62,37 +64,52 @@ class ClientConversationController extends Controller
 			return $result;
 		}
 
-		$userId = getSession('user')->id ?? null;
-		if ($userId === null)
-		{
-			return $this->error('User not authenticated.');
-		}
+		return $this->handleAttachments($request, $result->id);
+	}
 
+	/**
+	 * Handle file attachments for a conversation.
+	 *
+	 * @param Request $request The HTTP request object.
+	 * @param int $conversationId The conversation ID.
+	 * @return object The response object.
+	 */
+	private function handleAttachments(Request $request, int $conversationId): object
+	{
+		$userId = getSession('user')->id ?? null;
 		$attachmentCount = $this->storeAttachments(
 			$request,
-			$result->id,
-			(int)$userId
+			$conversationId,
+			$userId
 		);
 
-		// Update attachment count if files were uploaded
-		if ($attachmentCount > 0)
+		if ($attachmentCount === 0)
 		{
-			$conversation = ClientConversation::get($result->id);
-			if ($conversation)
-			{
-				$conversation->attachmentCount = $attachmentCount;
-				$conversation->update();
-			}
-
-			// Re-fetch with joins to include attachments in response
-			$updatedConversation = ClientConversation::get($result->id);
-			if ($updatedConversation)
-			{
-				return $this->response(true);
-			}
+			return $this->error('No valid attachments found', 400);
 		}
 
-		return $this->success($result);
+		return $this->updateAttachmentCount($conversationId, $attachmentCount);
+	}
+
+	/**
+	 * Update the attachment count for a conversation.
+	 *
+	 * @param int $conversationId The ID of the conversation.
+	 * @param int $count The new attachment count.
+	 * @return object The response object.
+	 */
+	protected function updateAttachmentCount(int $conversationId, int $count): object
+	{
+		$conversation = ClientConversation::get($conversationId);
+		if (!$conversation)
+		{
+			return $this->error('Conversation not found', 404);
+		}
+
+		$conversation->attachmentCount = $count;
+		$result = $conversation->update();
+
+		return $this->response($result);
 	}
 
 	/**
