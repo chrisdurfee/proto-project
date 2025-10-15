@@ -53,27 +53,27 @@ class ClientConversation extends Model
 		 * Join the user who created the conversation message.
 		 */
 		$builder->one(User::class, fields: [
-			'firstName',
-			'lastName',
-			'displayName',
-			'image'
-		])->on(['userId', 'id']);
+				'firstName',
+				'lastName',
+				'displayName',
+				'image'
+			])->on(['userId', 'id']);
 
 		/**
 		 * Join attachments for this conversation.
 		 */
 		$builder->many(ClientConversationAttachment::class, fields: [
-			'id',
-			'fileName',
-			'filePath',
-			'fileType',
-			'fileExtension',
-			'fileSize',
-			'displayName',
-			'description',
-			'width',
-			'height',
-			'thumbnailPath'
-		])->on(['id', 'conversationId'])->as('attachments');
+				'id',
+				'fileName',
+				'filePath',
+				'fileType',
+				'fileExtension',
+				'fileSize',
+				'displayName',
+				'description',
+				'width',
+				'height',
+				'thumbnailPath'
+			])->on(['id', 'conversationId'])->as('attachments');
 	}
 }
