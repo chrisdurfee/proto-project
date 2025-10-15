@@ -21,33 +21,39 @@ export const ConversationModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @param {FileList|File[]} [files] - Optional files to attach.
 		 * @returns {XMLHttpRequest|void} The request promise.
 		 */
-		add(instanceParams, callBack)
+		add(instanceParams, callBack, files)
 		{
-            const data = this.model.get();
-            const files = data.attachments || [];
-			// If no files, send as JSON
+			const data = this.model.get();
+
+			// If no files, send as JSON (exclude attachments field)
 			if (!files || files.length === 0)
 			{
-				const params = this.setupObjectData(data);
+				const cleanData = { ...data };
+				delete cleanData.attachments;
+				const params = this.setupObjectData(cleanData);
 				return this._post('', params, instanceParams, callBack);
 			}
 
 			// With files, use FormData
 			const formData = new FormData();
 
-			// Add message data
+			// Add message data (exclude attachments array)
 			Object.keys(data).forEach(key =>
 			{
-				formData.append(key, data[key]);
+				if (key !== 'attachments')
+				{
+					formData.append(key, data[key]);
+				}
 			});
 
 			// Add files
 			Array.from(files).forEach(file =>
 			{
-				// Validate file size (50MB as per backend validation)
-				const maxSize = 50 * 1024 * 1024; // 50MB
+				// Validate file size (10MB as per backend validation)
+				const maxSize = 10 * 1024 * 1024; // 10MB
 				if (file.size > maxSize)
 				{
 					app.notify({

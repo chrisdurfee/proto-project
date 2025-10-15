@@ -78,6 +78,10 @@ export const ThreadComposer = Jot(
 			return;
 		}
 
+		// Store files separately to preserve File objects
+		// @ts-ignore
+		this.selectedFiles = [];
+
 		// @ts-ignore
 		return new ConversationModel({
 			clientId: clientId,
@@ -85,8 +89,7 @@ export const ThreadComposer = Jot(
 			message: '',
 			messageType: 'comment',
 			isInternal: 0,
-			isPinned: 0,
-			attachments: []
+			isPinned: 0
 		});
 	},
 
@@ -116,8 +119,9 @@ export const ThreadComposer = Jot(
 	{
 		// @ts-ignore
 		const files = Array.from(e.target.files || []);
+		// Store files as instance property to preserve File objects
 		// @ts-ignore
-		this.data.set('attachments', files);
+		this.selectedFiles = files;
 
 		if (files.length > 0)
 		{
@@ -148,7 +152,7 @@ export const ThreadComposer = Jot(
 		// @ts-ignore
 		this.data.set('message', message);
 
-		// Send via API
+		// Send via API with files passed separately to preserve File objects
 		// @ts-ignore
 		this.data.xhr.add('', (response) =>
 		{
@@ -212,7 +216,8 @@ export const ThreadComposer = Jot(
 					icon: Icons.warning
 				});
 			}
-		});
+		// @ts-ignore
+		}, this.selectedFiles);
 	},
 
 	/**
