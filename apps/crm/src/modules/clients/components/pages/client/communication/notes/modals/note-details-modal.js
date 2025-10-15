@@ -124,10 +124,14 @@ export const NoteDetailsModal = ({ note, clientId, onUpdate }) =>
 		});
 	};
 
-	return Modal({
+	return new Modal({
 		title: formatted.title,
+        icon: Icons.document.default,
+        description: 'Note Details',
 		headerOptions: HeaderOptions(),
-		size: "xl",
+		size: 'md',
+		type: 'right',
+		hidePrimaryButton: true,
 		data: note,
 		clientId,
 		onUpdate,

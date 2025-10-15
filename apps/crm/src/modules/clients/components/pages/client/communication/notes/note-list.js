@@ -17,19 +17,19 @@ const NoteTypeIcon = (type) =>
 	switch (type)
 	{
 		case "meeting":
-			return Icon({ class: 'text-blue-500' }, Icons.users);
+			return Icon({ class: 'text-blue-500' }, Icons.user.group);
 		case "call":
 			return Icon({ class: 'text-green-500' }, Icons.phone.default);
 		case "email":
-			return Icon({ class: 'text-purple-500' }, Icons.envelope);
+			return Icon({ class: 'text-purple-500' }, Icons.envelope.default);
 		case "task":
-			return Icon({ class: 'text-orange-500' }, Icons.checkCircle);
+			return Icon({ class: 'text-orange-500' }, Icons.circleCheck);
 		case "follow_up":
-			return Icon({ class: 'text-yellow-500' }, Icons.arrowPath);
+			return Icon({ class: 'text-yellow-500' }, Icons.arrows.uturn.left);
 		case "important":
-			return Icon({ class: 'text-red-500' }, Icons.exclamationCircle);
+			return Icon({ class: 'text-red-500' }, Icons.information);
 		default:
-			return Icon({ class: 'text-base' }, Icons.documentText);
+			return Icon({ class: 'text-base' }, Icons.document.text);
 	}
 };
 
