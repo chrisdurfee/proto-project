@@ -44,19 +44,28 @@ class PasswordController extends Controller
 		$email = $req->input('email');
 		if (!isset($email))
 		{
-			return $this->error('The email is missing.', HttpStatus::BAD_REQUEST->value);
+			return $this->error(
+				'The email is missing.',
+				HttpStatus::BAD_REQUEST->value
+			);
 		}
 
 		$user = $this->user->getByEmail($email);
 		if (!$user)
 		{
-			return $this->error('The user is not found.', HttpStatus::NOT_FOUND->value);
+			return $this->error(
+				'The user is not found.',
+				HttpStatus::NOT_FOUND->value
+			);
 		}
 
 		$result = $this->pwService->sendResetRequest($user);
 		if (empty($result->email) && empty($result->sms))
 		{
-			return $this->error('The password reset request has failed.', HttpStatus::BAD_REQUEST->value);
+			return $this->error(
+				'The password reset request has failed.',
+				HttpStatus::BAD_REQUEST->value
+			);
 		}
 
 		return $this->response((object)[
@@ -76,13 +85,19 @@ class PasswordController extends Controller
 		$userId = $req->getInt('userId');
 		if (!isset($requestId) || !isset($userId))
 		{
-			return $this->error('The request id or user id is missing.', HttpStatus::BAD_REQUEST->value);
+			return $this->error(
+				'The request id or user id is missing.',
+				HttpStatus::BAD_REQUEST->value
+			);
 		}
 
 		$username = $this->pwService->validateRequest($requestId, $userId);
 		if ($username === null)
 		{
-			return $this->error('No request is found.', HttpStatus::NOT_FOUND->value);
+			return $this->error(
+				'No request is found.',
+				HttpStatus::NOT_FOUND->value
+			);
 		}
 
 		return $this->response((object)[
@@ -101,36 +116,54 @@ class PasswordController extends Controller
 		$userId = $req->getInt('userId');
 		if (!isset($userId))
 		{
-			return $this->error('The user id is not set.', HttpStatus::BAD_REQUEST->value);
+			return $this->error(
+				'The user id is not set.',
+				HttpStatus::BAD_REQUEST->value
+			);
 		}
 
 		$password = $req->input('password');
 		if (empty($password))
 		{
-			return $this->error('The password is not set.', HttpStatus::BAD_REQUEST->value);
+			return $this->error(
+				'The password is not set.',
+				HttpStatus::BAD_REQUEST->value
+			);
 		}
 
 		$requestId = $req->input('requestId');
 		if (empty($requestId))
 		{
-			return $this->error('The request id is not set.', HttpStatus::BAD_REQUEST->value);
+			return $this->error(
+				'The request id is not set.',
+				HttpStatus::BAD_REQUEST->value
+			);
 		}
 
 		$result = $this->pwService->resetPassword($requestId, $userId, $password);
 		if ($result === -1)
 		{
-			return $this->error('The password reset request is invalid.', HttpStatus::BAD_REQUEST->value);
+			return $this->error(
+				'The password reset request is invalid.',
+				HttpStatus::BAD_REQUEST->value
+			);
 		}
 
 		if ($result === false)
 		{
-			return $this->error('The password reset has failed.', HttpStatus::BAD_REQUEST->value);
+			return $this->error(
+				'The password reset has failed.',
+				HttpStatus::BAD_REQUEST->value
+			);
 		}
 
 		$user = $this->getUserId($userId);
 		if (!$user)
 		{
-			return $this->error('The user account is not found.', HttpStatus::NOT_FOUND->value);
+			return $this->error(
+				'The user account is not found.',
+				HttpStatus::NOT_FOUND->value
+			);
 		}
 
 		return $this->permit($user, $req->ip());

@@ -52,7 +52,6 @@ class ConversationAttachmentService extends Service
 	{
 		$count = 0;
 
-		// Get and validate uploaded files
 		$uploadFiles = $request->validateFileArray('attachments', [
 			'attachments' => 'file:50240|required|mimes:pdf,doc,docx,xls,xlsx,txt,csv,jpg,jpeg,png,gif,webp,zip'
 		]);
@@ -62,29 +61,23 @@ class ConversationAttachmentService extends Service
 			return 0;
 		}
 
-		// Process each validated file
 		foreach ($uploadFiles as $uploadFile)
 		{
 			try
 			{
-				// Store the file
 				if (!$uploadFile->store('local', 'conversation'))
 				{
 					continue;
 				}
 
-				// Prepare attachment data
 				$attachmentData = $this->prepareAttachmentData($uploadFile, $conversationId, $userId);
-
-				// Create attachment record
-				if (ClientConversationAttachment::create((object)$attachmentData))
+				if (ClientConversationAttachment::create($attachmentData))
 				{
 					$count++;
 				}
 			}
 			catch (\Exception $e)
 			{
-				// Log error but continue with other files
 				continue;
 			}
 		}
@@ -101,14 +94,10 @@ class ConversationAttachmentService extends Service
 	 */
 	public function updateAttachmentCount(int $conversationId, int $count): object
 	{
-		$conversation = ClientConversation::get($conversationId);
-		if (!$conversation)
-		{
-			return $this->error('Conversation not found.');
-		}
-
-		$conversation->attachmentCount = $count;
-		$result = $conversation->update();
+		$result = ClientConversation::edit((object)[
+            'id' => $conversationId,
+            'attachmentCount' => $count
+        ]);
 
 		return $this->response($result);
 	}
@@ -119,9 +108,9 @@ class ConversationAttachmentService extends Service
 	 * @param UploadFile $uploadFile The uploaded file object.
 	 * @param int $conversationId The ID of the conversation.
 	 * @param int|null $userId The ID of the user uploading the file.
-	 * @return array The prepared attachment data.
+	 * @return object The prepared attachment data.
 	 */
-	protected function prepareAttachmentData(UploadFile $uploadFile, int $conversationId, ?int $userId = null): array
+	protected function prepareAttachmentData(UploadFile $uploadFile, int $conversationId, ?int $userId = null): object
 	{
 		$attachmentData = [
 			'conversationId' => $conversationId,
@@ -145,6 +134,6 @@ class ConversationAttachmentService extends Service
 			}
 		}
 
-		return $attachmentData;
+		return (object)$attachmentData;
 	}
 }

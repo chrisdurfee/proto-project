@@ -54,25 +54,37 @@ class AuthController extends Controller
 		$password = $req->input('password');
 		if (!$username || !$password)
 		{
-			return $this->error('The username and password are required.', HttpStatus::BAD_REQUEST->value);
+			return $this->error(
+				'The username and password are required.',
+				HttpStatus::BAD_REQUEST->value
+			);
 		}
 
 		$attempts = $this->getAttempts($username, $req->ip());
 		if ($attempts >= self::MAX_ATTEMPTS)
 		{
-			return $this->error('Maximum login attempts reached. Please try again later.', HttpStatus::TOO_MANY_REQUESTS->value);
+			return $this->error(
+				'Maximum login attempts reached. Please try again later.',
+				HttpStatus::TOO_MANY_REQUESTS->value
+			);
 		}
 
 		$userId = $this->authenticate($username, $password, $req->ip());
 		if ($userId < 0)
 		{
-			return $this->error('Invalid credentials. Attempt ' . ++$attempts . ' of ' . self::MAX_ATTEMPTS, HttpStatus::UNAUTHORIZED->value);
+			return $this->error(
+				'Invalid credentials. Attempt ' . ++$attempts . ' of ' . self::MAX_ATTEMPTS,
+				HttpStatus::UNAUTHORIZED->value
+			);
 		}
 
 		$user = $this->getUserId($userId);
 		if (!$user)
 		{
-			return $this->error('The user account is not found.', HttpStatus::NOT_FOUND->value);
+			return $this->error(
+				'The user account is not found.',
+				HttpStatus::NOT_FOUND->value
+			);
 		}
 
 		if ($user->multiFactorEnabled == true)
@@ -141,25 +153,37 @@ class AuthController extends Controller
 		$user = $this->mfaService->getUser();
 		if (!$user)
 		{
-			return $this->error('The user is not found in MFA session.', HttpStatus::NOT_FOUND->value);
+			return $this->error(
+				'The user is not found in MFA session.',
+				HttpStatus::NOT_FOUND->value
+			);
 		}
 
 		$device = $this->mfaService->getDevice();
 		if (!$device)
 		{
-			return $this->error('The device is not found in MFA session.', HttpStatus::NOT_FOUND->value);
+			return $this->error(
+				'The device is not found in MFA session.',
+				HttpStatus::NOT_FOUND->value
+			);
 		}
 
 		$code = $req->input('code');
 		$isValid = $this->mfaService->validateCode($code);
 		if ($isValid === false)
 		{
-			return $this->error('Invalid authentication code.', HttpStatus::UNAUTHORIZED->value);
+			return $this->error(
+				'Invalid authentication code.',
+				HttpStatus::UNAUTHORIZED->value
+			);
 		}
 
 		if ($isValid === null)
 		{
-			return $this->error('Invalid authentication code. Too many attempts.', HttpStatus::TOO_MANY_REQUESTS->value);
+			return $this->error(
+				'Invalid authentication code. Too many attempts.',
+				HttpStatus::TOO_MANY_REQUESTS->value
+			);
 		}
 
 		$ipAddress = $req->ip();
@@ -180,19 +204,27 @@ class AuthController extends Controller
 		$userId = $session->id ?? null;
 		if (!$userId)
 		{
-			return $this->error('The user is not authenticated.', HttpStatus::UNAUTHORIZED->value);
+			return $this->error(
+				'The user is not authenticated.',
+				HttpStatus::UNAUTHORIZED->value
+			);
 		}
 
 		$user = $this->user->get($userId);
 		if (!$user)
 		{
-			return $this->error('The user is not found.', HttpStatus::NOT_FOUND->value);
+			return $this->error(
+				'The user is not found.',
+				HttpStatus::NOT_FOUND->value
+			);
 		}
 
 		$this->updateUserStatus($user, UserStatus::OFFLINE->value, $req->ip());
 		session()->destroy();
 
-		return $this->response(['message' => 'The user has been logged out successfully.']);
+		return $this->response([
+			'message' => 'The user has been logged out successfully.'
+		]);
 	}
 
 	/**
@@ -207,18 +239,27 @@ class AuthController extends Controller
 		$userId = $session->id ?? null;
 		if (!$userId)
 		{
-			return $this->error('The user is not authenticated.', HttpStatus::UNAUTHORIZED->value);
+			return $this->error(
+				'The user is not authenticated.',
+				HttpStatus::UNAUTHORIZED->value
+			);
 		}
 
 		$user = $this->user->get($userId);
 		if (!$user)
 		{
-			return $this->error('The user is not found.', HttpStatus::NOT_FOUND->value);
+			return $this->error(
+				'The user is not found.',
+				HttpStatus::NOT_FOUND->value
+			);
 		}
 
 		if ($user->enabled === 0)
 		{
-			return $this->error('The user is not enabled.', HttpStatus::FORBIDDEN->value);
+			return $this->error(
+				'The user is not enabled.',
+				HttpStatus::FORBIDDEN->value
+			);
 		}
 
 		/**
@@ -245,18 +286,27 @@ class AuthController extends Controller
 		$userId = $session->id ?? null;
 		if (!$userId)
 		{
-			return $this->error('The user is not authenticated.', HttpStatus::UNAUTHORIZED->value);
+			return $this->error(
+				'The user is not authenticated.',
+				HttpStatus::UNAUTHORIZED->value
+			);
 		}
 
 		$user = $this->user->get($userId);
 		if (!$user)
 		{
-			return $this->error('The user is not found.', HttpStatus::NOT_FOUND->value);
+			return $this->error(
+				'The user is not found.',
+				HttpStatus::NOT_FOUND->value
+			);
 		}
 
 		if ($user->enabled === 0)
 		{
-			return $this->error('The user is not enabled.', HttpStatus::FORBIDDEN->value);
+			return $this->error(
+				'The user is not enabled.',
+				HttpStatus::FORBIDDEN->value
+			);
 		}
 
 		return $this->permit($user, $req->ip());
@@ -273,13 +323,19 @@ class AuthController extends Controller
 		$data = $req->json('user');
 		if (!$data)
 		{
-			return $this->error('The data is invalid for registration.', HttpStatus::BAD_REQUEST->value);
+			return $this->error(
+				'The data is invalid for registration.',
+				HttpStatus::BAD_REQUEST->value
+			);
 		}
 
 		$user = $this->user->register($data);
 		if (!$user)
 		{
-			return $this->error('The registration has failed.', HttpStatus::BAD_REQUEST->value);
+			return $this->error(
+				'The registration has failed.',
+				HttpStatus::BAD_REQUEST->value
+			);
 		}
 
 		return $this->permit($user, $req->ip());
