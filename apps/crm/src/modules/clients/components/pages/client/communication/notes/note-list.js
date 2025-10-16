@@ -1,7 +1,7 @@
 import { Div, P } from "@base-framework/atoms";
-import { Atom, DateTime } from "@base-framework/base";
+import { Atom } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
-import { Badge, Card, Icon } from "@base-framework/ui/atoms";
+import { Badge, Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState, TimeFrame } from "@base-framework/ui/molecules";
 import { NoteDetailsModal } from "./modals/note-details-modal.js";
@@ -44,42 +44,55 @@ const NoteTypeIcon = (type) =>
  */
 const NoteItem = (note, onClick) =>
 {
-	const createdAt = note.createdAt ? DateTime.format('standard', note.createdAt) : 'Just now';
-	const preview = note.content ? note.content.substring(0, 150) + (note.content.length > 150 ? '...' : '') : 'No content';
-	const userName = note.createdByName || 'Unknown User';
+	const preview = note.content ? note.content.substring(0, 120) + (note.content.length > 120 ? '...' : '') : 'No content';
+	const userName = note.displayName || `${note.firstName || ''} ${note.lastName || ''}`.trim() || 'Unknown User';
 
-	return Card({
-		class: "flex items-start justify-between p-4 cursor-pointer",
-		margin: "m-2",
-		hover: true,
+	return Div({
+		class: "flex gap-x-3 px-6 py-4 hover:bg-muted/50 cursor-pointer border-b border-border",
 		click: (e, parent) => onClick && onClick(note, parent)
 	}, [
-		Div({ class: "flex items-start gap-x-4 flex-1" }, [
-			Avatar({
-				src: note.createdByImage && `/files/users/profile/${note.createdByImage}`,
-				alt: userName,
-				fallbackText: userName,
-				size: "sm"
-			}),
-			Div({ class: "flex flex-col flex-1 min-w-0" }, [
-				Div({ class: "flex items-center gap-2 mb-1" }, [
-					NoteTypeIcon(note.noteType),
-					P({ class: "font-medium m-0" }, note.title || 'Untitled Note'),
-					note.isPinned === 1 && Icon({ size: 'xs', class: 'text-yellow-500' }, Icons.pin)
+		Avatar({
+			src: note.image && `/files/users/profile/${note.image}`,
+			alt: userName,
+			fallbackText: userName,
+			size: "sm"
+		}),
+		Div({ class: "flex-1 min-w-0" }, [
+			Div({ class: "flex items-center gap-2 mb-1" }, [
+				P({ class: "text-sm font-medium m-0" }, userName),
+				Div({ class: "flex items-center gap-1 text-xs text-muted-foreground" }, [
+					P({ class: "m-0" }, "·"),
+					P({ class: "m-0" }, [
+                        TimeFrame({
+                            dateTime: note.createdAt,
+                            remoteTimeZone: 'America/Denver'
+                        })
+                    ])
+				])
+			]),
+			Div({ class: "flex items-center gap-2 mb-2" }, [
+				NoteTypeIcon(note.noteType),
+				P({ class: "text-sm font-medium m-0 flex-1" }, note.title || 'Untitled Note'),
+				note.isPinned === 1 && Icon({ size: 'xs', class: 'text-yellow-500' }, Icons.pin)
+			]),
+			P({ class: "text-sm text-muted-foreground m-0 line-clamp-2 mb-2" }, preview),
+			Div({ class: "flex items-center gap-2 flex-wrap" }, [
+				Badge({
+					type: note.priority === 'urgent' ? 'destructive' : note.priority === 'high' ? 'warning' : 'outline',
+					class: 'text-xs'
+				}, note.priority ? note.priority.toUpperCase() : 'NORMAL'),
+				note.hasReminder === 1 && Badge({ type: 'outline', class: 'gap-1 text-xs' }, [
+					Icon({ size: 'xs', class: 'text-blue-500' }, Icons.bell),
+					'Reminder'
 				]),
-				P({ class: "text-xs text-muted-foreground m-0 mb-1" }, userName),
-				P({ class: "text-sm text-muted-foreground m-0 line-clamp-2" }, preview),
-				P({ class: "text-xs text-muted-foreground m-0 mt-2" }, TimeFrame(note.createdAt))
-			])
-		]),
-		Div({ class: "flex flex-col items-end gap-2" }, [
-			Badge({ type: note.priority === 'urgent' ? 'destructive' : note.priority === 'high' ? 'warning' : 'outline' },
-				note.priority ? note.priority.toUpperCase() : 'NORMAL'
-			),
-			Div({ class: "flex gap-1 mt-1" }, [
-				note.hasReminder === 1 && Icon({ size: 'xs', class: 'text-blue-500' }, Icons.bell),
-				note.requiresFollowUp === 1 && Icon({ size: 'xs', class: 'text-orange-500' }, Icons.arrowPath),
-				note.hasAttachments === 1 && Icon({ size: 'xs', class: 'text-gray-500' }, Icons.paperClip)
+				note.requiresFollowUp === 1 && Badge({ type: 'outline', class: 'gap-1 text-xs' }, [
+					Icon({ size: 'xs', class: 'text-orange-500' }, Icons.arrowPath),
+					'Follow-up'
+				]),
+				note.hasAttachments === 1 && Badge({ type: 'outline', class: 'gap-1 text-xs' }, [
+					Icon({ size: 'xs', class: 'text-gray-500' }, Icons.paperClip),
+					'Attachments'
+				])
 			])
 		])
 	]);
@@ -123,7 +136,7 @@ export const NoteList = Atom(({ data }) =>
 		});
 	};
 
-	return Div({ class: "flex flex-col gap-y-6 mt-12" }, [
+	return Div({ class: "flex flex-col mt-12 border border-border rounded-lg bg-card overflow-hidden" }, [
 		ScrollableList({
 			data,
 			cache: "list",

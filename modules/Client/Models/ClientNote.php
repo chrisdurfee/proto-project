@@ -2,6 +2,7 @@
 namespace Modules\Client\Models;
 
 use Proto\Models\Model;
+use Modules\User\Models\User;
 
 /**
  * ClientNote
@@ -67,20 +68,21 @@ class ClientNote extends Model
 	}
 
 	/**
-	 * Define eager-loaded joins for the model.
+	 * Define joins for eager loading user data.
 	 *
-	 * @param mixed $builder
+	 * @param object $builder The query builder object
 	 * @return void
 	 */
-	protected static function joins($builder): void
+	protected static function joins(object $builder): void
 	{
-		// Join with users table to get creator info
-		$builder->leftJoin('users AS u_created', 'cn.createdBy', 'u_created.id')
-			->addFields([
-				'u_created.firstName AS createdByFirstName',
-				'u_created.lastName AS createdByLastName',
-				'u_created.image AS createdByImage',
-				'CONCAT(u_created.firstName, " ", u_created.lastName) AS createdByName'
-			]);
+		/**
+		 * Join the user who created the note.
+		 */
+		$builder->one(User::class, fields: [
+				'firstName',
+				'lastName',
+				'displayName',
+				'image'
+			])->on(['createdBy', 'id']);
 	}
 }
