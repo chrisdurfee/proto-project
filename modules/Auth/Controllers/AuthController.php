@@ -262,6 +262,8 @@ class AuthController extends Controller
 			);
 		}
 
+		$result = $this->permit($user, $req->ip());
+
 		/**
 		 * Check if the connection is still active before refreshing the session ID.
 		 */
@@ -271,7 +273,7 @@ class AuthController extends Controller
 			session()->refreshId();
 		}
 
-		return $this->permit($user, $req->ip());
+		return $result;
 	}
 
 	/**
