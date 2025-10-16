@@ -21,15 +21,7 @@ export const AuthedDevicesPage = () =>
 		}
 	});
 
-	/**
-	 * @type {object} Props
-	 */
-	const Props =
-	{
-		data,
-	};
-
-	return FullTablePage(Props, [
+	return FullTablePage({ data }, [
 		PageHeader(),
 		TableContainer([
 			UseParent(({ route }) =>
