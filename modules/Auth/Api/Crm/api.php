@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace Modules\Auth\Api;
+namespace Modules\Auth\Api\Crm;
 
 use Modules\Auth\Controllers\PasswordController;
 use Modules\Auth\Controllers\CrmAuthController;
