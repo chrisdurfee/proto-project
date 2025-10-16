@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Client\Controllers;
 
-use Modules\Client\Auth\Policies\ClientCallPolicy;
+use Modules\Client\Auth\Policies\ClientResourcePolicy;
 use Proto\Controllers\ResourceController as Controller;
 use Modules\Client\Models\ClientCall;
 
@@ -15,7 +15,7 @@ class ClientCallController extends Controller
 	/**
 	 * @var string|null $policy
 	 */
-	protected ?string $policy = ClientCallPolicy::class;
+	protected ?string $policy = ClientResourcePolicy::class;
 
 	/**
 	 * Initializes the model class.
