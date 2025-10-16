@@ -3,7 +3,7 @@ import { Atom, DateTime } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Badge, Card, Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { EmptyState } from "@base-framework/ui/molecules";
+import { Avatar, EmptyState, TimeFrame } from "@base-framework/ui/molecules";
 import { NoteDetailsModal } from "./modals/note-details-modal.js";
 
 /**
@@ -46,6 +46,7 @@ const NoteItem = (note, onClick) =>
 {
 	const createdAt = note.createdAt ? DateTime.format('standard', note.createdAt) : 'Just now';
 	const preview = note.content ? note.content.substring(0, 150) + (note.content.length > 150 ? '...' : '') : 'No content';
+	const userName = note.createdByName || 'Unknown User';
 
 	return Card({
 		class: "flex items-start justify-between p-4 cursor-pointer",
@@ -54,16 +55,21 @@ const NoteItem = (note, onClick) =>
 		click: (e, parent) => onClick && onClick(note, parent)
 	}, [
 		Div({ class: "flex items-start gap-x-4 flex-1" }, [
-			Div({ class: "mt-1" }, [
-				NoteTypeIcon(note.noteType)
-			]),
+			Avatar({
+				src: note.createdByImage && `/files/users/profile/${note.createdByImage}`,
+				alt: userName,
+				fallbackText: userName,
+				size: "sm"
+			}),
 			Div({ class: "flex flex-col flex-1 min-w-0" }, [
 				Div({ class: "flex items-center gap-2 mb-1" }, [
+					NoteTypeIcon(note.noteType),
 					P({ class: "font-medium m-0" }, note.title || 'Untitled Note'),
 					note.isPinned === 1 && Icon({ size: 'xs', class: 'text-yellow-500' }, Icons.pin)
 				]),
+				P({ class: "text-xs text-muted-foreground m-0 mb-1" }, userName),
 				P({ class: "text-sm text-muted-foreground m-0 line-clamp-2" }, preview),
-				P({ class: "text-xs text-muted-foreground m-0 mt-2" }, createdAt)
+				P({ class: "text-xs text-muted-foreground m-0 mt-2" }, TimeFrame(note.createdAt))
 			])
 		]),
 		Div({ class: "flex flex-col items-end gap-2" }, [

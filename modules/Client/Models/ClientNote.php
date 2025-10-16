@@ -65,4 +65,22 @@ class ClientNote extends Model
 			'tags'
 		];
 	}
+
+	/**
+	 * Define eager-loaded joins for the model.
+	 *
+	 * @param mixed $builder
+	 * @return void
+	 */
+	protected static function joins($builder): void
+	{
+		// Join with users table to get creator info
+		$builder->leftJoin('users AS u_created', 'cn.createdBy', 'u_created.id')
+			->addFields([
+				'u_created.firstName AS createdByFirstName',
+				'u_created.lastName AS createdByLastName',
+				'u_created.image AS createdByImage',
+				'CONCAT(u_created.firstName, " ", u_created.lastName) AS createdByName'
+			]);
+	}
 }

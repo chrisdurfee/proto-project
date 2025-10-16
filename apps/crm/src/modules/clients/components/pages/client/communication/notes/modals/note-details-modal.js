@@ -1,197 +1,302 @@
-import { Div, UseParent } from "@base-framework/atoms";
-import { DateTime } from "@base-framework/base";
+import { Div, P, UseParent } from "@base-framework/atoms";
+import { Data, DateTime } from "@base-framework/base";
 import { Badge, Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { DetailBody, DetailSection, Modal, SplitRow } from "@base-framework/ui/molecules";
-import { ClientNoteModel } from "../../../../../models/client-note-model.js";
+import { DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
 import { NoteModal } from "./note-modal.js";
 
 /**
- * HeaderOptions
+ * Header options for the modal.
  *
- * Options for the note details modal header
- *
+ * @param {object} note - The note data
+ * @param {string} clientId - The client ID
+ * @param {function} onUpdate - Callback when note is updated
  * @returns {function}
  */
-const HeaderOptions = () => () => [
-	UseParent((parent) => ({
-		options: [
-			{
-				label: "Edit",
-				click: () =>
+const HeaderOptions = (note, clientId, onUpdate) =>
+{
+	return () => [
+		UseParent((parent) => (
+			new DropdownMenu({
+				icon: Icons.ellipsis.vertical,
+				groups: [
+					[
+						{ icon: Icons.pencil.square, label: 'Edit Note', value: 'edit-note' },
+						{ icon: Icons.trash, label: 'Delete Note', value: 'delete-note' }
+					]
+				],
+				onSelect: (selected) =>
 				{
-					parent.close();
-					NoteModal({
-						item: parent.data,
-						clientId: parent.clientId,
-						onClose: parent.onUpdate
-					});
-				}
-			},
-			{
-				label: "Delete",
-				click: () =>
-				{
-					if (confirm("Are you sure you want to delete this note?"))
+					if (selected.value === 'edit-note')
 					{
-						parent.destroy();
+						parent.close();
+
+						NoteModal({
+							item: note,
+							clientId,
+							onSubmit: (data) =>
+							{
+								if (onUpdate)
+								{
+									onUpdate(data);
+								}
+							}
+						});
+					}
+					else if (selected.value === 'delete-note')
+					{
+						// Use fetch to delete the note
+						fetch(`/api/client/${clientId}/note/${note.id}`, {
+							method: 'DELETE',
+							headers: {
+								'Content-Type': 'application/json'
+							}
+						})
+						.then(res => res.json())
+						.then((response) =>
+						{
+							if (!response || response.success === false)
+							{
+								app.notify({
+									type: "destructive",
+									title: "Error",
+									description: "An error occurred while deleting the note.",
+									icon: Icons.shield
+								});
+								return;
+							}
+
+							parent.close();
+
+							app.notify({
+								type: "success",
+								title: "Note Deleted",
+								description: "The note has been deleted.",
+								icon: Icons.check
+							});
+
+							if (onUpdate)
+							{
+								onUpdate(null);
+							}
+						})
+						.catch(() =>
+						{
+							app.notify({
+								type: "destructive",
+								title: "Error",
+								description: "An error occurred while deleting the note.",
+								icon: Icons.shield
+							});
+						});
 					}
 				}
-			}
-		]
-	}))
-];
+			})
+		))
+	];
+};
 
 /**
- * QuickActionButtons
+ * Formats a label from a value
  *
- * Quick action buttons for the note
- *
- * @param {object} note
- * @returns {object}
+ * @param {string} value
+ * @returns {string}
  */
-const QuickActionButtons = (note) =>
-	Div({ class: "flex items-center gap-2 mt-4 pb-4 border-b" }, [
-		note.hasReminder === 1 && Badge({ type: 'outline', class: 'gap-1' }, [
-			Icon({ size: 'xs' }, Icons.bell),
-			'Reminder Set'
-		]),
-		note.requiresFollowUp === 1 && Badge({ type: 'outline', class: 'gap-1' }, [
-			Icon({ size: 'xs' }, Icons.arrowPath),
-			'Follow-up Required'
-		]),
-		note.isPinned === 1 && Badge({ type: 'outline', class: 'gap-1' }, [
-			Icon({ size: 'xs' }, Icons.pin),
-			'Pinned'
-		]),
-		note.priority === 'urgent' && Badge({ type: 'destructive' }, 'URGENT'),
-		note.priority === 'high' && Badge({ type: 'warning' }, 'HIGH')
-	]);
+const formatLabel = (value) =>
+{
+	if (!value) return '-';
+	return value.toString().replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+};
 
 /**
- * Formats note data for display
+ * Formats the note data for display
  *
  * @param {object} note
  * @returns {object}
  */
 const formatNoteData = (note) =>
 {
-	const formatDate = (date) => date ? DateTime.format('standard', date) : 'Not set';
-	const formatType = (type) => type ? type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'General';
-
 	return {
+		...note,
 		title: note.title || 'Untitled Note',
-		content: note.content || 'No content',
-		noteType: formatType(note.noteType),
-		priority: note.priority ? note.priority.toUpperCase() : 'NORMAL',
-		visibility: note.visibility ? note.visibility.charAt(0).toUpperCase() + note.visibility.slice(1) : 'Team',
-		status: note.status ? note.status.charAt(0).toUpperCase() + note.status.slice(1) : 'Active',
-		tags: note.tags || 'No tags',
-		reminderAt: formatDate(note.reminderAt),
-		followUpAt: formatDate(note.followUpAt),
-		followUpNotes: note.followUpNotes || 'No follow-up notes',
-		createdAt: formatDate(note.createdAt),
-		updatedAt: formatDate(note.updatedAt)
+		content: note.content || 'No content available',
+		noteTypeLabel: formatLabel(note.noteType),
+		priorityLabel: formatLabel(note.priority),
+		visibilityLabel: formatLabel(note.visibility),
+		statusLabel: formatLabel(note.status),
+		tagsDisplay: note.tags || '-',
+		reminderAtFormatted: note.reminderAt ? DateTime.format('standard', note.reminderAt) : '-',
+		followUpAtFormatted: note.followUpAt ? DateTime.format('standard', note.followUpAt) : '-',
+		followUpNotesDisplay: note.followUpNotes || 'No follow-up notes',
+		attachmentUrlsDisplay: note.attachmentUrls || '-',
+		createdAtFormatted: note.createdAt ? DateTime.format('standard', note.createdAt) : '-',
+		updatedAtFormatted: note.updatedAt ? DateTime.format('standard', note.updatedAt) : '-'
 	};
 };
 
 /**
- * NoteDetailsModal
+ * Content section
  *
- * Modal showing full details of a note
- *
- * @param {object} props
- * @param {object} props.note - The note to display
- * @param {string} props.clientId - The client ID
- * @param {function} props.onUpdate - Callback when note is updated/deleted
  * @returns {object}
  */
-export const NoteDetailsModal = ({ note, clientId, onUpdate }) =>
-{
-	const formatted = formatNoteData(note);
-    const model = new ClientNoteModel({ ...note, clientId });
+const ContentSection = () =>
+	DetailSection({ title: 'Content' }, [
+		Div({ class: 'flex flex-col gap-y-3' }, [
+			SplitRow('Note', P({ class: 'text-sm text-muted-foreground whitespace-pre-line' }, '[[content]]'))
+		])
+	]);
 
-	/**
-	 * Deletes the note
-	 */
-	const deleteNote = function()
-	{
-		model.xhr.delete(note.id, () =>
-		{
-			this.close();
-			onUpdate?.(null);
-		});
-	};
+/**
+ * Note details section
+ *
+ * @returns {object}
+ */
+const NoteDetailsSection = () =>
+	DetailSection({ title: 'Note Details' }, [
+		Div({ class: 'flex flex-col gap-y-3' }, [
+			SplitRow('Type', '[[noteTypeLabel]]'),
+			SplitRow('Priority', '[[priorityLabel]]'),
+			SplitRow('Visibility', '[[visibilityLabel]]'),
+			SplitRow('Status', '[[statusLabel]]'),
+			SplitRow('Tags', '[[tagsDisplay]]')
+		])
+	]);
+
+/**
+ * Reminder section
+ *
+ * @returns {object}
+ */
+const ReminderSection = () =>
+	DetailSection({ title: 'Reminder' }, [
+		Div({ class: 'flex flex-col gap-y-3' }, [
+			SplitRow('Reminder Date', '[[reminderAtFormatted]]')
+		])
+	]);
+
+/**
+ * Follow-up section
+ *
+ * @returns {object}
+ */
+const FollowUpSection = () =>
+	DetailSection({ title: 'Follow-up' }, [
+		Div({ class: 'flex flex-col gap-y-3' }, [
+			SplitRow('Follow-up Date', '[[followUpAtFormatted]]'),
+			SplitRow('Follow-up Notes', P({ class: 'text-sm text-muted-foreground whitespace-pre-line' }, '[[followUpNotesDisplay]]'))
+		])
+	]);
+
+/**
+ * Attachments section
+ *
+ * @returns {object}
+ */
+const AttachmentsSection = () =>
+	DetailSection({ title: 'Attachments' }, [
+		Div({ class: 'flex flex-col gap-y-3' }, [
+			SplitRow('Attachments', '[[attachmentUrlsDisplay]]')
+		])
+	]);
+
+/**
+ * Audit section
+ *
+ * @returns {object}
+ */
+const AuditSection = () =>
+	DetailSection({ title: 'Audit Information' }, [
+		Div({ class: 'flex flex-col gap-y-3' }, [
+			SplitRow('Created', '[[createdAtFormatted]]'),
+			SplitRow('Last Updated', '[[updatedAtFormatted]]')
+		])
+	]);
+
+/**
+ * NoteDetailsModal
+ *
+ * A read-only modal showing note details.
+ *
+ * @param {object} props
+ * @param {object} props.note - The note data
+ * @param {string} props.clientId - The client ID
+ * @param {function} [props.onUpdate] - Callback when note is updated
+ * @param {function} [props.onClose] - Callback when modal closes
+ * @returns {object}
+ */
+export const NoteDetailsModal = (props = { note: {}, clientId: '', onUpdate: undefined, onClose: undefined }) =>
+{
+	const note = props.note || {};
+	const clientId = props.clientId || note.clientId;
+	const closeCallback = (parent) => props.onClose && props.onClose(parent);
 
 	return new Modal({
-		title: formatted.title,
-        icon: Icons.document.default,
-        description: 'Note Details',
-		headerOptions: HeaderOptions(),
+		title: formatNoteData(note).title,
+		icon: Icons.document.default,
+		description: formatNoteData(note).noteTypeLabel,
 		size: 'md',
 		type: 'right',
 		hidePrimaryButton: true,
-		data: model,
-		clientId,
-		onUpdate,
-		destroy: deleteNote
-	}, [
-		QuickActionButtons(note),
+
+		/**
+		 * This will setup the data for the modal.
+		 *
+		 * @returns {Data}
+		 */
+		setData()
+		{
+			return new Data(formatNoteData(note));
+		},
+
+		/**
+		 * Header options for the modal.
+		 */
+		headerOptions: HeaderOptions(note, clientId, props.onUpdate),
+
+		/**
+		 * This will close the modal.
+		 *
+		 * @returns {void}
+		 */
+		onClose: closeCallback
+	},
+	[
+		// Quick action badges
+		Div({ class: "flex items-center gap-2 pb-4 border-b" }, [
+			note.hasReminder === 1 && Badge({ type: 'outline', class: 'gap-1' }, [
+				Icon({ size: 'xs' }, Icons.bell),
+				'Reminder Set'
+			]),
+			note.requiresFollowUp === 1 && Badge({ type: 'outline', class: 'gap-1' }, [
+				Icon({ size: 'xs' }, Icons.arrowPath),
+				'Follow-up Required'
+			]),
+			note.isPinned === 1 && Badge({ type: 'outline', class: 'gap-1' }, [
+				Icon({ size: 'xs' }, Icons.pin),
+				'Pinned'
+			]),
+			note.priority === 'urgent' && Badge({ type: 'destructive' }, 'URGENT'),
+			note.priority === 'high' && Badge({ type: 'warning' }, 'HIGH')
+		]),
 
 		DetailBody([
 			// Content Section
-			DetailSection({
-				title: "Content",
-				items: [
-					SplitRow({ label: "Note", value: formatted.content, fullWidth: true })
-				]
-			}),
+			ContentSection(),
 
 			// Note Details Section
-			DetailSection({
-				title: "Note Details",
-				items: [
-					SplitRow({ label: "Type", value: formatted.noteType }),
-					SplitRow({ label: "Priority", value: formatted.priority }),
-					SplitRow({ label: "Visibility", value: formatted.visibility }),
-					SplitRow({ label: "Status", value: formatted.status }),
-					SplitRow({ label: "Tags", value: formatted.tags })
-				]
-			}),
+			NoteDetailsSection(),
 
 			// Reminder Section (only show if reminder is set)
-			note.hasReminder === 1 && DetailSection({
-				title: "Reminder",
-				items: [
-					SplitRow({ label: "Reminder Date", value: formatted.reminderAt })
-				]
-			}),
+			note.hasReminder === 1 && ReminderSection(),
 
 			// Follow-up Section (only show if follow-up is required)
-			note.requiresFollowUp === 1 && DetailSection({
-				title: "Follow-up",
-				items: [
-					SplitRow({ label: "Follow-up Date", value: formatted.followUpAt }),
-					SplitRow({ label: "Follow-up Notes", value: formatted.followUpNotes, fullWidth: true })
-				]
-			}),
+			note.requiresFollowUp === 1 && FollowUpSection(),
 
 			// Attachments Section (only show if attachments exist)
-			note.hasAttachments === 1 && DetailSection({
-				title: "Attachments",
-				items: [
-					SplitRow({ label: "Attachments", value: note.attachmentUrls || 'No attachments', fullWidth: true })
-				]
-			}),
+			note.hasAttachments === 1 && AttachmentsSection(),
 
 			// Audit Section
-			DetailSection({
-				title: "Audit Information",
-				items: [
-					SplitRow({ label: "Created", value: formatted.createdAt }),
-					SplitRow({ label: "Last Updated", value: formatted.updatedAt })
-				]
-			})
+			AuditSection()
 		])
 	]).open();
 };
