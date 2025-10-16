@@ -5,6 +5,7 @@ use Proto\Controllers\ResourceController as Controller;
 use Proto\Http\Router\Request;
 use Modules\Client\Models\Conversation\ClientConversation;
 use Modules\Client\Services\Conversation\ConversationAttachmentService;
+use Modules\Client\Auth\Policies\ClientResourcePolicy;
 
 /**
  * ClientConversationController
@@ -13,6 +14,11 @@ use Modules\Client\Services\Conversation\ConversationAttachmentService;
  */
 class ClientConversationController extends Controller
 {
+	/**
+	 * @var string|null $policy
+	 */
+	protected ?string $policy = ClientResourcePolicy::class;
+
 	/**
 	 * Initializes the model class.
 	 *
