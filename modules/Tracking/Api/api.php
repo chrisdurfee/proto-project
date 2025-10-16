@@ -13,4 +13,6 @@ router()
 	->middleware(([
 		CrossSiteProtectionMiddleware::class
 	]))
-	->resource('tracking/activity', ActivityController::class);
+	->post('tracking/activity', [ActivityController::class, 'add'])
+	->get('tracking/activity/type', [ActivityController::class, 'getByType'])
+	->delete('tracking/activity/type', [ActivityController::class, 'deleteUserByType']);
