@@ -34,6 +34,11 @@ class UserModule extends Module
 	 */
 	private function setAuthGates(): void
 	{
+		/**
+		 * Add the module's authentication gates to the auth manager
+		 * to allow for user authorization and access control
+		 * within the application.
+		 */
 		$auth = auth();
 		$auth->user = new UserGate();
 		$auth->role = new RoleGate();

@@ -461,7 +461,6 @@ docker compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit
 
 ### Test Documentation
 
-- **[Test Coverage Proposal](infrastructure/docs/TEST-COVERAGE-PROPOSAL.md)** - Comprehensive testing strategy with 130+ proposed tests across all critical systems
 - **[Quick Test Guide](infrastructure/docs/QUICK-TEST-GUIDE.md)** - Templates, examples, and patterns for writing tests quickly
 
 ---

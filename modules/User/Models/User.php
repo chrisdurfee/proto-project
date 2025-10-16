@@ -177,6 +177,20 @@ class User extends Model
 	}
 
 	/**
+	 * Get searchable fields for the model.
+	 *
+	 * @return array
+	 */
+	public function getSearchableFields(): array
+	{
+		return [
+			'id',
+			["CONCAT(u.first_name, ' ', u.last_name)"],
+			["CONCAT(u.last_name, ', ', u.first_name)"]
+		];
+	}
+
+	/**
 	 * @var string $storageType
 	 */
 	protected static string $storageType = UserStorage::class;

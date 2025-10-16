@@ -4,7 +4,7 @@ import { Badge, Card } from "@base-framework/ui/atoms";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { DataTable, DynamicDataTable } from "@base-framework/ui/organisms";
 import { Format } from "@base-framework/ui/utils";
-import { UserAuthedDeviceModel } from "../../../models/user-authed-device-model.js";
+import { UserAuthedDeviceModel } from "../../../users/models/user-authed-device-model.js";
 import { ProfileSection } from "./profile-section.js";
 
 /**

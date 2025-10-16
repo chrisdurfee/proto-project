@@ -27,7 +27,10 @@ class CrmAuthController extends AuthController
 
 		if (auth()->permission->hasPermission('crm.access') === false)
 		{
-			return $this->error('Access denied. CRM privileges required.', HttpStatus::FORBIDDEN->value);
+			return $this->error(
+				'Access denied. CRM privileges required.',
+				HttpStatus::FORBIDDEN->value
+			);
 		}
 
 		return $this->response([

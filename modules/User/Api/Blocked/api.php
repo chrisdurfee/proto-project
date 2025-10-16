@@ -3,6 +3,7 @@ namespace Modules\User\Api\Blocked;
 
 use Modules\User\Controllers\BlockUserController;
 use Proto\Http\Router\Router;
+use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * User Blocked Routes
@@ -10,6 +11,9 @@ use Proto\Http\Router\Router;
  * This will handle the API routes for the User blocked users.
  */
 router()
+	->middleware(([
+		CrossSiteProtectionMiddleware::class
+	]))
 	->group('user/:id/blocked', function(Router $router)
 	{
 		$router->get('', [BlockUserController::class, 'all']);

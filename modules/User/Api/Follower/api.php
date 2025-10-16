@@ -3,6 +3,7 @@ namespace Modules\User\Api\Followers;
 
 use Modules\User\Controllers\FollowerController;
 use Proto\Http\Router\Router;
+use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * User Followers Routes
@@ -10,6 +11,9 @@ use Proto\Http\Router\Router;
  * This will handle the API routes for the User followers.
  */
 router()
+	->middleware(([
+		CrossSiteProtectionMiddleware::class
+	]))
 	->group('user/:id/follower', function(Router $router)
 	{
 		$router->get('', [FollowerController::class, 'all']);

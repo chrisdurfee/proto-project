@@ -229,29 +229,6 @@ class UserStorage extends Storage
 	}
 
 	/**
-	 * Allow modifiers to adjust where clauses.
-	 *
-	 * @param array &$where Where clauses.
-	 * @param array|null $modifiers Modifiers.
-	 * @param array &$params Parameter array.
-	 * @param mixed $filter Filter criteria.
-	 * @return void
-	 */
-	protected static function setModifiers(array &$where = [], ?array $modifiers = null, array &$params = [], mixed $filter = null): void
-	{
-		$search = $modifiers['search'] ?? '';
-		if (empty($search) === false)
-		{
-			$search = "%{$search}%";
-			$params[] = $search;
-			$params[] = $search;
-			$params[] = $search;
-
-			$where[] = "(u.id LIKE ? OR CONCAT(u.first_name, ' ', u.last_name) LIKE ? OR CONCAT(u.last_name, ', ', u.first_name) LIKE ?)";
-		}
-	}
-
-	/**
 	 * (Optional) Sets a custom where clause.
 	 *
 	 * @param object $sql Query builder instance.

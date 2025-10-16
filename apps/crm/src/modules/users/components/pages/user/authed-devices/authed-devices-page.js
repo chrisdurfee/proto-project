@@ -1,6 +1,6 @@
 import { UseParent } from "@base-framework/atoms";
 import FullTablePage, { TableContainer } from "@components/pages/types/full/table/full-table-page.js";
-import { UserAuthedDeviceModel } from "../../models/user-authed-device-model.js";
+import { UserAuthedDeviceModel } from "../../users/models/user-authed-device-model.js";
 import { AuthedDevicesTable } from "./authed-devices-table.js";
 import { PageHeader } from "./page-header.js";
 

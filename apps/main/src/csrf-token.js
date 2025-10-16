@@ -11,14 +11,17 @@ function csrfSafeMethod(method)
 	return (/^(GET|HEAD|OPTIONS)$/.test(method));
 }
 
+let token = null;
+
 /**
  * Sets the CSRF token for AJAX requests.
  *
- * @param {string} token - The CSRF token to set.
+ * @param {string} newToken - The CSRF token to set.
  * @returns {void}
  */
-const setCsrfToken = (token) =>
+const setCsrfToken = (newToken) =>
 {
+	token = newToken;
 	// @ts-ignore
 	base.beforeSend((xhr, settings) =>
 	{
@@ -28,6 +31,13 @@ const setCsrfToken = (token) =>
 		}
 	});
 };
+
+/**
+ * This will get the token that has been saved.
+ *
+ * @returns {string|null}
+ */
+export const getSavedToken = () => token;
 
 /**
  * This will setup the csrf token.

@@ -1,4 +1,5 @@
 import { Data, Events, State } from "@base-framework/base";
+import { getSavedToken } from "../../csrf-token.js";
 import { ActionTimer } from "./action-timer.js";
 import { APP_STATE, STATES, STATE_ATTR } from "./state.js";
 
@@ -13,12 +14,16 @@ const sendRequest = (url, params) =>
 {
 	const controller = new AbortController();
   	const signal = controller.signal;
+	const token = getSavedToken();
 
 	const promise = fetch(url,
 	{
 		method: 'PATCH',
 		body: params,
-		headers: { 'Content-type': 'application/x-www-form-urlencoded' },
+		headers: {
+			'Content-type': 'application/x-www-form-urlencoded',
+			'CSRF-TOKEN': token
+		},
 		keepalive: true,
 		signal
 	});
