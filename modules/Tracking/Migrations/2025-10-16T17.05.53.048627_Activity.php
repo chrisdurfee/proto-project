@@ -23,20 +23,22 @@ class Activity extends Migration
 	{
 		$this->create('activity', function($table)
 		{
-				$table->id();
-				$table->timestamps();
-				$table->integer('user_id', 30);
-				$table->integer('ref_id', 30);
+			$table->id();
+			$table->timestamps();
+			$table->enum('type', 'client', 'ticket', 'message');
+			$table->integer('user_id', 30);
+			$table->integer('ref_id', 30);
 
-				// Indexes
-				$table->index('user_id')->fields('user_id', 'ref_id', 'created_at');
-				$table->index('created_at')->fields('created_at');
+			// Indexes
+			$table->index('user_id')->fields('type', 'user_id', 'ref_id', 'created_at');
+			$table->index('type')->fields('type', 'ref_id');
+			$table->index('created_at')->fields('created_at', 'type');
 
-				// FKs
-				$table->foreign('user_id')
-						->references('id')
-						->on('users')
-						->onDelete('cascade');
+			// FKs
+			$table->foreign('user_id')
+				->references('id')
+				->on('users')
+				->onDelete('cascade');
 		});
 	}
 

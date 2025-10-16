@@ -2,6 +2,7 @@
 namespace Modules\Tracking\Api;
 
 use Modules\Tracking\Controllers\ActivityController;
+use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * Tracking Routes
@@ -9,4 +10,7 @@ use Modules\Tracking\Controllers\ActivityController;
  * This file contains the API routes for the Tracking module.
  */
 router()
+	->middleware(([
+		CrossSiteProtectionMiddleware::class
+	]))
 	->resource('tracking/activity', ActivityController::class);
