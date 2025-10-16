@@ -26,6 +26,19 @@ trait ResponseTrait
 	}
 
 	/**
+	 * This will create a success response.
+	 *
+	 * @param mixed $data
+	 * @return object
+	 */
+	protected function success(mixed $data = null): object
+	{
+		$response = new Response();
+		$response->success($data);
+		return $response->format();
+	}
+
+	/**
 	 * This will create a response.
 	 *
 	 * @return object
