@@ -48,6 +48,11 @@ class SeedRolesAndPermissions extends Migration
                 'description' => 'Edit content'
             ],
             [
+                'name' => 'Contributor',
+                'slug' => 'contributor',
+                'description' => 'Add content'
+            ],
+            [
                 'name' => 'User',
                 'slug' => 'user',
                 'description' => 'Regular user access'
