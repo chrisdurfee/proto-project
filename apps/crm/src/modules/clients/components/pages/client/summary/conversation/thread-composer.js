@@ -122,16 +122,6 @@ export const ThreadComposer = Jot(
 		// Store files as instance property to preserve File objects
 		// @ts-ignore
 		this.selectedFiles = files;
-
-		if (files.length > 0)
-		{
-			app.notify({
-				icon: Icons.document.default,
-				type: 'default',
-				title: 'Files Selected',
-				description: `${files.length} file(s) ready to upload.`,
-			});
-		}
 	},
 
 	/**
@@ -150,64 +140,13 @@ export const ThreadComposer = Jot(
 
 		// Update model with message
 		// @ts-ignore
-		this.data.set('message', message);
+		this.data.message = message;
 
 		// Send via API with files passed separately to preserve File objects
 		// @ts-ignore
 		this.data.xhr.add('', (response) =>
 		{
-			if (response && response.success)
-			{
-				// Add optimistic update to conversation list
-				// @ts-ignore
-				const userData = window.app?.user || {};
-				const newMessage = {
-					id: response.id,
-					// @ts-ignore
-					clientId: this.client.id,
-					// @ts-ignore
-					userId: this.data.get('userId'),
-					message: message,
-					messageType: 'comment',
-					isInternal: 0,
-					isPinned: 0,
-					attachmentCount: 0,
-					createdAt: new Date().toISOString(),
-					userDisplayName: userData.displayName || 'You',
-					userFirstName: userData.firstName || 'You',
-					userLastName: userData.lastName || '',
-					userImage: userData.image || null,
-					attachments: []
-				};
-
-				// @ts-ignore
-				if (this.submitCallBack)
-				{
-					// @ts-ignore
-					this.submitCallBack(this.parent);
-				}
-
-				// Reset form
-				// @ts-ignore
-				this.textarea.value = '';
-				// @ts-ignore
-				if (this.fileInput)
-				{
-					// @ts-ignore
-					this.fileInput.value = '';
-				}
-				// @ts-ignore
-				this.data.message = '';
-				// @ts-ignore
-				this.selectedFiles = [];
-				// @ts-ignore
-				this.state.charCount = 0;
-				// @ts-ignore
-				this.state.isOverLimit = false;
-				// @ts-ignore
-				this.state.empty = true;
-			}
-			else
+			if (!response && !response.success)
 			{
 				app.notify({
 					type: "destructive",
@@ -215,9 +154,77 @@ export const ThreadComposer = Jot(
 					description: response?.message || "Failed to send message.",
 					icon: Icons.warning
 				});
+				return;
 			}
-		// @ts-ignore
+
+			// Add optimistic update to conversation list
+			// @ts-ignore
+			//this.addOptimisticUpdate(message, response.id);
+
+			// @ts-ignore
+			if (this.submitCallBack)
+			{
+				// @ts-ignore
+				this.submitCallBack(this.parent);
+			}
+
+			// Reset form
+			// @ts-ignore
+			this.textarea.value = '';
+			// @ts-ignore
+			if (this.fileInput)
+			{
+				// @ts-ignore
+				this.fileInput.value = '';
+			}
+
+			// @ts-ignore
+			this.data.message = '';
+			// @ts-ignore
+			this.selectedFiles = [];
+			// @ts-ignore
+			this.state.charCount = 0;
+			// @ts-ignore
+			this.state.isOverLimit = false;
+			// @ts-ignore
+			this.state.empty = true;
+			// @ts-ignore
 		}, this.selectedFiles);
+	},
+
+	/**
+	 * Add an optimistic update to the conversation.
+	 *
+	 * @param {string} message
+	 * @param {*} conversationId
+	 * @retuns void
+	 */
+	addOptimisticUpdate(message, conversationId)
+	{
+		// Add optimistic update to conversation list
+		// @ts-ignore
+		const userData = app.data?.user || {};
+		const newMessage = {
+			id: conversationId,
+			// @ts-ignore
+			clientId: this.client.id,
+			// @ts-ignore
+			userId: userData.id,
+			message: message,
+			messageType: 'comment',
+			isInternal: 0,
+			isPinned: 0,
+			attachmentCount: 0,
+			createdAt: new Date().toISOString(),
+			userDisplayName: userData.displayName || 'You',
+			userFirstName: userData.firstName || 'You',
+			userLastName: userData.lastName || '',
+			userImage: userData.image || null,
+			attachments: []
+		};
+
+		// @ts-ignore
+		this.parent.list.append([newMessage]);
 	},
 
 	/**
@@ -232,38 +239,38 @@ export const ThreadComposer = Jot(
 		this.resizeTextarea();
 
 		const keyCode = e.keyCode;
-		if (keyCode === 13)
+		if (keyCode !== 13)
 		{
-			if (e.ctrlKey === true)
-			{
-				// @ts-ignore
-				if (this.state.empty === true || this.state.isOverLimit === true)
-				{
-					e.preventDefault();
-					e.stopPropagation();
-
-					app.notify({
-						icon: Icons.warning,
-						type: 'warning',
-						title: 'Missing Message',
-						description: 'Please enter a message.',
-					});
-
-					return;
-				}
-
-				e.preventDefault();
-				e.stopPropagation();
-
-				// @ts-ignore
-				this.submit();
-			}
-			else
-			{
-				// @ts-ignore
-				this.resizeTextarea();
-			}
+			return;
 		}
+
+		if (e.ctrlKey !== true)
+		{
+			// @ts-ignore
+			this.resizeTextarea();
+			return;
+		}
+
+		// @ts-ignore
+		if (this.state.empty === true || this.state.isOverLimit === true)
+		{
+			e.preventDefault();
+			e.stopPropagation();
+
+			app.notify({
+				icon: Icons.warning,
+				type: 'warning',
+				title: 'Missing Message',
+				description: 'Please enter a message.',
+			});
+			return;
+		}
+
+		e.preventDefault();
+		e.stopPropagation();
+
+		// @ts-ignore
+		this.submit();
 	},
 
 	/**
