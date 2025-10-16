@@ -2,6 +2,7 @@
 namespace Modules\User\Api\Role\Permission;
 
 use Modules\User\Controllers\PermissionRoleController;
+use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * Role Permission Routes
@@ -9,4 +10,7 @@ use Modules\User\Controllers\PermissionRoleController;
  * This file contains the API routes for the permission module.
  */
 router()
+	->middleware(([
+		CrossSiteProtectionMiddleware::class
+	]))
 	->resource('user/role/:roleId/permission', PermissionRoleController::class);

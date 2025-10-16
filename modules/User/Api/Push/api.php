@@ -3,6 +3,7 @@ namespace Modules\User\Api\Push;
 
 use Modules\User\Controllers\WebPushController;
 use Proto\Http\Router\Router;
+use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * Push Routes
@@ -10,6 +11,9 @@ use Proto\Http\Router\Router;
  * This file contains the API routes for the push notifications.
  */
 router()
+	->middleware(([
+		CrossSiteProtectionMiddleware::class
+	]))
 	->group('user/:id/push', function(Router $router)
 	{
 		$router
