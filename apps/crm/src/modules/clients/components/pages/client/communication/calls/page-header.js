@@ -1,4 +1,4 @@
-import { Div, H1, Header, P } from "@base-framework/atoms";
+import { Div, H1, Header } from "@base-framework/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { SearchInput as BaseSearch } from "@base-framework/ui/organisms";
 
@@ -27,7 +27,6 @@ export const PageHeader = () => (
 		Div({ class: 'flex flex-auto items-center justify-between w-full' }, [
 			Div({ class: 'flex flex-col gap-1' }, [
 				H1({ class: 'text-3xl font-bold' }, 'Call History'),
-				P({ class: 'text-sm text-muted-foreground' }, 'View all calls made to and from this client')
 			]),
 			Div({ class: 'hidden lg:flex min-w-[440px]' }, [
 				SearchInput()

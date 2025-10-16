@@ -42,7 +42,7 @@ export const Sidebar = ({ clientId }) => (
 				icon: Icons.chat.group,
 				options: [
 					{ label: 'Contacts', href: `clients/${clientId}/contacts` },
-					{ label: 'Messages', href: `clients/${clientId}/messages` },
+					//{ label: 'Messages', href: `clients/${clientId}/messages` },
 					{ label: 'Calls', href: `clients/${clientId}/calls` },
 					{ label: 'Notes', href: `clients/${clientId}/notes` }
 				]
