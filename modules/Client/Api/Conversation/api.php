@@ -1,7 +1,8 @@
 <?php declare(strict_types=1);
-namespace Modules\Client\Api;
+namespace Modules\Client\Api\Conversation;
 
 use Modules\Client\Controllers\Conversation\ClientConversationController;
+use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * Client Conversation Routes
@@ -9,4 +10,7 @@ use Modules\Client\Controllers\Conversation\ClientConversationController;
  * This file contains the API routes for the Client Conversation Controller.
  */
 router()
+	->middleware(([
+		CrossSiteProtectionMiddleware::class
+	]))
 	->resource('client/:clientId/conversation', ClientConversationController::class);
