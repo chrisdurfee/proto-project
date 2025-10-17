@@ -30,7 +30,7 @@ class SecureRequestMiddleware
 			return false;
 		}
 
-		$userId = $request->params()->id ?? $request->input('userId') ?? null;
+		$userId = $request->params()->id ?? $request->getInt('userId') ?? null;
 		if (!isset($userId))
 		{
 			self::exitWithResponse();
