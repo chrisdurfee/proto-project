@@ -436,6 +436,8 @@ A simple admin UI lets you:
 ![IAM Page](https://raw.githubusercontent.com/chrisdurfee/proto-project/refs/heads/main/public/images/product/iam-page.png)
 ![IAM Modal](https://raw.githubusercontent.com/chrisdurfee/proto-project/refs/heads/main/public/images/product/iam-modal.png)
 ![Email Page](https://raw.githubusercontent.com/chrisdurfee/proto-project/refs/heads/main/public/images/product/email-page.png)
+![Client Page](https://raw.githubusercontent.com/chrisdurfee/proto-project/refs/heads/main/public/images/product/client-page.png)
+![Settings Page](https://raw.githubusercontent.com/chrisdurfee/proto-project/refs/heads/main/public/images/product/settings-page.png)
 
 ---
 
