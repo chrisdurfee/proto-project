@@ -2,6 +2,7 @@ import { Div, H2, On } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Page } from "@base-framework/ui/pages";
+import { ActivityAvatarGroup } from "@components/organisms/tracking/activity-avatar-group.js";
 import { ClientModal } from "../../../organisms/modals/client-modal.js";
 import { ClientContent } from "./client-content.js";
 import ClientSkeleton from "./client-skeleton.js";
@@ -32,6 +33,11 @@ const PageHeader = (client) => (
 	Div({ class: 'flex flex-row justify-between gap-4 py-4 lg:py-2' }, [
 		H2({ class: 'text-2xl font-medium' }, 'Client Summary'),
 		Div({ class: 'flex flex-row gap-x-2' }, [
+			new ActivityAvatarGroup({
+				type: 'client',
+				refId: client.id,
+				userId: app.data.user.id
+			}),
 			Div({ class: 'hidden lg:inline-flex' }, [
 				Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.pencil.square, click: (e, parent) => Modal(parent) }, 'Edit'),
 			]),

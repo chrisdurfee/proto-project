@@ -21,15 +21,7 @@ export const FollowingPage = () =>
 		}
 	});
 
-	/**
-	 * @type {object} Props
-	 */
-	const Props =
-	{
-		data,
-	};
-
-	return new BlankPage(Props, [
+	return new BlankPage({ data }, [
 		TableContainer([
 			UseParent(({ route }) =>
 			{
