@@ -52,6 +52,7 @@ const ClientSearchItem = (client, onClick) =>
 /**
  * This will create a search input for the calls page.
  *
+ * @param {object} data
  * @returns {object}
  */
 const SearchInput = (data) => (
@@ -59,8 +60,12 @@ const SearchInput = (data) => (
 		class: 'min-w-40 lg:min-w-96 mt-2',
 		placeholder: 'Search clients...',
 		bind: 'search',
-        autofocus: true,
-		keyup: (e, parent) => parent.list.refresh(),
+		autofocus: true,
+		keyup: (e, parent) =>
+		{
+			e.stopPropagation();
+			parent.list?.refresh();
+		},
 		icon: Icons.magnifyingGlass.default
 	})
 );
