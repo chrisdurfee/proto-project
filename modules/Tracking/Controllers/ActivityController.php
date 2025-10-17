@@ -27,13 +27,13 @@ class ActivityController extends Controller
 	 *
 	 * @return array<string, string>
 	 */
-	protected function validate(): array
-	{
-		return [
-			'userId' => 'int:30|required',
-			'refId' => 'int:30|required'
-		];
-	}
+	// protected function validate(): array
+	// {
+	// 	return [
+	// 		'userId' => 'int:30|required',
+	// 		'refId' => 'int:30|required'
+	// 	];
+	// }
 
 	/**
 	 * Gets model data by type.
@@ -51,7 +51,9 @@ class ActivityController extends Controller
 		}
 
 		return $this->response(
-			$this->model()->getByType($type, $refId)
+			[
+				'rows' => $this->model()->getByType($type, $refId)
+			]
 		);
 	}
 
