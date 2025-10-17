@@ -21,7 +21,7 @@ export const ActivityModel = Model.extend({
 		getByType(instanceParams, callBack)
 		{
 			const data = this.model.get();
-			let params = {
+			const params = {
 				type: data.type,
 				refId: data.refId
 			};
@@ -39,7 +39,7 @@ export const ActivityModel = Model.extend({
 		deleteUserByType(instanceParams, callBack)
 		{
 			const data = this.model.get();
-			let params = {
+			const params = {
 				type: data.type,
 				refId: data.refId,
 				userId: data.userId
