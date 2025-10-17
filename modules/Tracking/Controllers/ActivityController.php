@@ -23,19 +23,6 @@ class ActivityController extends Controller
 	}
 
 	/**
-	 * This will return the validation rules for the model.
-	 *
-	 * @return array<string, string>
-	 */
-	protected function validate(): array
-	{
-		return [
-			'userId' => 'int:30|required',
-			'refId' => 'int:30|required'
-		];
-	}
-
-	/**
 	 * Gets model data by type.
 	 *
 	 * @param Request $request The request object.
