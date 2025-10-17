@@ -107,8 +107,17 @@ export const ClientSearchModal = (props = {}) =>
 		description: 'Find and view client details.',
 		size: 'sm',
 		type: 'left',
-		showFooter: false,
-		onClose: () => props.onClose?.()
+		hidePrimaryButton: true,
+		closeOnEscape: false,
+		onClose: () => props.onClose?.(),
+		keydown: (e) =>
+		{
+			// Prevent modal from closing on any key except ESC
+			if (e.key !== 'Escape')
+			{
+				e.stopPropagation();
+			}
+		}
 	}, [
 		Div({ class: 'flex flex-col h-full' }, [
 			SearchInput(data),
