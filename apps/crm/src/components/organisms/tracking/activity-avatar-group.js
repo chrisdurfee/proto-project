@@ -81,7 +81,7 @@ const UserContainer = (props) => Div({ class: 'user' }, [
  * @returns {object}
  */
 const Group = () => Div({
-	class: 'flex gap-x-2',
+	class: 'flex gap-x-2 mx-2',
 	for: ['rows', UserContainer]
 });
 
