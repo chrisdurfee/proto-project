@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Tracking\Controllers;
 
+use Modules\Tracking\Auth\Policies\ActivityPolicy;
 use Proto\Controllers\ResourceController as Controller;
 use Modules\Tracking\Models\Activity;
 use Proto\Http\Router\Request;
@@ -12,6 +13,11 @@ use Proto\Http\Router\Request;
  */
 class ActivityController extends Controller
 {
+	/**
+	 * @var string|null $policy
+	 */
+	protected ?string $policy = ActivityPolicy::class;
+
 	/**
 	 * Initializes the model class.
 	 *
@@ -32,16 +38,14 @@ class ActivityController extends Controller
 	{
 		$type = $request->input('type');
         $refId = $request->getInt('refId');
-		if (empty($type) || empty($refId))
+		if (empty($type) || !isset($refId))
 		{
 			return $this->error('No item provided.');
 		}
 
-		return $this->response(
-			[
-				'rows' => $this->model()->getByType($type, $refId)
-			]
-		);
+		return $this->response([
+			'rows' => $this->model()->getByType($type, $refId)
+		]);
 	}
 
 	/**
@@ -55,7 +59,7 @@ class ActivityController extends Controller
 		$type = $request->input('type');
         $refId = $request->getInt('refId');
         $userId = $request->getInt('userId');
-		if (empty($type) || empty($refId) || empty($userId))
+		if (empty($type) || !isset($refId) || !isset($userId))
 		{
 			return $this->error('No item provided.');
 		}

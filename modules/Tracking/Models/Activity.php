@@ -4,7 +4,6 @@ namespace Modules\Tracking\Models;
 use Proto\Models\Model;
 use Modules\User\Models\User;
 
-
 /**
  * Activity
  *
