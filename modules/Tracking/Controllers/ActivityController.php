@@ -27,13 +27,13 @@ class ActivityController extends Controller
 	 *
 	 * @return array<string, string>
 	 */
-	// protected function validate(): array
-	// {
-	// 	return [
-	// 		'userId' => 'int:30|required',
-	// 		'refId' => 'int:30|required'
-	// 	];
-	// }
+	protected function validate(): array
+	{
+		return [
+			'userId' => 'int:30|required',
+			'refId' => 'int:30|required'
+		];
+	}
 
 	/**
 	 * Gets model data by type.
