@@ -57,7 +57,7 @@ const Group = () => Div({
 });
 
 /**
- * Resource Activity Group
+ * Activity Avatar Group
  *
  * Manages and displays active users viewing a resource.
  *
