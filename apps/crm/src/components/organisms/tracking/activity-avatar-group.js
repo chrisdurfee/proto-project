@@ -47,23 +47,14 @@ const UserContainer = (props) => Div({ class: 'user' }, [
 ]);
 
 /**
- * This will create a user group.
+ * This will create a group.
  *
  * @returns {object}
  */
-const UserGroup = () => Div({
+const Group = () => Div({
 	class: 'flex',
 	for: ['rows', UserContainer]
 });
-
-/**
- * This will create the resource user group.
- *
- * @returns {object}
- */
-const ResourceUserGroup = () => Div({ class: 'activity-avatar-group flex' }, [
-    UserGroup()
-]);
 
 /**
  * Resource Activity Group
@@ -284,7 +275,7 @@ export const ActivityAvatarGroup = Jot(
 	 */
 	render()
 	{
-		return ResourceUserGroup();
+		return Group();
 	},
 
 	/**
