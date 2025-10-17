@@ -64,6 +64,8 @@ const SearchInput = (data) => (
 		keyup: (e, parent) =>
 		{
 			e.stopPropagation();
+            e.preventDefault();
+
 			parent.list?.refresh();
 		},
 		icon: Icons.magnifyingGlass.default
