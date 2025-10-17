@@ -1,11 +1,12 @@
-import { Div } from "@base-framework/atoms";
-import { Atom, Component, Jot } from "@base-framework/base";
-import { Icons } from "@base-framework/ui/icons";
-import { InlineNavigation } from "@base-framework/ui/organisms";
-import { Configs } from "../../configs.js";
-import { NavigationAvatar } from "./avatars/navigation-avatar.js";
-import { MainHeader } from "./main-header.js";
-import { ShortNavigation } from "./short/short-navigation.js";
+import { Div } from '@base-framework/atoms';
+import { Atom, Component, Jot } from '@base-framework/base';
+import { Icons } from '@base-framework/ui/icons';
+import { InlineNavigation } from '@base-framework/ui/organisms';
+import { Configs } from '../../configs.js';
+import { ClientSearchModal } from '../../modules/clients/components/organisms/modals/client-search-modal.js';
+import { NavigationAvatar } from './avatars/navigation-avatar.js';
+import { MainHeader } from './main-header.js';
+import { ShortNavigation } from './short/short-navigation.js';
 
 /**
  * This will create the main navigation.
@@ -64,6 +65,17 @@ const LowerNavigation = () => (
 );
 
 /**
+ * SearchButton
+ *
+ * @returns {object}
+ */
+const SearchButton = () => ({
+	label: 'Search',
+	icon: Icons.magnifyingGlass.default,
+	click: () => ClientSearchModal()
+});
+
+/**
  * MainNavigation
  *
  * This will create the main navigation.
@@ -87,7 +99,7 @@ export const MainNavigation = Jot(
 					// @ts-ignore
 					useShortNav: this.useShortNav || false,
 					// @ts-ignore
-					options: this.options
+					options: [SearchButton(), ...this.options]
 				}),
 				LowerNavigation()
 			])
