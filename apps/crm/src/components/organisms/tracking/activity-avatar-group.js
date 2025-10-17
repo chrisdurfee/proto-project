@@ -15,25 +15,49 @@ const STATES = {
 };
 
 /**
+ * Configuration constants
+ */
+const INTERVAL_DURATION = 15000;
+const API_ENDPOINT = '/api/tracking/activity/type';
+
+/**
  * This will send a request with keep alive.
  *
  * @param {string} url
- * @param {string} params
- * @returns {Promise}
+ * @param {URLSearchParams} params
+ * @returns {Promise<Response>}
  */
 const sendRequest = (url, params) =>
 {
-    const token = getSavedToken();
+	const token = getSavedToken();
 
 	return fetch(url, {
 		method: 'DELETE',
 		body: params,
 		headers: {
-            'Content-type': 'application/x-www-form-urlencoded',
-            'CSRF-TOKEN': token
-        },
+			'Content-type': 'application/x-www-form-urlencoded',
+			'CSRF-TOKEN': token
+		},
 		keepalive: true
 	});
+};
+
+/**
+ * Removes a user from the activity.
+ *
+ * @param {object} data
+ * @returns void
+ */
+const removeUser = (data) =>
+{
+	const params = new URLSearchParams({
+		op: 'deleteUserByType',
+		type: data.type,
+		refId: data.refId,
+		userId: data.userId
+	});
+
+	sendRequest(API_ENDPOINT, params);
 };
 
 /**
@@ -43,7 +67,12 @@ const sendRequest = (url, params) =>
  * @returns {object}
  */
 const UserContainer = (props) => Div({ class: 'user' }, [
-    Avatar({ src: `/files/users/profile/${props.image}`, alt: props.displayName, fallbackText: props.displayName, size: "sm" })
+	Avatar({
+		src: `/files/users/profile/${props.image}`,
+		alt: props.displayName,
+		fallbackText: props.displayName,
+		size: 'sm'
+	})
 ]);
 
 /**
@@ -75,8 +104,7 @@ export const ActivityAvatarGroup = Jot(
 	 */
 	onCreated()
 	{
-        const INTERVAL_DURATION = 15000;
-        // @ts-ignore
+		// @ts-ignore
 		this.timer = new IntervalTimer(INTERVAL_DURATION, () => this.updateUsers());
 	},
 
@@ -88,11 +116,11 @@ export const ActivityAvatarGroup = Jot(
 	setData()
 	{
 		return new ActivityModel({
-            // @ts-ignore
+			// @ts-ignore
 			type: this.type,
-            // @ts-ignore
+			// @ts-ignore
 			refId: this.refId,
-            // @ts-ignore
+			// @ts-ignore
 			userId: this.userId,
 			rows: []
 		});
@@ -112,12 +140,14 @@ export const ActivityAvatarGroup = Jot(
 				{
 					if (value === STATES.ACTIVE)
 					{
-                        // @ts-ignore
+						// @ts-ignore
 						this.addUser();
+						return;
 					}
-					else if (value === STATES.INACTIVE)
+
+					if (value === STATES.INACTIVE)
 					{
-                        // @ts-ignore
+						// @ts-ignore
 						this.removeUser();
 					}
 				}
@@ -130,44 +160,44 @@ export const ActivityAvatarGroup = Jot(
 	 *
 	 * @returns {Array}
 	 */
-	setupEvents()
+	events()
 	{
-		const events = [
-			['visibilitychange', document, () =>
-			{
-				if (document.visibilityState === 'visible')
-				{
-                    // @ts-ignore
-					this.setActive();
-					return;
-				}
+		const handleVisibilityChange = () =>
+		{
+			const isVisible = document.visibilityState === 'visible';
+			// @ts-ignore
+			isVisible ? this.setActive() : this.setInactive();
+		};
 
-                // @ts-ignore
-				this.setInactive();
-			}]
+		const events = [
+			['visibilitychange', document, handleVisibilityChange]
 		];
 
 		if (Env.isSafari)
 		{
-            // @ts-ignore
-			events.push(['pageshow', window, (e) =>
+			const handlePageShow = (e) =>
 			{
-				if (e.persisted === false)
+				if (!e.persisted)
 				{
-                    // @ts-ignore
+					// @ts-ignore
 					this.setActive();
 				}
-			}]);
+			};
 
-            // @ts-ignore
-			events.push(['pagehide', window, (e) =>
+			const handlePageHide = (e) =>
 			{
-				if (e.persisted === false)
+				if (!e.persisted)
 				{
-                    // @ts-ignore
+					// @ts-ignore
 					this.setInactive();
 				}
-			}]);
+			};
+
+			events.push(
+				// @ts-ignore
+				['pageshow', window, handlePageShow],
+				['pagehide', window, handlePageHide]
+			);
 		}
 
 		return events;
@@ -180,16 +210,16 @@ export const ActivityAvatarGroup = Jot(
 	 */
 	updateUsers()
 	{
-        // @ts-ignore
-		const data = this.data;
-		data.xhr.getByType('', (response) =>
+		// @ts-ignore
+		this.data.xhr.getByType('', (response) =>
 		{
-			if (!response)
+			if (!response?.rows)
 			{
 				return;
 			}
 
-			data.rows = response.rows;
+			// @ts-ignore
+			this.data.rows = response.rows;
 		});
 	},
 
@@ -201,7 +231,7 @@ export const ActivityAvatarGroup = Jot(
 	 */
 	updateStatus(status)
 	{
-        // @ts-ignore
+		// @ts-ignore
 		this.state.status = status;
 	},
 
@@ -212,7 +242,7 @@ export const ActivityAvatarGroup = Jot(
 	 */
 	setActive()
 	{
-        // @ts-ignore
+		// @ts-ignore
 		this.updateStatus(STATES.ACTIVE);
 	},
 
@@ -223,7 +253,7 @@ export const ActivityAvatarGroup = Jot(
 	 */
 	setInactive()
 	{
-        // @ts-ignore
+		// @ts-ignore
 		this.updateStatus(STATES.INACTIVE);
 	},
 
@@ -234,8 +264,8 @@ export const ActivityAvatarGroup = Jot(
 	 */
 	addUser()
 	{
-        // @ts-ignore
-		this.data.xhr.add('', (response) => this.updateUsers());
+		// @ts-ignore
+		this.data.xhr.add('', () => this.updateUsers());
 	},
 
 	/**
@@ -245,14 +275,9 @@ export const ActivityAvatarGroup = Jot(
 	 */
 	removeUser()
 	{
-        // @ts-ignore
+		// @ts-ignore
 		const data = this.data.get();
-		let params = 'op=deleteUserByType' +
-            '&type=' + data.type +
-            '&refId=' + data.refId +
-            '&userId=' + data.userId;
-
-		sendRequest('/api/tracking/activity/type', params);
+		removeUser(data);
 	},
 
 	/**
@@ -262,9 +287,9 @@ export const ActivityAvatarGroup = Jot(
 	 */
 	after()
 	{
-        // @ts-ignore
+		// @ts-ignore
 		this.setActive();
-        // @ts-ignore
+		// @ts-ignore
 		this.timer.start();
 	},
 
@@ -283,11 +308,11 @@ export const ActivityAvatarGroup = Jot(
 	 *
 	 * @returns {void}
 	 */
-	beforeDestroy()
+	destroy()
 	{
-        // @ts-ignore
+		// @ts-ignore
 		this.timer.stop();
-        // @ts-ignore
+		// @ts-ignore
 		this.setInactive();
 	}
 });
