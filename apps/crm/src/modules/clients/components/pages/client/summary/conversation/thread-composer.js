@@ -170,26 +170,36 @@ export const ThreadComposer = Jot(
 
 			// Reset form
 			// @ts-ignore
-			this.textarea.value = '';
-			// @ts-ignore
-			if (this.fileInput)
-			{
-				// @ts-ignore
-				this.fileInput.value = '';
-			}
+			this.reset();
 
 			// @ts-ignore
-			this.data.message = '';
-			// @ts-ignore
-			this.selectedFiles = [];
-			// @ts-ignore
-			this.state.charCount = 0;
-			// @ts-ignore
-			this.state.isOverLimit = false;
-			// @ts-ignore
-			this.state.empty = true;
-			// @ts-ignore
 		}, this.selectedFiles);
+	},
+
+	/**
+	 * Reset the form.
+	 *
+	 * @returns {void}
+	 */
+	reset()
+	{
+		// Reset form
+		// @ts-ignore
+		this.textarea.value = '';
+		// @ts-ignore
+		(this.fileInput) && (this.fileInput.value = '');
+
+		// @ts-ignore
+		this.data.message = '';
+		// @ts-ignore
+		this.selectedFiles = [];
+
+		// @ts-ignore
+		this.state.set({
+			empty: true,
+			charCount: 0,
+			isOverLimit: false
+		});
 	},
 
 	/**
