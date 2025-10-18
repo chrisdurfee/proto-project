@@ -46,9 +46,6 @@ export const ConversationSection = Atom(({ client }) =>
 {
 	const data = new ConversationModel({
 		clientId: client.id,
-		filter: {
-			clientId: client.id
-		},
 		orderBy: {
 			createdAt: 'desc'
 		}

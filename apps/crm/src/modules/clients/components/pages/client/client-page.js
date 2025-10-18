@@ -34,8 +34,11 @@ const Props =
 	updateClient()
 	{
 		const data = this.context.data;
-		data.set({ loaded: false });
+		data.loaded = false;
 
+		/**
+		 * Set the client ID for the request.
+		 */
 		data.id = this.route.clientId;
 		data.xhr.get('', (response) =>
 		{

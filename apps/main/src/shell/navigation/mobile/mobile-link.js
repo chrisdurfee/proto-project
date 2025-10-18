@@ -44,7 +44,7 @@ export const MobileLink = (props) => (
  * @returns {object}
  */
 export const MobileButton = (props) => (
-	Li({ class: `mobile-link flex flex-auto items-center justify-center ${getMaxHeight(props)}`, click: props.click }, [
+	Li({ class: `mobile-link flex flex-auto items-center justify-center ${getMaxHeight(props)} cursor-pointer`, click: props.click }, [
 		Div({
 			class: 'p-[4px] flex flex-col items-center justify-center rounded-md md:hover:bg-accent transition-colors duration-200',
 		},

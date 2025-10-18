@@ -74,4 +74,21 @@ class ClientConversationController extends Controller
 		$userId = getSession('user')->id ?? null;
 		return $this->service->handleAttachments($request, $result->id, $userId);
 	}
+
+	/**
+	 * Modifies the filter object based on the request.
+	 *
+	 * @param mixed $filter
+	 * @param Request $request
+	 * @return object|null
+	 */
+	protected function modifyFilter(?object $filter, Request $request): ?object
+	{
+		if ($request->params()->clientId)
+		{
+			$filter->clientId = $request->params()->clientId;
+		}
+
+		return $filter;
+	}
 }
