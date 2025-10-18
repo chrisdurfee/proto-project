@@ -54,7 +54,7 @@ const formatFileSize = (bytes) =>
  */
 const Attachment = (att) =>
 {
-	const isImage = att.fileType?.startsWith('image/');
+	const isImage = (['jpg', 'jpeg', 'png', 'gif', 'tiff', 'bmp', 'webp'].includes(att.fileExtension));
 	const filePath = `/files/client/conversation/${att.filePath}`;
 
 	return Div({

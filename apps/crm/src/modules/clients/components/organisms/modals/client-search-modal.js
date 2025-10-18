@@ -61,10 +61,18 @@ const SearchInput = (data) => (
 		placeholder: 'Search clients...',
 		bind: 'search',
 		autofocus: true,
+		keydown: (e, parent) =>
+		{
+			// Prevent Enter from submitting and closing the modal
+			if (e.key === 'Enter')
+			{
+				e.preventDefault();
+				e.stopPropagation();
+			}
+		},
 		keyup: (e, parent) =>
 		{
 			e.stopPropagation();
-            e.preventDefault();
 
 			parent.list?.refresh();
 		},
@@ -107,17 +115,8 @@ export const ClientSearchModal = (props = {}) =>
 		description: 'Find and view client details.',
 		size: 'sm',
 		type: 'left',
-		hidePrimaryButton: true,
-		closeOnEscape: false,
-		onClose: () => props.onClose?.(),
-		keydown: (e) =>
-		{
-			// Prevent modal from closing on any key except ESC
-			if (e.key !== 'Escape')
-			{
-				e.stopPropagation();
-			}
-		}
+		showFooter: false,
+		onClose: () => props.onClose?.()
 	}, [
 		Div({ class: 'flex flex-col h-full' }, [
 			SearchInput(data),

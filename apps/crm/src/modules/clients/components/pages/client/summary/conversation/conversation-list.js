@@ -1,5 +1,5 @@
 import { Div, P, Span, UseParent } from "@base-framework/atoms";
-import { Atom, DateTime } from "@base-framework/base";
+import { DateTime } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Avatar } from "@base-framework/ui/molecules";
 import { Attachments } from "./attachments.js";
@@ -21,10 +21,10 @@ const DateDivider = (date) =>
  * @typedef {object} Divider
  */
 const Divider = {
-    skipFirst: true,
-    itemProperty: "createdAt",
-    layout: DateDivider,
-    customCompare: (a, b) => DateTime.format('standard', a) !== DateTime.format('standard', b)
+	skipFirst: true,
+	itemProperty: "createdAt",
+	layout: DateDivider,
+	customCompare: (a, b) => DateTime.format('standard', a) !== DateTime.format('standard', b)
 };
 
 /**
@@ -35,7 +35,7 @@ const Divider = {
  * @param {object} msg
  * @returns {object}
  */
-const ConversationListItem = Atom((msg) =>
+const ConversationListItem = (msg) =>
 {
 	const name = `${msg.firstName} ${msg.lastName}`;
 	return Div({ class: "flex gap-x-3 px-6 py-4 hover:bg-muted/50" }, [
@@ -52,7 +52,7 @@ const ConversationListItem = Atom((msg) =>
 				Attachments(msg.attachments)
 		])
 	]);
-});
+};
 
 /**
  * ConversationList
@@ -61,17 +61,17 @@ const ConversationListItem = Atom((msg) =>
  * @returns {object}
  */
 export const ConversationList = ({ data }) =>
-    UseParent((parent)=> (
-        ScrollableList({
-            scrollDirection: 'up',
-            data,
-            cache: "list",
-            key: "id",
-            role: "list",
-            class: "flex flex-col",
-            limit: 25,
-            divider: Divider,
-            rowItem: ConversationListItem,
-            scrollContainer: parent.listContainer
-        })
-    ));
+	UseParent((parent)=> (
+		ScrollableList({
+			scrollDirection: 'up',
+			data,
+			cache: "list",
+			key: "id",
+			role: "list",
+			class: "flex flex-col",
+			limit: 25,
+			divider: Divider,
+			rowItem: ConversationListItem,
+			scrollContainer: parent.listContainer
+		})
+	));
