@@ -28,7 +28,7 @@ const ClientSearchItem = (client, onClick) =>
 		class: 'flex items-center gap-x-3 p-3 cursor-pointer',
 		margin: 'my-2',
 		hover: true,
-		click: () => onClick?.(client)
+		click: (e, { parent }) => onClick?.(client, parent)
 	}, [
 		Avatar({
 			src: client.avatar,
@@ -60,12 +60,7 @@ const SearchInput = (data) => (
 		placeholder: 'Search clients...',
 		bind: 'search',
 		autofocus: true,
-		keyup: (e, parent) =>
-		{
-			e.stopPropagation();
-
-			parent.list?.refresh();
-		},
+		keyup: (e, parent) => parent.list?.refresh(),
 		icon: Icons.magnifyingGlass.default
 	})
 );
@@ -90,8 +85,13 @@ export const ClientSearchModal = (props = {}) =>
 	 *
 	 * @param {object} client
 	 */
-	const handleClientClick = (client) =>
+	const handleClientClick = (client, parent) =>
 	{
+        if (parent)
+        {
+            parent.close();
+        }
+
 		if (client.id)
 		{
 			app.navigate(`clients/${client.id}`);
