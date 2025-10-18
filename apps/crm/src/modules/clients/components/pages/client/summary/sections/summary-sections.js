@@ -1,4 +1,4 @@
-import { A, Div, H2, Header, P } from "@base-framework/atoms";
+import { A, Div, H2, Header, P, Span } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
 import { List } from "@base-framework/organisms";
 import { Badge, Card, Icon } from "@base-framework/ui/atoms";
@@ -49,7 +49,7 @@ export const ClientAvatarSection = Atom(({ client }) =>
 				P({ class: "text-sm text-muted-foreground" }, "#[[client.id]]")
 			]),
 			Div({ class: "flex items-center gap-x-2" }, [
-				P({ class: "text-sm text-muted-foreground" }, Format.default("[[client.contactName]]", "No contact")),
+				Span({ class: "text-sm text-muted-foreground" }, Format.default("[[client.city]]", "No city")),
 				Badge({
 					variant: client.status === "Active" ? "primary" : "secondary"
 				}, Format.default("[[client.status]]", "Unknown"))

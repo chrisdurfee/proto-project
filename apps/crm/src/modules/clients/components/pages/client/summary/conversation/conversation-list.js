@@ -1,7 +1,7 @@
 import { Div, P, Span, UseParent } from "@base-framework/atoms";
 import { DateTime } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
-import { Avatar } from "@base-framework/ui/molecules";
+import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { Attachments } from "./attachments.js";
 
 /**
@@ -72,6 +72,11 @@ export const ConversationList = ({ data }) =>
 			limit: 25,
 			divider: Divider,
 			rowItem: ConversationListItem,
-			scrollContainer: parent.listContainer
+			scrollContainer: parent.listContainer,
+			emptyState: () => EmptyState(
+			{
+				title: 'It\'s quiet here...',
+				description: 'Let\'s start a conversation!'
+			})
 		})
 	));
