@@ -1,6 +1,7 @@
 import { Div, H2, On } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
+import { EmptyState } from "@base-framework/ui/molecules";
 import { Page } from "@base-framework/ui/pages";
 import { ActivityAvatarGroup } from "@components/organisms/tracking/activity-avatar-group.js";
 import { ClientModal } from "../../../organisms/modals/client-modal.js";
@@ -77,7 +78,10 @@ export const SummaryPage = () => (
 			const client = context.data.client;
 			if (!client)
 			{
-				return Div({ class: "text-center" }, "Client not found.");
+				return EmptyState({
+					title: 'Client not found',
+					description: 'Please check the client ID and try again.'
+				});
 			}
 
 			return Div({ class: 'flex flex-auto p-0 pt-0 w-full' }, [

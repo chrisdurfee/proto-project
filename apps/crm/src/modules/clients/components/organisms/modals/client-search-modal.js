@@ -1,5 +1,6 @@
 import { Div } from '@base-framework/atoms';
 import { ScrollableList } from '@base-framework/organisms';
+import { Badge } from '@base-framework/ui';
 import { Card } from '@base-framework/ui/atoms';
 import { Icons } from '@base-framework/ui/icons';
 import { Avatar, EmptyState, Modal } from '@base-framework/ui/molecules';
@@ -42,7 +43,7 @@ const ClientSearchItem = (client, onClick) =>
 				client.industry && Div({ class: 'capitalize' }, client.industry),
 				client.city && client.city && Div('•'),
 				client.state && Div(`${client.state}`),
-				Div({ class: `${statusColor} capitalize` }, client.status || 'Unknown')
+				Badge({ class: `${statusColor} capitalize` }, client.status || 'Unknown')
 			])
 		])
 	]);
@@ -66,6 +67,19 @@ const SearchInput = (data) => (
 );
 
 /**
+ * Handle client selection
+ *
+ * @param {object} client
+ */
+const handleClientClick = (client, parent) =>
+{
+	parent?.close();
+
+	const clientId = client.id ?? '';
+	app.navigate(`clients/${clientId}`);
+};
+
+/**
  * ClientSearchModal
  *
  * A modal for searching clients.
@@ -79,19 +93,6 @@ export const ClientSearchModal = (props = {}) =>
 		search: '',
 		filter: {}
 	});
-
-	/**
-	 * Handle client selection
-	 *
-	 * @param {object} client
-	 */
-	const handleClientClick = (client, parent) =>
-	{
-        parent?.close();
-
-        const clientId = client.id ?? '';
-		app.navigate(`clients/${clientId}`);
-	};
 
 	return new Modal({
 		data,
