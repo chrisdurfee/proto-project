@@ -1,6 +1,6 @@
 import { Nav, Ul } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
-import { MobileLink } from "../mobile/mobile-link.js";
+import { MobileButton, MobileLink } from "../mobile/mobile-link.js";
 
 /**
  * This will flatten the options to a single array.
@@ -46,6 +46,13 @@ const createOptions = (options) =>
 
 	return navOptions.map(option =>
 	{
+		if (option.click)
+		{
+			return MobileButton({
+				maxHeight,
+				...option
+			});
+		}
 		return MobileLink({
 			maxHeight,
 			...option
