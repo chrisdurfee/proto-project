@@ -84,9 +84,10 @@ class ClientConversationController extends Controller
 	 */
 	protected function modifyFilter(?object $filter, Request $request): ?object
 	{
-		if ($request->params()->clientId)
+		$clientId = $request->params()->clientId ?? null;
+		if (isset($clientId))
 		{
-			$filter->clientId = $request->params()->clientId;
+			$filter->clientId = $clientId;
 		}
 
 		return $filter;

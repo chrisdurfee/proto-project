@@ -4,6 +4,7 @@ namespace Modules\Client\Controllers;
 use Modules\Client\Auth\Policies\ClientResourcePolicy;
 use Modules\Client\Models\ClientNote;
 use Proto\Controllers\ResourceController;
+use Proto\Http\Router\Request;
 
 /**
  * ClientNoteController
@@ -25,5 +26,23 @@ class ClientNoteController extends ResourceController
 	)
 	{
 		parent::__construct();
+	}
+
+    /**
+	 * Modifies the filter object based on the request.
+	 *
+	 * @param mixed $filter
+	 * @param Request $request
+	 * @return object|null
+	 */
+	protected function modifyFilter(?object $filter, Request $request): ?object
+	{
+		$clientId = $request->params()->clientId ?? null;
+		if (isset($clientId))
+		{
+			$filter->clientId = $clientId;
+		}
+
+		return $filter;
 	}
 }
