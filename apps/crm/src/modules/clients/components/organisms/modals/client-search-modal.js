@@ -3,8 +3,8 @@ import { ScrollableList } from '@base-framework/organisms';
 import { Card } from '@base-framework/ui/atoms';
 import { Icons } from '@base-framework/ui/icons';
 import { Avatar, EmptyState, Modal } from '@base-framework/ui/molecules';
-import { SearchInput as BaseSearch } from '@base-framework/ui/organisms';
 import { ClientModel } from '../../models/client-model.js';
+import { SearchInput as BaseSearch } from './search-input.js';
 
 /**
  * ClientSearchItem
@@ -17,7 +17,7 @@ import { ClientModel } from '../../models/client-model.js';
  */
 const ClientSearchItem = (client, onClick) =>
 {
-	const displayName = client.displayName || client.name || 'Unknown';
+	const displayName = client.companyName || 'Unknown';
 	const statusColors = {
 		active: 'text-emerald-500',
 		inactive: 'text-red-500'
@@ -26,7 +26,7 @@ const ClientSearchItem = (client, onClick) =>
 
 	return Card({
 		class: 'flex items-center gap-x-3 p-3 cursor-pointer',
-		margin: 'm-2',
+		margin: 'my-2',
 		hover: true,
 		click: () => onClick?.(client)
 	}, [
@@ -39,11 +39,10 @@ const ClientSearchItem = (client, onClick) =>
 		Div({ class: 'flex flex-col flex-1 min-w-0' }, [
 			Div({ class: 'font-medium truncate' }, displayName),
 			Div({ class: 'flex items-center gap-2 text-sm text-muted-foreground' }, [
-				client.gender && Div({ class: 'capitalize' }, client.gender),
-				client.gender && client.age && Div('•'),
-				client.age && Div(`${client.age}y`),
-				(client.gender || client.age) && Div('•'),
-				Div({ class: statusColor }, client.status || 'Unknown')
+				client.industry && Div({ class: 'capitalize' }, client.industry),
+				client.city && client.city && Div('•'),
+				client.state && Div(`${client.state}`),
+				Div({ class: `${statusColor} capitalize` }, client.status || 'Unknown')
 			])
 		])
 	]);
@@ -61,15 +60,6 @@ const SearchInput = (data) => (
 		placeholder: 'Search clients...',
 		bind: 'search',
 		autofocus: true,
-		keydown: (e, parent) =>
-		{
-			// Prevent Enter from submitting and closing the modal
-			if (e.key === 'Enter')
-			{
-				e.preventDefault();
-				e.stopPropagation();
-			}
-		},
 		keyup: (e, parent) =>
 		{
 			e.stopPropagation();
@@ -120,7 +110,7 @@ export const ClientSearchModal = (props = {}) =>
 	}, [
 		Div({ class: 'flex flex-col h-full' }, [
 			SearchInput(data),
-			Div({ class: 'flex-1 overflow-hidden' }, [
+			Div({ class: 'flex-1 overflow-hidden mt-8' }, [
 				ScrollableList({
 					data,
 					cache: 'list',
