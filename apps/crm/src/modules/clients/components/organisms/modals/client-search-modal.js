@@ -87,15 +87,10 @@ export const ClientSearchModal = (props = {}) =>
 	 */
 	const handleClientClick = (client, parent) =>
 	{
-        if (parent)
-        {
-            parent.close();
-        }
+        parent?.close();
 
-		if (client.id)
-		{
-			app.navigate(`clients/${client.id}`);
-		}
+        const clientId = client.id ?? '';
+		app.navigate(`clients/${clientId}`);
 	};
 
 	return new Modal({
