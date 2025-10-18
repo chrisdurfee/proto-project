@@ -100,7 +100,7 @@ export const ClientSearchModal = (props = {}) =>
 		description: 'Find and view client details.',
 		size: 'sm',
 		type: 'left',
-		showFooter: false,
+		hidePrimaryButton: true,
 		onClose: () => props.onClose?.()
 	}, [
 		Div({ class: 'flex flex-col h-full' }, [
