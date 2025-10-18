@@ -72,6 +72,7 @@ const LowerNavigation = () => (
 const SearchButton = () => ({
 	label: 'Search',
 	icon: Icons.magnifyingGlass.default,
+	exact: true,
 	click: () => ClientSearchModal()
 });
 
