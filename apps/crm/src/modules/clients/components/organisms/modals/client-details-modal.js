@@ -33,9 +33,9 @@ export const ClientDetailsModal = (props) =>
 	return new Modal({
 		title: 'Client Profile',
 		icon: Icons.identification,
-		size: 'lg',
+		size: 'md',
 		type: 'right',
-		hidePrimaryButton: true,
+		hideFooter: true,
 
 		/**
 		 * This will setup the data for the modal.
@@ -58,7 +58,7 @@ export const ClientDetailsModal = (props) =>
 		onClose: closeCallback
 	},
 	[
-		Div({ class: 'flex flex-col gap-y-4' }, [
+		Div({ class: 'flex flex-auto flex-col gap-y-4' }, [
 			// Client avatar section
 			ClientDetailsAvatar({ client }),
 

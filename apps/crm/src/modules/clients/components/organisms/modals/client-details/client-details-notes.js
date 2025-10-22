@@ -1,4 +1,4 @@
-import { Div, P, Span } from "@base-framework/atoms";
+import { Div, P, Span, UseParent } from "@base-framework/atoms";
 import { Atom, DateTime } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
@@ -38,14 +38,13 @@ const Divider = {
  */
 const NoteListItem = (note) =>
 {
-	const name = note.createdBy || note.userDisplayName || 'Unknown User';
-	const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+	const name = note.firstName + ' ' + (note.lastName || '');
 
 	return Div({ class: "flex gap-x-3 px-4 py-4 hover:bg-muted/50" }, [
 		Avatar({
 			src: note.userImage && `/files/users/profile/${note.userImage}`,
 			alt: name,
-			fallbackText: initials,
+			fallbackText: name,
 			size: "sm"
 		}),
 		Div({ class: "flex-1 gap-y-1" }, [
@@ -73,27 +72,27 @@ const NoteListItem = (note) =>
  *
  * @param {object} props
  * @param {object} props.data - The notes data model
- * @param {object} props.scrollContainer - The scroll container element
  * @returns {object}
  */
-const NotesList = Atom(({ data, scrollContainer }) =>
-	ScrollableList({
-		scrollDirection: 'up',
-		data,
-		cache: "notesList",
-		key: "id",
-		role: "list",
-		class: "flex flex-col",
-		limit: 25,
-		divider: Divider,
-		rowItem: NoteListItem,
-		scrollContainer: scrollContainer,
-		emptyState: () => EmptyState({
-			title: 'No notes yet',
-			description: 'Start the conversation by adding the first note.'
+const NotesList = ({ data }) =>
+	UseParent((parent) => (
+		ScrollableList({
+			scrollDirection: 'up',
+			data,
+			cache: "list",
+			key: "id",
+			role: "list",
+			class: "flex flex-col",
+			limit: 25,
+			divider: Divider,
+			rowItem: NoteListItem,
+			scrollContainer: parent.notesScrollContainer,
+			emptyState: () => EmptyState({
+				title: 'No notes yet',
+				description: 'Start the conversation by adding the first note.'
+			})
 		})
-	})
-);
+	));
 
 /**
  * ClientDetailsNotes
@@ -108,7 +107,7 @@ const NotesList = Atom(({ data, scrollContainer }) =>
 export const ClientDetailsNotes = Atom(({ client, clientId }) =>
 {
 	const data = new ClientNoteModel({
-		clientId: clientId,
+		clientId,
 		orderBy: {
 			createdAt: 'desc'
 		}
@@ -122,20 +121,18 @@ export const ClientDetailsNotes = Atom(({ client, clientId }) =>
 			class: "flex-1 overflow-y-auto",
 			cache: "notesScrollContainer"
 		}, [
-			NotesList({
-				data,
-				get scrollContainer() {
-					return this.parent?.notesScrollContainer;
-				}
-			})
+			NotesList({ data })
 		]),
 		new NoteComposer({
 			client,
 			clientId,
 			submitCallBack: (parent) =>
 			{
-				const shouldScroll = true;
-				parent.notesList.fetchNew(shouldScroll);
+				if (parent.list)
+				{
+					const shouldScroll = true;
+					parent.list.fetchNew(shouldScroll);
+				}
 			}
 		})
 	]);
