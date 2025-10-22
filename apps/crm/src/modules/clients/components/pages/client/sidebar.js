@@ -1,6 +1,8 @@
 import { Div, H1, Header } from "@base-framework/atoms";
+import { Button } from "@base-framework/ui";
 import { Icons } from "@base-framework/ui/icons";
 import { BackButton } from "@base-framework/ui/organisms";
+import { ClientDetailsModal } from "../../organisms/modals/client-details-modal.js";
 import { ClientAvatar } from "./client-avatar.js";
 import { SidebarMenu } from "./sidebar-menu.js";
 
@@ -22,7 +24,17 @@ const Toolbar = () => (
 				H1({ class: 'scroll-m-20 text-2xl lg:text-lg font-bold tracking-tight truncate' }, '[[client.companyName]]'),
 			])
 		]),
-		ClientAvatar()
+		ClientAvatar(),
+		Button({
+			variant: 'withIcon',
+			class: 'outline',
+			icon: Icons.identification,
+			click: (e, { context }) => {
+				ClientDetailsModal({
+					client: context?.data?.client
+				});
+			}
+		}, 'View Profile')
 	])
 );
 
