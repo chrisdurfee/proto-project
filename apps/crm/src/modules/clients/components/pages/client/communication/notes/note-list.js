@@ -1,79 +1,67 @@
-import { Div, P } from "@base-framework/atoms";
-import { Atom } from "@base-framework/base";
+import { Div, P, Span } from "@base-framework/atoms";
+import { Atom, DateTime } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
-import { Badge, Card, Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { Avatar, EmptyState, TimeFrame } from "@base-framework/ui/molecules";
+import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { NoteDetailsModal } from "./modals/note-details-modal.js";
 
 /**
- * NoteItem
+ * DateDivider
  *
- * Renders a single note row as a card.
+ * Renders a date divider between notes.
  *
- * @param {object} note
- * @param {function} onClick
+ * @param {string} date
  * @returns {object}
  */
-const NoteItem = (note, onClick) =>
+const DateDivider = (date) =>
+	Div({ class: "flex justify-center mt-4" }, [
+		Span({ class: "text-xs text-muted-foreground p-2" }, DateTime.format('standard', date))
+	]);
+
+/**
+ * @typedef {object} Divider
+ */
+const Divider = {
+	skipFirst: true,
+	itemProperty: "createdAt",
+	layout: DateDivider,
+	customCompare: (a, b) => DateTime.format('standard', a) !== DateTime.format('standard', b)
+};
+
+/**
+ * NoteListItem
+ *
+ * Renders a single note entry with avatar, text, and metadata.
+ *
+ * @param {object} note
+ * @returns {object}
+ */
+const NoteListItem = (note, openNoteDetailsModal) =>
 {
-	const preview = note.content ? note.content.substring(0, 120) + (note.content.length > 120 ? '...' : '') : 'No content';
-	const userName = note.displayName || `${note.firstName || ''} ${note.lastName || ''}`.trim() || 'Unknown User';
+	const name = note.firstName + ' ' + (note.lastName || '');
 
-	return Card({
-		class: "flex flex-col gap-y-3 px-6 py-4 hover:bg-muted/50 cursor-pointer border-b border-border",
-		click: (e, parent) => onClick && onClick(note, parent),
-        margin: 'my-2'
-	}, [
-		// Top row: Avatar + Name on left, TimeFrame + Priority on right
-		Div({ class: "flex items-center justify-between" }, [
-			Div({ class: "flex items-center gap-2" }, [
-				Avatar({
-					src: note.image && `/files/users/profile/${note.image}`,
-					alt: userName,
-					fallbackText: userName,
-					size: "sm"
-				}),
-				P({ class: "text-sm font-medium m-0" }, userName)
+	return Div({ class: "flex gap-x-3 px-4 py-4 hover:bg-muted/50", click: () => openNoteDetailsModal(note) }, [
+		Avatar({
+			src: note.userImage && `/files/users/profile/${note.userImage}`,
+			alt: name,
+			fallbackText: name,
+			size: "sm"
+		}),
+		Div({ class: "flex flex-1 flex-col gap-y-3" }, [
+			Div({ class: "flex items-center gap-x-2" }, [
+				P({ class: "text-sm font-medium" }, name),
+				note.noteType && Span({ class: "text-xs text-muted-foreground" },
+					`• ${note.noteType.replace('_', ' ')}`
+				)
 			]),
-			Div({ class: "flex items-center gap-2" }, [
-				P({ class: "text-xs text-muted-foreground m-0" }, [
-					TimeFrame({
-						dateTime: note.createdAt,
-						remoteTimeZone: 'America/Denver'
-					})
-				]),
-				Badge({
-					type: note.priority === 'urgent' ? 'destructive' : note.priority === 'high' ? 'warning' : 'outline',
-					class: 'text-xs'
-				}, note.priority ? note.priority.toUpperCase() : 'NORMAL')
-			])
-		]),
-
-		// Title row with pin
-		Div({ class: "flex items-center gap-2" }, [
-			P({ class: "text-sm font-medium m-0 flex-1" }, note.title || 'Untitled Note'),
-			note.isPinned === 1 && Icon({ size: 'xs', class: 'text-yellow-500' }, Icons.pin)
-		]),
-
-		// Content preview
-		P({ class: "text-sm text-muted-foreground m-0 line-clamp-2" }, preview),
-
-		// Badges row (only if any exist)
-		note.hasReminder === 1 || note.requiresFollowUp === 1 || note.hasAttachments === 1 ? Div({ class: "flex items-center gap-2 flex-wrap" }, [
-			note.hasReminder === 1 && Badge({ type: 'outline', class: 'gap-1 text-xs' }, [
-				Icon({ size: 'xs', class: 'text-blue-500' }, Icons.bell),
-				'Reminder'
-			]),
-			note.requiresFollowUp === 1 && Badge({ type: 'outline', class: 'gap-1 text-xs' }, [
-				Icon({ size: 'xs', class: 'text-orange-500' }, Icons.arrowPath),
-				'Follow-up'
-			]),
-			note.hasAttachments === 1 && Badge({ type: 'outline', class: 'gap-1 text-xs' }, [
-				Icon({ size: 'xs', class: 'text-gray-500' }, Icons.paperClip),
-				'Attachments'
-			])
-		]) : null
+			note.title && P({ class: "text-sm font-semibold mt-1" }, note.title),
+			note.content && P({ class: "text-sm text-muted-foreground mt-1 whitespace-pre-line" }, note.content),
+			note.tags && Div({ class: "flex gap-2 mt-2 flex-wrap" },
+				note.tags.split(',').map(tag =>
+					Span({ class: "text-xs bg-muted px-2 py-1 rounded" }, tag.trim())
+				)
+			)
+		])
 	]);
 };
 
@@ -122,7 +110,7 @@ export const NoteList = Atom(({ data }) =>
 			key: "id",
 			role: "list",
 			skeleton: true,
-			rowItem: (note) => NoteItem(note, openNoteDetailsModal),
+			rowItem: (note) => NoteListItem(note, openNoteDetailsModal),
 			emptyState: () => EmptyState({
 				title: 'No Notes Found',
 				description: 'No notes have been added for this client yet.',
