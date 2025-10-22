@@ -47,7 +47,7 @@ const NoteListItem = (note) =>
 			fallbackText: name,
 			size: "sm"
 		}),
-		Div({ class: "flex-1 gap-y-1" }, [
+		Div({ class: "flex flex-1 flex-col gap-y-3" }, [
 			Div({ class: "flex items-center gap-x-2" }, [
 				P({ class: "text-sm font-medium" }, name),
 				note.noteType && Span({ class: "text-xs text-muted-foreground" },
