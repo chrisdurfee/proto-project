@@ -1,5 +1,5 @@
 import { Div, UseParent } from "@base-framework/atoms";
-import { Page } from "@base-framework/ui/pages";
+import { BlankPage } from "@base-framework/ui";
 import { ClientNoteModel } from "../../../../models/client-note-model.js";
 import { NoteList } from "./note-list.js";
 import { PageHeader } from "./page-header.js";
@@ -25,10 +25,11 @@ export const NotesPage = () =>
 	 */
 	const props =
 	{
+		class: 'pt-0',
 		data,
 	};
 
-	return new Page(props, [
+	return new BlankPage(props, [
 		UseParent(({ route }) =>
 		{
 			// @ts-ignore

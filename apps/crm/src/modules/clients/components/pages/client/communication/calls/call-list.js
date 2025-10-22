@@ -111,7 +111,7 @@ export const CallList = Atom(({ data }) =>
 		});
 	};
 
-	return Div({ class: "flex flex-col gap-y-6 mt-12" }, [
+	return Div({ class: "flex flex-auto flex-col gap-y-6 mt-12" }, [
 		ScrollableList({
 			data,
 			cache: "list",

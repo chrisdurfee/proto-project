@@ -23,7 +23,7 @@ const SearchInput = () => (
  * @returns {object}
  */
 export const PageHeader = () => (
-	Header({ class: 'flex flex-auto flex-col pt-0 sm:pt-2 md:pt-0' }, [
+	Header({ class: 'flex flex-col pt-0 sm:pt-2 md:pt-0' }, [
 		Div({ class: 'flex flex-auto items-center justify-between w-full' }, [
 			Div({ class: 'flex flex-col gap-1' }, [
 				H1({ class: 'text-3xl font-bold' }, 'Call History'),

@@ -115,7 +115,7 @@ export const NoteList = Atom(({ data }) =>
 		});
 	};
 
-	return Div({ class: "flex flex-col mt-12 rounded-lg overflow-hidden" }, [
+	return Div({ class: "flex flex-auto flex-col mt-12 rounded-lg overflow-hidden" }, [
 		ScrollableList({
 			data,
 			cache: "list",
@@ -126,7 +126,7 @@ export const NoteList = Atom(({ data }) =>
 			emptyState: () => EmptyState({
 				title: 'No Notes Found',
 				description: 'No notes have been added for this client yet.',
-				icon: Icons.documentText
+				icon: Icons.document.add
 			})
 		})
 	]);
