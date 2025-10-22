@@ -37,7 +37,7 @@ export const NoteComposer = Jot(
 			content: '',
 			noteType: 'general',
 			priority: 'normal',
-			visibility: 'internal',
+			visibility: 'team',
 			status: 'active'
 		});
 	},
