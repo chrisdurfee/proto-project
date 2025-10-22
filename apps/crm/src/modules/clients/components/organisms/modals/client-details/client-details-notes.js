@@ -86,7 +86,7 @@ const NotesList = ({ data }) =>
 			limit: 25,
 			divider: Divider,
 			rowItem: NoteListItem,
-			scrollContainer: parent.notesScrollContainer,
+			scrollContainer: parent.modalBody,
 			emptyState: () => EmptyState({
 				title: 'No notes yet',
 				description: 'Start the conversation by adding the first note.'
