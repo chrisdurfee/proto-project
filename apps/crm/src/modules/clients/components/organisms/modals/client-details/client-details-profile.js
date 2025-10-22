@@ -1,20 +1,7 @@
-import { Div, H3, P } from "@base-framework/atoms";
+import { Div, P } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
-import { ColumnRow, DetailSection } from "@base-framework/ui/molecules";
+import { ColumnRow, DetailBody, DetailSection } from "@base-framework/ui/molecules";
 import { Format } from "@base-framework/ui/utils";
-
-/**
- * Section wrapper component
- *
- * @param {string} title
- * @param {Array} children
- * @returns {object}
- */
-const Section = (title, children) =>
-	Div({ class: "flex flex-col gap-y-4" }, [
-		H3({ class: "text-lg font-semibold" }, title),
-		...children
-	]);
 
 /**
  * Company Information Section
@@ -157,7 +144,7 @@ const NotesSection = (client) =>
  * @returns {object}
  */
 export const ClientDetailsProfile = Atom(({ client }) =>
-	Div({ class: "flex flex-col gap-y-6" }, [
+	DetailBody([
 		CompanyInformation(client),
 		ContactInformation(client),
 		AddressInformation(client),

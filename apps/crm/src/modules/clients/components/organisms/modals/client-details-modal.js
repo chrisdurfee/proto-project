@@ -8,16 +8,6 @@ import { ClientDetailsNotes } from "./client-details/client-details-notes.js";
 import { ClientDetailsProfile } from "./client-details/client-details-profile.js";
 
 /**
- * Tab content wrapper.
- *
- * @param {Array} children
- * @returns {object}
- */
-const TabContent = (children) => (
-	Div({ class: 'py-4' }, children)
-);
-
-/**
  * ClientDetailsModal
  *
  * A modal for viewing client details with tabs for profile and notes.
@@ -80,16 +70,12 @@ export const ClientDetailsModal = (props) =>
 						label: 'Profile',
 						value: 'profile',
 						selected: true,
-						component: TabContent([
-							ClientDetailsProfile({ client })
-						])
+						component: ClientDetailsProfile({ client })
 					},
 					{
 						label: 'Notes',
 						value: 'notes',
-						component: TabContent([
-							ClientDetailsNotes({ client, clientId })
-						])
+						component: ClientDetailsNotes({ client, clientId })
 					}
 				]
 			})
