@@ -16,9 +16,9 @@ import { Format } from "@base-framework/ui/utils";
 export const ClientDetailsAvatar = Atom(({ client }) =>
 	Div({ class: "flex items-center gap-x-4 pb-6" }, [
 		Avatar({
-			src: client.avatar,
-			alt: client.companyName || 'Client',
-			fallbackText: client.companyName || 'Client',
+			src: '[[client.avatar]]',
+			alt: '[[client.companyName]]',
+			watcherFallback: '[[client.companyName]]',
 			size: "lg"
 		}),
 		Div({ class: "flex flex-col gap-y-1 flex-1" }, [
@@ -26,14 +26,20 @@ export const ClientDetailsAvatar = Atom(({ client }) =>
 				H2({ class: "text-2xl font-semibold text-foreground" },
 					Format.default('[[client.companyName]]', "Unnamed Client")
 				),
-				P({ class: "text-sm text-muted-foreground" }, `#${client.id}`)
+				P({ class: "text-sm text-muted-foreground" }, '#[[client.id]]')
 			]),
 			Div({ class: "flex items-center gap-x-2 flex-wrap" }, [
-				client.city && Span({ class: "text-sm text-muted-foreground" },
-					`${client.city}${client.state ? ', ' + client.state : ''}`
-				),
+				Span({
+					class: "text-sm text-muted-foreground",
+					watch: ['[[client.city]][[client.state]]', ([city, state]) => {
+						if (!city && !state) return '';
+						return `${city || ''}${state ? (city ? ', ' : '') + state : ''}`;
+					}]
+				}),
 				Badge({
-					variant: client.status === "active" ? "default" : "secondary"
+					watch: ['[[client.status]]', (status) => ({
+						variant: status === "active" ? "default" : "secondary"
+					})]
 				}, Format.default('[[client.status]]', "Unknown"))
 			])
 		])

@@ -4,6 +4,7 @@ import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 import { ClientModal } from "../../organisms/modals/client-modal.js";
+import { ClientDetailsModal } from "../../organisms/modals/client-details-modal.js";
 
 /**
  * This will create a client avatar with company name.
@@ -102,6 +103,27 @@ export const ClientRow = (row, onSelect) => (
 		]),
 		Td({ class: 'p-4 text-right hidden md:table-cell' }, [
 			A({ href: `clients/${row.id}`, class: 'text-muted-foreground' }, row.totalRevenue ? `$${parseFloat(row.totalRevenue).toFixed(2)}` : '-')
+		]),
+		Td({ class: 'p-4 text-right' }, [
+			Button({
+				variant: 'ghost',
+				size: 'sm',
+				icon: Icons.eye,
+				click: (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					ClientDetailsModal({
+						client: row,
+						onUpdate: (data) => {
+							// Refresh the list if needed
+							if (data === null) {
+								// Client was deleted
+								window.location.reload();
+							}
+						}
+					});
+				}
+			})
 		])
 	])
 );
@@ -120,7 +142,8 @@ const HeaderRow = () => (
 			HeaderCol({ key: 'status', label: 'Status', class: 'hidden md:table-cell' }),
 			HeaderCol({ key: 'clientType', label: 'Type', class: 'hidden md:table-cell' }),
 			HeaderCol({ key: 'industry', label: 'Industry', class: 'hidden md:table-cell' }),
-			HeaderCol({ key: 'totalRevenue', label: 'Total Revenue', class: 'hidden md:table-cell', align: 'justify-end' })
+			HeaderCol({ key: 'totalRevenue', label: 'Total Revenue', class: 'hidden md:table-cell', align: 'justify-end' }),
+			HeaderCol({ key: 'actions', label: '', align: 'justify-end' })
 		])
 	])
 );

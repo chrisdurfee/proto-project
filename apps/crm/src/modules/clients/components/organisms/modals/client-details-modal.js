@@ -43,7 +43,6 @@ export const ClientDetailsModal = (props) =>
 	return new Modal({
 		title: 'Client Profile',
 		icon: Icons.identification,
-		description: `A summary of client details.`,
 		size: 'lg',
 		type: 'right',
 		hidePrimaryButton: true,

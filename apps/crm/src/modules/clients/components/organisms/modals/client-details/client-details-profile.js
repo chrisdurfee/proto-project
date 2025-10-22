@@ -1,6 +1,6 @@
 import { Div, H3, P } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
-import { DetailSection, SplitRow } from "@base-framework/ui/molecules";
+import { ColumnRow, DetailSection } from "@base-framework/ui/molecules";
 import { Format } from "@base-framework/ui/utils";
 
 /**
@@ -25,11 +25,11 @@ const Section = (title, children) =>
 const CompanyInformation = (client) =>
 	DetailSection({ title: 'Company Information' }, [
 		Div({ class: 'flex flex-col gap-y-3' }, [
-			SplitRow('Company Name', Format.default(client.companyName, '-')),
-			SplitRow('Client Type', Format.default(client.clientType, '-')),
-			SplitRow('Client Number', Format.default(client.clientNumber, '-')),
-			SplitRow('Website', Format.default(client.website, '-')),
-			SplitRow('Industry', Format.default(client.industry, '-'))
+			ColumnRow('Name', Format.default('[[client.companyName]]', '-')),
+			ColumnRow('Type', Format.default('[[client.clientType]]', '-')),
+			ColumnRow('Number', Format.default('[[client.clientNumber]]', '-')),
+			ColumnRow('Website', Format.default('[[client.website]]', '-')),
+			ColumnRow('Industry', Format.default('[[client.industry]]', '-'))
 		])
 	]);
 
@@ -42,10 +42,10 @@ const CompanyInformation = (client) =>
 const ContactInformation = (client) =>
 	DetailSection({ title: 'Contact Information' }, [
 		Div({ class: 'flex flex-col gap-y-3' }, [
-			SplitRow('Email', Format.default(client.email, '-')),
-			SplitRow('Phone', Format.phone(client.phone, '-')),
-			SplitRow('Mobile', Format.phone(client.mobile, '-')),
-			SplitRow('Fax', Format.phone(client.fax, '-'))
+			ColumnRow('Email', Format.default('[[client.email]]', '-')),
+			ColumnRow('Phone', Format.phone('[[client.phone]]', '-')),
+			ColumnRow('Mobile', Format.phone('[[client.mobile]]', '-')),
+			ColumnRow('Fax', Format.phone('[[client.fax]]', '-'))
 		])
 	]);
 
@@ -56,29 +56,16 @@ const ContactInformation = (client) =>
  * @returns {object}
  */
 const AddressInformation = (client) =>
-{
-	const addressParts = [];
-	if (client.street1) addressParts.push(client.street1);
-	if (client.street2) addressParts.push(client.street2);
-
-	const cityStateZip = [];
-	if (client.city) cityStateZip.push(client.city);
-	if (client.state) cityStateZip.push(client.state);
-	if (client.postalCode) cityStateZip.push(client.postalCode);
-
-	if (cityStateZip.length > 0) addressParts.push(cityStateZip.join(', '));
-	if (client.country) addressParts.push(client.country);
-
-	const fullAddress = addressParts.length > 0 ? addressParts.join('\n') : '-';
-
-	return DetailSection({ title: 'Address' }, [
+	DetailSection({ title: 'Address' }, [
 		Div({ class: 'flex flex-col gap-y-3' }, [
-			SplitRow('Address',
-				P({ class: 'text-sm text-muted-foreground whitespace-pre-line' }, fullAddress)
-			)
+			ColumnRow('Street 1', Format.default('[[client.street1]]', '-')),
+			ColumnRow('Street 2', Format.default('[[client.street2]]', '-')),
+			ColumnRow('City', Format.default('[[client.city]]', '-')),
+			ColumnRow('State', Format.default('[[client.state]]', '-')),
+			ColumnRow('Postal Code', Format.default('[[client.postalCode]]', '-')),
+			ColumnRow('Country', Format.default('[[client.country]]', '-'))
 		])
 	]);
-};
 
 /**
  * Business Details Section
@@ -89,11 +76,9 @@ const AddressInformation = (client) =>
 const BusinessDetails = (client) =>
 	DetailSection({ title: 'Business Details' }, [
 		Div({ class: 'flex flex-col gap-y-3' }, [
-			SplitRow('Tax ID', Format.default(client.taxId, '-')),
-			SplitRow('Employee Count', Format.default(client.employeeCount, '-')),
-			SplitRow('Annual Revenue', client.annualRevenue ?
-				Format.money(client.annualRevenue, '$', '0.00') : '-'
-			)
+			ColumnRow('Tax ID', Format.default('[[client.taxId]]', '-')),
+			ColumnRow('Employee Count', Format.default('[[client.employeeCount]]', '-')),
+			ColumnRow('Annual Revenue', Format.money('[[client.annualRevenue]]', '$', '-'))
 		])
 	]);
 
@@ -114,10 +99,10 @@ const CrmDetails = (client) =>
 
 	return DetailSection({ title: 'CRM Details' }, [
 		Div({ class: 'flex flex-col gap-y-3' }, [
-			SplitRow('Status', formatLabel(client.status)),
-			SplitRow('Priority', formatLabel(client.priority)),
-			SplitRow('Lead Source', Format.default(client.leadSource, '-')),
-			SplitRow('Rating', formatLabel(client.rating))
+			ColumnRow('Status', { watch: ['[[client.status]]', (value) => formatLabel(value)] }),
+			ColumnRow('Priority', { watch: ['[[client.priority]]', (value) => formatLabel(value)] }),
+			ColumnRow('Lead Source', Format.default('[[client.leadSource]]', '-')),
+			ColumnRow('Rating', { watch: ['[[client.rating]]', (value) => formatLabel(value)] })
 		])
 	]);
 };
@@ -131,16 +116,10 @@ const CrmDetails = (client) =>
 const FinancialInformation = (client) =>
 	DetailSection({ title: 'Financial Information' }, [
 		Div({ class: 'flex flex-col gap-y-3' }, [
-			SplitRow('Currency', client.currency ?
-				client.currency.toUpperCase() : '-'
-			),
-			SplitRow('Payment Terms', Format.default(client.paymentTerms, '-')),
-			SplitRow('Credit Limit', client.creditLimit ?
-				Format.money(client.creditLimit, '$', '0.00') : '-'
-			),
-			SplitRow('Total Revenue', client.totalRevenue ?
-				Format.money(client.totalRevenue, '$', '0.00') : '-'
-			)
+			ColumnRow('Currency', { watch: ['[[client.currency]]', (value) => value ? value.toUpperCase() : '-'] }),
+			ColumnRow('Payment Terms', Format.default('[[client.paymentTerms]]', '-')),
+			ColumnRow('Credit Limit', Format.money('[[client.creditLimit]]', '$', '-')),
+			ColumnRow('Total Revenue', Format.money('[[client.totalRevenue]]', '$', '-'))
 		])
 	]);
 
@@ -151,31 +130,22 @@ const FinancialInformation = (client) =>
  * @returns {object}
  */
 const NotesSection = (client) =>
-{
-	const hasNotes = client.notes || client.internalNotes;
-
-	if (!hasNotes)
-	{
-		return null;
-	}
-
-	return DetailSection({ title: 'Notes' }, [
+	DetailSection({ title: 'Notes' }, [
 		Div({ class: 'flex flex-col gap-y-4' }, [
-			client.notes && Div({ class: 'flex flex-col gap-y-2' }, [
+			Div({ class: 'flex flex-col gap-y-2' }, [
 				P({ class: 'text-sm font-medium' }, 'Public Notes'),
 				P({ class: 'text-sm text-muted-foreground whitespace-pre-line' },
-					client.notes
+					Format.default('[[client.notes]]', 'No public notes')
 				)
 			]),
-			client.internalNotes && Div({ class: 'flex flex-col gap-y-2' }, [
+			Div({ class: 'flex flex-col gap-y-2' }, [
 				P({ class: 'text-sm font-medium' }, 'Internal Notes'),
 				P({ class: 'text-sm text-muted-foreground whitespace-pre-line' },
-					client.internalNotes
+				Format.default('[[client.internalNotes]]', 'No internal notes')
 				)
 			])
 		])
 	]);
-};
 
 /**
  * ClientDetailsProfile
