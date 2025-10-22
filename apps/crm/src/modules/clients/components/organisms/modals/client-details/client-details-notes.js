@@ -114,7 +114,7 @@ export const ClientDetailsNotes = Atom(({ client, clientId }) =>
 	});
 
 	return Div({
-		class: "flex flex-auto flex-col max-h-[600px] gap-y-4 overflow-hidden",
+		class: "flex flex-auto flex-col gap-y-4",
 		cache: "notesContainer"
 	}, [
 		Div({
