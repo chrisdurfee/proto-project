@@ -1,11 +1,7 @@
 @reference "./theme.css";
 
 @layer base {
-  * {
-		@apply border-border;
-	}
-
-	body {
+  	body {
 		font-feature-settings: "rlig" 1, "calt" 1;
 	}
 
@@ -19,6 +15,7 @@
 	}
 
 	* {
+		@apply border-border;
 		/* overscroll-behavior: none; */
 		-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 		-ms-overflow-style: -ms-autohiding-scrollbar;
