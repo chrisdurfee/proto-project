@@ -2,7 +2,7 @@ import { Div, P, UseParent } from "@base-framework/atoms";
 import { Data } from "@base-framework/base";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
+import { ColumnRow, DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
 import { Format } from "@base-framework/ui/utils";
 import { ContactModal } from "./contact-modal.js";
 
@@ -14,7 +14,7 @@ import { ContactModal } from "./contact-modal.js";
 const QuickConnectButtons = () =>
 	Div({ class: 'flex flex-auto items-center justify-center border-b pb-6' }, [
 		Div({ class: 'flex gap-x-4' }, [
-			Tooltip({ content: 'Email' }, [
+			Tooltip({ content: 'Email', position: 'bottom' }, [
 				Button({
 					variant: 'icon',
 					icon: Icons.envelope.default,
@@ -29,7 +29,7 @@ const QuickConnectButtons = () =>
 					}
 				})
 			]),
-			Tooltip({ content: 'Call' }, [
+			Tooltip({ content: 'Call', position: 'bottom' }, [
 				Button({
 					variant: 'icon',
 					icon: Icons.phone.default,
@@ -44,14 +44,14 @@ const QuickConnectButtons = () =>
 					}
 				})
 			]),
-			Tooltip({ content: 'Message' }, [
+			Tooltip({ content: 'Message', position: 'bottom' }, [
 				Button({
 					variant: 'icon',
 					icon: Icons.chat.text,
 					label: 'Message'
 				})
 			]),
-			Tooltip({ content: 'More' }, [
+			Tooltip({ content: 'More', position: 'bottom' }, [
 				Button({
 					variant: 'icon',
 					icon: Icons.ellipsis.vertical,
@@ -69,11 +69,11 @@ const QuickConnectButtons = () =>
 const ContactInformation = () =>
 	DetailSection({ title: 'Contact Information' }, [
 		Div({ class: 'flex flex-col gap-y-3' }, [
-			SplitRow('Name', '[[displayName]]'),
-			SplitRow('Email', '[[email]]'),
-			SplitRow('Phone', Format.phone('[[phone]]', '-')),
-			SplitRow('Mobile', Format.phone('[[mobile]]', '-')),
-			SplitRow('Fax', Format.phone('[[fax]]', '-'))
+			ColumnRow('Name', '[[displayName]]'),
+			ColumnRow('Email', '[[email]]'),
+			ColumnRow('Phone', Format.phone('[[phone]]', '-')),
+			ColumnRow('Mobile', Format.phone('[[mobile]]', '-')),
+			ColumnRow('Fax', Format.phone('[[fax]]', '-'))
 		])
 	]);
 
