@@ -110,6 +110,7 @@ export const NoteList = Atom(({ data }) =>
 			key: "id",
 			role: "list",
 			skeleton: true,
+			divider: Divider,
 			rowItem: (note) => NoteListItem(note, openNoteDetailsModal),
 			emptyState: () => EmptyState({
 				title: 'No Notes Found',

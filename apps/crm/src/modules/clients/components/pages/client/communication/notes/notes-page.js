@@ -16,8 +16,7 @@ export const NotesPage = () =>
 	const data = new ClientNoteModel(
 	{
 		clientId: null,
-		loaded: false,
-		notes: []
+		loaded: false
 	});
 
 	/**

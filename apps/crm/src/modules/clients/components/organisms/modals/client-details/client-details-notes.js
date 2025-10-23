@@ -40,7 +40,7 @@ const NoteListItem = (note) =>
 {
 	const name = note.firstName + ' ' + (note.lastName || '');
 
-	return Div({ class: "flex gap-x-3 px-4 py-4 hover:bg-muted/50" }, [
+	return Div({ class: "flex rounded-md gap-x-3 px-4 py-4 hover:bg-muted/50" }, [
 		Avatar({
 			src: note.userImage && `/files/users/profile/${note.userImage}`,
 			alt: name,
