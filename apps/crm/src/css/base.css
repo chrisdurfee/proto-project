@@ -1,23 +1,49 @@
 @reference "./theme.css";
 
 @layer base {
-  	body {
-		font-feature-settings: "rlig" 1, "calt" 1;
+  	html {
+		-webkit-overflow-scrolling: touch;
 	}
 
+	body {
+		font-feature-settings: "rlig" 1, "calt" 1;
+		/* Improve font rendering */
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		text-rendering: optimizeLegibility;
+	}
+
+	/**
+	* This will set the minimum height of the app container
+	* based on the display mode.
+	*
+	* This fixes the mobile navigation issues on iOS when
+	* in the browser and installed as a PWA.
+	*/
+	body.app-container {
+		min-height: 100vh;
+		min-height: 100dvh;
+	}
+	@media (display-mode: standalone)
+	{
+		body.app-container {
+			min-height: 100vh;
+		}
+	}
+
+	/**
+	 * This will style the backdrop when a modal is open.
+	 */
 	::backdrop {
 		animation: shadowIn .2s ease forwards;
 		@apply bg-black/40;
 	}
 
-	html {
-		-webkit-overflow-scrolling: touch;
-	}
-
 	* {
 		@apply border-border;
-		/* overscroll-behavior: none; */
+		/* Remove tap highlight */
 		-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+		/* Better scrollbar styling */
 		-ms-overflow-style: -ms-autohiding-scrollbar;
 		box-sizing: border-box;
 	}
@@ -37,17 +63,51 @@
 	}
 
 	/**
-	* Reset the default styles
+	* Reset the default styles and improve touch responsiveness
 	*/
 	a,
 	button {
 		outline: 0;
 		text-decoration: none;
+		/* Improve touch responsiveness */
+		touch-action: manipulation;
+		/* Prevent text selection on tap */
+		-webkit-user-select: none;
+		user-select: none;
+		/* Hardware acceleration */
+		transform: translateZ(0);
+		-webkit-backface-visibility: hidden;
+		backface-visibility: hidden;
 	}
 
 	a:hover,
 	a:active {
 		text-decoration: none;
+	}
+
+	/* Add active state feedback for touch */
+	button:active,
+	a:active,
+	[role="button"]:active {
+		opacity: 0.7;
+		transition: opacity 0.15s ease;
+	}
+
+	/* Improve input touch targets */
+	input,
+	textarea,
+	select {
+		touch-action: manipulation;
+		/* Allow text selection in inputs */
+		-webkit-user-select: text;
+		user-select: text;
+	}
+
+	/* Better scrolling performance */
+	.scroll-container {
+		-webkit-overflow-scrolling: touch;
+		overscroll-behavior: contain;
+		will-change: scroll-position;
 	}
 }
 
