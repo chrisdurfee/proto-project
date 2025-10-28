@@ -118,7 +118,7 @@ export const ClientDetailsNotes = Atom(({ client, clientId }) =>
 		cache: "notesContainer"
 	}, [
 		Div({
-			class: "flex-1 overflow-y-auto",
+			class: "flex flex-1 flex-col overflow-y-auto",
 			cache: "notesScrollContainer"
 		}, [
 			NotesList({ data })

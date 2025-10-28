@@ -31,7 +31,7 @@ export const ClientDetailsConversation = Atom(({ client, clientId }) =>
 
 	return Div({ class: "flex flex-auto flex-col h-96 overflow-hidden" }, [
 		// Conversation list
-		Div({ class: "flex-1 overflow-y-auto", cache: "listContainer" }, [
+		Div({ class: "flex flex-1 flex-col overflow-y-auto", cache: "listContainer" }, [
 			ConversationList({ data }),
             // Composer
             Div({ class: "sticky bottom-0" }, [

@@ -1,5 +1,4 @@
 <?php declare(strict_types=1);
-
 namespace Modules\Messaging\Models;
 
 use Modules\User\Models\User;
@@ -41,6 +40,29 @@ class Message extends Model
 		'createdAt',
 		'updatedAt'
 	];
+
+	/**
+	 * Define joins for the model.
+	 *
+	 * @param object $builder The query builder object
+	 * @return void
+	 */
+	protected static function joins(object $builder): void
+	{
+		$builder
+			->one(
+				Conversation::class,
+				fields: ['id', 'title', 'createdAt', 'updatedAt']
+			)
+			->on(['conversation_id', 'id']);
+
+		$builder
+			->one(
+				User::class,
+				fields: ['id', 'displayName', 'firstName', 'lastName', 'email', 'image']
+			)
+			->on(['sender_id', 'id']);
+	}
 
 	/**
 	 * Get the conversation this message belongs to.
