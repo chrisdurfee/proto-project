@@ -26,15 +26,15 @@ class ConversationParticipant extends Model
 	 */
 	protected static array $fields = [
 		'id',
-		'conversation_id',
-		'user_id',
+		'conversationId',
+		'userId',
 		'role',
-		'joined_at',
-		'last_read_at',
-		'last_read_message_id',
-		'is_active',
-		'created_at',
-		'updated_at'
+		'joinedAt',
+		'lastReadAt',
+		'lastReadMessageId',
+		'isActive',
+		'createdAt',
+		'updatedAt'
 	];
 
 	/**
