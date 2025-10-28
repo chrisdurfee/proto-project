@@ -76,19 +76,25 @@ class Conversation extends Model
 	{
 		$model = new static();
 		return $model->storage->table('conversations', 'c')
-			->select([
-				'c.*',
-				'u.first_name as creatorFirstName',
-				'u.last_name as creatorLastName',
-				'u.email as creatorEmail',
-				'p.last_read_at as lastReadAt'
-			])
-			->join('conversation_participants p', 'c.id = p.conversation_id')
-			->join('users u', 'c.created_by = u.id')
-			->where([
-				'p.user_id' => $userId,
-				'p.is_active' => 1
-			])
+			->select(
+				['c.*'],
+				[['u.first_name'], 'creatorFirstName'],
+				[['u.last_name'], 'creatorLastName'],
+				[['u.email'], 'creatorEmail'],
+				[['p.last_read_at'], 'lastReadAt']
+			)
+			->join(function($joins)
+			{
+				$joins->left('conversation_participants', 'p')
+					->on('c.id = p.conversation_id');
+
+				$joins->left('users', 'u')
+					->on('c.created_by = u.id');
+			})
+			->where(
+				['p.user_id', $userId],
+				['p.is_active', 1]
+			)
 			->orderBy('c.last_message_at DESC')
 			->fetch();
 	}
