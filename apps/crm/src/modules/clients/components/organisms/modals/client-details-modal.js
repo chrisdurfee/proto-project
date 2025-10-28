@@ -4,6 +4,7 @@ import { Icons } from "@base-framework/ui/icons";
 import { Modal } from "@base-framework/ui/molecules";
 import { UnderlinedButtonTab } from "@base-framework/ui/organisms";
 import { ClientDetailsAvatar } from "./client-details/client-details-avatar.js";
+import { ClientDetailsConversation } from "./client-details/client-details-conversation.js";
 import { ClientDetailsNotes } from "./client-details/client-details-notes.js";
 import { ClientDetailsProfile } from "./client-details/client-details-profile.js";
 
@@ -71,6 +72,11 @@ export const ClientDetailsModal = (props) =>
 						value: 'profile',
 						selected: true,
 						component: ClientDetailsProfile({ client })
+					},
+					{
+						label: 'Conversation',
+						value: 'conversation',
+						component: ClientDetailsConversation({ client, clientId })
 					},
 					{
 						label: 'Notes',
