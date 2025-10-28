@@ -83,4 +83,22 @@ class ConversationController extends ResourceController
 			'participantId' => 'int'
 		];
 	}
+
+    /**
+	 * Modifies the filter object based on the request.
+	 *
+	 * @param mixed $filter
+	 * @param Request $request
+	 * @return object|null
+	 */
+	protected function modifyFilter(?object $filter, Request $request): ?object
+	{
+		$userId = $request->params()->userId ?? null;
+		if (isset($userId))
+		{
+			$filter->userId = $userId;
+		}
+
+		return $filter;
+	}
 }

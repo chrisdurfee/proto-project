@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
-
 namespace Modules\Messaging\Models;
 
+use Modules\User\Models\User;
 use Proto\Models\Model;
 
 /**
@@ -15,6 +15,11 @@ class ConversationParticipant extends Model
 	 * @var string|null $tableName
 	 */
 	protected static ?string $tableName = 'conversation_participants';
+
+    /**
+	 * @var string|null $alias
+	 */
+    protected static ?string $alias = 'cp';
 
 	/**
 	 * @var array $fields
@@ -33,61 +38,19 @@ class ConversationParticipant extends Model
 	];
 
 	/**
-	 * @var array $fieldsBlacklist
-	 */
-	protected static array $fieldsBlacklist = [];
-
-	/**
-	 * @var string $idKeyName
-	 */
-	protected static string $idKeyName = 'id';
-
-	/**
-	 * Augments data before saving.
+	 * Define joins for the model.
 	 *
-	 * @param mixed|null $data
-	 * @return mixed
+	 * @param object $builder The query builder object
+	 * @return void
 	 */
-	public function augment(mixed $data = null): mixed
+	protected static function joins(object $builder): void
 	{
-		if (!$data) {
-			return $data;
-		}
-
-		// Ensure role defaults to 'member'
-		if (!isset($data['role']) || empty($data['role'])) {
-			$data['role'] = 'member';
-		}
-
-		// Set joined_at if not provided
-		if (!isset($data['joined_at'])) {
-			$data['joined_at'] = date('Y-m-d H:i:s');
-		}
-
-		// Set is_active default
-		if (!isset($data['is_active'])) {
-			$data['is_active'] = 1;
-		}
-
-		return $data;
-	}
-
-	/**
-	 * Formats data for API output.
-	 *
-	 * @param object|null $data
-	 * @return object|null
-	 */
-	public function format(?object $data): ?object
-	{
-		if (!$data) {
-			return null;
-		}
-
-		// Add user information
-		$data->user = $this->getUser($data->user_id);
-
-		return $data;
+		$builder
+			->one(
+				User::class,
+				fields: ['id', 'displayName', 'firstName', 'lastName', 'email', 'image']
+			)
+			->on(['user_id', 'id']);
 	}
 
 	/**
@@ -107,7 +70,7 @@ class ConversationParticipant extends Model
 	 */
 	public function user()
 	{
-		return $this->belongsTo('\Modules\User\Models\User', 'user_id');
+		return $this->belongsTo(User::class, 'user_id');
 	}
 
 	/**
@@ -146,7 +109,8 @@ class ConversationParticipant extends Model
 			'user_id' => $userId
 		]);
 
-		if (!$participant) {
+		if (!$participant)
+        {
 			return false;
 		}
 
@@ -179,22 +143,5 @@ class ConversationParticipant extends Model
 			]);
 
 		return $storage->fetch($sql);
-	}
-
-	/**
-	 * Get user information.
-	 *
-	 * @param int $userId
-	 * @return object|null
-	 */
-	private function getUser(int $userId): ?object
-	{
-		$storage = static::storage();
-		$sql = $storage->table('users')
-			->select(['id', 'first_name', 'last_name', 'email', 'avatar'])
-			->where(['id' => $userId]);
-
-		$users = $storage->fetch($sql);
-		return $users[0] ?? null;
 	}
 }

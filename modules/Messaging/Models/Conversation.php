@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Messaging\Models;
 
+use Modules\User\Models\User;
 use Proto\Models\Model;
 
 /**
@@ -14,6 +15,11 @@ class Conversation extends Model
 	 * @var string|null $tableName
 	 */
 	protected static ?string $tableName = 'conversations';
+
+    /**
+	 * @var string|null $alias
+	 */
+    protected static ?string $alias = 'c';
 
 	/**
 	 * @var array $fields
@@ -31,56 +37,13 @@ class Conversation extends Model
 	];
 
 	/**
-	 * @var array $fieldsBlacklist
-	 */
-	protected static array $fieldsBlacklist = [];
-
-	/**
-	 * @var string $idKeyName
-	 */
-	protected static string $idKeyName = 'id';
-
-	/**
-	 * Augments data before saving.
-	 *
-	 * @param mixed|null $data
-	 * @return mixed
-	 */
-	protected static function augment(mixed $data = null): mixed
-	{
-		if (!$data)
-        {
-			return $data;
-		}
-
-		// Ensure type defaults to 'direct'
-		if (!isset($data->type) || empty($data->type))
-        {
-			$data->type = 'direct';
-		}
-
-		return $data;
-	}
-
-	/**
-	 * Formats data for API output.
-	 *
-	 * @param object|null $data
-	 * @return object|null
-	 */
-	protected static function format(?object $data): ?object
-	{
-		return $data;
-	}
-
-	/**
 	 * Get messages for this conversation.
 	 *
 	 * @return mixed
 	 */
 	public function messages()
 	{
-		return $this->hasMany(Message::class, 'conversation_id');
+		return $this->hasMany(Message::class);
 	}
 
 	/**
@@ -90,7 +53,7 @@ class Conversation extends Model
 	 */
 	public function participants()
 	{
-		return $this->hasMany(ConversationParticipant::class, 'conversation_id');
+		return $this->hasMany(ConversationParticipant::class);
 	}
 
 	/**
@@ -100,7 +63,7 @@ class Conversation extends Model
 	 */
 	public function creator()
 	{
-		return $this->belongsTo('\Modules\User\Models\User', 'created_by');
+		return $this->belongsTo(User::class, 'created_by');
 	}
 
 	/**

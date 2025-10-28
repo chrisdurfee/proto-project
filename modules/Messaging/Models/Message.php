@@ -16,6 +16,11 @@ class Message extends Model
 	 */
 	protected static ?string $tableName = 'messages';
 
+    /**
+	 * @var string|null $alias
+	 */
+    protected static ?string $alias = 'm';
+
 	/**
 	 * @var array $fields
 	 */
@@ -35,55 +40,6 @@ class Message extends Model
 		'createdAt',
 		'updatedAt'
 	];
-
-	/**
-	 * @var array $fieldsBlacklist
-	 */
-	protected static array $fieldsBlacklist = [];
-
-	/**
-	 * @var string $idKeyName
-	 */
-	protected static string $idKeyName = 'id';
-
-	/**
-	 * Augments data before saving.
-	 *
-	 * @param mixed $data
-	 * @return mixed
-	 */
-	protected static function augment(mixed $data = null): mixed
-	{
-		if (!$data)
-		{
-			return $data;
-		}
-
-		// Ensure messageType defaults to 'text'
-		if (!isset($data->messageType) || empty($data->messageType))
-		{
-			$data->messageType = 'text';
-		}
-
-		// Set isEdited default
-		if (!isset($data->isEdited))
-		{
-			$data->isEdited = 0;
-		}
-
-		return $data;
-	}
-
-	/**
-	 * Formats data for API output.
-	 *
-	 * @param object|null $data
-	 * @return object|null
-	 */
-	protected static function format(?object $data): ?object
-	{
-		return $data;
-	}
 
 	/**
 	 * Get the conversation this message belongs to.

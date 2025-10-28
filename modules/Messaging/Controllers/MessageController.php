@@ -16,6 +16,8 @@ class MessageController extends ResourceController
 {
 	/**
 	 * Constructor
+     *
+     * @param string|null $model The model class reference using ::class.
 	 */
 	public function __construct(
 		protected ?string $model = Message::class
@@ -32,7 +34,7 @@ class MessageController extends ResourceController
 	 */
 	public function index(Request $request): object
 	{
-		$conversationId = $request->getInt('conversation_id');
+		$conversationId = $request->getInt('conversationId');
 		$limit = ($request->getInt('limit') ?? 50);
 		$offset = ($request->getInt('offset') ?? 0);
 
@@ -61,7 +63,7 @@ class MessageController extends ResourceController
         }
 
 		// Basic validation
-		if (empty($data['conversation_id']) || empty($data['content'])) {
+		if (empty($data['conversationId']) || empty($data['content'])) {
 			return $this->error('Conversation ID and content are required', 400);
 		}
 
@@ -86,7 +88,7 @@ class MessageController extends ResourceController
 	 */
 	public function markAsRead(Request $request): object
 	{
-		$conversationId = $request->getInt('conversation_id');
+		$conversationId = $request->getInt('conversationId');
 		$userId = getSession('user')->id ?? null;
         if (!$userId)
         {
@@ -111,11 +113,11 @@ class MessageController extends ResourceController
 	protected function validate(): array
 	{
 		return [
-			'conversation_id' => 'int|required',
+			'conversationId' => 'int|required',
 			'content' => 'string|required',
-			'message_type' => 'string:20',
-			'file_url' => 'string:500',
-			'file_name' => 'string:255'
+			'messageType' => 'string:20',
+			'fileUrl' => 'string:500',
+			'fileName' => 'string:255'
 		];
 	}
 }

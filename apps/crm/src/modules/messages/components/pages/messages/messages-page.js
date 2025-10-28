@@ -15,7 +15,13 @@ import { ThreadContentSwitch } from "./thread/thread-content-switch.js";
  */
 export const MessagesPage = () =>
 {
-	const data = new ConversationModel();
+	const userId = app.data.user.id;
+	const data = new ConversationModel({
+		userId: userId,
+		filter: {
+			userId: userId
+		}
+	});
 
 	/**
 	 * @type {object} Props
