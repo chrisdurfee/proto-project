@@ -32,10 +32,15 @@ class ConversationParticipant extends Model
 		'joinedAt',
 		'lastReadAt',
 		'lastReadMessageId',
-		'isActive',
 		'createdAt',
-		'updatedAt'
+		'updatedAt',
+		'deletedAt'
 	];
+
+	/**
+	 * @var bool $useSoftDelete
+	 */
+	protected static bool $useSoftDelete = true;
 
 	/**
 	 * Define joins for the model.
@@ -87,8 +92,7 @@ class ConversationParticipant extends Model
 			'conversation_id' => $conversationId,
 			'user_id' => $userId,
 			'role' => $role,
-			'joined_at' => date('Y-m-d H:i:s'),
-			'is_active' => 1
+			'joined_at' => date('Y-m-d H:i:s')
 		];
 
 		$participant = static::create((object)$data);
@@ -114,8 +118,7 @@ class ConversationParticipant extends Model
 			return false;
 		}
 
-		$participant->is_active = 0;
-		return $participant->update();
+		return $participant->delete();
 	}
 
 	/**
@@ -126,22 +129,26 @@ class ConversationParticipant extends Model
 	 */
 	public static function getForConversation(int $conversationId): array
 	{
-		$storage = static::storage();
-
-		$sql = $storage->table('conversation_participants', 'cp')
-			->select([
-				'cp.*',
-				'u.first_name',
-				'u.last_name',
-				'u.email',
-				'u.avatar'
-			])
-			->join('users u', 'cp.user_id = u.id')
-			->where([
-				'cp.conversation_id' => $conversationId,
-				'cp.is_active' => 1
-			]);
-
-		return $storage->fetch($sql);
+		$model = new static();
+		return $model
+			->storage
+			->table()
+			->select(
+				['cp.*'],
+				[['u.first_name'], 'firstName'],
+				[['u.last_name'], 'lastName'],
+				[['u.email'], 'email'],
+				[['u.image'], 'avatar']
+			)
+			->join(function($joins)
+			{
+				$joins->left('users', 'u')
+					->on('cp.user_id = u.id');
+			})
+			->where(
+				['cp.conversation_id', $conversationId],
+				'cp.deleted_at IS NULL'
+			)
+			->fetch();
 	}
 }

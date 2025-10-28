@@ -24,17 +24,17 @@ class ConversationParticipants extends Migration
 		{
 			$table->id();
 			$table->timestamps();
+            $table->deletedAt();
 			$table->integer('conversation_id', 30);
 			$table->integer('user_id', 30);
 			$table->enum('role', 'member', 'admin')->default("'member'");
 			$table->datetime('joined_at');
 			$table->datetime('last_read_at')->nullable();
 			$table->integer('last_read_message_id', 30)->nullable();
-			$table->boolean('is_active')->default(1);
 
 			// Indexes
 			$table->index('conversation_user')->fields('conversation_id', 'user_id');
-			$table->index('user_conversations')->fields('user_id', 'is_active');
+			$table->index('user_conversations')->fields('user_id', 'deleted_at');
 			$table->index('last_read')->fields('conversation_id', 'last_read_at');
 
 			// Unique constraint

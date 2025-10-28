@@ -41,7 +41,7 @@ class OrganizationUser extends Model
 	 */
 	protected static function joins(object $builder): void
 	{
-		Organization::one($builder)
+		$builder->one(Organization::class)
 			->on(['organizationId', 'id'])
 			->fields(
 				['name', 'organizationName']

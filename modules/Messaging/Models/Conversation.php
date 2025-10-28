@@ -95,7 +95,7 @@ class Conversation extends Model
 			})
 			->where(
 				['p.user_id', $userId],
-				['p.is_active', 1]
+				'p.deleted_at IS NULL'
 			)
 			->orderBy('c.last_message_at DESC')
 			->fetch();

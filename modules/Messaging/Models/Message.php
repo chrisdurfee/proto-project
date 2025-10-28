@@ -2,6 +2,7 @@
 
 namespace Modules\Messaging\Models;
 
+use Modules\User\Models\User;
 use Proto\Models\Model;
 
 /**
@@ -58,7 +59,7 @@ class Message extends Model
 	 */
 	public function sender()
 	{
-		return $this->belongsTo('\Modules\User\Models\User', 'sender_id');
+		return $this->belongsTo(User::class, 'sender_id');
 	}
 
 	/**
