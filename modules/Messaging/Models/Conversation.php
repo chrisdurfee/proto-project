@@ -75,7 +75,9 @@ class Conversation extends Model
 	public static function getForUser(int $userId): array
 	{
 		$model = new static();
-		return $model->storage->table('conversations', 'c')
+		return $model
+			->storage
+			->table()
 			->select(
 				['c.*'],
 				[['u.first_name'], 'creatorFirstName'],
