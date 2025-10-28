@@ -74,9 +74,8 @@ class Conversation extends Model
 	 */
 	public static function getForUser(int $userId): array
 	{
-		$storage = static::storage();
-
-		$sql = $storage->table('conversations', 'c')
+		$model = new static();
+		return $model->storage->table('conversations', 'c')
 			->select([
 				'c.*',
 				'u.first_name as creatorFirstName',
@@ -90,8 +89,7 @@ class Conversation extends Model
 				'p.user_id' => $userId,
 				'p.is_active' => 1
 			])
-			->orderBy('c.last_message_at DESC');
-
-		return $storage->fetch($sql);
+			->orderBy('c.last_message_at DESC')
+			->fetch();
 	}
 }
