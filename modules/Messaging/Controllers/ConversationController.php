@@ -15,58 +15,55 @@ class ConversationController extends ResourceController
 {
 	/**
 	 * Constructor
-     *
-     * @param string|null $model
+	 *
+	 * @param string|null $model
 	 */
 	public function __construct(
 		protected ?string $model = Conversation::class
 	)
-    {
+	{
 		parent::__construct();
 	}
 
 	/**
-	 * Create a new conversation and add participant.
+	 * Override the add method to handle file attachments.
 	 *
-	 * @param Request $request
-	 * @return object
+	 * @param Request $request The HTTP request object.
+	 * @return object Response with created conversation and attachments.
 	 */
 	public function add(Request $request): object
 	{
-		$userId = getSession('user')->id ?? null;
-        if (!$userId)
-        {
-            return $this->error('Unauthorized', 401);
-        }
+		$result = parent::add($request);
+		if ($result->success === false)
+		{
+			return $result;
+		}
+
+		$userId = session()->user->id ?? null;
+		if (!$userId)
+		{
+			return $this->error('Unauthorized', 401);
+		}
 
 		$data = $this->getRequestItem($request);
 		if (empty($data))
-        {
+		{
 			return $this->error('No data provided', 400);
 		}
 
-		// Set createdBy
-		$data->createdBy = $userId;
+		// Add participant
+		ConversationParticipant::create((object)[
+			'conversationId' => $result->id,
+			'userId' => $data->participantId,
+			'isActive' => 1
+		]);
 
-		// Use parent add method for creation
-		$result = $this->addItem($data);
-
-		if ($result->success && isset($data->participantId))
-		{
-			// Add participant
-			ConversationParticipant::create((object)[
-				'conversationId' => $result->data->id,
-				'userId' => $data->participantId,
-				'isActive' => 1
-			]);
-
-			// Add creator as participant
-			ConversationParticipant::create((object)[
-				'conversationId' => $result->data->id,
-				'userId' => $userId,
-				'isActive' => 1
-			]);
-		}
+		// Add creator as participant
+		ConversationParticipant::create((object)[
+			'conversationId' => $result->id,
+			'userId' => $userId,
+			'isActive' => 1
+		]);
 
 		return $result;
 	}
@@ -84,7 +81,7 @@ class ConversationController extends ResourceController
 		];
 	}
 
-    /**
+	/**
 	 * Modifies the filter object based on the request.
 	 *
 	 * @param mixed $filter

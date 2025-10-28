@@ -16,13 +16,13 @@ class MessageController extends ResourceController
 {
 	/**
 	 * Constructor
-     *
-     * @param string|null $model The model class reference using ::class.
+	 *
+	 * @param string|null $model The model class reference using ::class.
 	 */
 	public function __construct(
 		protected ?string $model = Message::class
 	)
-    {
+	{
 		parent::__construct();
 	}
 
@@ -39,7 +39,7 @@ class MessageController extends ResourceController
 		$offset = ($request->getInt('offset') ?? 0);
 
 		if (!$conversationId)
-        {
+		{
 			return $this->error('Conversation ID required', 400);
 		}
 
@@ -57,10 +57,10 @@ class MessageController extends ResourceController
 	public function store(Request $request): object
 	{
 		$userId = getSession('user')->id ?? null;
-        if (!$userId)
-        {
-            return $this->error('Unauthorized', 401);
-        }
+		if (!$userId)
+		{
+			return $this->error('Unauthorized', 401);
+		}
 
 		// Basic validation
 		if (empty($data['conversationId']) || empty($data['content'])) {
@@ -68,7 +68,7 @@ class MessageController extends ResourceController
 		}
 
 		// Set sender and defaults
-        $data = $this->getRequestItem($request);
+		$data = $this->getRequestItem($request);
 		$data->senderId = $userId;
 		$data->messageType = $data->messageType ?? 'text';
 		$data->createdAt = date('Y-m-d H:i:s');
@@ -90,10 +90,10 @@ class MessageController extends ResourceController
 	{
 		$conversationId = $request->getInt('conversationId');
 		$userId = getSession('user')->id ?? null;
-        if (!$userId)
-        {
-            return $this->error('Unauthorized', 401);
-        }
+		if (!$userId)
+		{
+			return $this->error('Unauthorized', 401);
+		}
 
 		if (!$conversationId) {
 			return $this->error('Conversation ID required', 400);

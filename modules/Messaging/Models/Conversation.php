@@ -16,10 +16,10 @@ class Conversation extends Model
 	 */
 	protected static ?string $tableName = 'conversations';
 
-    /**
+	/**
 	 * @var string|null $alias
 	 */
-    protected static ?string $alias = 'c';
+	protected static ?string $alias = 'c';
 
 	/**
 	 * @var array $fields

@@ -16,10 +16,10 @@ class ConversationParticipant extends Model
 	 */
 	protected static ?string $tableName = 'conversation_participants';
 
-    /**
+	/**
 	 * @var string|null $alias
 	 */
-    protected static ?string $alias = 'cp';
+	protected static ?string $alias = 'cp';
 
 	/**
 	 * @var array $fields
@@ -110,7 +110,7 @@ class ConversationParticipant extends Model
 		]);
 
 		if (!$participant)
-        {
+		{
 			return false;
 		}
 

@@ -16,10 +16,10 @@ class Message extends Model
 	 */
 	protected static ?string $tableName = 'messages';
 
-    /**
+	/**
 	 * @var string|null $alias
 	 */
-    protected static ?string $alias = 'm';
+	protected static ?string $alias = 'm';
 
 	/**
 	 * @var array $fields
