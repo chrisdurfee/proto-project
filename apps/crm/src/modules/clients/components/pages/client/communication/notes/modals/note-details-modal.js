@@ -3,6 +3,7 @@ import { Data, DateTime } from "@base-framework/base";
 import { Badge, Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
+import { ClientNoteModel } from "@modules/clients/components/models/client-note-model.js";
 import { NoteModal } from "./note-modal.js";
 
 /**
@@ -45,15 +46,8 @@ const HeaderOptions = (note, clientId, onUpdate) =>
 					}
 					else if (selected.value === 'delete-note')
 					{
-						// Use fetch to delete the note
-						fetch(`/api/client/${clientId}/note/${note.id}`, {
-							method: 'DELETE',
-							headers: {
-								'Content-Type': 'application/json'
-							}
-						})
-						.then(res => res.json())
-						.then((response) =>
+						const model = new ClientNoteModel({ ...note, clientId });
+						model.xhr.delete({}, (response) =>
 						{
 							if (!response || response.success === false)
 							{
@@ -68,26 +62,10 @@ const HeaderOptions = (note, clientId, onUpdate) =>
 
 							parent.close();
 
-							app.notify({
-								type: "success",
-								title: "Note Deleted",
-								description: "The note has been deleted.",
-								icon: Icons.check
-							});
-
 							if (onUpdate)
 							{
 								onUpdate(null);
 							}
-						})
-						.catch(() =>
-						{
-							app.notify({
-								type: "destructive",
-								title: "Error",
-								description: "An error occurred while deleting the note.",
-								icon: Icons.shield
-							});
 						});
 					}
 				}
@@ -140,9 +118,9 @@ const formatNoteData = (note) =>
  * @returns {object}
  */
 const ContentSection = () =>
-	DetailSection({ title: 'Content' }, [
+	DetailSection({ title: 'Note' }, [
 		Div({ class: 'flex flex-col gap-y-3' }, [
-			SplitRow('Note', P({ class: 'text-sm text-muted-foreground whitespace-pre-line' }, '[[content]]'))
+			P({ class: 'text-sm text-muted-foreground whitespace-pre-line' }, '[[content]]')
 		])
 	]);
 
@@ -245,7 +223,7 @@ export const NoteDetailsModal = (props = { note: {}, clientId: '', onUpdate: und
 		 */
 		setData()
 		{
-			return new Data(formatNoteData(note));
+			return new ClientNoteModel(formatNoteData(note));
 		},
 
 		/**
