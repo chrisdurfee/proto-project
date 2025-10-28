@@ -22,7 +22,7 @@ const AddMessageButton = () => (
                         onSubmit: (data) => {
                             console.log('New conversation started:', data);
                         }
-                    }).open();
+                    });
                 }
             })
         ])

@@ -21,19 +21,19 @@ class Message extends Model
 	 */
 	protected static array $fields = [
 		'id',
-		'conversation_id',
-		'sender_id',
+		'conversationId',
+		'senderId',
 		'content',
-		'message_type',
-		'file_url',
-		'file_name',
-		'file_size',
-		'audio_duration',
-		'is_edited',
-		'edited_at',
-		'read_at',
-		'created_at',
-		'updated_at'
+		'messageType',
+		'fileUrl',
+		'fileName',
+		'fileSize',
+		'audioDuration',
+		'isEdited',
+		'editedAt',
+		'readAt',
+		'createdAt',
+		'updatedAt'
 	];
 
 	/**
@@ -49,23 +49,26 @@ class Message extends Model
 	/**
 	 * Augments data before saving.
 	 *
-	 * @param mixed|null $data
+	 * @param mixed $data
 	 * @return mixed
 	 */
-	public function augment(mixed $data = null): mixed
+	protected static function augment(mixed $data = null): mixed
 	{
-		if (!$data) {
+		if (!$data)
+		{
 			return $data;
 		}
 
-		// Ensure message_type defaults to 'text'
-		if (!isset($data['message_type']) || empty($data['message_type'])) {
-			$data['message_type'] = 'text';
+		// Ensure messageType defaults to 'text'
+		if (!isset($data->messageType) || empty($data->messageType))
+		{
+			$data->messageType = 'text';
 		}
 
-		// Set is_edited default
-		if (!isset($data['is_edited'])) {
-			$data['is_edited'] = 0;
+		// Set isEdited default
+		if (!isset($data->isEdited))
+		{
+			$data->isEdited = 0;
 		}
 
 		return $data;
@@ -77,25 +80,8 @@ class Message extends Model
 	 * @param object|null $data
 	 * @return object|null
 	 */
-	public function format(?object $data): ?object
+	protected static function format(?object $data): ?object
 	{
-		if (!$data) {
-			return null;
-		}
-
-		// Add sender information
-		$data->sender = $this->getSender($data->sender_id);
-
-		// Format timestamps
-		$data->time = $data->created_at;
-		$data->direction = $this->getDirection($data->sender_id);
-
-		// Add audio info if audio message
-		if ($data->message_type === 'audio' && $data->file_url) {
-			$data->audioUrl = $data->file_url;
-			$data->audioDuration = $data->audio_duration;
-		}
-
 		return $data;
 	}
 
@@ -124,87 +110,16 @@ class Message extends Model
 	 *
 	 * @param int $conversationId
 	 * @param int $limit
-	 * @param int $offset
 	 * @return array
 	 */
-	public static function getForConversation(int $conversationId, int $limit = 50, int $offset = 0): array
+	public static function getForConversation(int $conversationId, int $limit = 50): array
 	{
-		$storage = static::storage();
-		$sql = $storage->table(static::$tableName)
-			->select()
-			->where(['conversation_id' => $conversationId])
-			->orderBy('created_at ASC')
-			->limit($limit)
-			->offset($offset);
+		// Use fetchWhere for simple queries
+		$messages = static::fetchWhere(['conversationId' => $conversationId]);
 
-		return $storage->fetch($sql);
-	}
+		// Sort by createdAt and limit
+		usort($messages, fn($a, $b) => strtotime($a->createdAt) - strtotime($b->createdAt));
 
-	/**
-	 * Mark messages as read for a user.
-	 *
-	 * @param int $conversationId
-	 * @param int $userId
-	 * @return bool
-	 */
-	public static function markAsRead(int $conversationId, int $userId): bool
-	{
-		$storage = static::storage();
-
-		// Update messages read_at timestamp
-		$sql = $storage->table('messages')
-			->update([
-				'read_at' => date('Y-m-d H:i:s')
-			])
-			->where([
-				'conversation_id' => $conversationId,
-				'sender_id !=' => $userId,
-				'read_at' => null
-			]);
-
-		$storage->execute($sql);
-
-		// Update participant's last_read_at
-		$participantSql = $storage->table('conversation_participants')
-			->update([
-				'last_read_at' => date('Y-m-d H:i:s')
-			])
-			->where([
-				'conversation_id' => $conversationId,
-				'user_id' => $userId
-			]);
-
-		return $storage->execute($participantSql);
-	}
-
-	/**
-	 * Get sender information.
-	 *
-	 * @param int $senderId
-	 * @return object|null
-	 */
-	private function getSender(int $senderId): ?object
-	{
-		// This would use the User model
-		$storage = static::storage();
-		$sql = $storage->table('users')
-			->select(['id', 'first_name', 'last_name', 'email', 'avatar'])
-			->where(['id' => $senderId]);
-
-		$users = $storage->fetch($sql);
-		return $users[0] ?? null;
-	}
-
-	/**
-	 * Determine message direction based on current user.
-	 *
-	 * @param int $senderId
-	 * @return string
-	 */
-	private function getDirection(int $senderId): string
-	{
-		// This would get current user ID from auth
-		$currentUserId = 1; // Placeholder
-		return ($senderId === $currentUserId) ? 'sent' : 'received';
+		return array_slice($messages, 0, $limit);
 	}
 }

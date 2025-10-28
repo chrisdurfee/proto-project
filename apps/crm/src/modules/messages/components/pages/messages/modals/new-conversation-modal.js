@@ -1,4 +1,4 @@
-import { Div, P } from "@base-framework/atoms";
+import { Div, Label } from "@base-framework/atoms";
 import { Data } from "@base-framework/base";
 import { Input } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
@@ -17,7 +17,7 @@ const add = (data, destroyCallback = null) =>
 	const conversationModel = new ConversationModel();
 	conversationModel.set(data);
 
-	conversationModel.xhr.start({}, (response) =>
+	conversationModel.xhr.add({}, (response) =>
 	{
 		if (!response || response.success === false)
 		{
@@ -39,9 +39,9 @@ const add = (data, destroyCallback = null) =>
 		app.navigate(`messages/all/${response.data.id}`);
 
 		app.notify({
-			type: "success",
 			title: "Conversation Started",
 			description: "The conversation has been started successfully.",
+			icon: Icons.check
 		});
 	});
 };
@@ -54,33 +54,27 @@ const add = (data, destroyCallback = null) =>
 const ConversationForm = () =>
 	Div({ class: "space-y-4" }, [
 		Div({ class: "space-y-2" }, [
-			P({ class: "text-sm font-medium" }, "Conversation Type"),
+			Label({ for: "title" }, "Title (optional)"),
 			Input({
-				placeholder: "Direct or Group",
-				bind: "type",
-				value: "direct",
-				readonly: true
-			})
-		]),
-		Div({ class: "space-y-2" }, [
-			P({ class: "text-sm font-medium" }, "Title (optional)"),
-			Input({
+				id: "title",
 				placeholder: "Enter conversation title...",
 				bind: "title"
 			})
 		]),
 		Div({ class: "space-y-2" }, [
-			P({ class: "text-sm font-medium" }, "Description (optional)"),
+			Label({ for: "description" }, "Description (optional)"),
 			Input({
+				id: "description",
 				placeholder: "Enter conversation description...",
 				bind: "description"
 			})
 		]),
 		Div({ class: "space-y-2" }, [
-			P({ class: "text-sm font-medium" }, "Participant User ID"),
+			Label({ for: "participantId" }, "Participant User ID *"),
 			Input({
+				id: "participantId",
 				placeholder: "Enter user ID to start conversation with...",
-				bind: "participant_id",
+				bind: "participantId",
 				type: "number"
 			})
 		])
@@ -100,18 +94,15 @@ export const NewConversationModal = (props = {}) =>
 		type: 'direct',
 		title: '',
 		description: '',
-		participant_id: null
+		participantId: props.initialData?.participantId || null
 	});
-
-	const closeCallback = (parent) => props.onClose?.(data, parent);
 
 	const handleSubmit = (parent) =>
 	{
-		const destroyCallback = () => parent.destroy();
-		const modalData = parent.data;
+		const modalData = parent.data.get();
 
 		// Basic validation
-		if (!modalData.participant_id)
+		if (!modalData.participantId)
         {
 			app.notify({
 				type: "destructive",
@@ -122,6 +113,7 @@ export const NewConversationModal = (props = {}) =>
 			return false;
 		}
 
+		const destroyCallback = () => parent.destroy();
 		add(modalData, destroyCallback);
 		props.onSubmit?.(modalData);
 
@@ -136,7 +128,7 @@ export const NewConversationModal = (props = {}) =>
 		description: 'Create a new conversation with another user.',
 		size: 'md',
 		type: 'right',
-		onClose: closeCallback,
+		onClose: () => props.onClose?.(data),
 		onSubmit: handleSubmit,
 		children: [
 			ConversationForm()

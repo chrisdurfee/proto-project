@@ -4,48 +4,23 @@ import { Model } from "@base-framework/base";
  * ConversationModel
  *
  * This model handles conversation data and API operations.
+ * Uses default CRUD operations (add, update, delete, get, all).
  *
  * @type {typeof Model}
  */
 export const ConversationModel = Model.extend({
-	url: '/api/conversations',
+	url: '/api/messaging/conversations',
 
 	defaults: {
 		id: null,
 		type: 'direct',
 		title: null,
 		description: null,
-		participants: [],
-		last_message_at: null,
-		last_message_id: null,
-		created_at: null,
-		updated_at: null
-	},
-
-	xhr: {
-		/**
-		 * Get conversations for the current user.
-		 *
-		 * @param {object} instanceParams - The instance parameters.
-		 * @param {function} callBack - The callback function.
-		 * @returns {object}
-		 */
-		getForUser(instanceParams, callBack)
-		{
-			return this._get('', '', instanceParams, callBack);
-		},
-
-		/**
-		 * Start a new conversation.
-		 *
-		 * @param {object} instanceParams - The instance parameters.
-		 * @param {function} callBack - The callback function.
-		 * @returns {object}
-		 */
-		start(instanceParams, callBack)
-		{
-			const data = this.setupObjectData();
-			return this._post('', data, instanceParams, callBack);
-		}
+		participantId: null,
+		lastMessageAt: null,
+		lastMessageId: null,
+		createdBy: null,
+		createdAt: null,
+		updatedAt: null
 	}
 });

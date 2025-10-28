@@ -13,9 +13,9 @@ use Modules\Messaging\Controllers\MessageController;
 
 // Conversation routes
 router()
-    ->resource('conversations', ConversationController::class);
+    ->resource('messaging/conversations', ConversationController::class);
 
 // Message routes
 router()
-    ->post('messages/mark-read', [MessageController::class, 'markAsRead'])
-    ->resource('messages', MessageController::class);
+    ->post('messaging/messages/mark-read', [MessageController::class, 'markAsRead'])
+    ->resource('messaging/messages', MessageController::class);

@@ -22,7 +22,7 @@ export const ThreadEmptyState = () =>
 					onSubmit: (data) => {
 						console.log('New conversation started:', data);
 					}
-				}).open();
+				});
 			}
 		}, 'Start New Thread')
 	]);

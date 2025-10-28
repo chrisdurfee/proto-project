@@ -10,7 +10,7 @@ import { Avatar, StaticStatusIndicator, TimeFrame } from "@base-framework/ui/mol
  * - Round avatar skeleton on the left
  * - Two lines of text and a small time skeleton on the right
  */
-const ThreadListItemSkeleton = () =>
+export const ThreadListItemSkeleton = () =>
     Div({ class: "flex items-center gap-3 p-4 lg:p-5 hover:bg-muted rounded-md" }, [
         Skeleton({ shape: "circle", width: "w-12", height: "h-12", class: "flex-none" }),
         Div({ class: "flex flex-col flex-1 gap-1" }, [
@@ -112,10 +112,3 @@ export const ThreadListItem = Jot(
         });
     }
 });
-
-/**
- * Static skeleton method for loading states.
- *
- * @returns {object}
- */
-ThreadListItem.skeleton = () => ThreadListItemSkeleton();

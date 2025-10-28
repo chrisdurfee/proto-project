@@ -26,48 +26,12 @@ class ConversationController extends ResourceController
 	}
 
 	/**
-	 * Get conversations for the current user.
+	 * Create a new conversation and add participant.
 	 *
 	 * @param Request $request
 	 * @return object
 	 */
-	public function index(Request $request): object
-	{
-		$userId = getSession('user')->id ?? null;
-        if (!$userId)
-        {
-            return $this->error('Unauthorized', 401);
-        }
-
-		$conversations = Conversation::getForUser($userId);
-		return $this->response($conversations);
-	}
-
-	/**
-	 * Get a specific conversation.
-	 *
-	 * @param Request $request
-	 * @return object
-	 */
-	public function show(Request $request): object
-	{
-		$conversationId = (int)$this->getResourceId($request);
-		$conversation = Conversation::get($conversationId);
-		if (!$conversation)
-        {
-			return $this->error('Conversation not found', 404);
-		}
-
-		return $this->response($conversation);
-	}
-
-	/**
-	 * Create a new conversation.
-	 *
-	 * @param Request $request
-	 * @return object
-	 */
-	public function store(Request $request): object
+	public function add(Request $request): object
 	{
 		$userId = getSession('user')->id ?? null;
         if (!$userId)
@@ -81,18 +45,30 @@ class ConversationController extends ResourceController
 			return $this->error('No data provided', 400);
 		}
 
-		// Set created_by
+		// Set createdBy
 		$data->createdBy = $userId;
-		$data->type = $data->type ?? 'direct';
 
-		// Create conversation
-		$conversation = Conversation::create((object)$data);
-		if (!$conversation)
-        {
-			return $this->error('Failed to create conversation');
+		// Use parent add method for creation
+		$result = $this->addItem($data);
+
+		if ($result->success && isset($data->participantId))
+		{
+			// Add participant
+			ConversationParticipant::create((object)[
+				'conversationId' => $result->data->id,
+				'userId' => $data->participantId,
+				'isActive' => 1
+			]);
+
+			// Add creator as participant
+			ConversationParticipant::create((object)[
+				'conversationId' => $result->data->id,
+				'userId' => $userId,
+				'isActive' => 1
+			]);
 		}
 
-		return $this->response($conversation);
+		return $result;
 	}
 
 	/**
@@ -103,7 +79,8 @@ class ConversationController extends ResourceController
 		return [
 			'title' => 'string:255',
 			'type' => 'string:20',
-			'description' => 'string:500'
+			'description' => 'string:500',
+			'participantId' => 'int'
 		];
 	}
 }

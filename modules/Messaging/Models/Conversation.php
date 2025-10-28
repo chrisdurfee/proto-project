@@ -46,7 +46,7 @@ class Conversation extends Model
 	 * @param mixed|null $data
 	 * @return mixed
 	 */
-	public function augment(mixed $data = null): mixed
+	protected static function augment(mixed $data = null): mixed
 	{
 		if (!$data)
         {
@@ -68,18 +68,8 @@ class Conversation extends Model
 	 * @param object|null $data
 	 * @return object|null
 	 */
-	public function format(?object $data): ?object
+	protected static function format(?object $data): ?object
 	{
-		if (!$data)
-        {
-			return null;
-		}
-
-		// Add computed fields
-		$data->unreadCount = $this->getUnreadCount($data->id);
-		$data->participantCount = $this->getParticipantCount($data->id);
-		$data->lastMessage = $this->getLastMessage($data->id);
-
 		return $data;
 	}
 
@@ -114,68 +104,6 @@ class Conversation extends Model
 	}
 
 	/**
-	 * Get unread message count for current user.
-	 *
-	 * @param int $conversationId
-	 * @return int
-	 */
-	private function getUnreadCount(int $conversationId): int
-	{
-		// This would typically get the current user's ID from auth
-		$userId = 1; // Placeholder for current user
-
-		$participant = ConversationParticipant::getBy([
-			'conversation_id' => $conversationId,
-			'user_id' => $userId
-		]);
-
-		if (!$participant)
-        {
-			return 0;
-		}
-
-		$lastReadAt = $participant->last_read_at ?? '1970-01-01 00:00:00';
-
-		return count(Message::fetchWhere([
-			'conversation_id' => $conversationId,
-			"created_at > '{$lastReadAt}'"
-		]));
-	}
-
-	/**
-	 * Get participant count for this conversation.
-	 *
-	 * @param int $conversationId
-	 * @return int
-	 */
-	private function getParticipantCount(int $conversationId): int
-	{
-		return count(ConversationParticipant::fetchWhere([
-			'conversation_id' => $conversationId,
-			'is_active' => 1
-		]));
-	}
-
-	/**
-	 * Get the last message in this conversation.
-	 *
-	 * @param int $conversationId
-	 * @return object|null
-	 */
-	private function getLastMessage(int $conversationId): ?object
-	{
-		$storage = static::storage();
-		$sql = $storage->table('messages')
-			->select()
-			->where(['conversation_id' => $conversationId])
-			->orderBy('created_at DESC')
-			->limit(1);
-
-		$messages = $storage->fetch($sql);
-		return $messages[0] ?? null;
-	}
-
-	/**
 	 * Get conversations for a specific user.
 	 *
 	 * @param int $userId
@@ -188,10 +116,10 @@ class Conversation extends Model
 		$sql = $storage->table('conversations', 'c')
 			->select([
 				'c.*',
-				'u.first_name',
-				'u.last_name',
-				'u.email',
-				'p.last_read_at'
+				'u.first_name as creatorFirstName',
+				'u.last_name as creatorLastName',
+				'u.email as creatorEmail',
+				'p.last_read_at as lastReadAt'
 			])
 			->join('conversation_participants p', 'c.id = p.conversation_id')
 			->join('users u', 'c.created_by = u.id')

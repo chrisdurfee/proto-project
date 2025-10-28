@@ -11,8 +11,8 @@ const routes = Module.convertRoutes(
 	/**
 	 * Messages routes
 	 */
-	{ path: '/messages/:page?/video/:roomId?*', import: () => import('./components/pages/video/video-chat-page.js'), title: 'Video Chat' },
-	{ path: '/messages/:page?/:messageId?*', import: () => import('./components/pages/messages/messages-page.js'), title: 'Messages' }
+	{ path: '/messages/video/:roomId?*', import: () => import('./components/pages/video/video-chat-page.js'), title: 'Video Chat' },
+	{ path: '/messages/:messageId?*', import: () => import('./components/pages/messages/messages-page.js'), title: 'Messages' }
 ]);
 
 /**

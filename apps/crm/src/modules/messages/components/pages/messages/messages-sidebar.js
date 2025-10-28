@@ -21,13 +21,12 @@ const SidebarRowItem = (route) => {
 				// Start new conversation with this user
 				NewConversationModal({
 					initialData: {
-						participant_id: user.id,
-						title: `Conversation with ${user.sender}`
+						participantId: user.id
 					},
 					onSubmit: (data) => {
 						console.log(`Starting conversation with ${user.sender}:`, data);
 					}
-				}).open();
+				});
 			}
 		},
 			[
