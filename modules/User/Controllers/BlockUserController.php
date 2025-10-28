@@ -132,32 +132,14 @@ class BlockUserController extends Controller
 			return $this->error('Invalid user ID.');
 		}
 
-		$filter = $this->getFilter($request);
-		$offset = $request->getInt('offset') ?? 0;
-		$limit = $request->getInt('limit') ?? 50;
-		$search = $request->input('search');
-		$custom = $request->input('custom');
-		$lastCursor = $request->input('lastCursor') ?? null;
-		$dates = $this->setDateModifier($request);
-		$orderBy = $this->setOrderByModifier($request);
-		$groupBy = $this->setGroupByModifier($request);
-		$since = $request->input('since') ?? null;
-
 		$user = User::get($userId);
 		if ($user === null)
 		{
 			return $this->error('User not found.');
 		}
 
-		$result = $user->blocked()->all($filter, $offset, $limit, [
-			'search' => $search,
-			'custom' => $custom,
-			'dates' => $dates,
-			'orderBy' => $orderBy,
-			'groupBy' => $groupBy,
-			'cursor' => $lastCursor,
-			'since' => $since
-		]);
+		$inputs = $this->getAllInputs($request);
+		$result = $user->blocked()->all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
 		return $this->response($result);
 	}
 }

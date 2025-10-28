@@ -32,32 +32,14 @@ class FollowingController extends Controller
 			return $this->error('Invalid user ID.');
 		}
 
-		$filter = $this->getFilter($request);
-		$offset = $request->getInt('offset') ?? 0;
-		$limit = $request->getInt('limit') ?? 50;
-		$search = $request->input('search');
-		$custom = $request->input('custom');
-		$lastCursor = $request->input('lastCursor') ?? null;
-		$dates = $this->setDateModifier($request);
-		$orderBy = $this->setOrderByModifier($request);
-		$groupBy = $this->setGroupByModifier($request);
-		$sinceId = $request->input('sinceId') ?? null;
-
 		$user = User::get($userId);
 		if ($user === null)
 		{
 			return $this->error('User not found.');
 		}
 
-		$result = $user->following()->all($filter, $offset, $limit, [
-			'search' => $search,
-			'custom' => $custom,
-			'dates' => $dates,
-			'orderBy' => $orderBy,
-			'groupBy' => $groupBy,
-			'cursor' => $lastCursor,
-			'sinceId' => $sinceId
-		]);
+		$inputs = $this->getAllInputs($request);
+		$result = $user->following()->all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
 		return $this->response($result);
 	}
 }

@@ -79,24 +79,9 @@ class ErrorController extends Controller
 	{
 		$filter = $request->input('filter');
 		$filter = $this->setFilter($filter);
+		$inputs = $this->getAllInputs($request);
 
-		$offset = $request->getInt('offset');
-		$limit = $request->getInt('limit');
-		$search = $request->input('search');
-		$custom = $request->input('custom');
-		$lastCursor = $request->input('lastCursor') ?? null;
-		$orderBy = $this->setOrderByModifier($request);
-		$dates = $this->setDateModifier($request);
-		$groupBy = $this->setGroupByModifier($request);
-
-		$result = ErrorLog::all($filter, $offset, $limit, [
-			'search' => $search,
-			'custom' => $custom,
-			'orderBy' => $orderBy,
-			'dates' => $dates,
-			'groupBy' => $groupBy,
-			'cursor' => $lastCursor
-		]);
+		$result = ErrorLog::all($filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
 		return $this->response($result);
 	}
 }

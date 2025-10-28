@@ -38,11 +38,6 @@ class ConversationParticipant extends Model
 	];
 
 	/**
-	 * @var bool $useSoftDelete
-	 */
-	protected static bool $useSoftDelete = true;
-
-	/**
 	 * Define joins for the model.
 	 *
 	 * @param object $builder The query builder object
@@ -56,6 +51,13 @@ class ConversationParticipant extends Model
 				fields: ['id', 'displayName', 'firstName', 'lastName', 'email', 'image']
 			)
 			->on(['user_id', 'id']);
+
+		$builder
+			->one(
+				Conversation::class,
+				fields: ['id', 'title', 'createdAt', 'updatedAt']
+			)
+			->on(['conversation_id', 'id']);
 	}
 
 	/**

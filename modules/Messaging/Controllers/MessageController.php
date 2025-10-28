@@ -56,7 +56,7 @@ class MessageController extends ResourceController
 	 */
 	public function store(Request $request): object
 	{
-		$userId = getSession('user')->id ?? null;
+		$userId = session()->user->id ?? null;
 		if (!$userId)
 		{
 			return $this->error('Unauthorized', 401);
@@ -89,7 +89,7 @@ class MessageController extends ResourceController
 	public function markAsRead(Request $request): object
 	{
 		$conversationId = $request->getInt('conversationId');
-		$userId = getSession('user')->id ?? null;
+		$userId = session()->user->id ?? null;
 		if (!$userId)
 		{
 			return $this->error('Unauthorized', 401);
