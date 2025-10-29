@@ -57,7 +57,17 @@ class Conversation extends Model
 				'deletedAt'
 			])
 			->on(['id', 'conversationId'])
-			->as('participants');
+			->as('participants')
+			->one(User::class, fields: [
+					'id',
+					'displayName',
+					'firstName',
+					'lastName',
+					'email',
+					'image',
+					['status', 'userStatus']
+				])
+				->on(['userId', 'id']);
 	}
 
 	/**

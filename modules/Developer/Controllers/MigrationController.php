@@ -116,11 +116,8 @@ class MigrationController extends Controller
 		Request $request
 	): object
 	{
-		$filter = $request->input('filter');
-		$filter = $this->setFilter($filter);
 		$inputs = $this->getAllInputs($request);
-
-		$result = Migration::all($filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+		$result = Migration::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
 		return $this->response($result);
 	}
 }

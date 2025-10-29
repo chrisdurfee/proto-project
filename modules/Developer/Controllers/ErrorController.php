@@ -49,13 +49,14 @@ class ErrorController extends Controller
 	}
 
 	/**
-	 * This will get the filter for the model.
+	 * This will get the filter from the request.
 	 *
-	 * @param string|null $filter
-	 * @return array
+	 * @param Request $request The request object.
+	 * @return mixed The filter criteria.
 	 */
-	protected function setFilter(?string $filter): array
+	public function getFilter(Request $request): mixed
 	{
+		$filter = $request->input('filter') ?? $request->input('option');
 		$filter = strtolower($filter ?? '');
 		if (empty($filter) || $filter === 'all')
 		{
@@ -77,11 +78,8 @@ class ErrorController extends Controller
         Request $request
     ): object
 	{
-		$filter = $request->input('filter');
-		$filter = $this->setFilter($filter);
 		$inputs = $this->getAllInputs($request);
-
-		$result = ErrorLog::all($filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+		$result = ErrorLog::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
 		return $this->response($result);
 	}
 }
