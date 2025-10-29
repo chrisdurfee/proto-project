@@ -21,7 +21,7 @@ const DockableThread = (props) => (
 
 			if (messageId === 'new')
 			{
-				return NewConversationForm({
+				return new NewConversationForm({
 					onCancel: () => app.navigate('messages/all'),
 					onSuccess: (conversation) =>
 					{

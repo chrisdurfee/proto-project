@@ -1,43 +1,36 @@
 import { Button, Div, Form, H2, Header, Input, Label, On, P, Select } from "@base-framework/atoms";
-import { Data } from "@base-framework/base";
+import { Component, Jot } from "@base-framework/base";
 import { Icons } from "@base-framework/ui/icons";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
-import { UserModel } from "@modules/users/components/pages/users/models/user-model.js";
 
 /**
  * NewConversationForm
  *
  * A form to select a user and start a new conversation.
  *
- * @param {object} props
- * @returns {object}
+ * @type {typeof Component}
  */
-export const NewConversationForm = ({ onCancel, onSuccess }) =>
+export const NewConversationForm = Jot(
 {
-	const conversationModel = new ConversationModel();
-	const userModel = new UserModel();
-
-	const data = new Data({
-        participantId: null,
-        title: '',
-        users: [],
-        usersLoaded: false,
-        isLoading: false
-    });
-
-	// Load users from API
-	userModel.xhr.all({}, (response) => {
-		if (response && response.data) {
-			data.set({ users: response.data, usersLoaded: true });
-		}
-	});
+	/**
+	 * Setup the form data and load users.
+	 *
+	 * @returns {object}
+	 */
+	setData()
+	{
+		return new ConversationModel({
+            loading: false
+        });
+	},
 
 	/**
 	 * Handle user selection and conversation creation
 	 */
-	const handleNext = async () =>
+	handleNext()
 	{
-		const selectedId = data.get('participantId');
+        // @ts-ignore
+		const selectedId = this.data.participantId;
 		if (!selectedId)
 		{
 			app.notify({
@@ -49,23 +42,38 @@ export const NewConversationForm = ({ onCancel, onSuccess }) =>
 			return;
 		}
 
-		data.set({ isLoading: true });
+        // @ts-ignore
+		this.data.isLoading = true;
 
-		try
+        // @ts-ignore
+		const users = this.data.users;
+		const user = users.find(u => u.id === parseInt(selectedId));
+		if (!user)
 		{
-			const users = data.get('users');
-			const user = users.find(u => u.id === parseInt(selectedId));
-			if (!user) {
-				throw new Error('User not found');
-			}
-			const userName = user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
-			const title = data.get('title') || `Conversation with ${userName}`;
-
-			const result = await conversationModel.xhr.add({
-				participantId: parseInt(selectedId),
-				title: title,
-				type: 'direct'
+			app.notify({
+				type: 'error',
+				title: 'Error',
+				description: 'User not found',
+				icon: Icons.alertCircle
 			});
+
+            // @ts-ignore
+			this.data.isLoading = false;
+			return;
+		}
+
+		const userName = user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+        // @ts-ignore
+		const title = this.data.title || `Conversation with ${userName}`;
+
+        // @ts-ignore
+		this.conversationModel.xhr.add({
+			participantId: parseInt(selectedId),
+			title: title,
+			type: 'direct'
+		}, (result) => {
+            // @ts-ignore
+			this.data.isLoading = false;
 
 			if (result && result.id)
 			{
@@ -79,117 +87,121 @@ export const NewConversationForm = ({ onCancel, onSuccess }) =>
 				// Navigate to the new conversation
 				app.navigate(`messages/all/${result.id}`);
 
-				if (onSuccess)
+                // @ts-ignore
+				if (this.onSuccess)
 				{
-					onSuccess(result);
+                    // @ts-ignore
+					this.onSuccess(result);
 				}
 			}
 			else
 			{
-				throw new Error('Failed to create conversation');
+				app.notify({
+					type: 'error',
+					title: 'Error',
+					description: 'Failed to start conversation. Please try again.',
+					icon: Icons.alertCircle
+				});
 			}
-		}
-		catch (error)
-		{
-			console.error('Error creating conversation:', error);
-			app.notify({
-				type: 'error',
-				title: 'Error',
-				description: 'Failed to start conversation. Please try again.',
-				icon: Icons.alertCircle
-			});
-		}
-		finally
-		{
-			data.set({ isLoading: false });
-		}
-	};
+		});
+	},
 
-	return Div({ class: "flex flex-col h-full" }, [
-		// Header
-		Header({ class: "border-b p-4" }, [
-			Div({ class: "flex items-center justify-between" }, [
-				H2({ class: "text-xl font-semibold" }, "Start New Conversation"),
+	/**
+	 * Render the form.
+	 *
+	 * @returns {object}
+	 */
+	render()
+	{
+		return Div({ class: "flex flex-col h-full" }, [
+			// Header
+			Header({ class: "border-b p-4" }, [
+				Div({ class: "flex items-center justify-between" }, [
+					H2({ class: "text-xl font-semibold" }, "Start New Conversation"),
+					Button({
+						variant: 'ghost',
+						icon: Icons.x,
+                        // @ts-ignore
+						click: () => this.onCancel && this.onCancel()
+					})
+				])
+			]),
+
+			// Form Content
+			Div({ class: "flex-1 p-6 overflow-y-auto" }, [
+				Form({ class: "space-y-6 max-w-md" }, [
+					// User Selection
+					Div({ class: "space-y-2" }, [
+						Label({ htmlFor: "participant-select" }, "Select User"),
+						On('usersLoaded', (loaded) => {
+							if (!loaded) {
+								return Select({
+									id: "participant-select",
+									class: "w-full",
+									disabled: true
+								}, [
+									Div({ tag: 'option' }, "Loading users...")
+								]);
+							}
+
+							return On('users', (users) =>
+								Select({
+									id: "participant-select",
+									bind: 'participantId',
+									class: "w-full",
+									required: true
+								}, [
+									Div({ tag: 'option', value: '' }, "Choose a user..."),
+									...users.map(user => {
+										const displayName = user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+										return Div({
+											tag: 'option',
+											value: user.id.toString()
+										}, `${displayName} ${user.email ? `(${user.email})` : ''}`);
+									})
+								])
+							);
+						})
+					]),
+
+					// Optional Title
+					Div({ class: "space-y-2" }, [
+						Label({ htmlFor: "title-input" }, "Conversation Title (Optional)"),
+						Input({
+							id: "title-input",
+							type: "text",
+							bind: 'title',
+							placeholder: "Enter a custom title...",
+							class: "w-full"
+						})
+					]),
+
+					P({ class: "text-sm text-muted-foreground" },
+						"Select a user to start a conversation. You'll be taken to the chat interface after clicking Next."
+					)
+				])
+			]),
+
+			// Footer Actions
+			Div({ class: "border-t p-4 flex justify-end gap-2" }, [
 				Button({
-					variant: 'ghost',
-					icon: Icons.x,
-					click: onCancel
-				})
-			])
-		]),
-
-		// Form Content
-		Div({ class: "flex-1 p-6 overflow-y-auto" }, [
-			Form({ class: "space-y-6 max-w-md" }, [
-				// User Selection
-				Div({ class: "space-y-2" }, [
-					Label({ htmlFor: "participant-select" }, "Select User"),
-					On('usersLoaded', (loaded) => {
-						if (!loaded) {
-							return Select({
-								id: "participant-select",
-								class: "w-full",
-								disabled: true
-							}, [
-								Div({ tag: 'option' }, "Loading users...")
-							]);
-						}
-
-						return On('users', (users) =>
-							Select({
-								id: "participant-select",
-								bind: 'participantId',
-								class: "w-full",
-								required: true
-							}, [
-								Div({ tag: 'option', value: '' }, "Choose a user..."),
-								...users.map(user => {
-									const displayName = user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
-									return Div({
-										tag: 'option',
-										value: user.id.toString()
-									}, `${displayName} ${user.email ? `(${user.email})` : ''}`);
-								})
-							])
-						);
+					variant: 'outline',
+                    // @ts-ignore
+					click: () => this.onCancel && this.onCancel()
+				}, 'Cancel'),
+				Button({
+					variant: 'default',
+                    // @ts-ignore
+					click: () => this.handleNext(),
+					onState: ['isLoading', (loading, ele) => {
+						ele.disabled = loading;
+					}]
+				}, [
+					Div({
+						onState: ['isLoading', (loading) => loading ? 'Creating...' : 'Next']
 					})
-				]),
-
-				// Optional Title
-				Div({ class: "space-y-2" }, [
-					Label({ htmlFor: "title-input" }, "Conversation Title (Optional)"),
-					Input({
-						id: "title-input",
-						type: "text",
-						bind: 'title',
-						placeholder: "Enter a custom title...",
-						class: "w-full"
-					})
-				]),
-
-				P({ class: "text-sm text-muted-foreground" },
-					"Select a user to start a conversation. You'll be taken to the chat interface after clicking Next."
-				)
+				])
 			])
-		]),
-
-		// Footer Actions
-		Div({ class: "border-t p-4 flex justify-end gap-2" }, [
-			Button({
-				variant: 'outline',
-				click: onCancel
-			}, 'Cancel'),
-			Button({
-				variant: 'default',
-				click: handleNext,
-				onState: ['isLoading', (loading, ele) => {
-					ele.disabled = loading;
-				}]
-			}, [
-				Div({
-					onState: ['isLoading', (loading) => loading ? 'Creating...' : 'Next']
-				})
-			])
-		])
-	]);
-};
+		]);
+	}
+});

@@ -31,6 +31,7 @@ export const MessagesPage = () =>
 	const Props =
 	{
 		title: 'Messages',
+		data
 	};
 
 	return new BlankPage(Props, [
