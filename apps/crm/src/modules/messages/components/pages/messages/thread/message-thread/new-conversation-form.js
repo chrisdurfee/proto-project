@@ -4,6 +4,7 @@ import { ScrollableList } from "@base-framework/organisms";
 import { Button, Card } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
+import { ConversationModel } from "@modules/messages/models/conversation-model.js";
 import { UserModel } from "@modules/users/components/pages/users/models/user-model.js";
 import { SearchInput as BaseSearch } from './search-input.js';
 
@@ -68,13 +69,40 @@ const SearchInput = (data) => (
  * Handle user selection
  *
  * @param {object} user
+ * @param {object} parent
  */
-const handleClientClick = (user, parent) =>
+const handleUserClick = (user, parent) =>
 {
-	parent?.close();
+	const userName = user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+	const conversationModel = new ConversationModel({
+		userId: user.id,
+		participantId: user.id,
+		title: `Conversation with ${userName}`,
+		type: 'direct'
+	});
 
-	const userId = user.id ?? '';
-	app.navigate(`messages/${userId}`);
+	conversationModel.xhr.add({}, (result) =>
+	{
+		if (result && result.id)
+		{
+			app.notify({
+				type: 'success',
+				title: 'Conversation Started',
+				description: `Started conversation with ${userName}`,
+				icon: Icons.circleCheck
+			});
+
+			app.navigate(`messages/${result.id}`);
+			return;
+		}
+
+		app.notify({
+			type: 'error',
+			title: 'Error',
+			description: 'Failed to start conversation. Please try again.',
+			icon: Icons.circleX
+		});
+	});
 };
 
 /**
@@ -132,7 +160,7 @@ export const NewConversationForm = Jot(
 						key: 'id',
 						role: 'list',
 						skeleton: true,
-						rowItem: (user) => UserSearchItem(user, handleClientClick),
+						rowItem: (user) => UserSearchItem(user, handleUserClick),
 						emptyState: () =>
 						{
 							const searchValue = data.get?.().search || '';

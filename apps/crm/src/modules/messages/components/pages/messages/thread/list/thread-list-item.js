@@ -33,11 +33,12 @@ export const ThreadListItemSkeleton = () =>
  *
  * @type {object}
  */
-export const ThreadListItem = (thread) =>
+export const ThreadListItem = (conversation) =>
 {
-    return UseParent(({ route }) =>
+    const fullName = `${conversation.firstName} ${conversation.lastName}`;
+    return UseParent(({ parent }) =>
         A({
-            href: `messages/${route.page}/${thread.id}`,
+            href: `messages/${conversation.id}`,
             class: `
                 flex items-center gap-3 p-4 lg:p-5 rounded-md hover:bg-muted/50
             `,
@@ -45,38 +46,38 @@ export const ThreadListItem = (thread) =>
             /**
              * Highlights the current item if selected (based on route messageId).
              */
-            onSet: [route, "messageId", {
-                'bg-muted/50': thread.id.toString()
+            onSet: [parent.route, "messageId", {
+                'bg-muted/50': conversation.id.toString()
             }],
         }, [
             // Avatar + status
             Div({ class: "relative flex-none" }, [
                 Avatar({
-                    src: thread.avatar,
-                    alt: thread.sender,
-                    fallbackText: thread.sender,
+                    src: `/files/users/profile/${conversation.image}`,
+                    alt: fullName,
+                    fallbackText: fullName,
                     size: "md",
                 }),
                 Div({ class: "absolute bottom-0 right-0" }, [
-                    StaticStatusIndicator(thread.status)
+                    StaticStatusIndicator(conversation.status)
                 ])
             ]),
 
             // Text content
             Div({ class: "flex flex-col flex-1" }, [
                 Div({ class: "flex items-center justify-between" }, [
-                    P({ class: "font-semibold text-base text-foreground" }, thread.sender),
+                    P({ class: "font-semibold text-base text-foreground" }, fullName),
                     Div({ class: "text-xs text-muted-foreground" },
-                        TimeFrame({ dateTime: thread.time })
+                        TimeFrame({ dateTime: conversation.createdAt })
                     )
                 ]),
                 Div({ class: "flex items-center justify-between mt-1" }, [
-                    P({ class: "text-sm text-muted-foreground line-clamp-1" }, thread.content),
+                    P({ class: "text-sm text-muted-foreground line-clamp-1" }, conversation.content),
 
                     // Unread count badge if any
-                    (thread.unreadCount > 0) && Div({
+                    (conversation.unreadCount > 0) && Div({
                         class: "ml-2 bg-primary text-primary-foreground text-xs font-semibold rounded-full h-5 w-5 flex items-center justify-center"
-                    }, thread.unreadCount.toString())
+                    }, conversation.unreadCount.toString())
                 ])
             ])
         ])

@@ -28,7 +28,7 @@ class ConversationParticipants extends Migration
 			$table->integer('conversation_id', 30);
 			$table->integer('user_id', 30);
 			$table->enum('role', 'member', 'admin')->default("'member'");
-			$table->datetime('joined_at');
+			$table->timestamp('joined_at')->default("CURRENT_TIMESTAMP");
 			$table->datetime('last_read_at')->nullable();
 			$table->integer('last_read_message_id', 30)->nullable();
 
