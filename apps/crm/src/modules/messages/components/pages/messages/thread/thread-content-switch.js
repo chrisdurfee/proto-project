@@ -12,14 +12,14 @@ import { ThreadEmptyState } from "./message-thread/thread-empty-state.js";
  */
 const DockableThread = (props) => (
 	() => new DockableOverlay([
-		OnRoute('messageId', (messageId) =>
+		OnRoute('conversationId', (conversationId) =>
 		{
-			if (!messageId)
+			if (!conversationId)
 			{
 				return ThreadEmptyState();
 			}
 
-			if (messageId === 'new')
+			if (conversationId === 'new')
 			{
 				return new NewConversationForm({
 					onCancel: () => app.navigate('messages/all'),
@@ -34,7 +34,7 @@ const DockableThread = (props) => (
 			}
 
 			return new ThreadDetail({
-				messageId,
+				conversationId,
 				delete: props.delete,
 				mingle: props.mingle
 			});
@@ -70,7 +70,7 @@ export const ThreadContentSwitch = (props) =>
 		class: "flex-auto flex-col w-full h-full hidden lg:flex",
 		switch: [
 			{
-				uri: 'messages/:page/:messageId*',
+				uri: 'messages/:conversationId*',
 				component: DockableThread(props)
 			},
 			{

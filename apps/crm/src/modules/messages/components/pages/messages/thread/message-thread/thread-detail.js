@@ -5,7 +5,7 @@ import { Button, Icon, Skeleton } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState, StaticStatusIndicator, TimeFrame } from "@base-framework/ui/molecules";
 import { BackButton } from "@base-framework/ui/organisms";
-import { MessageModel } from "@modules/messages/models/message-model.js";
+import { ConversationModel } from "@modules/messages/models/conversation-model.js";
 import { ThreadComposer } from "./thread-composer.js";
 
 /**
@@ -51,7 +51,7 @@ const ThreadSkeleton = () =>
  */
 export const ThreadDetail = Jot(
 {
-	state: { loaded: true },
+	state: { loaded: false },
 
 	/**
 	 * Setup the message data for this conversation.
@@ -61,13 +61,35 @@ export const ThreadDetail = Jot(
 	setData()
 	{
 		// Create message model instance with conversationId filter
-		return new MessageModel({
+		return new ConversationModel({
+			userId: app.data.user.id,
 			// @ts-ignore
-			conversationId: this.messageId,
+			id: this.conversationId,
 			filter: {
 				// @ts-ignore
-				conversationId: this.messageId
+				conversationId: this.conversationId
 			}
+		});
+	},
+
+	/**
+	 * Fetch messages after component is mounted.
+	 *
+	 * @return {void}
+	 */
+	after()
+	{
+		// @ts-ignore
+		this.state.loaded = false;
+		// @ts-ignore
+		this.data.xhr.get({}, (response) =>
+		{
+			// @ts-ignore
+			this.state.loaded = true;
+			// @ts-ignore
+			this.data.set({
+				conversation: response.row
+			})
 		});
 	},
 
@@ -78,15 +100,11 @@ export const ThreadDetail = Jot(
 	 */
 	render()
 	{
-		// Get the full thread object by messageId
-		// @ts-ignore
-		const currentThread = getThreadById(this.messageId);
-
 		return Div({ class: "flex flex-auto flex-col w-full bg-background" },
 		[
 			OnState("loaded", (loaded, ele, parent) =>
 			{
-				if (!loaded || !currentThread)
+				if (!loaded)
 				{
 					return Div([
 						HeaderSkeleton(),
@@ -95,7 +113,7 @@ export const ThreadDetail = Jot(
 				}
 
 				return Div({ class: "flex flex-col flex-auto max-h-screen relative" }, [
-					ConversationHeader(currentThread),
+					ConversationHeader(),
 					// @ts-ignore
 					ConversationMessages(this.data),
 					new ThreadComposer({ placeholder: "Type something...", add: (msg) =>
@@ -122,7 +140,8 @@ export const ThreadDetail = Jot(
 							// Update the conversation list preview
 							// @ts-ignore
 							this.mingle([
-								{ ...currentThread, content: 'YOU: ' + msg }
+								// @ts-ignore
+								{ ...this.data.get(), content: 'YOU: ' + msg }
 							]);
 						}
 					})
@@ -138,10 +157,9 @@ export const ThreadDetail = Jot(
  * A top bar: avatar, name, and right-side icons (call, video).
  * Now uses `thread` object fields: avatar, sender, status, etc.
  *
- * @param {object} thread - The full thread object.
  * @returns {object}
  */
-const ConversationHeader = (thread) =>
+const ConversationHeader = () =>
 	Div({ class: "flex items-center p-4 bg-background/80 backdrop-blur-md absolute w-full z-10" }, [
 		Div({ class: 'flex flex-auto items-center gap-3 lg:max-w-5xl m-auto' }, [
 			// Left side avatar + status
@@ -154,18 +172,18 @@ const ConversationHeader = (thread) =>
 			]),
 			Div({ class: "relative" }, [
 				Avatar({
-					src: thread.avatar,
-					alt: thread.sender,
-					fallbackText: thread.sender,
+					src: `/files/users/profile/[[conversation.image]]`,
+					alt: '[[conversation.sender]]',
+					fallbackText: '[[conversation.sender]]',
 					size: "md"
 				}),
 				Div({ class: "absolute bottom-0 right-0" }, [
-					StaticStatusIndicator(thread.status)
+					StaticStatusIndicator('[[conversation.status]]')
 				])
 			]),
 
 			Div({ class: "flex flex-col" }, [
-				Span({ class: "font-semibold text-base text-foreground" }, thread.sender),
+				Span({ class: "font-semibold text-base text-foreground" }, '[[conversation.sender]]'),
 				Span({ class: "text-xs text-muted-foreground" }, "PRO")
 			]),
 
@@ -173,7 +191,7 @@ const ConversationHeader = (thread) =>
 			Div({ class: "ml-auto flex items-center gap-1" }, [
 				A({
 					class: "bttn icon",
-					href: '/messages/all/video/' + thread.id,
+					href: '/messages/video/[[conversation.id]]',
 				}, [
 					Icon(Icons.videoCamera.default)
 				]),
