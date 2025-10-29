@@ -39,7 +39,7 @@ const UserSearchItem = (user, onClick) =>
             size: 'sm'
         }),
         Div({ class: 'flex flex-col flex-1 min-w-0' }, [
-            Div({ class: 'font-medium truncate' }, fullName),
+            Div({ class: 'font-medium truncate capitalize' }, fullName),
             Div({ class: 'flex items-center gap-2 text-sm text-muted-foreground' }, [
                 displayName && Div({ class: 'capitalize' }, displayName)
             ])
@@ -132,7 +132,7 @@ export const NewConversationForm = Jot(
                         key: 'id',
                         role: 'list',
                         skeleton: true,
-                        rowItem: (client) => UserSearchItem(client, handleClientClick),
+                        rowItem: (user) => UserSearchItem(user, handleClientClick),
                         emptyState: () =>
                         {
                             const searchValue = data.get?.().search || '';
