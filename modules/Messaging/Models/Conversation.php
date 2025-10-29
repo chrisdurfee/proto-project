@@ -37,6 +37,30 @@ class Conversation extends Model
 	];
 
 	/**
+	 * Define joins for the model.
+	 *
+	 * @param object $builder The query builder object
+	 * @return void
+	 */
+	protected static function joins(object $builder): void
+	{
+		$builder->many(ConversationParticipant::class, fields: [
+				'id',
+				'conversationId',
+				'userId',
+				'role',
+				'joinedAt',
+				'lastReadAt',
+				'lastReadMessageId',
+				'createdAt',
+				'updatedAt',
+				'deletedAt'
+			])
+			->on(['id', 'conversationId'])
+			->as('participants');
+	}
+
+	/**
 	 * Get messages for this conversation.
 	 *
 	 * @return mixed
