@@ -1,12 +1,86 @@
-import { Button, Div, Form, H2, Header, Input, Label, On, P, Select } from "@base-framework/atoms";
+import { Button, Div, H2, Header } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
+import { ScrollableList } from "@base-framework/organisms";
+import { Card } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { ConversationModel } from "@modules/messages/models/conversation-model.js";
+import { Avatar, EmptyState } from "@base-framework/ui/molecules";
+import { UserModel } from "@modules/users/components/pages/users/models/user-model.js";
+import { SearchInput as BaseSearch } from './search-input.js';
+
+/**
+ * ClientSearchItem
+ *
+ * Renders a single client search result.
+ *
+ * @param {object} user
+ * @param {function} onClick
+ * @returns {object}
+ */
+const UserSearchItem = (user, onClick) =>
+{
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    const displayName = user.displayName || 'Unknown';
+    const statusColors = {
+        active: 'text-emerald-500',
+        inactive: 'text-red-500'
+    };
+
+    return Card({
+        class: 'flex items-center gap-x-3 p-3 cursor-pointer',
+        margin: 'my-2',
+        hover: true,
+        click: (e, { parent }) => onClick?.(user, parent)
+    }, [
+        Avatar({
+            src: `/files/users/profile/${user.image}`,
+            alt: fullName,
+            fallbackText: fullName,
+            status: user.status,
+            size: 'sm'
+        }),
+        Div({ class: 'flex flex-col flex-1 min-w-0' }, [
+            Div({ class: 'font-medium truncate' }, fullName),
+            Div({ class: 'flex items-center gap-2 text-sm text-muted-foreground' }, [
+                displayName && Div({ class: 'capitalize' }, displayName)
+            ])
+        ])
+    ]);
+};
+
+/**
+ * This will create a search input for the calls page.
+ *
+ * @param {object} data
+ * @returns {object}
+ */
+const SearchInput = (data) => (
+    BaseSearch({
+        class: 'min-w-40 lg:min-w-96 mt-2',
+        placeholder: 'Search clients...',
+        bind: 'search',
+        autofocus: true,
+        keyup: (e, parent) => parent.list?.refresh(),
+        icon: Icons.magnifyingGlass.default
+    })
+);
+
+/**
+ * Handle client selection
+ *
+ * @param {object} client
+ */
+const handleClientClick = (client, parent) =>
+{
+    parent?.close();
+
+    const clientId = client.id ?? '';
+    app.navigate(`clients/${clientId}`);
+};
 
 /**
  * NewConversationForm
  *
- * A form to select a user and start a new conversation.
+ * A searchable list to select a user and start a new conversation.
  *
  * @type {typeof Component}
  */
@@ -19,91 +93,11 @@ export const NewConversationForm = Jot(
 	 */
 	setData()
 	{
-		return new ConversationModel({
-            loading: false
+		return new UserModel({
+            orderBy: {
+                firstName: 'asc'
+            }
         });
-	},
-
-	/**
-	 * Handle user selection and conversation creation
-	 */
-	handleNext()
-	{
-        // @ts-ignore
-		const selectedId = this.data.participantId;
-		if (!selectedId)
-		{
-			app.notify({
-				type: 'error',
-				title: 'Selection Required',
-				description: 'Please select a user to start a conversation.',
-				icon: Icons.alertCircle
-			});
-			return;
-		}
-
-        // @ts-ignore
-		this.data.isLoading = true;
-
-        // @ts-ignore
-		const users = this.data.users;
-		const user = users.find(u => u.id === parseInt(selectedId));
-		if (!user)
-		{
-			app.notify({
-				type: 'error',
-				title: 'Error',
-				description: 'User not found',
-				icon: Icons.alertCircle
-			});
-
-            // @ts-ignore
-			this.data.isLoading = false;
-			return;
-		}
-
-		const userName = user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
-        // @ts-ignore
-		const title = this.data.title || `Conversation with ${userName}`;
-
-        // @ts-ignore
-		this.conversationModel.xhr.add({
-			participantId: parseInt(selectedId),
-			title: title,
-			type: 'direct'
-		}, (result) => {
-            // @ts-ignore
-			this.data.isLoading = false;
-
-			if (result && result.id)
-			{
-				app.notify({
-					type: 'success',
-					title: 'Conversation Started',
-					description: `Started conversation with ${userName}`,
-					icon: Icons.circleCheck
-				});
-
-				// Navigate to the new conversation
-				app.navigate(`messages/all/${result.id}`);
-
-                // @ts-ignore
-				if (this.onSuccess)
-				{
-                    // @ts-ignore
-					this.onSuccess(result);
-				}
-			}
-			else
-			{
-				app.notify({
-					type: 'error',
-					title: 'Error',
-					description: 'Failed to start conversation. Please try again.',
-					icon: Icons.alertCircle
-				});
-			}
-		});
 	},
 
 	/**
@@ -113,94 +107,52 @@ export const NewConversationForm = Jot(
 	 */
 	render()
 	{
+        // @ts-ignore
+        const data = this.data;
 		return Div({ class: "flex flex-col h-full" }, [
 			// Header
-			Header({ class: "border-b p-4" }, [
-				Div({ class: "flex items-center justify-between" }, [
+			Header({ class: "p-6 border-b" }, [
+				Div({ class: "flex items-center justify-between mb-4" }, [
 					H2({ class: "text-xl font-semibold" }, "Start New Conversation"),
 					Button({
 						variant: 'ghost',
 						icon: Icons.x,
-                        // @ts-ignore
-						click: () => this.onCancel && this.onCancel()
+						click: () => app.navigate('messages/all')
 					})
-				])
+				]),
 			]),
 
-			// Form Content
-			Div({ class: "flex-1 p-6 overflow-y-auto" }, [
-				Form({ class: "space-y-6 max-w-md" }, [
-					// User Selection
-					Div({ class: "space-y-2" }, [
-						Label({ htmlFor: "participant-select" }, "Select User"),
-						On('usersLoaded', (loaded) => {
-							if (!loaded) {
-								return Select({
-									id: "participant-select",
-									class: "w-full",
-									disabled: true
-								}, [
-									Div({ tag: 'option' }, "Loading users...")
-								]);
-							}
-
-							return On('users', (users) =>
-								Select({
-									id: "participant-select",
-									bind: 'participantId',
-									class: "w-full",
-									required: true
-								}, [
-									Div({ tag: 'option', value: '' }, "Choose a user..."),
-									...users.map(user => {
-										const displayName = user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
-										return Div({
-											tag: 'option',
-											value: user.id.toString()
-										}, `${displayName} ${user.email ? `(${user.email})` : ''}`);
-									})
-								])
-							);
-						})
-					]),
-
-					// Optional Title
-					Div({ class: "space-y-2" }, [
-						Label({ htmlFor: "title-input" }, "Conversation Title (Optional)"),
-						Input({
-							id: "title-input",
-							type: "text",
-							bind: 'title',
-							placeholder: "Enter a custom title...",
-							class: "w-full"
-						})
-					]),
-
-					P({ class: "text-sm text-muted-foreground" },
-						"Select a user to start a conversation. You'll be taken to the chat interface after clicking Next."
-					)
-				])
+			// User List
+			Div({ class: "flex flex-1 flex-col p-6 overflow-y-auto" }, [
+				SearchInput(data),
+                Div({ class: 'flex-1 overflow-hidden mt-8' }, [
+                    ScrollableList({
+                        data,
+                        cache: 'list',
+                        key: 'id',
+                        role: 'list',
+                        skeleton: true,
+                        rowItem: (client) => UserSearchItem(client, handleClientClick),
+                        emptyState: () =>
+                        {
+                            const searchValue = data.get?.().search || '';
+                            return EmptyState({
+                                title: 'No Users Found',
+                                description: searchValue ? 'Try adjusting your search terms.' : 'Start typing to search users.',
+                                icon: Icons.magnifyingGlass.default
+                            });
+                        }
+                    })
+                ])
 			]),
 
-			// Footer Actions
-			Div({ class: "border-t p-4 flex justify-end gap-2" }, [
+			// Footer
+			Div({ class: "border-t p-4" }, [
 				Button({
 					variant: 'outline',
-                    // @ts-ignore
-					click: () => this.onCancel && this.onCancel()
-				}, 'Cancel'),
-				Button({
-					variant: 'default',
-                    // @ts-ignore
-					click: () => this.handleNext(),
-					onState: ['isLoading', (loading, ele) => {
-						ele.disabled = loading;
-					}]
-				}, [
-					Div({
-						onState: ['isLoading', (loading) => loading ? 'Creating...' : 'Next']
-					})
-				])
+					class: 'w-full',
+					click: () => app.navigate('messages/all')
+				}, 'Cancel')
 			])
 		]);
 	}
