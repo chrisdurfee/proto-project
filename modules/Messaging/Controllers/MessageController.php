@@ -32,7 +32,7 @@ class MessageController extends ResourceController
 	 * @param Request $request
 	 * @return object
 	 */
-	public function index(Request $request): object
+	public function all(Request $request): object
 	{
 		$conversationId = $request->getInt('conversationId');
 		$limit = ($request->getInt('limit') ?? 50);
@@ -54,7 +54,7 @@ class MessageController extends ResourceController
 	 * @param Request $request
 	 * @return object
 	 */
-	public function store(Request $request): object
+	public function add(Request $request): object
 	{
 		$userId = session()->user->id ?? null;
 		if (!$userId)
@@ -62,20 +62,20 @@ class MessageController extends ResourceController
 			return $this->error('Unauthorized', 401);
 		}
 
+		$data = $this->getRequestItem($request);
+
 		// Basic validation
-		if (empty($data['conversationId']) || empty($data['content'])) {
+		if (empty($data->conversationId) || empty($data->content))
+		{
 			return $this->error('Conversation ID and content are required', 400);
 		}
 
 		// Set sender and defaults
-		$data = $this->getRequestItem($request);
 		$data->senderId = $userId;
 		$data->messageType = $data->messageType ?? 'text';
-		$data->createdAt = date('Y-m-d H:i:s');
-		$data->updatedAt = date('Y-m-d H:i:s');
 
 		// Use ResourceController's built-in add method
-		$result = $this->addItem((object)$data);
+		$result = $this->addItem($data);
 
 		return $result;
 	}

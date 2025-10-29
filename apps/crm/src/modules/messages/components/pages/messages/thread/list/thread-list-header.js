@@ -2,7 +2,6 @@ import { Div, H2, Header } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { TabGroup } from "@base-framework/ui/organisms";
-import { NewConversationModal } from "../../modals/new-conversation-modal.js";
 
 /**
  * This will create the AddMessageButton organism.
@@ -17,12 +16,8 @@ const AddMessageButton = () => (
                 class: 'outline',
                 icon: Icons.circlePlus,
                 click: () => {
-                    // Open new conversation modal
-                    NewConversationModal({
-                        onSubmit: (data) => {
-                            console.log('New conversation started:', data);
-                        }
-                    });
+                    // Navigate to new conversation form
+                    app.navigate('messages/all/new');
                 }
             })
         ])

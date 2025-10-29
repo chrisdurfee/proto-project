@@ -8,28 +8,29 @@ import { Model } from "@base-framework/base";
  * @type {typeof Model}
  */
 export const MessageModel = Model.extend({
-	url: '/api/messaging',
+	url: '/api/messages',
 
 	defaults: {
 		id: null,
-		conversation_id: null,
-		sender_id: null,
+		conversationId: null,
+		senderId: null,
 		content: '',
-		message_type: 'text',
-		file_url: null,
-		file_name: null,
-		file_size: null,
-		audio_duration: null,
-		is_edited: false,
-		edited_at: null,
-		read_at: null,
-		created_at: null,
-		updated_at: null,
+		messageType: 'text',
+		fileUrl: null,
+		fileName: null,
+		fileSize: null,
+		audioDuration: null,
+		isEdited: false,
+		editedAt: null,
+		readAt: null,
+		createdAt: null,
+		updatedAt: null,
 		// Frontend-specific fields
 		sender: null,
 		avatar: null,
 		status: 'online',
-		direction: 'sent'
+		direction: 'sent',
+		time: null
 	},
 
 	xhr: {
@@ -47,11 +48,11 @@ export const MessageModel = Model.extend({
 		 */
 		getForConversation(instanceParams, callBack)
 		{
-			const conversationId = this.model.get('conversation_id');
+			const conversationId = this.model.get('conversationId');
 			const limit = instanceParams?.limit || 50;
 			const offset = instanceParams?.offset || 0;
 
-			const params = `conversation_id=${conversationId}&limit=${limit}&offset=${offset}`;
+			const params = `conversationId=${conversationId}&limit=${limit}&offset=${offset}`;
 
 			return this._get('', params, instanceParams, callBack);
 		},
@@ -78,8 +79,8 @@ export const MessageModel = Model.extend({
 		 */
 		markAsRead(instanceParams, callBack)
 		{
-			const conversationId = this.model.get('conversation_id');
-			const params = `conversation_id=${conversationId}`;
+			const conversationId = this.model.get('conversationId');
+			const params = `conversationId=${conversationId}`;
 
 			return this._post('/mark-read', params, instanceParams, callBack);
 		}

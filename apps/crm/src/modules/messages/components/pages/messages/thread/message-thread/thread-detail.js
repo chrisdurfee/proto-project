@@ -1,24 +1,12 @@
-import { A, Div, OnState, Span } from "@base-framework/atoms";
+import { A, Div, OnState, Span, UseParent } from "@base-framework/atoms";
 import { Component, DateTime, Jot } from "@base-framework/base";
-import { List } from "@base-framework/organisms";
+import { ScrollableList } from "@base-framework/organisms";
 import { Button, Icon, Skeleton } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { Avatar, StaticStatusIndicator, TimeFrame } from "@base-framework/ui/molecules";
+import { Avatar, EmptyState, StaticStatusIndicator, TimeFrame } from "@base-framework/ui/molecules";
 import { BackButton } from "@base-framework/ui/organisms";
-import { MESSAGES_THREADS } from "../../messages-threads.js";
+import { MessageModel } from "@modules/messages/models/message-model.js";
 import { ThreadComposer } from "./thread-composer.js";
-
-/**
- * Finds the thread object for a given threadId.
- *
- * @param {string|number} threadId - The ID of the selected thread.
- * @returns {object|null} The full thread object or null if not found.
- */
-const getThreadById = (threadId) =>
-{
-	const idNum = parseInt(String(threadId), 10);
-	return MESSAGES_THREADS.find((t) => t.id === idNum) || null;
-};
 
 /**
  * HeaderSkeleton
@@ -56,14 +44,32 @@ const ThreadSkeleton = () =>
 /**
  * ThreadDetail
  *
- * Displays a conversation with a header and list of messages based on the new structure:
- * Each thread object has top-level fields for the sender/avatar and a .thread array for messages.
+ * Displays a conversation with a header and list of messages using ScrollableList
+ * to automatically fetch messages from the API.
  *
  * @type {typeof Component}
  */
 export const ThreadDetail = Jot(
 {
-	state: { loaded: false },
+	state: { loaded: true },
+
+	/**
+	 * Setup the message data for this conversation.
+	 *
+	 * @returns {object}
+	 */
+	setData()
+	{
+		// Create message model instance with conversationId filter
+		return new MessageModel({
+			// @ts-ignore
+			conversationId: this.messageId,
+			filter: {
+				// @ts-ignore
+				conversationId: this.messageId
+			}
+		});
+	},
 
 	/**
 	 * Render the detail view.
@@ -75,10 +81,6 @@ export const ThreadDetail = Jot(
 		// Get the full thread object by messageId
 		// @ts-ignore
 		const currentThread = getThreadById(this.messageId);
-
-		const LOADING_DELAY = 500;
-		// @ts-ignore
-		setTimeout(() => (this.state.loaded = true), LOADING_DELAY);
 
 		return Div({ class: "flex flex-auto flex-col w-full bg-background" },
 		[
@@ -94,23 +96,30 @@ export const ThreadDetail = Jot(
 
 				return Div({ class: "flex flex-col flex-auto max-h-screen relative" }, [
 					ConversationHeader(currentThread),
-					ConversationMessages(currentThread),
+					// @ts-ignore
+					ConversationMessages(this.data),
 					new ThreadComposer({ placeholder: "Type something...", add: (msg) =>
 						{
 							/**
-							 * This is a placeholder for adding a new message to the thread.
+							 * This adds a new message to the thread.
 							 */
 							const timeStamp = new Date().toISOString();
 							const row = {
 								id: Math.random() * 1000,
 								time: timeStamp,
 								direction: "sent",
-								content: msg
+								content: msg,
+								sender: "You",
+								createdAt: timeStamp
 							};
 
-							parent.thread.append(row);
+							// Add to the scrollable list
+							if (parent.messageList)
+							{
+								parent.messageList.append(row);
+							}
 
-							// This will update the list with the new message.
+							// Update the conversation list preview
 							// @ts-ignore
 							this.mingle([
 								{ ...currentThread, content: 'YOU: ' + msg }
@@ -191,27 +200,40 @@ const DateDivider = (date) => (
 /**
  * ConversationMessages
  *
- * Renders the chat bubble UI for each message in thread.thread array.
+ * Renders the chat messages using ScrollableList with automatic data loading.
  *
- * @param {object} thread - The full thread object with a .thread array.
+ * @param {object} data - The MessageModel instance with conversation_id
  * @returns {object}
  */
-const ConversationMessages = (thread) =>
-	Div({ class: "flex flex-col grow overflow-y-auto p-4 z-0" }, [
+const ConversationMessages = (data) =>
+	Div({
+		class: "flex flex-col grow overflow-y-auto p-4 z-0",
+		cache: 'listContainer'
+	}, [
 		Div({ class: "flex flex-auto flex-col w-full max-w-none lg:max-w-5xl mx-auto pt-24" }, [
-			new List({
-				cache: 'thread',
-				key: 'id',
-				items: thread.thread,
-				role: 'list',
-				divider: {
-					itemProperty: 'time',
-					layout: DateDivider,
-					customCompare: (lastValue, value) => DateTime.format('standard', lastValue) !== DateTime.format('standard', value)
-				},
-				class: 'flex flex-col gap-4 ',
-				rowItem: (message) => MessageBubble(message)
-			})
+			UseParent((parent) => (
+				ScrollableList({
+					scrollDirection: 'up',
+					data,
+					cache: 'list',
+					key: 'id',
+					role: 'list',
+					class: 'flex flex-col gap-4',
+					limit: 25,
+					divider: {
+						skipFirst: true,
+						itemProperty: 'createdAt',
+						layout: DateDivider,
+						customCompare: (lastValue, value) => DateTime.format('standard', lastValue) !== DateTime.format('standard', value)
+					},
+					rowItem: (message) => MessageBubble(message),
+					scrollContainer: parent.listContainer,
+					emptyState: () => EmptyState({
+						title: 'No messages yet',
+						description: 'Start the conversation by sending a message!'
+					})
+				})
+			))
 		])
 	]);
 

@@ -1,6 +1,5 @@
 import { Div, H2, P } from "@base-framework/atoms";
 import { Button } from "@base-framework/ui/atoms";
-import { NewConversationModal } from "../../modals/new-conversation-modal.js";
 
 /**
  * ThreadEmptyState
@@ -16,13 +15,10 @@ export const ThreadEmptyState = () =>
 		Button({
 			variant: 'outline',
 			class: 'my-8',
-			click: () => {
-				// Open new conversation modal
-				NewConversationModal({
-					onSubmit: (data) => {
-						console.log('New conversation started:', data);
-					}
-				});
+			click: () =>
+			{
+				// Navigate to new conversation form
+				app.navigate('messages/all/new');
 			}
 		}, 'Start New Thread')
 	]);

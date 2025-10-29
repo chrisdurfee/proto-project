@@ -2,11 +2,10 @@ import { A, Div, H3, Header, Span, UseParent } from "@base-framework/atoms";
 import { List } from "@base-framework/organisms";
 import { Avatar, StaticStatusIndicator } from "@base-framework/ui/molecules";
 import { AVAILABLE_USERS } from "./available-users.js";
-import { NewConversationModal } from "./modals/new-conversation-modal.js";
 
 /**
  * Sidebar row item to display the user's name and status,
- * then start new conversation on click.
+ * then navigate to new conversation on click.
  *
  * @param {object} route
  * @returns {object}
@@ -18,15 +17,8 @@ const SidebarRowItem = (route) => {
 			href: "#",
 			click: (e) => {
 				e.preventDefault();
-				// Start new conversation with this user
-				NewConversationModal({
-					initialData: {
-						participantId: user.id
-					},
-					onSubmit: (data) => {
-						console.log(`Starting conversation with ${user.sender}:`, data);
-					}
-				});
+				// Navigate to new conversation with pre-selected user
+				app.navigate('messages/all/new', { participantId: user.id });
 			}
 		},
 			[

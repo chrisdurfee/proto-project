@@ -89,16 +89,33 @@ class Message extends Model
 	 *
 	 * @param int $conversationId
 	 * @param int $limit
+	 * @param int $offset
 	 * @return array
 	 */
-	public static function getForConversation(int $conversationId, int $limit = 50): array
+	public static function getForConversation(int $conversationId, int $limit = 50, int $offset = 0): array
 	{
-		// Use fetchWhere for simple queries
-		$messages = static::fetchWhere(['conversationId' => $conversationId]);
-
-		// Sort by createdAt and limit
-		usort($messages, fn($a, $b) => strtotime($a->createdAt) - strtotime($b->createdAt));
-
-		return array_slice($messages, 0, $limit);
+		$model = new static();
+		return $model
+			->storage
+			->table()
+			->select(
+				['m.*'],
+				[['u.first_name'], 'senderFirstName'],
+				[['u.last_name'], 'senderLastName'],
+				[['u.email'], 'senderEmail'],
+				[['u.image'], 'senderAvatar']
+			)
+			->join(function($joins)
+			{
+				$joins->left('users', 'u')
+					->on('m.sender_id = u.id');
+			})
+			->where(
+				['m.conversation_id', $conversationId]
+			)
+			->orderBy('m.created_at DESC')
+			->limit($limit)
+			->offset($offset)
+			->fetch();
 	}
 }

@@ -1,5 +1,6 @@
 import { Div, OnRoute } from "@base-framework/atoms";
 import { DockableOverlay, Panel } from "@base-framework/ui/organisms";
+import { NewConversationForm } from "./message-thread/new-conversation-form.js";
 import { ThreadDetail } from "./message-thread/thread-detail.js";
 import { ThreadEmptyState } from "./message-thread/thread-empty-state.js";
 
@@ -11,14 +12,32 @@ import { ThreadEmptyState } from "./message-thread/thread-empty-state.js";
  */
 const DockableThread = (props) => (
 	() => new DockableOverlay([
-		OnRoute('messageId', (messageId) => (!messageId)
-			? ThreadEmptyState()
-			: new ThreadDetail({
+		OnRoute('messageId', (messageId) =>
+		{
+			if (!messageId)
+			{
+				return ThreadEmptyState();
+			}
+
+			if (messageId === 'new')
+			{
+				return NewConversationForm({
+					onCancel: () => app.navigate('messages/all'),
+					onSuccess: (conversation) => {
+						if (props.mingle)
+						{
+							props.mingle(conversation);
+						}
+					}
+				});
+			}
+
+			return new ThreadDetail({
 				messageId,
 				delete: props.delete,
 				mingle: props.mingle
-			})
-		)
+			});
+		})
 	])
 );
 
