@@ -110,11 +110,21 @@ class ConversationController extends ResourceController
 		$inputs = $this->getAllInputs($request);
 		if (isset($inputs->filter->userId))
 		{
-			$result = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+			$result = ConversationParticipant::all(
+				$inputs->filter,
+				$inputs->offset,
+				$inputs->limit,
+				$inputs->modifiers
+			);
 			return $this->response($result);
 		}
 
-		$result = $this->model::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+		$result = $this->model::all(
+			$inputs->filter,
+			$inputs->offset,
+			$inputs->limit,
+			$inputs->modifiers
+		);
 		return $this->response($result);
 	}
 }
