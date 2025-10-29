@@ -1,5 +1,5 @@
 import { Div, H2, P } from "@base-framework/atoms";
-import {  Button  } from "@base-framework/ui/atoms";
+import { Button } from "@base-framework/ui/atoms";
 
 /**
  * ListEmptyState
@@ -11,7 +11,7 @@ import {  Button  } from "@base-framework/ui/atoms";
  * @returns {object}
  */
 export const ListEmptyState = ({ filter }) =>
-    Div({ class: "m-4 mt-8 p-4 border rounded-md items-center justify-center text-center" }, [
+    Div({ class: "m-4 mt-8 p-4 rounded-md items-center justify-center text-center" }, [
         H2({ class: "text-xl font-semibold text-muted-foreground text-center" }, "No Chats Found"),
         P(`We couldn't find any messages in "${filter}" list.`),
         Button({ variant: 'outline', class: 'my-8' }, 'Start a new chat')

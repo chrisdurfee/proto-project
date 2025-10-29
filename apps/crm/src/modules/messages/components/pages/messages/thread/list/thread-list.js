@@ -18,7 +18,6 @@ export const ThreadList = ({ data }) =>
 		ThreadListHeader(),
 		ScrollableList({
 			data,
-			url: '/api/conversations',
 			key: 'id',
 			role: 'list',
 			class: 'flex flex-col gap-y-2 px-4 pb-4 overflow-y-auto',
