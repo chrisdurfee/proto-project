@@ -23,7 +23,8 @@ const DockableThread = (props) => (
 			{
 				return NewConversationForm({
 					onCancel: () => app.navigate('messages/all'),
-					onSuccess: (conversation) => {
+					onSuccess: (conversation) =>
+					{
 						if (props.mingle)
 						{
 							props.mingle(conversation);
