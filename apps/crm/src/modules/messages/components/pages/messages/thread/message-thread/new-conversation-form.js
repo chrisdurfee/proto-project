@@ -1,7 +1,7 @@
-import { Button, Div, H2, Header } from "@base-framework/atoms";
+import { Div, H2, Header } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
-import { Card } from "@base-framework/ui/atoms";
+import { Button, Card } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { UserModel } from "@modules/users/components/pages/users/models/user-model.js";
@@ -18,33 +18,33 @@ import { SearchInput as BaseSearch } from './search-input.js';
  */
 const UserSearchItem = (user, onClick) =>
 {
-    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-    const displayName = user.displayName || 'Unknown';
-    const statusColors = {
-        active: 'text-emerald-500',
-        inactive: 'text-red-500'
-    };
+	const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+	const displayName = user.displayName || 'Unknown';
+	const statusColors = {
+		active: 'text-emerald-500',
+		inactive: 'text-red-500'
+	};
 
-    return Card({
-        class: 'flex items-center gap-x-3 p-3 cursor-pointer',
-        margin: 'my-2',
-        hover: true,
-        click: (e, { parent }) => onClick?.(user, parent)
-    }, [
-        Avatar({
-            src: `/files/users/profile/${user.image}`,
-            alt: fullName,
-            fallbackText: fullName,
-            status: user.status,
-            size: 'sm'
-        }),
-        Div({ class: 'flex flex-col flex-1 min-w-0' }, [
-            Div({ class: 'font-medium truncate capitalize' }, fullName),
-            Div({ class: 'flex items-center gap-2 text-sm text-muted-foreground' }, [
-                displayName && Div({ class: 'capitalize' }, displayName)
-            ])
-        ])
-    ]);
+	return Card({
+		class: 'flex items-center gap-x-3 p-3 cursor-pointer',
+		margin: 'my-2',
+		hover: true,
+		click: (e, { parent }) => onClick?.(user, parent)
+	}, [
+		Avatar({
+			src: `/files/users/profile/${user.image}`,
+			alt: fullName,
+			fallbackText: fullName,
+			status: user.status,
+			size: 'sm'
+		}),
+		Div({ class: 'flex flex-col flex-1 min-w-0' }, [
+			Div({ class: 'font-medium truncate capitalize' }, fullName),
+			Div({ class: 'flex items-center gap-2 text-sm text-muted-foreground' }, [
+				displayName && Div({ class: 'capitalize' }, displayName)
+			])
+		])
+	]);
 };
 
 /**
@@ -54,27 +54,27 @@ const UserSearchItem = (user, onClick) =>
  * @returns {object}
  */
 const SearchInput = (data) => (
-    BaseSearch({
-        class: 'min-w-40 lg:min-w-96 mt-2',
-        placeholder: 'Search clients...',
-        bind: 'search',
-        autofocus: true,
-        keyup: (e, parent) => parent.list?.refresh(),
-        icon: Icons.magnifyingGlass.default
-    })
+	BaseSearch({
+		class: 'min-w-40 lg:min-w-96 mt-2',
+		placeholder: 'Search clients...',
+		bind: 'search',
+		autofocus: true,
+		keyup: (e, parent) => parent.list?.refresh(),
+		icon: Icons.magnifyingGlass.default
+	})
 );
 
 /**
- * Handle client selection
+ * Handle user selection
  *
- * @param {object} client
+ * @param {object} user
  */
-const handleClientClick = (client, parent) =>
+const handleClientClick = (user, parent) =>
 {
-    parent?.close();
+	parent?.close();
 
-    const clientId = client.id ?? '';
-    app.navigate(`clients/${clientId}`);
+	const userId = user.id ?? '';
+	app.navigate(`messages/${userId}`);
 };
 
 /**
@@ -94,10 +94,10 @@ export const NewConversationForm = Jot(
 	setData()
 	{
 		return new UserModel({
-            orderBy: {
-                firstName: 'asc'
-            }
-        });
+			orderBy: {
+				firstName: 'asc'
+			}
+		});
 	},
 
 	/**
@@ -107,8 +107,8 @@ export const NewConversationForm = Jot(
 	 */
 	render()
 	{
-        // @ts-ignore
-        const data = this.data;
+		// @ts-ignore
+		const data = this.data;
 		return Div({ class: "flex flex-col h-full" }, [
 			// Header
 			Header({ class: "p-6 border-b" }, [
@@ -125,32 +125,31 @@ export const NewConversationForm = Jot(
 			// User List
 			Div({ class: "flex flex-1 flex-col p-6 overflow-y-auto" }, [
 				SearchInput(data),
-                Div({ class: 'flex-1 overflow-hidden mt-8' }, [
-                    ScrollableList({
-                        data,
-                        cache: 'list',
-                        key: 'id',
-                        role: 'list',
-                        skeleton: true,
-                        rowItem: (user) => UserSearchItem(user, handleClientClick),
-                        emptyState: () =>
-                        {
-                            const searchValue = data.get?.().search || '';
-                            return EmptyState({
-                                title: 'No Users Found',
-                                description: searchValue ? 'Try adjusting your search terms.' : 'Start typing to search users.',
-                                icon: Icons.magnifyingGlass.default
-                            });
-                        }
-                    })
-                ])
+				Div({ class: 'flex-1 overflow-hidden mt-8' }, [
+					ScrollableList({
+						data,
+						cache: 'list',
+						key: 'id',
+						role: 'list',
+						skeleton: true,
+						rowItem: (user) => UserSearchItem(user, handleClientClick),
+						emptyState: () =>
+						{
+							const searchValue = data.get?.().search || '';
+							return EmptyState({
+								title: 'No Users Found',
+								description: searchValue ? 'Try adjusting your search terms.' : 'Start typing to search users.',
+								icon: Icons.magnifyingGlass.default
+							});
+						}
+					})
+				])
 			]),
 
 			// Footer
 			Div({ class: "border-t p-4" }, [
 				Button({
 					variant: 'outline',
-					class: 'w-full',
 					click: () => app.navigate('messages/all')
 				}, 'Cancel')
 			])
