@@ -48,14 +48,14 @@ class ConversationParticipant extends Model
 		$builder
 			->one(
 				User::class,
-				fields: ['id', 'displayName', 'firstName', 'lastName', 'email', 'image']
+				fields: ['id', 'displayName', 'firstName', 'lastName', 'email', 'image', ['status', 'userStatus']]
 			)
 			->on(['user_id', 'id']);
 
 		$builder
 			->one(
 				Conversation::class,
-				fields: ['id', 'title', 'createdAt', 'updatedAt']
+				fields: ['id', 'title', 'createdAt', 'updatedAt', 'type']
 			)
 			->on(['conversation_id', 'id']);
 	}

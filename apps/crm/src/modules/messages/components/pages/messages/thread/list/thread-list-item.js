@@ -59,7 +59,7 @@ export const ThreadListItem = (conversation) =>
                     size: "md",
                 }),
                 Div({ class: "absolute bottom-0 right-0" }, [
-                    StaticStatusIndicator(conversation.status)
+                    StaticStatusIndicator(conversation.userStatus)
                 ])
             ]),
 
@@ -72,7 +72,7 @@ export const ThreadListItem = (conversation) =>
                     )
                 ]),
                 Div({ class: "flex items-center justify-between mt-1" }, [
-                    P({ class: "text-sm text-muted-foreground line-clamp-1" }, conversation.content),
+                    P({ class: "text-sm text-muted-foreground line-clamp-1" }, conversation.title),
 
                     // Unread count badge if any
                     (conversation.unreadCount > 0) && Div({
