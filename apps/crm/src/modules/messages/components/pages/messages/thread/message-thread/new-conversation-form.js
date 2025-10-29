@@ -1,20 +1,8 @@
-import { Button, Div, Form, H2, Header, Input, Label, P, Select } from "@base-framework/atoms";
+import { Button, Div, Form, H2, Header, Input, Label, On, P, Select } from "@base-framework/atoms";
 import { Data } from "@base-framework/base";
 import { Icons } from "@base-framework/ui/icons";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
-
-/**
- * AVAILABLE_USERS
- *
- * Mock data for available users to start conversations with.
- * In a real app, this would come from an API.
- */
-const AVAILABLE_USERS = [
-	{ id: 2, name: "Alice Johnson", email: "alice@example.com" },
-	{ id: 3, name: "Bob Smith", email: "bob@example.com" },
-	{ id: 4, name: "Carol Williams", email: "carol@example.com" },
-	{ id: 5, name: "David Brown", email: "david@example.com" },
-];
+import { UserModel } from "@modules/users/components/pages/users/models/user-model.js";
 
 /**
  * NewConversationForm
@@ -27,14 +15,22 @@ const AVAILABLE_USERS = [
 export const NewConversationForm = ({ onCancel, onSuccess }) =>
 {
 	const conversationModel = new ConversationModel();
+	const userModel = new UserModel();
 
 	const data = new Data({
         participantId: null,
         title: '',
-        selectedUser: null,
-        step: 'select-user', // 'select-user' or 'chat'
+        users: [],
+        usersLoaded: false,
         isLoading: false
     });
+
+	// Load users from API
+	userModel.xhr.all({}, (response) => {
+		if (response && response.data) {
+			data.set({ users: response.data, usersLoaded: true });
+		}
+	});
 
 	/**
 	 * Handle user selection and conversation creation
@@ -57,8 +53,13 @@ export const NewConversationForm = ({ onCancel, onSuccess }) =>
 
 		try
 		{
-			const user = AVAILABLE_USERS.find(u => u.id === parseInt(selectedId));
-			const title = data.get('title') || `Conversation with ${user.name}`;
+			const users = data.get('users');
+			const user = users.find(u => u.id === parseInt(selectedId));
+			if (!user) {
+				throw new Error('User not found');
+			}
+			const userName = user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+			const title = data.get('title') || `Conversation with ${userName}`;
 
 			const result = await conversationModel.xhr.add({
 				participantId: parseInt(selectedId),
@@ -71,7 +72,7 @@ export const NewConversationForm = ({ onCancel, onSuccess }) =>
 				app.notify({
 					type: 'success',
 					title: 'Conversation Started',
-					description: `Started conversation with ${user.name}`,
+					description: `Started conversation with ${userName}`,
 					icon: Icons.circleCheck
 				});
 
@@ -123,20 +124,35 @@ export const NewConversationForm = ({ onCancel, onSuccess }) =>
 				// User Selection
 				Div({ class: "space-y-2" }, [
 					Label({ htmlFor: "participant-select" }, "Select User"),
-					Select({
-						id: "participant-select",
-						bind: 'participantId',
-						class: "w-full",
-						required: true
-					}, [
-						Div({ tag: 'option', value: '' }, "Choose a user..."),
-						...AVAILABLE_USERS.map(user =>
-							Div({
-								tag: 'option',
-								value: user.id.toString()
-							}, `${user.name} (${user.email})`)
-						)
-					])
+					On('usersLoaded', (loaded) => {
+						if (!loaded) {
+							return Select({
+								id: "participant-select",
+								class: "w-full",
+								disabled: true
+							}, [
+								Div({ tag: 'option' }, "Loading users...")
+							]);
+						}
+
+						return On('users', (users) =>
+							Select({
+								id: "participant-select",
+								bind: 'participantId',
+								class: "w-full",
+								required: true
+							}, [
+								Div({ tag: 'option', value: '' }, "Choose a user..."),
+								...users.map(user => {
+									const displayName = user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+									return Div({
+										tag: 'option',
+										value: user.id.toString()
+									}, `${displayName} ${user.email ? `(${user.email})` : ''}`);
+								})
+							])
+						);
+					})
 				]),
 
 				// Optional Title

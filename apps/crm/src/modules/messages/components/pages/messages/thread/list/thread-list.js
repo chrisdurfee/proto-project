@@ -22,7 +22,7 @@ export const ThreadList = ({ data }) =>
 			role: 'list',
 			class: 'flex flex-col gap-y-2 px-4 pb-4 overflow-y-auto',
 			limit: 25,
-			rowItem: (conversation) => new ThreadListItem({ message: conversation }),
+			rowItem: ThreadListItem,
 			emptyState: () => ListEmptyState({ filter: 'all' })
 		})
 	]);

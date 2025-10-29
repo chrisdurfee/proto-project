@@ -12,7 +12,7 @@ import { Button } from "@base-framework/ui/atoms";
  */
 export const ListEmptyState = ({ filter }) =>
     Div({ class: "m-4 mt-8 p-4 rounded-md items-center justify-center text-center" }, [
-        H2({ class: "text-xl font-semibold text-muted-foreground text-center" }, "No Chats Found"),
+        H2({ class: "text-xl font-semibold text-muted-foreground text-center" }, "No Messages Found"),
         P(`We couldn't find any messages in "${filter}" list.`),
-        Button({ variant: 'outline', class: 'my-8' }, 'Start a new chat')
+        Button({ variant: 'outline', class: 'my-8' }, 'Start a conversation')
     ]);

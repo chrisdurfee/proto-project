@@ -1,5 +1,4 @@
-import { A, Div, P } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { A, Div, P, UseParent } from "@base-framework/atoms";
 import { Skeleton } from "@base-framework/ui/atoms";
 import { Avatar, StaticStatusIndicator, TimeFrame } from "@base-framework/ui/molecules";
 
@@ -32,83 +31,54 @@ export const ThreadListItemSkeleton = () =>
  *
  * Uses a skeleton while loading.
  *
- * @type {typeof Component}
+ * @type {object}
  */
-export const ThreadListItem = Jot(
+export const ThreadListItem = (thread) =>
 {
-    state: { loaded: false },
+    return UseParent(({ route }) =>
+        A({
+            href: `messages/${route.page}/${thread.id}`,
+            class: `
+                flex items-center gap-3 p-4 lg:p-5 rounded-md hover:bg-muted/50
+            `,
 
-    /**
-     * Render the thread list item.
-     *
-     * @returns {object}
-     */
-    render()
-    {
-        // @ts-ignore
-        const thread = this.message;
-        // @ts-ignore
-        const route = this.parent.parent.route;
+            /**
+             * Highlights the current item if selected (based on route messageId).
+             */
+            onSet: [route, "messageId", {
+                'bg-muted/50': thread.id.toString()
+            }],
+        }, [
+            // Avatar + status
+            Div({ class: "relative flex-none" }, [
+                Avatar({
+                    src: thread.avatar,
+                    alt: thread.sender,
+                    fallbackText: thread.sender,
+                    size: "md",
+                }),
+                Div({ class: "absolute bottom-0 right-0" }, [
+                    StaticStatusIndicator(thread.status)
+                ])
+            ]),
 
-        // Simulate loading delay
-        const LOADING_WAIT = 500;
-        // @ts-ignore
-        setTimeout(() => this.state.loaded = true, LOADING_WAIT);
+            // Text content
+            Div({ class: "flex flex-col flex-1" }, [
+                Div({ class: "flex items-center justify-between" }, [
+                    P({ class: "font-semibold text-base text-foreground" }, thread.sender),
+                    Div({ class: "text-xs text-muted-foreground" },
+                        TimeFrame({ dateTime: thread.time })
+                    )
+                ]),
+                Div({ class: "flex items-center justify-between mt-1" }, [
+                    P({ class: "text-sm text-muted-foreground line-clamp-1" }, thread.content),
 
-        return Div({
-            class: "transition-all",
-            onState: ["loaded", (loaded) =>
-            {
-                if (!loaded)
-                {
-                    return ThreadListItemSkeleton();
-                }
-
-                return A({
-                    href: `messages/${route.page}/${thread.id}`,
-                    class: `
-                        flex items-center gap-3 p-4 lg:p-5 rounded-md hover:bg-muted/50
-                    `,
-
-                    /**
-                     * Highlights the current item if selected (based on route messageId).
-                     */
-                    onSet: [route, "messageId", {
-                        'bg-muted/50': thread.id.toString()
-                    }],
-                }, [
-                    // Avatar + status
-                    Div({ class: "relative flex-none" }, [
-                        Avatar({
-                            src: thread.avatar,
-                            alt: thread.sender,
-                            fallbackText: thread.sender,
-                            size: "md",
-                        }),
-                        Div({ class: "absolute bottom-0 right-0" }, [
-                            StaticStatusIndicator(thread.status)
-                        ])
-                    ]),
-
-                    // Text content
-                    Div({ class: "flex flex-col flex-1" }, [
-                        Div({ class: "flex items-center justify-between" }, [
-                            P({ class: "font-semibold text-base text-foreground" }, thread.sender),
-                            Div({ class: "text-xs text-muted-foreground" },
-                                TimeFrame({ dateTime: thread.time })
-                            )
-                        ]),
-                        Div({ class: "flex items-center justify-between mt-1" }, [
-                            P({ class: "text-sm text-muted-foreground line-clamp-1" }, thread.content),
-
-                            // Unread count badge if any
-                            (thread.unreadCount > 0) && Div({
-                                class: "ml-2 bg-primary text-primary-foreground text-xs font-semibold rounded-full h-5 w-5 flex items-center justify-center"
-                            }, thread.unreadCount.toString())
-                        ])
-                    ])
-                ]);
-            }]
-        });
-    }
-});
+                    // Unread count badge if any
+                    (thread.unreadCount > 0) && Div({
+                        class: "ml-2 bg-primary text-primary-foreground text-xs font-semibold rounded-full h-5 w-5 flex items-center justify-center"
+                    }, thread.unreadCount.toString())
+                ])
+            ])
+        ])
+    )
+};
