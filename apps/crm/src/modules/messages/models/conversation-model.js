@@ -9,18 +9,5 @@ import { Model } from "@base-framework/base";
  * @type {typeof Model}
  */
 export const ConversationModel = Model.extend({
-	url: '/api/messaging/conversations',
-
-	defaults: {
-		id: null,
-		type: 'direct',
-		title: null,
-		description: null,
-		participantId: null,
-		lastMessageAt: null,
-		lastMessageId: null,
-		createdBy: null,
-		createdAt: null,
-		updatedAt: null
-	}
+	url: '/api/messaging/[[userId]]/conversations'
 });

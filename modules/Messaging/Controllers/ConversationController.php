@@ -98,4 +98,23 @@ class ConversationController extends ResourceController
 
 		return $filter;
 	}
+
+	/**
+	 * Retrieve all records.
+	 *
+	 * @param Request $request The request object.
+	 * @return object
+	 */
+	public function all(Request $request): object
+	{
+		$inputs = $this->getAllInputs($request);
+		if (isset($inputs->filter->userId))
+		{
+			$result = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+			return $this->response($result);
+		}
+
+		$result = $this->model::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+		return $this->response($result);
+	}
 }
