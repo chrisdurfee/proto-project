@@ -85,13 +85,6 @@ const handleUserClick = (user, parent) =>
 	{
 		if (result && result.id)
 		{
-			app.notify({
-				type: 'success',
-				title: 'Conversation Started',
-				description: `Started conversation with ${userName}`,
-				icon: Icons.circleCheck
-			});
-
 			app.navigate(`messages/${result.id}`);
 			return;
 		}

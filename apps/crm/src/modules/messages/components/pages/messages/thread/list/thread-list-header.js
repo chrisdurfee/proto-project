@@ -17,7 +17,7 @@ const AddMessageButton = () => (
                 icon: Icons.circlePlus,
                 click: () => {
                     // Navigate to new conversation form
-                    app.navigate('messages/all/new');
+                    app.navigate('messages/new');
                 }
             })
         ])

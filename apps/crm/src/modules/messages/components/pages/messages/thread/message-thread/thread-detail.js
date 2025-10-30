@@ -196,7 +196,7 @@ const ConversationHeader = () =>
 				]),
 
 				Div({ class: "flex flex-col" }, [
-					Span({ class: "font-semibold text-base text-foreground" }, '[[otherUser.firstName]] [[otherUser.lastName]]'),
+					Span({ class: "font-semibold text-base text-foreground capitalize" }, '[[otherUser.firstName]] [[otherUser.lastName]]'),
 				])
 			]),
 
