@@ -91,7 +91,17 @@ export const ThreadDetail = Jot(
 
 				// Find the other participant (not the current user)
 				const otherParticipant = conversation.participants?.find(p => p.userId !== currentUserId);
-				console.log(otherParticipant)
+
+				// Map participant data to expected format
+				const otherUser = otherParticipant ? {
+					id: otherParticipant.userId,
+					firstName: otherParticipant.firstName,
+					lastName: otherParticipant.lastName,
+					displayName: otherParticipant.displayName,
+					email: otherParticipant.email,
+					image: otherParticipant.image,
+					status: otherParticipant.userStatus
+				} : null;
 
 				// Set the conversation data with computed fields
 				// @ts-ignore
@@ -101,7 +111,8 @@ export const ThreadDetail = Jot(
 						// Store the other participant's userId for lookups
 						otherUserId: otherParticipant?.userId
 					},
-					otherParticipant
+					otherParticipant,
+					otherUser
 				});
 			}
 
