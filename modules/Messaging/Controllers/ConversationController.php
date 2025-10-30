@@ -154,80 +154,63 @@ class ConversationController extends ResourceController
 		$model = new ConversationParticipant();
 		$storage = $model->storage;
 
-		// Build the query using Proto's table builder (bypasses model joins)
-		$result = $storage->table()->select(
-			['cp.id'],
-			['cp.conversation_id', 'conversationId'],
-			['cp.last_read_at', 'lastReadAt'],
-			['cp.last_read_message_id', 'lastReadMessageId'],
-			// Conversation fields
-			['c.id', 'id'],
-			['c.title', 'title'],
-			['c.type', 'type'],
-			['c.created_at', 'createdAt'],
-			['c.updated_at', 'updatedAt'],
-			['c.last_message_at', 'lastMessageAt'],
-			// Other participant's user fields
-			['u.id', 'userId'],
-			['u.first_name', 'firstName'],
-			['u.last_name', 'lastName'],
-			['u.email', 'email'],
-			['u.image', 'image'],
-			['u.display_name', 'displayName'],
-			['u.status', 'userStatus'],
-			// Last message fields
-			['m.id', 'lastMessageId'],
-			['m.content', 'lastMessageContent'],
-			['m.message_type', 'lastMessageType'],
-			['m.sender_id', 'lastMessageSenderId'],
-			// Unread count subquery
-			[
-				'(SELECT COUNT(*) FROM messages m2 WHERE m2.conversation_id = c.id AND m2.sender_id != ? AND (m2.created_at > COALESCE(cp.last_read_at, \'1970-01-01\') OR cp.last_read_at IS NULL))',
-				'unreadCount'
-			]
-		)
-		->join(function($joins)
-		{
-			// Join conversation
-			$joins->left('conversations', 'c')
-				->on('cp.conversation_id = c.id');
+		// Use direct SQL to avoid alias doubling issues
+		$params = [$userId, $userId, $userId]; // for subquery, JOIN condition, WHERE cp.user_id
 
-			// Join to get the other participant
-			$joins->left('conversation_participants', 'cp2')
-				->on('c.id = cp2.conversation_id');
-
-			$joins->left('users', 'u')
-				->on('cp2.user_id = u.id');
-
-			// Join last message
-			$joins->left('messages', 'm')
-				->on('c.last_message_id = m.id');
-		})
-		->where(
-			['cp.user_id', $userId],
-			['cp2.user_id !=', $userId],
-			'cp.deleted_at IS NULL',
-			'cp2.deleted_at IS NULL'
-		);
-
-		// Apply any additional filters
+		$filterSql = '';
 		if ($filter && !empty((array)$filter))
 		{
-			$conditions = [];
 			foreach ((array)$filter as $key => $value)
 			{
-				$conditions[] = ["c.{$key}", $value];
+				$filterSql .= " AND c.{$key} = ?";
+				$params[] = $value;
 			}
-			$result->where(...$conditions);
 		}
 
-		// Order and paginate
-		$result->orderBy('c.last_message_at DESC')
-			->limit($limit)
-			->offset($offset);
+		$sql = "
+			SELECT
+				cp.id,
+				cp.conversation_id AS conversationId,
+				cp.last_read_at AS lastReadAt,
+				cp.last_read_message_id AS lastReadMessageId,
+				c.id AS id,
+				c.title AS title,
+				c.type AS type,
+				c.created_at AS createdAt,
+				c.updated_at AS updatedAt,
+				c.last_message_at AS lastMessageAt,
+				u.id AS userId,
+				u.first_name AS firstName,
+				u.last_name AS lastName,
+				u.email AS email,
+				u.image AS image,
+				u.display_name AS displayName,
+				u.status AS userStatus,
+				m.id AS lastMessageId,
+				m.content AS lastMessageContent,
+				m.message_type AS lastMessageType,
+				m.sender_id AS lastMessageSenderId,
+				(SELECT COUNT(*)
+				 FROM messages m2
+				 WHERE m2.conversation_id = c.id
+				   AND m2.sender_id != ?
+				   AND (m2.created_at > COALESCE(cp.last_read_at, '1970-01-01') OR cp.last_read_at IS NULL)
+				) AS unreadCount
+			FROM conversation_participants AS cp
+			LEFT JOIN conversations AS c ON cp.conversation_id = c.id
+			LEFT JOIN conversation_participants AS cp2 ON c.id = cp2.conversation_id AND cp2.user_id != ?
+			LEFT JOIN users AS u ON cp2.user_id = u.id
+			LEFT JOIN messages AS m ON c.last_message_id = m.id
+			WHERE cp.user_id = ?
+			  AND cp.deleted_at IS NULL
+			  AND (cp2.deleted_at IS NULL OR cp2.id IS NULL)
+			  {$filterSql}
+			ORDER BY c.last_message_at DESC
+			LIMIT {$limit}
+			OFFSET {$offset}
+		";
 
-		// Execute query with userId for subquery
-		$rows = $result->fetch([$userId]);
+		$rows = $storage->fetch($sql, $params);
 
 		return (object)[
 			'rows' => $rows ?? [],
