@@ -3,6 +3,7 @@ import { Component, Jot } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
+import { MessageModel } from "@modules/messages/models/message-model";
 
 
 /**
@@ -78,10 +79,8 @@ export const ThreadComposer = Jot(
 	 */
 	submit()
 	{
-		console.log('message sent');
-
 		// @ts-ignore
-		this.add(this.textarea.value);
+		this.save(this.textarea.value);
 
 		// @ts-ignore
 		this.textarea.value = '';
@@ -91,6 +90,31 @@ export const ThreadComposer = Jot(
 		this.state.isOverLimit = false;
 		// @ts-ignore
 		this.state.empty = true;
+	},
+
+	/**
+	 * This will add a new message.
+	 *
+	 * @param {string} content
+	 * @returns {void}
+	 */
+	save(content)
+	{
+		const data = new MessageModel({
+			userId: app.data.user.id,
+			// @ts-ignore
+			conversationId: this.conversationId,
+			content
+		});
+
+		data.xhr.add({}, (response) =>
+		{
+			if (response && response.row)
+			{
+				// @ts-ignore
+				this.add(response.row);
+			}
+		});
 	},
 
 	/**

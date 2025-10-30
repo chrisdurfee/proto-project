@@ -145,33 +145,15 @@ export const ThreadDetail = Jot(
 						// @ts-ignore
 						conversationId: this.conversationId
 					}),
-					new ThreadComposer({ placeholder: "Type something...", add: (msg) =>
+					// @ts-ignore
+					new ThreadComposer({
+						// @ts-ignore
+						conversationId: this.conversationId,
+						placeholder: "Type something...",
+						submitCallBack: (parent) =>
 						{
-							/**
-							 * This adds a new message to the thread.
-							 */
-							const timeStamp = new Date().toISOString();
-							const row = {
-								id: Math.random() * 1000,
-								time: timeStamp,
-								direction: "sent",
-								content: msg,
-								sender: "You",
-								createdAt: timeStamp
-							};
-
-							// Add to the scrollable list
-							if (parent.messageList)
-							{
-								parent.messageList.append(row);
-							}
-
-							// Update the conversation list preview
-							// @ts-ignore
-							this.mingle([
-								// @ts-ignore
-								{ ...this.data.get(), content: 'YOU: ' + msg }
-							]);
+							const shouldScroll = true;
+							parent.list.fetchNew(shouldScroll);
 						}
 					})
 				]);

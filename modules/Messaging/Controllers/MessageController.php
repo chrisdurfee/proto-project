@@ -41,7 +41,8 @@ class MessageController extends ResourceController
 		}
 
 		$data = $this->getRequestItem($request);
-		if (empty($data->conversationId) || empty($data->content))
+		$conversationId = $request->params()->conversationId ?? null;
+		if (empty($conversationId) || empty($data->content))
 		{
 			return $this->error('Conversation ID and content are required', 400);
 		}
@@ -49,11 +50,9 @@ class MessageController extends ResourceController
 		// Set sender and defaults
 		$data->senderId = $userId;
 		$data->messageType = $data->messageType ?? 'text';
+		$data->conversationId = $conversationId;
 
-		// Use ResourceController's built-in add method
-		$result = $this->addItem($data);
-
-		return $result;
+		return $this->addItem($data);
 	}
 
 	/**

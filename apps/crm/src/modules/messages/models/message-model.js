@@ -12,11 +12,6 @@ export const MessageModel = Model.extend({
 
 	xhr: {
 		/**
-		 * @type {string}
-		 */
-		objectType: 'resource',
-
-		/**
 		 * Get messages for a conversation.
 		 *
 		 * @param {object} instanceParams - The instance parameters.
