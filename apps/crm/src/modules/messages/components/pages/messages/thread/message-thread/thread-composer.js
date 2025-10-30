@@ -112,7 +112,11 @@ export const ThreadComposer = Jot(
 			if (response && response.row)
 			{
 				// @ts-ignore
-				this.add(response.row);
+				if (this.submitCallBack)
+				{
+					// @ts-ignore
+					this.submitCallBack(this.parent);
+				}
 			}
 		});
 	},

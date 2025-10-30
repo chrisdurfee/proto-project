@@ -241,8 +241,8 @@ const ConversationMessages = (props) =>
 	const data = new MessageModel({
 		userId: app.data.user.id,
 		conversationId: props.conversationId,
-		filter: {
-			conversationId: props.conversationId
+		orderBy: {
+			createdAt: 'desc'
 		}
 	});
 
@@ -279,6 +279,19 @@ const ConversationMessages = (props) =>
 };
 
 /**
+ * Gets the user ID of the current user.
+ *
+ * @returns {function}
+ */
+const getUserId = () =>
+{
+	const userId = app.data.user.id;
+	return () => userId;
+};
+
+const userId = getUserId();
+
+/**
  * MessageBubble
  *
  * A single message bubble from thread.thread array.
@@ -288,7 +301,7 @@ const ConversationMessages = (props) =>
  */
 const MessageBubble = (msg) =>
 {
-	const isSent = (msg.direction === "sent");
+	const isSent = (msg.senderId === userId());
 	const bubbleClasses = isSent
 		? "bg-primary text-primary-foreground self-end rounded-tr-none"
 		: "bg-muted text-foreground self-start rounded-tl-none";
@@ -300,8 +313,8 @@ const MessageBubble = (msg) =>
 				? Span({ class: "text-xs text-muted-foreground mr-2 opacity-0 group-hover:opacity-100 transition-opacity" }, "You")
 				: Span({ class: "text-xs text-muted-foreground mr-2" }, msg.sender),
 			Span({
-				class: "opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out text-xs text-muted-foreground ml-2",
-			}, TimeFrame({ dateTime: msg.time }))
+				class: "opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out text-xs text-muted-foreground ml-2 capitalize",
+			}, TimeFrame({ dateTime: msg.createdAt }))
 		]),
 		// The bubble
 		Div({ class: `rounded-md p-3 ${bubbleClasses}` }, [
