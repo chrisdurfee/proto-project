@@ -84,12 +84,29 @@ export const ThreadDetail = Jot(
 		// @ts-ignore
 		this.data.xhr.get({}, (response) =>
 		{
+			if (response && response.row)
+			{
+				const conversation = response.row;
+				const currentUserId = app.data.user.id;
+
+				// Find the other participant (not the current user)
+				const otherParticipant = conversation.participants?.find(p => p.userId !== currentUserId);
+				console.log(otherParticipant)
+
+				// Set the conversation data with computed fields
+				// @ts-ignore
+				this.data.set({
+					conversation: {
+						...conversation,
+						// Store the other participant's userId for lookups
+						otherUserId: otherParticipant?.userId
+					},
+					otherParticipant
+				});
+			}
+
 			// @ts-ignore
 			this.state.loaded = true;
-			// @ts-ignore
-			this.data.set({
-				conversation: response.row
-			})
 		});
 	},
 
@@ -155,14 +172,14 @@ export const ThreadDetail = Jot(
  * ConversationHeader
  *
  * A top bar: avatar, name, and right-side icons (call, video).
- * Now uses `thread` object fields: avatar, sender, status, etc.
+ * Fetches the other user's information from the participants array.
  *
  * @returns {object}
  */
 const ConversationHeader = () =>
 	Div({ class: "flex items-center p-4 bg-background/80 backdrop-blur-md absolute w-full z-10" }, [
 		Div({ class: 'flex flex-auto items-center gap-3 lg:max-w-5xl m-auto' }, [
-			// Left side avatar + status
+			// Left side back button
 			Div({ class: 'flex lg:hidden' }, [
 				BackButton({
 					margin: 'm-0 ml-0',
@@ -170,21 +187,24 @@ const ConversationHeader = () =>
 					allowHistory: true
 				})
 			]),
-			Div({ class: "relative" }, [
-				Avatar({
-					src: `/files/users/profile/[[conversation.image]]`,
-					alt: '[[conversation.sender]]',
-					fallbackText: '[[conversation.sender]]',
-					size: "md"
-				}),
-				Div({ class: "absolute bottom-0 right-0" }, [
-					StaticStatusIndicator('[[conversation.status]]')
-				])
-			]),
 
-			Div({ class: "flex flex-col" }, [
-				Span({ class: "font-semibold text-base text-foreground" }, '[[conversation.sender]]'),
-				Span({ class: "text-xs text-muted-foreground" }, "PRO")
+			// User info - load dynamically based on otherUserId
+			Div({ class: "flex items-center gap-3 flex-1" }, [
+				Div({ class: "relative" }, [
+					Avatar({
+						src: '/files/users/profile/[[otherUser.image]]',
+						alt: '[[otherUser.firstName]] [[otherUser.lastName]]',
+						watcherFallback: '[[otherUser.firstName]] [[otherUser.lastName]]',
+						size: "md"
+					}),
+					Div({ class: "absolute bottom-0 right-0" }, [
+						StaticStatusIndicator('[[otherUser.status]]')
+					])
+				]),
+
+				Div({ class: "flex flex-col" }, [
+					Span({ class: "font-semibold text-base text-foreground" }, '[[otherUser.firstName]] [[otherUser.lastName]]'),
+				])
 			]),
 
 			// Right side icons (video/call)

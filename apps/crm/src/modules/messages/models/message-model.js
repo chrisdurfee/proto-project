@@ -10,29 +10,6 @@ import { Model } from "@base-framework/base";
 export const MessageModel = Model.extend({
 	url: '/api/messages',
 
-	defaults: {
-		id: null,
-		conversationId: null,
-		senderId: null,
-		content: '',
-		messageType: 'text',
-		fileUrl: null,
-		fileName: null,
-		fileSize: null,
-		audioDuration: null,
-		isEdited: false,
-		editedAt: null,
-		readAt: null,
-		createdAt: null,
-		updatedAt: null,
-		// Frontend-specific fields
-		sender: null,
-		avatar: null,
-		status: 'online',
-		direction: 'sent',
-		time: null
-	},
-
 	xhr: {
 		/**
 		 * @type {string}

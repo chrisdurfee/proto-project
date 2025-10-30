@@ -18,7 +18,7 @@ export const ThreadEmptyState = () =>
 			click: () =>
 			{
 				// Navigate to new conversation form
-				app.navigate('messages/all/new');
+				app.navigate('messages/new');
 			}
 		}, 'Start New Thread')
 	]);
