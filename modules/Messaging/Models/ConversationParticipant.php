@@ -52,12 +52,22 @@ class ConversationParticipant extends Model
 			)
 			->on(['user_id', 'id']);
 
+		// Join the conversation details
 		$builder
 			->one(
 				Conversation::class,
-				fields: ['id', 'title', 'createdAt', 'updatedAt', 'type']
+				fields: ['id', 'title', 'createdAt', 'updatedAt', 'type', 'lastMessageAt', 'lastMessageId']
 			)
 			->on(['conversation_id', 'id']);
+
+		// Join the last message details
+		$builder
+			->one(
+				Message::class,
+				fields: ['id', 'content', 'messageType', 'senderId', 'createdAt']
+			)
+			->on(['lastMessageId', 'id'])
+			->as('lastMessage');
 	}
 
 	/**

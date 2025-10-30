@@ -24,7 +24,7 @@ export const ThreadListItemSkeleton = () =>
  *
  * A list item showing a single thread's summary:
  * - Avatar (with status)
- * - Sender's name
+ * - Other participant's name
  * - Last message snippet (content)
  * - Unread count badge if any
  * - Timestamp
@@ -36,6 +36,12 @@ export const ThreadListItemSkeleton = () =>
 export const ThreadListItem = (conversation) =>
 {
     const fullName = `${conversation.firstName} ${conversation.lastName}`;
+    const lastMessagePreview = conversation.lastMessageContent
+        ? (conversation.lastMessageType === 'text'
+            ? conversation.lastMessageContent
+            : `[${conversation.lastMessageType}]`)
+        : conversation.title || 'No messages yet';
+
     return UseParent(({ parent }) =>
         A({
             href: `messages/${conversation.id}`,
@@ -66,13 +72,13 @@ export const ThreadListItem = (conversation) =>
             // Text content
             Div({ class: "flex flex-col flex-1" }, [
                 Div({ class: "flex items-center justify-between" }, [
-                    P({ class: "font-semibold text-base text-foreground" }, fullName),
+                    P({ class: "font-semibold text-base text-foreground capitalize" }, fullName),
                     Div({ class: "text-xs text-muted-foreground" },
-                        TimeFrame({ dateTime: conversation.createdAt })
+                        TimeFrame({ dateTime: conversation.lastMessageAt || conversation.createdAt })
                     )
                 ]),
                 Div({ class: "flex items-center justify-between mt-1" }, [
-                    P({ class: "text-sm text-muted-foreground line-clamp-1" }, conversation.title),
+                    P({ class: "text-sm text-muted-foreground line-clamp-1" }, lastMessagePreview),
 
                     // Unread count badge if any
                     (conversation.unreadCount > 0) && Div({
