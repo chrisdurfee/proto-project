@@ -110,7 +110,7 @@ class ConversationController extends ResourceController
 		$inputs = $this->getAllInputs($request);
 		if (isset($inputs->filter->userId))
 		{
-			$userId = $inputs->filter->userId;
+			$userId = (int) $inputs->filter->userId;
 			unset($inputs->filter->userId);
 
 			// Get conversations with other participant details
