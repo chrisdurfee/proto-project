@@ -18,4 +18,4 @@ router()
 // Message routes
 router()
     ->post('messaging/:userId/messages/mark-read', [MessageController::class, 'markAsRead'])
-    ->resource('messaging/:userId/messages', MessageController::class);
+    ->resource('messaging/:conversationId/messages', MessageController::class);

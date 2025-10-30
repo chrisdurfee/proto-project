@@ -34,7 +34,7 @@ const SidebarRowItem = () =>
 							StaticStatusIndicator(user.status || 'offline')
 						])
 					]),
-					Span({ class: "text-sm font-medium" }, displayName)
+					Span({ class: "text-sm font-medium capitalize" }, displayName)
 				])
 			]);
 	};

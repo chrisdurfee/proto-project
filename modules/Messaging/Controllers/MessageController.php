@@ -27,28 +27,6 @@ class MessageController extends ResourceController
 	}
 
 	/**
-	 * Get messages for a conversation.
-	 *
-	 * @param Request $request
-	 * @return object
-	 */
-	public function all(Request $request): object
-	{
-		$conversationId = $request->getInt('conversationId');
-		$limit = ($request->getInt('limit') ?? 50);
-		$offset = ($request->getInt('offset') ?? 0);
-
-		if (!$conversationId)
-		{
-			return $this->error('Conversation ID required', 400);
-		}
-
-		$messages = Message::getForConversation($conversationId, $limit, $offset);
-
-		return $this->response($messages);
-	}
-
-	/**
 	 * Send a new message.
 	 *
 	 * @param Request $request
@@ -105,6 +83,24 @@ class MessageController extends ResourceController
 			'success' => $result,
 			'message' => $result ? 'Messages marked as read' : 'Failed to mark messages as read'
 		]);
+	}
+
+	/**
+	 * Modifies the filter object based on the request.
+	 *
+	 * @param mixed $filter
+	 * @param Request $request
+	 * @return object|null
+	 */
+	protected function modifyFilter(?object $filter, Request $request): ?object
+	{
+		$conversationId = $request->params()->conversationId ?? null;
+		if (isset($conversationId))
+		{
+			$filter->conversationId = $conversationId;
+		}
+
+		return $filter;
 	}
 
 	/**

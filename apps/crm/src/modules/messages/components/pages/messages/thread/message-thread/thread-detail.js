@@ -6,6 +6,7 @@ import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState, StaticStatusIndicator, TimeFrame } from "@base-framework/ui/molecules";
 import { BackButton } from "@base-framework/ui/organisms";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
+import { MessageModel } from "@modules/messages/models/message-model.js";
 import { ThreadComposer } from "./thread-composer.js";
 
 /**
@@ -107,11 +108,8 @@ export const ThreadDetail = Jot(
 				// @ts-ignore
 				this.data.set({
 					conversation: {
-						...conversation,
-						// Store the other participant's userId for lookups
-						otherUserId: otherParticipant?.userId
+						...conversation
 					},
-					otherParticipant,
 					otherUser
 				});
 			}
@@ -143,7 +141,10 @@ export const ThreadDetail = Jot(
 				return Div({ class: "flex flex-col flex-auto max-h-screen relative" }, [
 					ConversationHeader(),
 					// @ts-ignore
-					ConversationMessages(this.data),
+					ConversationMessages({
+						// @ts-ignore
+						conversationId: this.conversationId
+					}),
 					new ThreadComposer({ placeholder: "Type something...", add: (msg) =>
 						{
 							/**
@@ -199,7 +200,6 @@ const ConversationHeader = () =>
 				})
 			]),
 
-			// User info - load dynamically based on otherUserId
 			Div({ class: "flex items-center gap-3 flex-1" }, [
 				Div({ class: "relative" }, [
 					Avatar({
@@ -251,11 +251,20 @@ const DateDivider = (date) => (
  *
  * Renders the chat messages using ScrollableList with automatic data loading.
  *
- * @param {object} data - The MessageModel instance with conversation_id
+ * @param {object} props - The props object containing conversationId
  * @returns {object}
  */
-const ConversationMessages = (data) =>
-	Div({
+const ConversationMessages = (props) =>
+{
+	const data = new MessageModel({
+		userId: app.data.user.id,
+		conversationId: props.conversationId,
+		filter: {
+			conversationId: props.conversationId
+		}
+	});
+
+	return Div({
 		class: "flex flex-col grow overflow-y-auto p-4 z-0",
 		cache: 'listContainer'
 	}, [
@@ -285,6 +294,7 @@ const ConversationMessages = (data) =>
 			))
 		])
 	]);
+};
 
 /**
  * MessageBubble

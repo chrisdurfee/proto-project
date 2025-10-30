@@ -8,7 +8,7 @@ import { Model } from "@base-framework/base";
  * @type {typeof Model}
  */
 export const MessageModel = Model.extend({
-	url: '/api/messages',
+	url: '/api/messaging/[[conversationId]]/messages',
 
 	xhr: {
 		/**
