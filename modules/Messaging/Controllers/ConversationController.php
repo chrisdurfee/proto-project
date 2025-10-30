@@ -151,99 +151,87 @@ class ConversationController extends ResourceController
 		?array $modifiers
 	): object
 	{
-		$storage = ConversationParticipant::getStorage();
+		$model = new ConversationParticipant();
+		$storage = $model->storage;
 
-		// Build the query using Proto's builder
-		$result = $storage->findAll(function($sql, &$params) use ($userId, $filter, $offset, $limit)
+		// Build the query using Proto's table builder (bypasses model joins)
+		$result = $storage->table()->select(
+			['cp.id'],
+			['cp.conversation_id', 'conversationId'],
+			['cp.last_read_at', 'lastReadAt'],
+			['cp.last_read_message_id', 'lastReadMessageId'],
+			// Conversation fields
+			['c.id', 'id'],
+			['c.title', 'title'],
+			['c.type', 'type'],
+			['c.created_at', 'createdAt'],
+			['c.updated_at', 'updatedAt'],
+			['c.last_message_at', 'lastMessageAt'],
+			// Other participant's user fields
+			['u.id', 'userId'],
+			['u.first_name', 'firstName'],
+			['u.last_name', 'lastName'],
+			['u.email', 'email'],
+			['u.image', 'image'],
+			['u.display_name', 'displayName'],
+			['u.status', 'userStatus'],
+			// Last message fields
+			['m.id', 'lastMessageId'],
+			['m.content', 'lastMessageContent'],
+			['m.message_type', 'lastMessageType'],
+			['m.sender_id', 'lastMessageSenderId'],
+			// Unread count subquery
+			[
+				'(SELECT COUNT(*) FROM messages m2 WHERE m2.conversation_id = c.id AND m2.sender_id != ? AND (m2.created_at > COALESCE(cp.last_read_at, \'1970-01-01\') OR cp.last_read_at IS NULL))',
+				'unreadCount'
+			]
+		)
+		->join(function($joins)
 		{
-			// Select conversation participant fields
-			$sql->select(
-				['cp.id'],
-				['cp.conversation_id', 'conversationId'],
-				['cp.last_read_at', 'lastReadAt'],
-				['cp.last_read_message_id', 'lastReadMessageId'],
-				// Conversation fields
-				['c.id', 'id'],
-				['c.title', 'title'],
-				['c.type', 'type'],
-				['c.created_at', 'createdAt'],
-				['c.updated_at', 'updatedAt'],
-				['c.last_message_at', 'lastMessageAt'],
-				// Other participant's user fields
-				['u.id', 'userId'],
-				['u.first_name', 'firstName'],
-				['u.last_name', 'lastName'],
-				['u.email', 'email'],
-				['u.image', 'image'],
-				['u.display_name', 'displayName'],
-				['u.status', 'userStatus'],
-				// Last message fields
-				['m.id', 'lastMessageId'],
-				['m.content', 'lastMessageContent'],
-				['m.message_type', 'lastMessageType'],
-				['m.sender_id', 'lastMessageSenderId'],
-				// Unread count subquery
-				[
-					'(SELECT COUNT(*) FROM messages m2 WHERE m2.conversation_id = c.id AND m2.sender_id != ? AND (m2.created_at > COALESCE(cp.last_read_at, \'1970-01-01\') OR cp.last_read_at IS NULL))',
-					'unreadCount'
-				]
-			);
-
 			// Join conversation
-			$sql->join(function($joins)
-			{
-				$joins->inner('conversations', 'c')
-					->on('cp.conversation_id = c.id');
-			});
+			$joins->left('conversations', 'c')
+				->on('cp.conversation_id = c.id');
 
 			// Join to get the other participant
-			$sql->join(function($joins) use ($userId, &$params)
-			{
-				$joins->inner('conversation_participants', 'cp2')
-					->on('c.id = cp2.conversation_id')
-					->on('cp2.user_id != ?', [$userId]);
+			$joins->left('conversation_participants', 'cp2')
+				->on('c.id = cp2.conversation_id');
 
-				$joins->inner('users', 'u')
-					->on('cp2.user_id = u.id');
-			});
+			$joins->left('users', 'u')
+				->on('cp2.user_id = u.id');
 
 			// Join last message
-			$sql->join(function($joins)
-			{
-				$joins->left('messages', 'm')
-					->on('c.last_message_id = m.id');
-			});
+			$joins->left('messages', 'm')
+				->on('c.last_message_id = m.id');
+		})
+		->where(
+			['cp.user_id', $userId],
+			['cp2.user_id !=', $userId],
+			'cp.deleted_at IS NULL',
+			'cp2.deleted_at IS NULL'
+		);
 
-			// Filter by current user's conversations
-			$params[] = $userId; // for unread count subquery
-			$params[] = $userId; // for WHERE clause
-			$sql->where('cp.user_id = ?');
-			$sql->where('cp.deleted_at IS NULL');
-			$sql->where('cp2.deleted_at IS NULL');
-
-			// Apply any additional filters
-			if ($filter && !empty((array)$filter))
+		// Apply any additional filters
+		if ($filter && !empty((array)$filter))
+		{
+			$conditions = [];
+			foreach ((array)$filter as $key => $value)
 			{
-				foreach ((array)$filter as $key => $value)
-				{
-					$params[] = $value;
-					$sql->where("c.{$key} = ?");
-				}
+				$conditions[] = ["c.{$key}", $value];
 			}
+			$result->where(...$conditions);
+		}
 
-			// Order by most recent message
-			$sql->orderBy('c.last_message_at DESC');
+		// Order and paginate
+		$result->orderBy('c.last_message_at DESC')
+			->limit($limit)
+			->offset($offset);
 
-			// Pagination
-			$sql->limit($limit);
-			$sql->offset($offset);
-
-			return $sql;
-		});
+		// Execute query with userId for subquery
+		$rows = $result->fetch([$userId]);
 
 		return (object)[
-			'rows' => $result ?? [],
-			'count' => count($result ?? [])
+			'rows' => $rows ?? [],
+			'count' => count($rows ?? [])
 		];
 	}
 }
