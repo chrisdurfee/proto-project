@@ -41,8 +41,6 @@ class MessageController extends ResourceController
 		}
 
 		$data = $this->getRequestItem($request);
-
-		// Basic validation
 		if (empty($data->conversationId) || empty($data->content))
 		{
 			return $this->error('Conversation ID and content are required', 400);
@@ -73,7 +71,8 @@ class MessageController extends ResourceController
 			return $this->error('Unauthorized', 401);
 		}
 
-		if (!$conversationId) {
+		if (!$conversationId)
+		{
 			return $this->error('Conversation ID required', 400);
 		}
 
