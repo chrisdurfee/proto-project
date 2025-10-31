@@ -51,21 +51,59 @@ class ConversationController extends ResourceController
 			return $this->error('No data provided', 400);
 		}
 
-		// Add participant
-		ConversationParticipant::create((object)[
-			'conversationId' => $result->id,
-			'userId' => $data->participantId,
-			'isActive' => 1
-		]);
+		// Add participants
+		$addResult = $this->addParticipants(
+			$result->id,
+			[
+				$data->participantId,
+				$userId
+			]
+		);
 
-		// Add creator as participant
-		ConversationParticipant::create((object)[
-			'conversationId' => $result->id,
+		if ($addResult === false)
+		{
+			return $this->error('Failed to add participants', 500);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Add multiple participants to a conversation.
+	 *
+	 * @param int $conversationId
+	 * @param array $userIds
+	 * @return bool
+	 */
+	protected function addParticipants(int $conversationId, array $userIds): bool
+	{
+		$success = true;
+		foreach ($userIds as $userId)
+		{
+			$result = $this->addParticipant($conversationId, (int)$userId);
+			if ($result === false)
+			{
+				$success = false;
+			}
+		}
+
+		return $success;
+	}
+
+	/**
+	 * Add a participant to a conversation.
+	 *
+	 * @param int $conversationId
+	 * @param int $userId
+	 * @return bool
+	 */
+	protected function addParticipant(int $conversationId, int $userId): bool
+	{
+		return ConversationParticipant::create((object)[
+			'conversationId' => $conversationId,
 			'userId' => $userId,
 			'isActive' => 1
 		]);
-
-		return $result;
 	}
 
 	/**
