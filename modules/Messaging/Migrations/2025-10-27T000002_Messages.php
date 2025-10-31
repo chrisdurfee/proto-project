@@ -24,24 +24,21 @@ class Messages extends Migration
 		{
 			$table->id();
 			$table->timestamps();
-			$table->integer('conversation_id', 30);
-			$table->integer('sender_id', 30);
-			$table->text('content');
-			$table->enum('message_type', 'text', 'audio', 'image', 'file')->default("'text'");
-			$table->varchar('file_url', 500)->nullable();
-			$table->varchar('file_name', 255)->nullable();
-			$table->integer('file_size', 20)->nullable();
-			$table->varchar('audio_duration', 10)->nullable();
+
+			$table->int('conversation_id', 30);
+			$table->int('sender_id', 30);
+			$table->int('parent_id', 30)->nullable(); // for threads/replies
+			$table->enum('type', 'text', 'image', 'file', 'system')->default("'text'");
+			$table->text('content')->nullable();
 			$table->boolean('is_edited')->default(0);
 			$table->datetime('edited_at')->nullable();
-			$table->datetime('read_at')->nullable();
 
 			// Indexes
 			$table->index('conversation')->fields('conversation_id', 'created_at');
 			$table->index('sender')->fields('sender_id', 'created_at');
-			$table->index('read_status')->fields('conversation_id', 'read_at');
+			$table->index('thread_parent')->fields('parent_id');
 
-			// FKs
+			// Foreign Keys
 			$table->foreign('conversation_id')
 				->references('id')
 				->on('conversations')
@@ -50,6 +47,11 @@ class Messages extends Migration
 			$table->foreign('sender_id')
 				->references('id')
 				->on('users')
+				->onDelete('cascade');
+
+			$table->foreign('parent_id')
+				->references('id')
+				->on('messages')
 				->onDelete('cascade');
 		});
 	}

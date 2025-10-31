@@ -24,19 +24,20 @@ class Conversations extends Migration
 		{
 			$table->id();
 			$table->timestamps();
+
 			$table->varchar('title', 255)->nullable();
-			$table->enum('type', 'direct', 'group')->default("'direct'");
 			$table->text('description')->nullable();
+			$table->enum('type', 'direct', 'group')->default("'direct'");
+			$table->int('created_by', 30);
 			$table->datetime('last_message_at')->nullable();
-			$table->integer('last_message_id', 30)->nullable();
-			$table->integer('created_by', 30);
+			$table->int('last_message_id', 30)->nullable();
 
 			// Indexes
-			$table->index('created_by')->fields('created_by');
+			$table->index('by_type')->fields('type', 'created_at');
+			$table->index('creator')->fields('created_by');
 			$table->index('last_message')->fields('last_message_at', 'id');
-			$table->index('type')->fields('type', 'created_at');
 
-			// FKs
+			// Foreign Keys
 			$table->foreign('created_by')
 				->references('id')
 				->on('users')

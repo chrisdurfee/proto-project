@@ -26,19 +26,15 @@ class Message extends Model
 	 */
 	protected static array $fields = [
 		'id',
+		'createdAt',
+		'updatedAt',
 		'conversationId',
 		'senderId',
+		'parentId',
+		'type',
 		'content',
-		'messageType',
-		'fileUrl',
-		'fileName',
-		'fileSize',
-		'audioDuration',
 		'isEdited',
-		'editedAt',
-		'readAt',
-		'createdAt',
-		'updatedAt'
+		'editedAt'
 	];
 
 	/**

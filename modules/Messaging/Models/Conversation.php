@@ -26,14 +26,14 @@ class Conversation extends Model
 	 */
 	protected static array $fields = [
 		'id',
+		'createdAt',
+		'updatedAt',
 		'title',
-		'type',
 		'description',
+		'type',
+		'createdBy',
 		'lastMessageAt',
 		'lastMessageId',
-		'createdBy',
-		'createdAt',
-		'updatedAt'
 	];
 
 	/**
