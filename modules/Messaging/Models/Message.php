@@ -52,14 +52,14 @@ class Message extends Model
 		$builder
 			->one(
 				Conversation::class,
-				fields: ['id', 'title', 'createdAt', 'updatedAt']
+				fields: ['title', 'createdAt', 'updatedAt']
 			)
 			->on(['conversation_id', 'id']);
 
 		$builder
 			->one(
 				User::class,
-				fields: ['id', 'displayName', 'firstName', 'lastName', 'email', 'image']
+				fields: ['displayName', 'firstName', 'lastName', 'email', 'image']
 			)
 			->on(['sender_id', 'id']);
 	}

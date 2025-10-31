@@ -109,7 +109,7 @@ export const ThreadComposer = Jot(
 
 		data.xhr.add({}, (response) =>
 		{
-			if (response && response.row)
+			if (response && response.success)
 			{
 				// @ts-ignore
 				if (this.submitCallBack)
