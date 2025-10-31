@@ -53,7 +53,7 @@ export const MessagesPage = () =>
 						 */
 						return (typeof messageId !== "undefined")
 							? null
-							: Div({ class: "flex flex-auto w-full lg:max-w-[460px] lg:border-r" }, [
+							: Div({ class: "flex flex-auto w-full lg:max-w-[460px] lg:border-r", debug: true }, [
 								ThreadList({ data })
 							]);
 					});
@@ -62,7 +62,7 @@ export const MessagesPage = () =>
 				/**
 				 * Large displays always show the thread list.
 				 */
-				return Div({ class: "flex flex-auto w-full lg:max-w-[460px] lg:border-r" }, [
+				return Div({ class: "flex flex-auto w-full lg:max-w-[460px] lg:border-r", debug: true }, [
 					ThreadList({ data })
 				]);
 			}),
