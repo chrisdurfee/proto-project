@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
+namespace Modules\Messaging\Api;
 
 use Modules\Messaging\Controllers\ConversationController;
-use Modules\Messaging\Controllers\MessageController;
 
 /**
  * Messaging API Routes
@@ -14,8 +14,3 @@ use Modules\Messaging\Controllers\MessageController;
 // Conversation routes
 router()
     ->resource('messaging/:userId/conversations', ConversationController::class);
-
-// Message routes
-router()
-    ->post('messaging/:userId/messages/mark-read', [MessageController::class, 'markAsRead'])
-    ->resource('messaging/:conversationId/messages', MessageController::class);

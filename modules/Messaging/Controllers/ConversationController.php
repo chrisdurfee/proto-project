@@ -226,7 +226,6 @@ class ConversationController extends ResourceController
 				u.status AS userStatus,
 				m.id AS lastMessageId,
 				m.content AS lastMessageContent,
-				m.message_type AS lastMessageType,
 				m.sender_id AS lastMessageSenderId,
 				(SELECT COUNT(*)
 				 FROM messages m2

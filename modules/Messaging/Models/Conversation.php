@@ -59,7 +59,6 @@ class Conversation extends Model
 			->on(['id', 'conversationId'])
 			->as('participants')
 			->one(User::class, fields: [
-					'id',
 					'displayName',
 					'firstName',
 					'lastName',
