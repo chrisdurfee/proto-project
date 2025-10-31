@@ -2,6 +2,7 @@
 namespace Modules\Messaging\Api;
 
 use Modules\Messaging\Controllers\ConversationController;
+use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * Messaging API Routes
@@ -13,4 +14,7 @@ use Modules\Messaging\Controllers\ConversationController;
 
 // Conversation routes
 router()
+    ->middleware(([
+		CrossSiteProtectionMiddleware::class
+	]))
     ->resource('messaging/:userId/conversations', ConversationController::class);
