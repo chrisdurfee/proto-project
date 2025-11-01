@@ -36,8 +36,8 @@ const EmojiPicker = (messageId, toggleReaction) =>
 		class: "absolute bottom-full mb-1 right-0 bg-surface border rounded-lg shadow-lg p-2 flex gap-1 z-50",
 		// Prevent clicks from bubbling
 		click: (e) => e.stopPropagation()
-	},
-		QUICK_EMOJIS.map(emoji =>
+	}, [
+		...QUICK_EMOJIS.map(emoji =>
 			ButtonAtom({
 				class: "text-xl hover:bg-muted rounded p-1 transition-colors",
 				click: () => {
@@ -45,7 +45,7 @@ const EmojiPicker = (messageId, toggleReaction) =>
 				}
 			}, emoji)
 		)
-	);
+	]);
 };
 
 /**
@@ -89,10 +89,10 @@ const AttachmentDisplay = (attachment) =>
  * @param {object} msg
  * @param {function} toggleReaction
  * @param {function} showEmojiPicker
- * @param {boolean} emojiPickerOpen
+ * @param {object} parent - Parent component with state
  * @returns {object}
  */
-const ReactionDisplay = (msg, toggleReaction, showEmojiPicker, emojiPickerOpen) =>
+const ReactionDisplay = (msg, toggleReaction, showEmojiPicker, parent) =>
 {
 	const currentUserId = userId();
 	const reactions = msg.reactions || [];
@@ -119,7 +119,7 @@ const ReactionDisplay = (msg, toggleReaction, showEmojiPicker, emojiPickerOpen) 
 	const hasReactions = reactionButtons.length > 0;
 
 	return Div({
-		class: `relative flex gap-1 mt-1 flex-wrap`
+		class: `flex gap-1 mt-1 flex-wrap items-center`
 	}, [
 		...reactionButtons.map(reaction =>
 			ButtonAtom({
@@ -146,7 +146,7 @@ const ReactionDisplay = (msg, toggleReaction, showEmojiPicker, emojiPickerOpen) 
 					showEmojiPicker();
 				}
 			}),
-			emojiPickerOpen && EmojiPicker(msg.id, (msgId, emoji) => {
+			EmojiPicker(msg.id, (msgId, emoji) => {
 				toggleReaction(msgId, emoji);
 				showEmojiPicker(); // Close picker after selection
 			})
@@ -242,12 +242,12 @@ export const MessageBubble = Jot(
 			Div({ class: `rounded-md p-3 ${bubbleClasses}` }, [
 				msg.content && Span({ class: "text-sm" }, msg.content),
 				msg.audioUrl && AudioBubble(msg.audioUrl, msg.audioDuration),
-				// Display attachments if any
-				...(msg.attachments || []).map(attachment => AttachmentDisplay(attachment))
-			]),
-			// Reactions - always show (hidden on hover if no reactions)
-			// @ts-ignore
-			ReactionDisplay(msg, (msgId, emoji) => this.toggleReaction(msgId, emoji), () => this.toggleEmojiPicker(), this.state.emojiPickerOpen),
+			// Display attachments if any
+			...(msg.attachments || []).map(attachment => AttachmentDisplay(attachment))
+		]),
+		// Reactions - always show (hidden on hover if no reactions)
+		// @ts-ignore
+		ReactionDisplay(msg, (msgId, emoji) => this.toggleReaction(msgId, emoji), () => this.toggleEmojiPicker(), this),
 			// Possibly a "sent for X credits" line
 			(msg.credits >= 0) && Div({ class: "text-[11px] text-muted-foreground mt-1" },
 				`Sent for ${msg.credits} credits | ${msg.sentTime}`
