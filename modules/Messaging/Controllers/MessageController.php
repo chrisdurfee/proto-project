@@ -42,7 +42,7 @@ class MessageController extends ResourceController
 		}
 
 		$data = $this->getRequestItem($request);
-		$conversationId = $request->params()->conversationId ?? null;
+		$conversationId = (int)$request->params()->conversationId ?? null;
 
 		// Check if we have either content or files
 		$hasFiles = !empty($_FILES['attachments']) && !empty($_FILES['attachments']['name']);
