@@ -1,4 +1,5 @@
 import { A, Button as ButtonAtom, Div, Img, Span } from "@base-framework/atoms";
+import { Jot } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { TimeFrame } from "@base-framework/ui/molecules";
@@ -16,6 +17,36 @@ const getUserId = () =>
 };
 
 const userId = getUserId();
+
+/**
+ * Common emoji reactions for quick access.
+ */
+const QUICK_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+
+/**
+ * Emoji picker popup.
+ *
+ * @param {number} messageId
+ * @param {function} toggleReaction
+ * @returns {object}
+ */
+const EmojiPicker = (messageId, toggleReaction) =>
+{
+	return Div({
+		class: "absolute bottom-full mb-1 right-0 bg-surface border rounded-lg shadow-lg p-2 flex gap-1 z-50",
+		// Prevent clicks from bubbling
+		click: (e) => e.stopPropagation()
+	},
+		QUICK_EMOJIS.map(emoji =>
+			ButtonAtom({
+				class: "text-xl hover:bg-muted rounded p-1 transition-colors",
+				click: () => {
+					toggleReaction(messageId, emoji);
+				}
+			}, emoji)
+		)
+	);
+};
 
 /**
  * Display file attachment.
@@ -57,9 +88,11 @@ const AttachmentDisplay = (attachment) =>
  *
  * @param {object} msg
  * @param {function} toggleReaction
+ * @param {function} showEmojiPicker
+ * @param {boolean} emojiPickerOpen
  * @returns {object}
  */
-const ReactionDisplay = (msg, toggleReaction) =>
+const ReactionDisplay = (msg, toggleReaction, showEmojiPicker, emojiPickerOpen) =>
 {
 	const currentUserId = userId();
 	const reactions = msg.reactions || [];
@@ -83,8 +116,11 @@ const ReactionDisplay = (msg, toggleReaction) =>
 	}, {});
 
 	const reactionButtons = Object.values(grouped);
+	const hasReactions = reactionButtons.length > 0;
 
-	return Div({ class: "flex gap-1 mt-1 flex-wrap" }, [
+	return Div({
+		class: `relative flex gap-1 mt-1 flex-wrap ${!hasReactions ? 'opacity-0 group-hover:opacity-100 transition-opacity' : ''}`
+	}, [
 		...reactionButtons.map(reaction =>
 			ButtonAtom({
 				class: `text-xs px-2 py-1 rounded-full border transition-colors ${
@@ -95,18 +131,26 @@ const ReactionDisplay = (msg, toggleReaction) =>
 				click: () => toggleReaction(msg.id, reaction.emoji)
 			}, `${reaction.emoji} ${reaction.count}`)
 		),
-		// Add reaction button
-		Button({
-			variant: "ghost",
-			size: "sm",
-			icon: Icons.plus,
-			class: "h-6 w-6 p-0 rounded-full",
-			click: () => toggleReaction(msg.id, '👍') // Default to thumbs up for now
-		})
+		// Add reaction button with emoji picker
+		Div({ class: "relative" }, [
+			Button({
+				variant: "ghost",
+				size: "sm",
+				icon: Icons.plus,
+				class: "h-6 w-6 p-0 rounded-full",
+				title: "Add reaction",
+				click: (e) => {
+					e.stopPropagation();
+					showEmojiPicker();
+				}
+			}),
+			emojiPickerOpen && EmojiPicker(msg.id, (msgId, emoji) => {
+				toggleReaction(msgId, emoji);
+				showEmojiPicker(); // Close picker after selection
+			})
+		])
 	]);
-};
-
-/**
+};/**
  * MessageBubble
  *
  * A single message bubble from thread.thread array.
@@ -115,12 +159,30 @@ const ReactionDisplay = (msg, toggleReaction) =>
  * @param {object} msg
  * @returns {object}
  */
-export const MessageBubble = (msg) =>
+export const MessageBubble = Jot(
 {
-	const isSent = (msg.senderId === userId());
-	const bubbleClasses = isSent
-		? "bg-primary text-primary-foreground self-end rounded-tr-none"
-		: "bg-muted text-foreground self-start rounded-tl-none";
+	/**
+	 * Set up state for emoji picker.
+	 *
+	 * @returns {object}
+	 */
+	state()
+	{
+		return {
+			emojiPickerOpen: false
+		};
+	},
+
+	/**
+	 * Toggle emoji picker visibility.
+	 *
+	 * @returns {void}
+	 */
+	toggleEmojiPicker()
+	{
+		// @ts-ignore
+		this.state.emojiPickerOpen = !this.state.emojiPickerOpen;
+	},
 
 	/**
 	 * Toggle reaction on message.
@@ -128,7 +190,7 @@ export const MessageBubble = (msg) =>
 	 * @param {number} messageId
 	 * @param {string} emoji
 	 */
-	const toggleReaction = (messageId, emoji) =>
+	toggleReaction(messageId, emoji)
 	{
 		const reactionData = new MessageReactionModel({
 			messageId: messageId,
@@ -140,40 +202,55 @@ export const MessageBubble = (msg) =>
 		{
 			if (response && response.success)
 			{
-				// Optimistically update UI - in a real app you'd refresh the message
 				app.notify({
 					title: response.action === 'added' ? 'Reaction added' : 'Reaction removed',
 					icon: Icons.circleCheck
 				});
 			}
 		});
-	};
+	},
 
-	return Div({ class: `group flex flex-col max-w-[80%]` + (isSent ? " ml-auto" : " mr-auto") }, [
-		// Name + time (with hover effect for time)
-		Div({ class: "mb-1 flex items-center" }, [
-			isSent
-				? Span({ class: "text-xs text-muted-foreground mr-2 opacity-0 group-hover:opacity-100 transition-opacity" }, "You")
-				: Span({ class: "text-xs text-muted-foreground mr-2" }, msg.sender),
-			Span({
-				class: "opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out text-xs text-muted-foreground ml-2 capitalize",
-			}, TimeFrame({ dateTime: msg.createdAt }))
-		]),
-		// The bubble
-		Div({ class: `rounded-md p-3 ${bubbleClasses}` }, [
-			msg.content && Span({ class: "text-sm" }, msg.content),
-			msg.audioUrl && AudioBubble(msg.audioUrl, msg.audioDuration),
-			// Display attachments if any
-			...(msg.attachments || []).map(attachment => AttachmentDisplay(attachment))
-		]),
-		// Reactions
-		msg.reactions && msg.reactions.length > 0 && ReactionDisplay(msg, toggleReaction),
-		// Possibly a "sent for X credits" line
-		(msg.credits >= 0) && Div({ class: "text-[11px] text-muted-foreground mt-1" },
-			`Sent for ${msg.credits} credits | ${msg.sentTime}`
-		)
-	]);
-};
+	/**
+	 * Render the message bubble.
+	 *
+	 * @returns {object}
+	 */
+	render()
+	{
+		// @ts-ignore
+		const msg = this.message;
+		const isSent = (msg.senderId === userId());
+		const bubbleClasses = isSent
+			? "bg-primary text-primary-foreground self-end rounded-tr-none"
+			: "bg-muted text-foreground self-start rounded-tl-none";
+
+		return Div({ class: `group flex flex-col max-w-[80%]` + (isSent ? " ml-auto" : " mr-auto") }, [
+			// Name + time (with hover effect for time)
+			Div({ class: "mb-1 flex items-center" }, [
+				isSent
+					? Span({ class: "text-xs text-muted-foreground mr-2 opacity-0 group-hover:opacity-100 transition-opacity" }, "You")
+					: Span({ class: "text-xs text-muted-foreground mr-2" }, msg.sender),
+				Span({
+					class: "opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out text-xs text-muted-foreground ml-2 capitalize",
+				}, TimeFrame({ dateTime: msg.createdAt }))
+			]),
+			// The bubble
+			Div({ class: `rounded-md p-3 ${bubbleClasses}` }, [
+				msg.content && Span({ class: "text-sm" }, msg.content),
+				msg.audioUrl && AudioBubble(msg.audioUrl, msg.audioDuration),
+				// Display attachments if any
+				...(msg.attachments || []).map(attachment => AttachmentDisplay(attachment))
+			]),
+			// Reactions - always show (hidden on hover if no reactions)
+			// @ts-ignore
+			ReactionDisplay(msg, (msgId, emoji) => this.toggleReaction(msgId, emoji), () => this.toggleEmojiPicker(), this.state.emojiPickerOpen),
+			// Possibly a "sent for X credits" line
+			(msg.credits >= 0) && Div({ class: "text-[11px] text-muted-foreground mt-1" },
+				`Sent for ${msg.credits} credits | ${msg.sentTime}`
+			)
+		]);
+	}
+});
 
 /**
  * AudioBubble

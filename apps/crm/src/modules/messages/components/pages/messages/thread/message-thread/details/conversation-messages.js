@@ -134,7 +134,9 @@ export const ConversationMessages = Jot(
 							layout: DateDivider,
 							customCompare: (lastValue, value) => DateTime.format('standard', lastValue) !== DateTime.format('standard', value)
 						},
-						rowItem: (message) => MessageBubble(message),
+						rowItem: (message) => new MessageBubble({
+							message
+						}),
 						scrollContainer: parent.listContainer,
 						emptyState: () => EmptyState({
 							title: 'No messages yet',
