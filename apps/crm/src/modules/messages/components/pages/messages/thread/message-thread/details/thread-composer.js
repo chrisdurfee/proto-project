@@ -1,5 +1,5 @@
 import { Div } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Veil, VeilJot } from "@base-framework/ui";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
@@ -42,9 +42,9 @@ const SendButton = () => (
  * - Handles API calls
  * - Coordinates textarea and buttons
  *
- * @type {typeof Component} ThreadComposer
+ * @type {typeof Veil} ThreadComposer
  */
-export const ThreadComposer = Jot(
+export const ThreadComposer = VeilJot(
 {
 	/**
 	 * This will submit the form.

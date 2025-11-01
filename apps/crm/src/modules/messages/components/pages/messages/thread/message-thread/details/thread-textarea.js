@@ -1,5 +1,5 @@
 import { Textarea } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Veil, VeilJot } from "@base-framework/ui";
 import { Icons } from "@base-framework/ui/icons";
 
 /**
@@ -20,9 +20,9 @@ const isOverLimit = (count, limit) => count > limit ? true : null;
  * - Submit on Ctrl+Enter
  * - Input validation
  *
- * @type {typeof Component}
+ * @type {typeof Veil}
  */
-export const ThreadTextarea = Jot(
+export const ThreadTextarea = VeilJot(
 {
 	/**
 	 * This will set the state object.
@@ -51,42 +51,47 @@ export const ThreadTextarea = Jot(
 		// @ts-ignore
 		this.resizeTextarea();
 
-		const keyCode = e.keyCode;
-		if (keyCode === 13)
+        const keyCode = e.keyCode;
+		if (keyCode !== 13)
 		{
-			if (e.ctrlKey === true)
-			{
-				// @ts-ignore
-				if (this.state.empty === true || this.state.isOverLimit === true)
-				{
-					e.preventDefault();
-					e.stopPropagation();
+			return;
+		}
 
-					app.notify({
-						icon: Icons.warning,
-						type: 'warning',
-						title: 'Missing Message',
-						description: 'Please enter a message.',
-					});
+		// Allow Ctrl+Enter to submit
+		if (e.ctrlKey !== true)
+		{
+			// @ts-ignore
+			this.resizeTextarea();
+			return;
+		}
 
-					return;
-				}
+		if (e.ctrlKey === true)
+        {
+            // @ts-ignore
+            if (this.state.empty === true || this.state.isOverLimit === true)
+            {
+                e.preventDefault();
+                e.stopPropagation();
 
-				e.preventDefault();
-				e.stopPropagation();
+                app.notify({
+                    icon: Icons.warning,
+                    type: 'warning',
+                    title: 'Missing Message',
+                    description: 'Please enter a message.',
+                });
 
-				// @ts-ignore
-				if (this.onSubmit)
-				{
-					// @ts-ignore
-					this.onSubmit(this.textarea.value);
-				}
-			}
-			else
-			{
-				// @ts-ignore
-				this.resizeTextarea();
-			}
+                return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // @ts-ignore
+            if (this.onSubmit)
+            {
+                // @ts-ignore
+                this.onSubmit(this.panel.value);
+            }
 		}
 	},
 
@@ -101,15 +106,15 @@ export const ThreadTextarea = Jot(
 		let height = startHeight;
 
 		// @ts-ignore
-		if (this.textarea.value !== '')
+		if (this.panel.value !== '')
 		{
 			// @ts-ignore
-			const targetHeight = this.textarea.scrollHeight;
+			const targetHeight = this.panel.scrollHeight;
 			height = (targetHeight > startHeight) ? targetHeight : startHeight;
 		}
 
 		// @ts-ignore
-		this.textarea.style = 'height:' + height + 'px;';
+		this.panel.style = 'height:' + height + 'px;';
 	},
 
 	/**
@@ -120,7 +125,7 @@ export const ThreadTextarea = Jot(
 	clear()
 	{
 		// @ts-ignore
-		this.textarea.value = '';
+		this.panel.value = '';
 		// @ts-ignore
 		this.state.charCount = 0;
 		// @ts-ignore
@@ -139,7 +144,7 @@ export const ThreadTextarea = Jot(
 	getValue()
 	{
 		// @ts-ignore
-		return this.textarea.value;
+		return this.panel.value;
 	},
 
 	/**
@@ -163,7 +168,6 @@ export const ThreadTextarea = Jot(
 
 		return Textarea({
 			class: "w-full border-none bg-transparent resize-none focus:outline-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground",
-			cache: 'textarea',
 			// @ts-ignore
 			placeholder: this.placeholder,
 			input: updateCharCount,
