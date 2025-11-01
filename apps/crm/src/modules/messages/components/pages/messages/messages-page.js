@@ -1,4 +1,4 @@
-import { Div, OnXs, UseParent } from "@base-framework/atoms";
+import { Div, OnRoute, OnXs, UseParent } from "@base-framework/atoms";
 import { BlankPage } from "@base-framework/ui/pages";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
 import { MessagesSidebar } from "./messages-sidebar.js";
@@ -40,24 +40,24 @@ export const MessagesPage = () =>
 			// Left: Thread List
 			OnXs((size) =>
 			{
-				// if (size === "sm" || size === "xs")
-				// {
-				// 	/**
-				// 	 * Tracks the route to add or remove the thread list
-				// 	 * based on the selected message on small devices.
-				// 	 */
-				// 	return OnRoute('messageId', (messageId) =>
-				// 	{
-				// 		/**
-				// 		 * If a message is selected, remove the thread list.
-				// 		 */
-				// 		return (typeof messageId !== "undefined")
-				// 			? null
-				// 			: Div({ class: "flex flex-auto w-full lg:max-w-[460px] lg:border-r" }, [
-				// 				ThreadList({ data })
-				// 			]);
-				// 	});
-				// }
+				if (size === "sm" || size === "xs")
+				{
+					/**
+					 * Tracks the route to add or remove the thread list
+					 * based on the selected message on small devices.
+					 */
+					return OnRoute('messageId', (messageId) =>
+					{
+						/**
+						 * If a message is selected, remove the thread list.
+						 */
+						return (typeof messageId !== "undefined")
+							? null
+							: Div({ class: "flex flex-auto w-full lg:max-w-[460px] lg:border-r" }, [
+								ThreadList({ data })
+							]);
+					});
+				}
 
 				/**
 				 * Large displays always show the thread list.

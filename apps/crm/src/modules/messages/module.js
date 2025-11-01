@@ -8,9 +8,6 @@ import { Module } from '../module/module.js';
  */
 const routes = Module.convertRoutes(
 [
-	/**
-	 * Messages routes
-	 */
 	{ path: '/messages/video/:roomId?*', import: () => import('./components/pages/video/video-chat-page.js'), title: 'Video Chat' },
 	{ path: '/messages/:messageId?*', import: () => import('./components/pages/messages/messages-page.js'), title: 'Messages' }
 ]);
