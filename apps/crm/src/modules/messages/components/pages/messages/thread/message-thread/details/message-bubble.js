@@ -1,5 +1,6 @@
 import { A, Button as ButtonAtom, Div, Img, Span } from "@base-framework/atoms";
 import { Jot } from "@base-framework/base";
+import { Icon } from "@base-framework/ui";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { TimeFrame } from "@base-framework/ui/molecules";
@@ -57,7 +58,7 @@ const EmojiPicker = (messageId, toggleReaction) =>
 const AttachmentDisplay = (attachment) =>
 {
 	const isImage = attachment.fileType?.startsWith('image/');
-	const fileIcon = isImage ? Icons.image : Icons.fileText;
+	const fileIcon = isImage ? Icons.photo : Icons.document.text;
 	const downloadUrl = `/files/messages/${attachment.fileUrl}`;
 
 	return Div({ class: "mt-2 border rounded-md p-2 bg-background/50" }, [
@@ -70,7 +71,7 @@ const AttachmentDisplay = (attachment) =>
 				})
 			])
 			: Div({ class: "flex items-center gap-2" }, [
-				Div({ class: "text-muted-foreground" }, fileIcon({ size: 20 })),
+				Div({ class: "text-muted-foreground" }, Icon({ size: 'sm' }, fileIcon)),
 				A({
 					href: downloadUrl,
 					download: attachment.fileName,
