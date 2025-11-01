@@ -66,7 +66,7 @@ class MessageReactionController extends Controller
 		}
 
 		// Add reaction
-		$result = MessageReaction::create((object)[
+		$result = $this->addItem((object)[
 			'messageId' => $messageId,
 			'userId' => $userId,
 			'emoji' => $data->emoji

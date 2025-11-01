@@ -93,6 +93,7 @@ export const ConversationMessages = Jot(
 		// Fetch the updated message from the server
 		// @ts-ignore
 		const conversationId = this.conversationId;
+		// @ts-ignore
 		const MessageModel = this.data.constructor;
 
 		// Create a temporary model to fetch just this message

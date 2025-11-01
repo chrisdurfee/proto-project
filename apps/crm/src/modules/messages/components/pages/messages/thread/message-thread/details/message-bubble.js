@@ -1,7 +1,5 @@
-import { A, Button as ButtonAtom, Div, Img, OnState, Span } from "@base-framework/atoms";
+import { Button as ButtonAtom, Div, Img, OnState, P, Span } from "@base-framework/atoms";
 import { Jot } from "@base-framework/base";
-import { Icon } from "@base-framework/ui";
-import { Icons } from "@base-framework/ui/icons";
 import { TimeFrame } from "@base-framework/ui/molecules";
 import { MessageReactionModel } from "@modules/messages/models/message-reaction-model.js";
 
@@ -51,39 +49,112 @@ const EmojiPicker = (isSent, messageId, toggleReaction) =>
 };
 
 /**
- * Display file attachment.
+ * FileSize
  *
- * @param {object} attachment
+ * Format bytes to human readable size
+ *
+ * @param {number} bytes
+ * @returns {string}
+ */
+const formatFileSize = (bytes) =>
+{
+	if (!bytes) return '';
+	if (bytes < 1024) return bytes + ' B';
+	if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+	return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+};
+
+/**
+ * AttachmentIcon
+ *
+ * Returns appropriate icon/styling based on file type
+ *
+ * @param {string} ext
  * @returns {object}
  */
-const AttachmentDisplay = (attachment) =>
+const AttachmentIcon = (ext) =>
 {
-	const isImage = attachment.fileType?.startsWith('image/');
-	const fileIcon = isImage ? Icons.photo : Icons.document.text;
-	const downloadUrl = `/files/messages/${attachment.fileUrl}`;
+	const iconClasses = "w-10 h-10 rounded flex items-center justify-center text-white font-semibold text-xs";
+	const extUpper = ext?.toUpperCase() || '?';
 
-	return Div({ class: "mt-2 border rounded-md p-2 bg-background/50" }, [
+	// Color coding by file type
+	const colorMap = {
+		pdf: 'bg-red-500',
+		doc: 'bg-blue-500',
+		docx: 'bg-blue-500',
+		xls: 'bg-green-600',
+		xlsx: 'bg-green-600',
+		txt: 'bg-gray-500',
+		csv: 'bg-green-500',
+		zip: 'bg-purple-500',
+		default: 'bg-gray-400'
+	};
+
+	const bgColor = colorMap[ext?.toLowerCase()] || colorMap.default;
+	return Div({ class: `${iconClasses} ${bgColor}` }, extUpper);
+};
+
+/**
+ * Attachment
+ *
+ * @param {object} att
+ * @returns {object}
+ */
+const Attachment = (att) =>
+{
+	const ext = att.fileName ? att.fileName.split('.').pop() : '';
+	const isImage = (['jpg', 'jpeg', 'png', 'gif', 'tiff', 'bmp', 'webp'].includes(ext));
+	const filePath = `/files/messages/${att.fileUrl}`;
+
+	return Div({
+		class: "group relative flex items-center gap-x-3 p-3 border border-border rounded-lg hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer bg-card",
+		click: () => window.open(filePath, '_blank')
+	}, [
+		// Image preview or file type icon
 		isImage
-			? A({ href: downloadUrl, target: "_blank", class: "block" }, [
+			? Div({ class: "relative" }, [
 				Img({
-					src: downloadUrl,
-					alt: attachment.fileName,
-					class: "max-w-xs max-h-48 rounded object-cover"
-				})
+					src: filePath,
+					alt: att.fileName,
+					class: "w-16 h-16 rounded object-cover border border-border"
+				}),
+				// Overlay on hover for images
+				Div({ class: "absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded transition-all" })
 			])
-			: Div({ class: "flex items-center gap-2" }, [
-				Div({ class: "text-muted-foreground" }, Icon({ size: 'sm' }, fileIcon)),
-				A({
-					href: downloadUrl,
-					download: attachment.fileName,
-					class: "text-sm text-primary hover:underline flex-1"
-				}, attachment.fileName || 'Download'),
-				Span({ class: "text-xs text-muted-foreground" },
-					attachment.fileSize ? `${Math.round(attachment.fileSize / 1024)}KB` : ''
-				)
+			: AttachmentIcon(ext),
+
+		// File info
+		Div({ class: "flex-1 min-w-0" }, [
+			P({
+				class: "text-sm font-medium truncate group-hover:text-primary transition-colors"
+			}, att.displayName || att.fileName),
+			Div({ class: "flex items-center gap-x-2 mt-1" }, [
+				Span({
+					class: "text-xs text-muted-foreground uppercase font-semibold"
+				}, ext || 'file'),
+				att.fileSize && Span({
+					class: "text-xs text-muted-foreground"
+				}, formatFileSize(att.fileSize))
 			])
+		]),
+
+		// Download indicator
+		Div({
+			class: "opacity-0 group-hover:opacity-100 transition-opacity"
+		}, [
+			Span({
+				class: "text-xs text-muted-foreground"
+			}, "↗")
+		])
 	]);
 };
+
+export const Attachments = (attachments) =>
+	Div({ class: "flex flex-col gap-y-2 mt-3" },
+		attachments.map((att) =>
+			Attachment(att)
+		)
+	);
 
 /**
  * Reaction button that shows existing reactions.
@@ -263,12 +334,11 @@ export const MessageBubble = Jot(
 					}, TimeFrame({ dateTime: msg.createdAt }))
 				]),
 				// The bubble
-				Div({ class: `rounded-md p-3 max-w-[80%] ${bubbleClasses}` }, [
+				Div({ class: `rounded-md p-3 max-w-[80%]` }, [
 					msg.content && Span({ class: "text-sm" }, msg.content),
 					msg.audioUrl && AudioBubble(msg.audioUrl, msg.audioDuration),
-					// Display attachments if any
-					...(msg.attachments || []).map(attachment => AttachmentDisplay(attachment))
 				]),
+				msg.attachments.length && Attachments(msg.attachments),
 				// Reactions - outside the bubble so they don't get cut off
 				// @ts-ignore
 				ReactionDisplay(
