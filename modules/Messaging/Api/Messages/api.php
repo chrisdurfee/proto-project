@@ -13,15 +13,12 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * @package Modules\Messaging\Api
  */
 router()
-    ->middleware(([
+	->middleware(([
 		CrossSiteProtectionMiddleware::class
 	]))
-    ->post('messaging/:conversationId/messages/mark-read', [MessageController::class, 'markAsRead'])
-    ->resource('messaging/:conversationId/messages', MessageController::class);
+	->post('messaging/:conversationId/messages/mark-read', [MessageController::class, 'markAsRead'])
+	->resource('messaging/:conversationId/messages', MessageController::class);
 
 // Message attachment routes
 router()
-    ->middleware([
-		CrossSiteProtectionMiddleware::class
-	])
-    ->resource('messaging/messages/:messageId/attachments', MessageAttachmentController::class);
+	->resource('messaging/messages/:messageId/attachments', MessageAttachmentController::class);
