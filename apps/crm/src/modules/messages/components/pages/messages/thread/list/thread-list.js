@@ -1,4 +1,4 @@
-import { Div } from "@base-framework/atoms";
+import { Div, UseParent } from "@base-framework/atoms";
 import { ScrollableList } from "@base-framework/organisms";
 import { ListEmptyState } from "./list-empty-state.js";
 import { ThreadListHeader } from "./thread-list-header.js";
@@ -13,8 +13,8 @@ import { ThreadListItem } from "./thread-list-item.js";
  * @returns {object}
  */
 export const ThreadList = ({ data }) =>
-{
-	return Div({ class: "w-full pt-0 lg:pt-2 flex flex-col gap-y-2" }, [
+	UseParent((parent) =>
+		Div({ class: "w-full pt-0 lg:pt-2 flex flex-col gap-y-2" }, [
 		ThreadListHeader(),
 		ScrollableList({
 			data,
@@ -24,7 +24,7 @@ export const ThreadList = ({ data }) =>
 			class: 'flex flex-col gap-y-2 px-4 pb-4 overflow-y-auto',
 			limit: 25,
 			rowItem: ThreadListItem,
+			scrollContainer: parent.listContainer,
 			emptyState: () => ListEmptyState({ filter: 'all' })
 		})
-	]);
-};
+	]));

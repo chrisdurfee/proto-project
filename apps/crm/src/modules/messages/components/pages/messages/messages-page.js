@@ -6,6 +6,17 @@ import { ThreadList } from "./thread/list/thread-list.js";
 import { ThreadContentSwitch } from "./thread/thread-content-switch.js";
 
 /**
+ * Sets up the thread list container.
+ *
+ * @param {object} data
+ * @returns {object}
+ */
+const createList = (data) =>
+	Div({ class: "flex flex-auto w-full lg:max-w-[460px] lg:border-r", cache: "listContainer" }, [
+		ThreadList({ data })
+	]);
+
+/**
  * MessagesPage
  *
  * A chat-like page that shows a thread of messages.
@@ -53,18 +64,14 @@ export const MessagesPage = () =>
 						 */
 						return (typeof messageId !== "undefined")
 							? null
-							: Div({ class: "flex flex-auto w-full lg:max-w-[460px] lg:border-r" }, [
-								ThreadList({ data })
-							]);
+							: createList(data);
 					});
 				}
 
 				/**
 				 * Large displays always show the thread list.
 				 */
-				return Div({ class: "flex flex-auto w-full lg:max-w-[460px] lg:border-r" }, [
-					ThreadList({ data })
-				]);
+				return createList(data);
 			}),
 
 			// Right: Content Switch for actual chat messages

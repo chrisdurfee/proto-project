@@ -12,7 +12,7 @@ export const SearchInput = Atom((props) => (
 	Div({ class: 'relative flex items-center' }, [
 		Input({
 			cache: 'input',
-            ...props,
+			...props,
 			class: props.class ?? '',
 			placeholder: props.placeholder ?? 'Search...',
 			bind: (props.bind ?? [props.state, 'searchQuery'])

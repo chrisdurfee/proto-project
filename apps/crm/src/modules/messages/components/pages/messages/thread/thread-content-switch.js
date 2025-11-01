@@ -1,7 +1,7 @@
 import { Div, OnRoute } from "@base-framework/atoms";
 import { DockableOverlay, Panel } from "@base-framework/ui/organisms";
-import { NewConversationForm } from "./message-thread/new-conversation-form.js";
-import { ThreadDetail } from "./message-thread/thread-detail.js";
+import { ThreadDetail } from "./message-thread/details/thread-detail.js";
+import { NewConversationForm } from "./message-thread/new-message/new-conversation-form.js";
 import { ThreadEmptyState } from "./message-thread/thread-empty-state.js";
 
 /**
