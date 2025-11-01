@@ -334,7 +334,7 @@ export const MessageBubble = Jot(
 					}, TimeFrame({ dateTime: msg.createdAt }))
 				]),
 				// The bubble
-				Div({ class: `rounded-md p-3 max-w-[80%]` }, [
+				Div({ class: `rounded-md p-3 max-w-[80%] ${bubbleClasses}` }, [
 					msg.content && Span({ class: "text-sm" }, msg.content),
 					msg.audioUrl && AudioBubble(msg.audioUrl, msg.audioDuration),
 				]),
