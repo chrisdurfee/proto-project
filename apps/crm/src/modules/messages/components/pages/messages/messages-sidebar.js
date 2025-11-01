@@ -1,6 +1,4 @@
 import { A, Div, H3, Header, Span } from "@base-framework/atoms";
-import { ScrollableList } from "@base-framework/organisms";
-import { Skeleton } from "@base-framework/ui/atoms";
 import { Avatar, StaticStatusIndicator } from "@base-framework/ui/molecules";
 import { UserModel } from "@modules/users/components/pages/users/models/user-model.js";
 
@@ -57,21 +55,21 @@ export const MessagesSidebar = () =>
 			Header({ class: "pb-4 px-2 flex flex-col" }, [
 				H3({ class: "scroll-m-20 text-lg font-bold tracking-tight" }, "Connections")
 			]),
-			ScrollableList({
-				data,
-				key: 'id',
-				items: [],
-				skeleton: {
-					number: 3,
-					row: () => Div({ class: "flex flex-col gap-y-2 mt-4" }, [
-						Skeleton({ width: "w-full", height: "h-10" }),
-						Skeleton({ width: "w-full", height: "h-10" }),
-						Skeleton({ width: "w-full", height: "h-10" })
-					])
-				},
-				cache: 'list',
-				class: "flex flex-col gap-y-1 mt-4",
-				rowItem: SidebarRowItem()
-			})
+			// ScrollableList({
+			// 	data,
+			// 	key: 'id',
+			// 	items: [],
+			// 	skeleton: {
+			// 		number: 3,
+			// 		row: () => Div({ class: "flex flex-col gap-y-2 mt-4" }, [
+			// 			Skeleton({ width: "w-full", height: "h-10" }),
+			// 			Skeleton({ width: "w-full", height: "h-10" }),
+			// 			Skeleton({ width: "w-full", height: "h-10" })
+			// 		])
+			// 	},
+			// 	cache: 'list',
+			// 	class: "flex flex-col gap-y-1 mt-4",
+			// 	rowItem: SidebarRowItem()
+			// })
 		]);
 };

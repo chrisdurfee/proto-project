@@ -18,6 +18,7 @@ export const ThreadList = ({ data }) =>
 		ThreadListHeader(),
 		ScrollableList({
 			data,
+			cache: 'list',
 			key: 'id',
 			role: 'list',
 			class: 'flex flex-col gap-y-2 px-4 pb-4 overflow-y-auto',
