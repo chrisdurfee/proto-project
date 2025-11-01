@@ -9,7 +9,7 @@ import { Icons } from "@base-framework/ui/icons";
  * @param {number} limit
  * @returns {boolean}
  */
-const isOverLimit = (count, limit) => count > limit ? true : null;
+const isOverLimit = (count, limit) => count > limit;
 
 /**
  * ThreadTextarea
@@ -68,18 +68,8 @@ export const ThreadTextarea = VeilJot(
 		if (e.ctrlKey === true)
         {
             // @ts-ignore
-            if (this.state.empty === true || this.state.isOverLimit === true)
+            if (this.validate() === false)
             {
-                e.preventDefault();
-                e.stopPropagation();
-
-                app.notify({
-                    icon: Icons.warning,
-                    type: 'warning',
-                    title: 'Missing Message',
-                    description: 'Please enter a message.',
-                });
-
                 return;
             }
 
@@ -94,6 +84,42 @@ export const ThreadTextarea = VeilJot(
             }
 		}
 	},
+
+    /**
+     * This will validate the textarea content.
+     *
+     * @returns {boolean}
+     */
+    validate()
+    {
+        // @ts-ignore
+        if (this.state.empty === true)
+        {
+            app.notify({
+                icon: Icons.warning,
+                type: 'warning',
+                title: 'Missing Message',
+                description: 'Please enter a message.',
+            });
+
+            return false;
+        }
+
+        // @ts-ignore
+        if (this.state.isOverLimit === true)
+        {
+            app.notify({
+                icon: Icons.warning,
+                type: 'warning',
+                title: 'Message Too Long',
+                description: 'Your message exceeds the character limit.',
+            });
+
+            return false;
+        }
+
+        return true;
+    },
 
 	/**
 	 * This will resize the textarea.

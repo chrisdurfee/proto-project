@@ -1,4 +1,4 @@
-import { Div } from "@base-framework/atoms";
+import { Div, UseParent } from "@base-framework/atoms";
 import { Veil, VeilJot } from "@base-framework/ui";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
@@ -12,9 +12,7 @@ import { ThreadTextarea } from "./thread-textarea.js";
  * @returns {object}
  */
 const TextCount = () => (
-	Div({
-		class: "text-xs text-muted-foreground",
-	}, `[[charCount]]/[[charLimit]]`)
+	UseParent(({ textareaComponent }) => Div({ class: "text-xs text-muted-foreground" }, [`[[charCount]]/[[charLimit]]`, textareaComponent.state]))
 );
 
 /**
@@ -54,6 +52,11 @@ export const ThreadComposer = VeilJot(
 	 */
 	submit(content)
 	{
+		if (this.textareaComponent.validate() === false)
+		{
+			return;
+		}
+
 		// @ts-ignore
 		this.save(content);
 		// @ts-ignore
@@ -118,7 +121,7 @@ export const ThreadComposer = VeilJot(
 					onSubmit: (content) => this.submit(content)
 				}),
 				Div({ class: 'flex flex-col' }, [
-					//TextCount(),
+					TextCount(),
 					SendButton()
 				])
 			]),
