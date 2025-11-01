@@ -1,19 +1,10 @@
-import { Div, Textarea } from "@base-framework/atoms";
+import { Div } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
 import { MessageModel } from "@modules/messages/models/message-model.js";
-
-
-/**
- * This will check if the count is over the limit.
- *
- * @param {number} count
- * @param {number} limit
- * @returns {boolean}
- */
-const isOverLimit = (count, limit) => count > limit? true : null;
+import { ThreadTextarea } from "./thread-textarea.js";
 
 /**
  * This will display the character count.
@@ -36,7 +27,6 @@ const SendButton = () => (
 		Button({
 			type: "submit",
 			variant: "icon",
-			click: () => console.log("Send email"),
 			icon: Icons.airplane,
 			class: "text-foreground hover:text-accent",
 			onSet: ['empty', (empty, el) => el.disabled = empty]
@@ -47,49 +37,27 @@ const SendButton = () => (
 /**
  * ThreadComposer
  *
- * Similar to the email composer, but for chat:
- * - text area
- * - mic icon
- * - send button
+ * Container component for chat message composition:
+ * - Manages message submission
+ * - Handles API calls
+ * - Coordinates textarea and buttons
  *
  * @type {typeof Component} ThreadComposer
  */
 export const ThreadComposer = Jot(
 {
 	/**
-	 * This will set the state object.
-	 *
-	 * @returns {object}
-	 */
-	state()
-	{
-		return {
-			empty: true,
-			charCount: 0,
-			// @ts-ignore
-			charLimit: this.charLimit ?? 5000,
-			isOverLimit: false
-		};
-	},
-
-	/**
 	 * This will submit the form.
 	 *
+	 * @param {string} content
 	 * @returns {void}
 	 */
-	submit()
+	submit(content)
 	{
 		// @ts-ignore
-		this.save(this.textarea.value);
-
+		this.save(content);
 		// @ts-ignore
-		this.textarea.value = '';
-		// @ts-ignore
-		this.state.charCount = 0;
-		// @ts-ignore
-		this.state.isOverLimit = false;
-		// @ts-ignore
-		this.state.empty = true;
+		this.textareaComponent.clear();
 	},
 
 	/**
@@ -122,95 +90,15 @@ export const ThreadComposer = Jot(
 	},
 
 	/**
-	 * This will check the submit.
-	 *
-	 * @param {object} e
-	 * @returns {void}
-	 */
-	checkSubmit(e)
-	{
-		// @ts-ignore
-		this.resizeTextarea();
-
-		const keyCode = e.keyCode;
-		if (keyCode === 13)
-		{
-			if (e.ctrlKey === true)
-			{
-				// @ts-ignore
-				if (this.state.empty === true || this.state.isOverLimit === true)
-				{
-					e.preventDefault();
-					e.stopPropagation();
-
-					app.notify({
-						icon: Icons.warning,
-						type: 'warning',
-						title: 'Missing Message',
-						description: 'Please enter a message.',
-					});
-
-					return;
-				}
-
-				e.preventDefault();
-				e.stopPropagation();
-
-				// @ts-ignore
-				this.submit();
-			}
-			else
-			{
-				// @ts-ignore
-				this.resizeTextarea();
-			}
-		}
-	},
-
-	/**
-	 * This will resize the textarea.
-	 *
-	 * @returns {void}
-	 */
-	resizeTextarea()
-	{
-		const startHeight = 48;
-		let height = startHeight;
-
-		// @ts-ignore
-		if (this.textarea.value !== '')
-		{
-			// @ts-ignore
-			const targetHeight = this.textarea.scrollHeight;
-			height = (targetHeight > startHeight)? targetHeight : startHeight;
-		}
-
-		// @ts-ignore
-		this.textarea.style = 'height:' + height + 'px;';
-	},
-
-	/**
 	 * This will render the component.
 	 *
 	 * @returns {object}
 	 */
 	render()
 	{
-		// @ts-ignore
-		const charLimit = this.state.charLimit;
-		const updateCharCount = (e) =>
-		{
-			const text = e.target.value;
-			// @ts-ignore
-			const state = this.state;
-			state.charCount = text.length;
-			state.isOverLimit = (isOverLimit(text.length, charLimit));
-			state.empty = text.length === 0;
-		};
-
 		return Div({ class: "fadeIn p-4 w-full lg:max-w-5xl m-auto" }, [
 			// @ts-ignore
-			Form({ class: "relative flex border rounded-lg p-3 bg-surface", submit: () => this.submit() }, [
+			Form({ class: "relative flex border rounded-lg p-3 bg-surface", submit: () => this.submit(this.textareaComponent.getValue()) }, [
 				Div([
 					Button({
 						variant: "icon",
@@ -220,17 +108,14 @@ export const ThreadComposer = Jot(
 					})
 				]),
 				// Textarea for reply
-				Textarea({
-					class: "w-full border-none bg-transparent resize-none focus:outline-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground",
-					cache: 'textarea',
+				new ThreadTextarea({
+					cache: 'textareaComponent',
 					// @ts-ignore
 					placeholder: this.placeholder,
-					input: updateCharCount,
 					// @ts-ignore
-					bind: this.bind,
-					required: true,
+					charLimit: this.charLimit ?? 5000,
 					// @ts-ignore
-					keyup: (e) => this.checkSubmit(e)
+					onSubmit: (content) => this.submit(content)
 				}),
 				Div({ class: 'flex flex-col' }, [
 					//TextCount(),
