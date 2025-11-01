@@ -217,16 +217,7 @@ export const MessageBubble = Jot(
 			emoji: emoji
 		});
 
-		reactionData.xhr.toggle({}, (response) =>
-		{
-			if (response && response.success)
-			{
-				app.notify({
-					title: response.action === 'added' ? 'Reaction added' : 'Reaction removed',
-					icon: Icons.circleCheck
-				});
-			}
-		});
+		reactionData.xhr.toggle({}, (response) => null);
 	},
 
 	/**
