@@ -244,7 +244,7 @@ export const MessageBubble = Jot(
 			: "bg-muted text-foreground self-start rounded-tl-none";
 
 		return Div({
-				class: `group flex flex-col relative ${isSent ? "items-end" : "items-start"}`,
+				class: `group flex flex-none flex-col relative ${isSent ? "items-end" : "items-start"}`,
 				// @ts-ignore
 				pointerenter: () => this.state.emojiPickerOpen = true,
 				// @ts-ignore
