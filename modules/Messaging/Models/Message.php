@@ -81,6 +81,26 @@ class Message extends Model
 	}
 
 	/**
+	 * Get attachments for this message.
+	 *
+	 * @return mixed
+	 */
+	public function attachments()
+	{
+		return $this->hasMany(MessageAttachment::class, 'message_id');
+	}
+
+	/**
+	 * Get reactions for this message.
+	 *
+	 * @return mixed
+	 */
+	public function reactions()
+	{
+		return $this->hasMany(MessageReaction::class, 'message_id');
+	}
+
+	/**
 	 * Get messages for a conversation.
 	 *
 	 * @param int $conversationId

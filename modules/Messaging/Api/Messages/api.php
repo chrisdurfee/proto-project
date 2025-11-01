@@ -2,6 +2,7 @@
 namespace Modules\Messaging\Api;
 
 use Modules\Messaging\Controllers\MessageController;
+use Modules\Messaging\Controllers\MessageAttachmentController;
 use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
@@ -17,3 +18,10 @@ router()
 	]))
     ->post('messaging/:conversationId/messages/mark-read', [MessageController::class, 'markAsRead'])
     ->resource('messaging/:conversationId/messages', MessageController::class);
+
+// Message attachment routes
+router()
+    ->middleware([
+		CrossSiteProtectionMiddleware::class
+	])
+    ->resource('messaging/messages/:messageId/attachments', MessageAttachmentController::class);

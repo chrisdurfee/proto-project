@@ -6,6 +6,7 @@ use Proto\Http\Router\Request;
 use Modules\Messaging\Models\Message;
 use Modules\Messaging\Models\Conversation;
 use Modules\Messaging\Models\ConversationParticipant;
+use Modules\Messaging\Services\MessageAttachmentService;
 
 /**
  * MessageController
@@ -49,10 +50,26 @@ class MessageController extends ResourceController
 
 		// Set sender and defaults
 		$data->senderId = $userId;
-		$data->messageType = $data->messageType ?? 'text';
+		$data->type = $data->type ?? 'text';
 		$data->conversationId = $conversationId;
 
-		return $this->addItem($data);
+		$result = $this->addItem($data);
+		if ($result->success === false)
+		{
+			return $result;
+		}
+
+		// Handle file attachments if present
+		if ($request->hasFiles())
+		{
+			$attachmentService = new MessageAttachmentService();
+			$attachmentService->handleAttachments($request, $result->id);
+		}
+
+		// Update conversation's last message
+		$this->updateConversationLastMessage($conversationId, $result->id);
+
+		return $result;
 	}
 
 	/**
@@ -102,6 +119,22 @@ class MessageController extends ResourceController
 	}
 
 	/**
+	 * Update the conversation's last message reference.
+	 *
+	 * @param int $conversationId
+	 * @param int $messageId
+	 * @return void
+	 */
+	protected function updateConversationLastMessage(int $conversationId, int $messageId): void
+	{
+		Conversation::edit((object)[
+			'id' => $conversationId,
+			'lastMessageId' => $messageId,
+			'lastMessageAt' => date('Y-m-d H:i:s')
+		]);
+	}
+
+	/**
 	 * Validation rules
 	 */
 	protected function validate(): array
@@ -109,9 +142,45 @@ class MessageController extends ResourceController
 		return [
 			'conversationId' => 'int|required',
 			'content' => 'string|required',
-			'messageType' => 'string:20',
+			'type' => 'string:20',
 			'fileUrl' => 'string:500',
 			'fileName' => 'string:255'
 		];
+	}
+
+	/**
+	 * Stream new messages for a conversation via SSE.
+	 *
+	 * @param Request $request
+	 * @return void
+	 */
+	public function stream(Request $request): void
+	{
+		$conversationId = $request->params()->conversationId ?? null;
+		if (!$conversationId)
+		{
+			return;
+		}
+
+		$lastId = $request->getInt('lastId') ?? 0;
+
+		// Use SSE to stream new messages
+		eventStream(function() use ($conversationId, $lastId)
+		{
+			$messages = Message::fetchWhere([
+				['conversationId', $conversationId],
+				['id', '>', $lastId]
+			]);
+
+			if (!empty($messages))
+			{
+				return json_encode([
+					'messages' => $messages,
+					'lastId' => end($messages)->id
+				]);
+			}
+
+			return null;
+		});
 	}
 }

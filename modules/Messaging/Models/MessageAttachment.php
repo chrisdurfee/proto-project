@@ -34,4 +34,14 @@ class MessageAttachment extends Model
 		'fileSize'
 	];
 
+	/**
+	 * Get the message this attachment belongs to.
+	 *
+	 * @return mixed
+	 */
+	public function message()
+	{
+		return $this->belongsTo(Message::class, 'message_id');
+	}
+
 }

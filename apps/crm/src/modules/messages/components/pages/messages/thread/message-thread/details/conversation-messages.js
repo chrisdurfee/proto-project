@@ -1,6 +1,6 @@
 import { Div, Span, UseParent } from "@base-framework/atoms";
-import { DateTime } from "@base-framework/base";
-import { ScrollableList } from "@base-framework/organisms";
+import { DateTime, Jot } from "@base-framework/base";
+import { IntervalTimer, ScrollableList } from "@base-framework/organisms";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { MessageModel } from "@modules/messages/models/message-model.js";
 import { MessageBubble } from "./message-bubble.js";
@@ -22,52 +22,127 @@ const DateDivider = (date) => (
  * ConversationMessages
  *
  * Renders the chat messages using ScrollableList with automatic data loading.
+ * Includes polling for new messages every 10 seconds.
  *
  * @param {object} props - The props object containing conversationId
  * @returns {object}
  */
-export const ConversationMessages = (props) =>
+export const ConversationMessages = Jot(
 {
-	const data = new MessageModel({
-		userId: app.data.user.id,
-		conversationId: props.conversationId,
-		orderBy: {
-			createdAt: 'desc'
-		}
-	});
+	/**
+	 * Set up the data model.
+	 *
+	 * @returns {object}
+	 */
+	setData()
+	{
+		// @ts-ignore
+		return new MessageModel({
+			userId: app.data.user.id,
+			// @ts-ignore
+			conversationId: this.conversationId,
+			orderBy: {
+				createdAt: 'desc'
+			}
+		});
+	},
 
-	return Div({
-		class: "flex flex-col grow overflow-y-auto p-4 z-0",
-		cache: 'listContainer'
-	}, [
-		Div({ class: "flex flex-auto flex-col w-full max-w-none lg:max-w-5xl mx-auto pt-24" }, [
-			UseParent((parent) => (
-				ScrollableList({
-					scrollDirection: 'up',
-					data,
-					cache: 'list',
-					key: 'id',
-					role: 'list',
-					class: 'flex flex-col gap-4',
-					limit: 25,
-                    skeleton: {
-                        number: 3,
-                        row: ThreadSkeleton
-                    },
-					divider: {
-						skipFirst: true,
-						itemProperty: 'createdAt',
-						layout: DateDivider,
-						customCompare: (lastValue, value) => DateTime.format('standard', lastValue) !== DateTime.format('standard', value)
-					},
-					rowItem: (message) => MessageBubble(message),
-					scrollContainer: parent.listContainer,
-					emptyState: () => EmptyState({
-						title: 'No messages yet',
-						description: 'Start the conversation by sending a message!'
+	/**
+	 * Initialize polling timer.
+	 *
+	 * @returns {void}
+	 */
+	onCreated()
+	{
+		// Poll for new messages every 10 seconds
+		// @ts-ignore
+		this.pollTimer = new IntervalTimer(10000, () => this.pollNewMessages());
+	},
+
+	/**
+	 * Poll for new messages.
+	 *
+	 * @returns {void}
+	 */
+	pollNewMessages()
+	{
+		// @ts-ignore
+		if (!this.list || !this.data)
+		{
+			return;
+		}
+
+		// @ts-ignore
+		this.list.fetchNew();
+	},
+
+	/**
+	 * Start polling after component is set up.
+	 *
+	 * @returns {void}
+	 */
+	after()
+	{
+		// @ts-ignore
+		this.pollTimer.start();
+	},
+
+	/**
+	 * Clean up timer on destroy.
+	 *
+	 * @returns {void}
+	 */
+	destroy()
+	{
+		// @ts-ignore
+		if (this.pollTimer)
+		{
+			// @ts-ignore
+			this.pollTimer.stop();
+		}
+	},
+
+	/**
+	 * Render the component.
+	 *
+	 * @returns {object}
+	 */
+	render()
+	{
+		return Div({
+			class: "flex flex-col grow overflow-y-auto p-4 z-0",
+			cache: 'listContainer'
+		}, [
+			Div({ class: "flex flex-auto flex-col w-full max-w-none lg:max-w-5xl mx-auto pt-24" }, [
+				UseParent((parent) => (
+					ScrollableList({
+						scrollDirection: 'up',
+						// @ts-ignore
+						data: parent.data,
+						cache: 'list',
+						key: 'id',
+						role: 'list',
+						class: 'flex flex-col gap-4',
+						limit: 25,
+						skeleton: {
+							number: 3,
+							row: ThreadSkeleton
+						},
+						divider: {
+							skipFirst: true,
+							itemProperty: 'createdAt',
+							layout: DateDivider,
+							customCompare: (lastValue, value) => DateTime.format('standard', lastValue) !== DateTime.format('standard', value)
+						},
+						rowItem: (message) => MessageBubble(message),
+						scrollContainer: parent.listContainer,
+						emptyState: () => EmptyState({
+							title: 'No messages yet',
+							description: 'Start the conversation by sending a message!'
+						})
 					})
-				})
-			))
-		])
-	]);
-};
+				))
+			])
+		]);
+	}
+});

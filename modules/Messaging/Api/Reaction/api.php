@@ -2,6 +2,7 @@
 namespace Modules\Messaging\Api\Reaction;
 
 use Modules\Messaging\Controllers\MessageReactionController;
+use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * MessageReaction Routes
@@ -9,4 +10,14 @@ use Modules\Messaging\Controllers\MessageReactionController;
  * This file contains the API routes for the MessageReaction module.
  */
 router()
-    ->resource('messaging/:messageId/reactions', MessageReactionController::class);
+	->middleware([
+		CrossSiteProtectionMiddleware::class
+	])
+    ->resource('messaging/messages/:messageId/reactions', MessageReactionController::class);
+
+// Toggle reaction (add or remove)
+router()
+	->middleware([
+		CrossSiteProtectionMiddleware::class
+	])
+    ->post('messaging/messages/:messageId/reactions/toggle', [MessageReactionController::class, 'toggle']);

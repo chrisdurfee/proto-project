@@ -2,6 +2,7 @@
 namespace Modules\Messaging\Models;
 
 use Proto\Models\Model;
+use Modules\User\Models\User;
 
 /**
  * MessageReaction
@@ -31,5 +32,25 @@ class MessageReaction extends Model
 		'userId',
 		'emoji'
 	];
+
+	/**
+	 * Get the message this reaction belongs to.
+	 *
+	 * @return mixed
+	 */
+	public function message()
+	{
+		return $this->belongsTo(Message::class, 'message_id');
+	}
+
+	/**
+	 * Get the user who made this reaction.
+	 *
+	 * @return mixed
+	 */
+	public function user()
+	{
+		return $this->belongsTo(User::class, 'user_id');
+	}
 
 }

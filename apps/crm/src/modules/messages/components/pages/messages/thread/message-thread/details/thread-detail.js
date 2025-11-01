@@ -105,7 +105,7 @@ export const ThreadDetail = Jot(
 				return Div({ class: "flex flex-col flex-auto max-h-screen relative" }, [
 					ConversationHeader(),
 					// @ts-ignore
-					ConversationMessages({
+					new ConversationMessages({
 						// @ts-ignore
 						conversationId: this.conversationId
 					}),
