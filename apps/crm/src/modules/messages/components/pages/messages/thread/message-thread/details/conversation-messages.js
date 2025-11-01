@@ -4,6 +4,7 @@ import { ScrollableList } from "@base-framework/organisms";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { MessageModel } from "@modules/messages/models/message-model.js";
 import { MessageBubble } from "./message-bubble.js";
+import { ThreadSkeleton } from "./skeletons.js";
 
 /**
  * This will create a date divider row.
@@ -49,6 +50,10 @@ export const ConversationMessages = (props) =>
 					role: 'list',
 					class: 'flex flex-col gap-4',
 					limit: 25,
+                    skeleton: {
+                        number: 3,
+                        row: ThreadSkeleton
+                    },
 					divider: {
 						skipFirst: true,
 						itemProperty: 'createdAt',
