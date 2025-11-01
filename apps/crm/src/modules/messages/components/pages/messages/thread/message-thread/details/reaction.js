@@ -55,7 +55,7 @@ export const EmojiPicker = (isSent, messageId, toggleReaction) =>
  */
 export const ReactionButton = (reaction, onClick) =>
 	ButtonAtom({
-		class: `text-xs px-2 py-1 rounded-full border transition-colors ${
+		class: `text-xs px-2 py-1 rounded-full transition-colors ${
 			reaction.hasCurrentUser
 				? 'bg-primary/20 border-primary text-primary'
 				: 'bg-muted border-border hover:bg-muted/80'
