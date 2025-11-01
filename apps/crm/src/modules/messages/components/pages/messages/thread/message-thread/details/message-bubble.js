@@ -217,7 +217,19 @@ export const MessageBubble = Jot(
 			emoji: emoji
 		});
 
-		reactionData.xhr.toggle({}, (response) => null);
+		reactionData.xhr.toggle({}, (response) =>
+		{
+			if (response && response.success)
+			{
+				// Call the callback to refresh the message in the list
+				// @ts-ignore
+				if (this.onReactionToggle)
+				{
+					// @ts-ignore
+					this.onReactionToggle(messageId);
+				}
+			}
+		});
 	},
 
 	/**

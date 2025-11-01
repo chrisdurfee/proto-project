@@ -77,6 +77,37 @@ export const ConversationMessages = Jot(
 	},
 
 	/**
+	 * Refresh a specific message after reaction toggle.
+	 *
+	 * @param {number} messageId
+	 * @returns {void}
+	 */
+	refreshMessage(messageId)
+	{
+		// @ts-ignore
+		if (!this.list || !this.data)
+		{
+			return;
+		}
+
+		// Fetch the updated message from the server
+		// @ts-ignore
+		const conversationId = this.conversationId;
+		const MessageModel = this.data.constructor;
+
+		// Create a temporary model to fetch just this message
+		const tempModel = new MessageModel({
+			// @ts-ignore
+			conversationId: conversationId
+		});
+
+		// Fetch all messages and find the updated one
+		// Note: This is a workaround since we don't have a single message endpoint
+		// @ts-ignore
+		this.list.fetchNew();
+	},
+
+	/**
 	 * Start polling after component is set up.
 	 *
 	 * @returns {void}
@@ -135,7 +166,8 @@ export const ConversationMessages = Jot(
 							customCompare: (lastValue, value) => DateTime.format('standard', lastValue) !== DateTime.format('standard', value)
 						},
 						rowItem: (message) => new MessageBubble({
-							message
+							message,
+							onReactionToggle: (messageId) => parent.refreshMessage(messageId)
 						}),
 						scrollContainer: parent.listContainer,
 						emptyState: () => EmptyState({

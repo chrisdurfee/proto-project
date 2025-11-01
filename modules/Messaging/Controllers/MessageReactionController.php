@@ -53,12 +53,19 @@ class MessageReactionController extends Controller
 
 		if ($existing)
 		{
-			// Remove reaction
-			MessageReaction::deleteById((object)['id' => $existing->id]);
+			// Remove reaction - delete by filters to ensure we delete the correct one
+			$deleted = MessageReaction::deleteBy([
+				'id' => $existing->id,
+				'messageId' => $messageId,
+				'userId' => $userId,
+				'emoji' => $data->emoji
+			]);
+
 			return $this->response([
-				'success' => true,
+				'success' => $deleted,
 				'action' => 'removed',
-				'message' => 'Reaction removed'
+				'message' => $deleted ? 'Reaction removed' : 'Failed to remove reaction',
+				'messageId' => (int)$messageId
 			]);
 		}
 
@@ -72,7 +79,8 @@ class MessageReactionController extends Controller
 		return $this->response([
 			'success' => $result !== false,
 			'action' => 'added',
-			'message' => $result ? 'Reaction added' : 'Failed to add reaction'
+			'message' => $result ? 'Reaction added' : 'Failed to add reaction',
+			'messageId' => (int)$messageId
 		]);
 	}
 
