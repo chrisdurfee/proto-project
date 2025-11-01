@@ -68,7 +68,7 @@ const AttachmentDisplay = (attachment) =>
 					alt: attachment.fileName,
 					class: "max-w-xs max-h-48 rounded object-cover"
 				})
-			  ])
+			])
 			: Div({ class: "flex items-center gap-2" }, [
 				Div({ class: "text-muted-foreground" }, fileIcon({ size: 20 })),
 				A({
@@ -79,7 +79,7 @@ const AttachmentDisplay = (attachment) =>
 				Span({ class: "text-xs text-muted-foreground" },
 					attachment.fileSize ? `${Math.round(attachment.fileSize / 1024)}KB` : ''
 				)
-			  ])
+			])
 	]);
 };
 
@@ -119,7 +119,7 @@ const ReactionDisplay = (msg, toggleReaction, showEmojiPicker, emojiPickerOpen) 
 	const hasReactions = reactionButtons.length > 0;
 
 	return Div({
-		class: `relative flex gap-1 mt-1 flex-wrap ${!hasReactions ? 'opacity-0 group-hover:opacity-100 transition-opacity' : ''}`
+		class: `relative flex gap-1 mt-1 flex-wrap`
 	}, [
 		...reactionButtons.map(reaction =>
 			ButtonAtom({
@@ -131,8 +131,10 @@ const ReactionDisplay = (msg, toggleReaction, showEmojiPicker, emojiPickerOpen) 
 				click: () => toggleReaction(msg.id, reaction.emoji)
 			}, `${reaction.emoji} ${reaction.count}`)
 		),
-		// Add reaction button with emoji picker
-		Div({ class: "relative" }, [
+		// Add reaction button with emoji picker (always visible on hover)
+		Div({
+			class: `relative ${!hasReactions ? 'opacity-0 group-hover:opacity-100 transition-opacity' : ''}`
+		}, [
 			Button({
 				variant: "ghost",
 				size: "sm",
@@ -150,7 +152,9 @@ const ReactionDisplay = (msg, toggleReaction, showEmojiPicker, emojiPickerOpen) 
 			})
 		])
 	]);
-};/**
+};
+
+/**
  * MessageBubble
  *
  * A single message bubble from thread.thread array.
@@ -229,7 +233,7 @@ export const MessageBubble = Jot(
 			Div({ class: "mb-1 flex items-center" }, [
 				isSent
 					? Span({ class: "text-xs text-muted-foreground mr-2 opacity-0 group-hover:opacity-100 transition-opacity" }, "You")
-					: Span({ class: "text-xs text-muted-foreground mr-2" }, msg.sender),
+					: Span({ class: "text-xs text-muted-foreground mr-2" }, msg.displayName || msg.sender || 'Unknown'),
 				Span({
 					class: "opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out text-xs text-muted-foreground ml-2 capitalize",
 				}, TimeFrame({ dateTime: msg.createdAt }))

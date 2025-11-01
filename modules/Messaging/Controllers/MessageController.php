@@ -43,15 +43,26 @@ class MessageController extends ResourceController
 
 		$data = $this->getRequestItem($request);
 		$conversationId = $request->params()->conversationId ?? null;
-		if (empty($conversationId) || empty($data->content))
+
+		// Check if we have either content or files
+		$hasFiles = $request->hasFiles();
+		$hasContent = !empty($data->content);
+
+		if (empty($conversationId) || (!$hasContent && !$hasFiles))
 		{
-			return $this->error('Conversation ID and content are required', 400);
+			return $this->error('Conversation ID and either content or attachments are required', 400);
 		}
 
 		// Set sender and defaults
 		$data->senderId = $userId;
 		$data->type = $data->type ?? 'text';
 		$data->conversationId = $conversationId;
+
+		// Allow empty content if files are present
+		if (!$hasContent && $hasFiles)
+		{
+			$data->content = '';
+		}
 
 		$result = $this->addItem($data);
 		if ($result->success === false)
@@ -60,7 +71,7 @@ class MessageController extends ResourceController
 		}
 
 		// Handle file attachments if present
-		if ($request->hasFiles())
+		if ($hasFiles)
 		{
 			$attachmentService = new MessageAttachmentService();
 			$attachmentService->handleAttachments($request, $result->id);
@@ -141,7 +152,7 @@ class MessageController extends ResourceController
 	{
 		return [
 			'conversationId' => 'int|required',
-			'content' => 'string|required',
+			'content' => 'string', // Optional - can be empty if attachments are present
 			'type' => 'string:20',
 			'fileUrl' => 'string:500',
 			'fileName' => 'string:255'

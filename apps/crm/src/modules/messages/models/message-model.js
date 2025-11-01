@@ -12,6 +12,44 @@ export const MessageModel = Model.extend({
 
 	xhr: {
 		/**
+		 * Add a new message with optional file attachments.
+		 *
+		 * @param {object} instanceParams - The instance parameters.
+		 * @param {function} callBack - The callback function.
+		 * @param {Array} files - Optional array of files to attach.
+		 * @returns {object}
+		 */
+		add(instanceParams, callBack, files)
+		{
+			const data = this.setupObjectData();
+
+			// If files are provided, use FormData
+			if (files && files.length > 0)
+			{
+				const formData = new FormData();
+
+				// Add all message data fields to FormData
+				for (const key in data)
+				{
+					if (data.hasOwnProperty(key))
+					{
+						formData.append(key, data[key]);
+					}
+				}
+
+				// Add all files with the key 'attachments[]'
+				files.forEach(file => {
+					formData.append('attachments[]', file);
+				});
+
+				return this._post('', formData, instanceParams, callBack);
+			}
+
+			// No files, send as regular JSON
+			return this._post('', data, instanceParams, callBack);
+		},
+
+		/**
 		 * Get messages for a conversation.
 		 *
 		 * @param {object} instanceParams - The instance parameters.

@@ -58,6 +58,24 @@ class Message extends Model
 				fields: ['displayName', 'firstName', 'lastName', 'email', 'image']
 			)
 			->on(['sender_id', 'id']);
+
+		// Include attachments
+		$builder
+			->many(
+				MessageAttachment::class,
+				fields: ['id', 'messageId', 'fileUrl', 'fileType', 'fileName', 'fileSize', 'createdAt']
+			)
+			->on(['id', 'message_id'])
+			->as('attachments');
+
+		// Include reactions with user info
+		$builder
+			->many(
+				MessageReaction::class,
+				fields: ['id', 'messageId', 'userId', 'emoji', 'createdAt']
+			)
+			->on(['id', 'message_id'])
+			->as('reactions');
 	}
 
 	/**
