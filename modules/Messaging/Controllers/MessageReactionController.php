@@ -36,7 +36,7 @@ class MessageReactionController extends Controller
 			return $this->error('Unauthorized', 401);
 		}
 
-		$messageId = $request->params()->messageId ?? null;
+		$messageId = (int)($request->params()->messageId ?? null);
 		$data = $this->getRequestItem($request);
 
 		if (!$messageId || !isset($data->emoji))
@@ -44,7 +44,7 @@ class MessageReactionController extends Controller
 			return $this->error('Message ID and emoji are required', 400);
 		}
 
-		// Check if reaction exists
+		// Check if reaction exists using camelCase field names (Proto auto-converts)
 		$existing = MessageReaction::getBy([
 			'messageId' => $messageId,
 			'userId' => $userId,
@@ -53,19 +53,15 @@ class MessageReactionController extends Controller
 
 		if ($existing)
 		{
-			// Remove reaction - delete by filters to ensure we delete the correct one
-			$deleted = MessageReaction::deleteBy([
-				'id' => $existing->id,
-				'messageId' => $messageId,
-				'userId' => $userId,
-				'emoji' => $data->emoji
-			]);
+			// Remove reaction - use controller's deleteItem method
+			$deleteResult = $this->deleteItem((object)['id' => $existing->id]);
 
 			return $this->response([
-				'success' => $deleted,
+				'success' => $deleteResult->success ?? false,
 				'action' => 'removed',
-				'message' => $deleted ? 'Reaction removed' : 'Failed to remove reaction',
-				'messageId' => (int)$messageId
+				'message' => ($deleteResult->success ?? false) ? 'Reaction removed' : 'Failed to remove reaction',
+				'messageId' => $messageId,
+				'reactionId' => $existing->id
 			]);
 		}
 
@@ -80,7 +76,8 @@ class MessageReactionController extends Controller
 			'success' => $result !== false,
 			'action' => 'added',
 			'message' => $result ? 'Reaction added' : 'Failed to add reaction',
-			'messageId' => (int)$messageId
+			'messageId' => $messageId,
+			'reactionId' => is_object($result) ? $result->id : null
 		]);
 	}
 
