@@ -12,6 +12,18 @@ import { Icons } from "@base-framework/ui/icons";
 const isOverLimit = (count, limit) => count > limit;
 
 /**
+ * This will filter newlines from the text.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+const filterNewlines = (text) =>
+{
+	const normalizedText = text.replace(/\n/g, ' ');
+    return normalizedText.trim();
+};
+
+/**
  * ThreadTextarea
  *
  * Handles the textarea logic for message composition:
@@ -48,6 +60,9 @@ export const ThreadTextarea = VeilJot(
 	 */
 	checkSubmit(e)
 	{
+		e.preventDefault();
+		e.stopPropagation();
+
 		// @ts-ignore
 		this.resizeTextarea();
 
@@ -58,28 +73,25 @@ export const ThreadTextarea = VeilJot(
 		}
 
 		// Allow Ctrl+Enter to submit
-		if (e.ctrlKey !== true)
+		if (e.ctrlKey === true || e.shiftKey === true)
 		{
-            // @ts-ignore
-            if (this.validate() === false)
-            {
-                return;
-            }
-
-            e.preventDefault();
-            e.stopPropagation();
-
-            // @ts-ignore
-            if (this.onSubmit)
-            {
-                // @ts-ignore
-                this.onSubmit(this.panel.value);
-            }
+			// @ts-ignore
+			this.resizeTextarea();
+			return;
 		}
 
 		// @ts-ignore
-        this.resizeTextarea();
-        return;
+		if (this.validate() === false)
+		{
+			return;
+		}
+
+		// @ts-ignore
+		if (this.onSubmit)
+		{
+			// @ts-ignore
+			this.onSubmit(this.panel.value);
+		}
 	},
 
     /**
@@ -128,8 +140,10 @@ export const ThreadTextarea = VeilJot(
 		const startHeight = 48;
 		let height = startHeight;
 
+		const text = this.panel.value;
+		const normalizedText = filterNewlines(text);
 		// @ts-ignore
-		if (this.panel.value !== '')
+		if (normalizedText !== '')
 		{
 			// @ts-ignore
 			const targetHeight = this.panel.scrollHeight;
@@ -183,8 +197,7 @@ export const ThreadTextarea = VeilJot(
 		{
 			const text = e.target.value;
             // replace newlines with spaces
-            let normalizedText = text.replace(/\n/g, ' ');
-            normalizedText = normalizedText.trim();
+            const normalizedText = filterNewlines(text);
 
 			// @ts-ignore
 			const state = this.state;

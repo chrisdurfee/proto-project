@@ -106,6 +106,7 @@ export const ThreadDetail = Jot(
 					ConversationHeader(),
 					// @ts-ignore
 					new ConversationMessages({
+						cache: 'conversation',
 						// @ts-ignore
 						conversationId: this.conversationId
 					}),
@@ -117,7 +118,7 @@ export const ThreadDetail = Jot(
 						submitCallBack: (parent) =>
 						{
 							const shouldScroll = true;
-							parent.list.fetchNew(shouldScroll);
+							parent.conversation.list.fetchNew(shouldScroll);
 						}
 					})
 				]);
