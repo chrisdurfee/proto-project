@@ -32,11 +32,13 @@ class Messages extends Migration
 			$table->text('content')->nullable();
 			$table->boolean('is_edited')->default(0);
 			$table->datetime('edited_at')->nullable();
+			$table->deletedAt();
 
 			// Indexes
 			$table->index('conversation')->fields('conversation_id', 'created_at');
 			$table->index('sender')->fields('sender_id', 'created_at');
 			$table->index('thread_parent')->fields('parent_id');
+			$table->index('deleted_at_idx')->fields('deleted_at');
 
 			// Foreign Keys
 			$table->foreign('conversation_id')
