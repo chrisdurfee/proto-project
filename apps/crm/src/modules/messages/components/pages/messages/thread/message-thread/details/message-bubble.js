@@ -94,7 +94,7 @@ export const MessageBubble = Jot(
 		const currentUserId = userId();
 
 		return Div({
-				class: `group flex flex-none flex-col relative ${isSent ? "items-end" : "items-start"}`,
+				class: `group flex flex-none flex-col ${isSent ? "items-end" : "items-start"}`,
 				// @ts-ignore
 				pointerenter: () => this.state.emojiPickerOpen = true,
 				// @ts-ignore

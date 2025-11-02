@@ -35,7 +35,7 @@ export const EmojiPicker = (isSent, messageId, toggleReaction) =>
 	const positionClass = !isSent ? "left-0" : "right-0";
 
 	return Div({
-		class: `absolute top-full ${positionClass} bg-popover bg-surface border rounded-lg shadow-lg p-2 flex gap-1 z-50`,
+		class: `absolute top-full ${positionClass} bg-popover bg-surface border rounded-lg shadow-lg p-2 flex gap-1 z-50 backface-hidden fadeIn`,
 		click: (e) => e.stopPropagation()
 	},
 		QUICK_EMOJIS.map(emoji =>

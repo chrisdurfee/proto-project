@@ -134,6 +134,13 @@ class ConversationController extends ResourceController
 			$filter->userId = $userId;
 		}
 
+		// Support "since" parameter for fetching newer conversations
+		$since = $request->getInt('since');
+		if ($since)
+		{
+			$filter->id = ['>', $since];
+		}
+
 		return $filter;
 	}
 

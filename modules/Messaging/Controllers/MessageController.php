@@ -126,7 +126,70 @@ class MessageController extends ResourceController
 			$filter->conversationId = $conversationId;
 		}
 
+		// Support "since" parameter for fetching newer messages
+		$since = $request->getInt('since');
+		if ($since)
+		{
+			$filter->id = ['>', $since];
+		}
+
 		return $filter;
+	}
+
+	/**
+	 * Modifies the modifiers array to add custom SQL conditions.
+	 *
+	 * @param array $modifiers
+	 * @param Request $request
+	 * @return array
+	 */
+	protected function modifyModifiers(array $modifiers, Request $request): array
+	{
+		// Filter out soft-deleted messages by default using the model's table alias
+		$modifiers[] = 'm.deleted_at IS NULL';
+		return $modifiers;
+	}
+
+	/**
+	 * Delete (soft delete) a message.
+	 *
+	 * @param Request $request
+	 * @return object
+	 */
+	public function delete(Request $request): object
+	{
+		$userId = session()->user->id ?? null;
+		if (!$userId)
+		{
+			return $this->error('Unauthorized', 401);
+		}
+
+		$messageId = (int)$this->getResourceId($request);
+		if (!$messageId)
+		{
+			return $this->error('Message ID is required', 400);
+		}
+
+		$message = Message::get($messageId);
+		if (!$message)
+		{
+			return $this->error('Message not found', 404);
+		}
+
+		// Only sender can delete their message
+		if ($message->senderId != $userId)
+		{
+			return $this->error('You can only delete your own messages', 403);
+		}
+
+		// Soft delete
+		$message->deletedAt = date('Y-m-d H:i:s');
+		$message->save();
+
+		return $this->response([
+			'success' => true,
+			'messageId' => $messageId
+		]);
 	}
 
 	/**

@@ -34,7 +34,8 @@ class Message extends Model
 		'type',
 		'content',
 		'isEdited',
-		'editedAt'
+		'editedAt',
+		'deletedAt'
 	];
 
 	/**

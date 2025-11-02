@@ -3,9 +3,9 @@ namespace Modules\Messaging\Services;
 
 use Common\Services\Service;
 use Modules\Messaging\Models\MessageAttachment;
-use Modules\Messaging\Models\Message;
 use Proto\Http\Router\Request;
 use Proto\Http\UploadFile;
+use Proto\Utils\Files\Vault;
 
 /**
  * MessageAttachmentService
@@ -132,13 +132,7 @@ class MessageAttachmentService extends Service
 		}
 
 		// Delete file from storage
-		$basePath = $_SERVER['DOCUMENT_ROOT'] ?? '';
-		$filePath = $basePath . "/files/messages/{$attachment->fileUrl}";
-		if (file_exists($filePath))
-		{
-			@unlink($filePath);
-		}
-
-		return MessageAttachment::deleteById((object)['id' => $attachmentId]);
+        Vault::disk('local', 'messages')->delete($attachment->fileUrl);
+		return $attachment->delete();
 	}
 }
