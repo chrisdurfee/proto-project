@@ -142,10 +142,9 @@ export const ConversationMessages = Jot(
 	render()
 	{
 		return Div({
-			class: "flex flex-col grow overflow-y-auto p-4 z-0",
-			cache: 'listContainer'
+			class: "flex flex-col grow p-4 z-0",
 		}, [
-			Div({ class: "flex flex-auto flex-col w-full max-w-none lg:max-w-5xl mx-auto pt-24" }, [
+			Div({ class: "flex flex-auto flex-col w-full max-w-none lg:max-w-5xl mx-auto pt-24 pb-24" }, [
 				UseParent((parent) => (
 					ScrollableList({
 						scrollDirection: 'up',
@@ -170,7 +169,7 @@ export const ConversationMessages = Jot(
 							message,
 							onReactionToggle: (messageId) => parent.refreshMessage(messageId)
 						}),
-						scrollContainer: parent.listContainer,
+						scrollContainer: parent.parent.panel,
 						emptyState: () => EmptyState({
 							title: 'No messages yet',
 							description: 'Start the conversation by sending a message!'

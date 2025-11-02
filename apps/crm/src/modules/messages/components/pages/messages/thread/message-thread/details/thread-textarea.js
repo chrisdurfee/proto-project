@@ -60,13 +60,6 @@ export const ThreadTextarea = VeilJot(
 		// Allow Ctrl+Enter to submit
 		if (e.ctrlKey !== true)
 		{
-			// @ts-ignore
-			this.resizeTextarea();
-			return;
-		}
-
-		if (e.ctrlKey === true)
-        {
             // @ts-ignore
             if (this.validate() === false)
             {
@@ -83,6 +76,10 @@ export const ThreadTextarea = VeilJot(
                 this.onSubmit(this.panel.value);
             }
 		}
+
+		// @ts-ignore
+        this.resizeTextarea();
+        return;
 	},
 
     /**
@@ -185,15 +182,19 @@ export const ThreadTextarea = VeilJot(
 		const updateCharCount = (e) =>
 		{
 			const text = e.target.value;
+            // replace newlines with spaces
+            let normalizedText = text.replace(/\n/g, ' ');
+            normalizedText = normalizedText.trim();
+
 			// @ts-ignore
 			const state = this.state;
-			state.charCount = text.length;
-			state.isOverLimit = (isOverLimit(text.length, charLimit));
-			state.empty = text.length === 0;
+			state.charCount = normalizedText.length;
+			state.isOverLimit = (isOverLimit(normalizedText.length, charLimit));
+			state.empty = normalizedText.length === 0;
 		};
 
 		return Textarea({
-			class: "w-full border-none bg-transparent resize-none focus:outline-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground",
+			class: "w-full border-none bg-transparent overflow-hidden resize-none focus:outline-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground",
 			// @ts-ignore
 			placeholder: this.placeholder,
 			input: updateCharCount,

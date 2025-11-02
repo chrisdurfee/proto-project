@@ -13,7 +13,7 @@ import { BackButton } from "@base-framework/ui/organisms";
  * @returns {object}
  */
 export const ConversationHeader = () =>
-	Div({ class: "flex items-center p-4 bg-background/80 backdrop-blur-md absolute w-full z-10" }, [
+	Div({ class: "flex items-center p-4 bg-background/80 backdrop-blur-md sticky top-0 w-full z-10" }, [
 		Div({ class: 'flex flex-auto items-center gap-3 lg:max-w-5xl m-auto' }, [
 			// Left side back button
 			Div({ class: 'flex lg:hidden' }, [

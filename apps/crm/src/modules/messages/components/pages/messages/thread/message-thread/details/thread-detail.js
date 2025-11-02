@@ -90,7 +90,7 @@ export const ThreadDetail = Jot(
 	 */
 	render()
 	{
-		return Div({ class: "flex flex-auto flex-col w-full bg-background" },
+		return Div({ class: "flex flex-auto flex-col w-full bg-background overflow-y-auto" },
 		[
 			OnState("loaded", (loaded, ele, parent) =>
 			{
