@@ -1,4 +1,4 @@
-import { Model } from "@base-framework/base";
+import { Encode, Model } from "@base-framework/base";
 
 /**
  * MessageModel
@@ -21,21 +21,13 @@ export const MessageModel = Model.extend({
 		 */
 		add(instanceParams, callBack, files)
 		{
-			const data = this.setupObjectData();
+			const data = this.model.get();
 
 			// If files are provided, use FormData
 			if (files && files.length > 0)
 			{
 				const formData = new FormData();
-
-				// Add all message data fields to FormData
-				for (const key in data)
-				{
-					if (data.hasOwnProperty(key))
-					{
-						formData.append(key, data[key]);
-					}
-				}
+				formData.append(this.objectType, Encode.prepareJsonUrl(data));
 
 				// Add all files with the key 'attachments[]'
 				files.forEach(file => {
