@@ -90,7 +90,7 @@ export const ThreadDetail = Jot(
 	 */
 	render()
 	{
-		return Div({ class: "flex flex-auto flex-col w-full bg-background overflow-y-auto" },
+		return Div({ class: "flex flex-auto flex-col w-full bg-background max-h-screen overflow-y-auto" },
 		[
 			OnState("loaded", (loaded, ele, parent) =>
 			{
@@ -102,7 +102,7 @@ export const ThreadDetail = Jot(
 					]);
 				}
 
-				return Div({ class: "flex flex-col flex-auto max-h-screen relative" }, [
+				return Div({ class: "flex flex-col flex-auto relative" }, [
 					ConversationHeader(),
 					// @ts-ignore
 					new ConversationMessages({
