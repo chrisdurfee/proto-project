@@ -49,7 +49,7 @@ class Message extends Model
 		$builder
 			->one(
 				Conversation::class,
-				fields: ['title', 'createdAt', 'updatedAt']
+				fields: ['title']
 			)
 			->on(['conversation_id', 'id']);
 
