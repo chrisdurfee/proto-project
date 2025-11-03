@@ -82,7 +82,7 @@ export const ConversationMessages = Jot(
 	 * @param {number} messageId
 	 * @returns {void}
 	 */
-	refreshMessage(messageId)
+	updateMessage(messageId)
 	{
 		// @ts-ignore
 		if (!this.list || !this.data)
@@ -91,21 +91,24 @@ export const ConversationMessages = Jot(
 		}
 
 		// Fetch the updated message from the server
-		// @ts-ignore
-		const conversationId = this.conversationId;
-		// @ts-ignore
-		const MessageModel = this.data.constructor;
-
-		// Create a temporary model to fetch just this message
-		const tempModel = new MessageModel({
+		const model = new MessageModel({
+			id: messageId,
 			// @ts-ignore
-			conversationId: conversationId
+			conversationId: this.conversationId
 		});
 
-		// Fetch all messages and find the updated one
-		// Note: This is a workaround since we don't have a single message endpoint
-		// @ts-ignore
-		this.list.fetchNew();
+		model.xhr.get({}, (response) =>
+		{
+			if (!response || response.success === false)
+			{
+				return;
+			}
+
+			// @ts-ignore
+			this.list.mingle([
+				response.row
+			])
+		});
 	},
 
 	/**
@@ -167,7 +170,7 @@ export const ConversationMessages = Jot(
 						},
 						rowItem: (message) => new MessageBubble({
 							message,
-							onReactionToggle: (messageId) => parent.refreshMessage(messageId)
+							onReactionToggle: (messageId) => parent.updateMessage(messageId)
 						}),
 						scrollContainer: parent.parent.panel,
 						emptyState: () => EmptyState({

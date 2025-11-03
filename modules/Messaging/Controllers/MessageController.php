@@ -130,7 +130,7 @@ class MessageController extends ResourceController
 		$since = $request->getInt('since');
 		if ($since)
 		{
-			$filter->id = ['>', $since];
+			$filter->{'m.id'} = ['>', $since];
 		}
 
 		return $filter;
