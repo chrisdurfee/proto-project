@@ -16,6 +16,7 @@ router()
 	->middleware(([
 		CrossSiteProtectionMiddleware::class
 	]))
+	->get('messaging/:conversationId/messages/sync', [MessageController::class, 'sync'])
 	->post('messaging/:conversationId/messages/mark-read', [MessageController::class, 'markAsRead'])
 	->resource('messaging/:conversationId/messages', MessageController::class);
 

@@ -11,6 +11,46 @@ export const MessageModel = Model.extend({
 	url: '/api/messaging/[[conversationId]]/messages',
 
 	xhr: {
+
+		/**
+		 * Set up an EventSource for real-time message updates.
+		 *
+		 * @param {string} params - The query parameters.
+		 * @param {function} callBack - The callback function for incoming messages.
+		 * @returns {EventSource}
+		 */
+		setupEventSource(url, params, callBack)
+		{
+			const fullUrl = this.getUrl(url);
+			const source = new EventSource(fullUrl + '?' + params);
+			source.onerror = (event) =>
+			{
+				source.close();
+			};
+
+			source.onmessage = (event) =>
+			{
+				callBack(event.data);
+			};
+			return source;
+		},
+
+		/**
+		 * Synchronize messages in real-time using EventSource.
+		 *
+		 * @param {object} instanceParams - The instance parameters.
+		 * @param {function} callBack - The callback function for incoming messages.
+		 * @returns {object}
+		 */
+		sync(instanceParams, callBack)
+		{
+			const data = this.model.get();
+            const params = '';
+			const url = '/sync';
+
+			return this.setupEventSource(url, params, callBack);
+		},
+
 		/**
 		 * Add a new message with optional file attachments.
 		 *

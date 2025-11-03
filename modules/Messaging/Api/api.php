@@ -12,9 +12,9 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * @package Modules\Messaging\Api
  */
 
-// Conversation routes
 router()
-    ->middleware(([
+	->middleware(([
 		CrossSiteProtectionMiddleware::class
 	]))
-    ->resource('messaging/:userId/conversations', ConversationController::class);
+	// Conversation routes
+	->resource('messaging/:userId/conversations', ConversationController::class);

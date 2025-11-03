@@ -257,4 +257,46 @@ class MessageController extends ResourceController
 			return null;
 		});
 	}
+
+	/**
+	 * Sync messages for a conversation since the last sync time.
+	 * Uses Server-Sent Events (SSE) to stream updates.
+	 *
+	 * @param Request $request
+	 * @return void
+	 */
+	public function sync(Request $request): void
+	{
+		$conversationId = (int)($request->params()->conversationId ?? null);
+		if (!$conversationId)
+		{
+			return;
+		}
+
+		// Check if user has access to this conversation
+		$userId = session()->user->id ?? null;
+		if (!$userId)
+		{
+			return;
+		}
+
+		$lastSync = null;
+		$INTERVAL_IN_SECONDS = 5; // Check every 5 seconds
+
+		serverEvent($INTERVAL_IN_SECONDS, function() use($conversationId, &$lastSync)
+		{
+			$response = Message::sync($conversationId, $lastSync);
+
+			/**
+			 * This will update the last sync for the next check.
+			 */
+			$lastSync = date('Y-m-d H:i:s');
+
+			/**
+			 * Only return data if there are changes.
+			 */
+			$hasChanges = !empty($response['new']) || !empty($response['updated']) || !empty($response['deleted']);
+			return $hasChanges ? $response : null;
+		});
+	}
 }
