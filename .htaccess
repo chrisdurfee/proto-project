@@ -9,9 +9,6 @@ RewriteEngine On
 # Disable directory listing
 Options -Indexes
 
-# Default character set
-AddDefaultCharset UTF-8
-
 # Security Headers
 <IfModule mod_headers.c>
     # Ensure persistent connection (optional)
