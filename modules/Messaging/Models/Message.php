@@ -195,7 +195,7 @@ class Message extends Model
 			->select(['m.*'])
 			->where(
 				['m.conversation_id', $conversationId],
-				['m.created_at', '>', $lastSync],
+				"m.created_at > '{$lastSync}'",
 				"m.deleted_at IS NULL"
 			)
 			->orderBy('m.created_at ASC')
@@ -208,8 +208,8 @@ class Message extends Model
 			->select(['m.*'])
 			->where(
 				['m.conversation_id', $conversationId],
-				['m.created_at', '<=', $lastSync],
-				['m.updated_at', '>', $lastSync],
+				"m.created_at <= '{$lastSync}'",
+				"m.updated_at > '{$lastSync}'",
 				"m.deleted_at IS NULL"
 			)
 			->fetch() ?? [];
@@ -221,7 +221,7 @@ class Message extends Model
 			->select(['m.id'])
 			->where(
 				['m.conversation_id', $conversationId],
-				['m.deleted_at', '>', $lastSync]
+				"m.deleted_at > '{$lastSync}'"
 			)
 			->fetch();
 
