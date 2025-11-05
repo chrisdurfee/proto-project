@@ -106,8 +106,13 @@ class MessageController extends ResourceController
 		$data->type = $data->type ?? 'text';
 		$data->conversationId = $conversationId;
 
+		// Decode URL-encoded content (happens with multipart/form-data)
+		if (!empty($data->content))
+		{
+			$data->content = urldecode($data->content);
+		}
 		// Allow empty content if files are present
-		if (empty($data->content) && $this->hasAttachments())
+		else if ($this->hasAttachments())
 		{
 			$data->content = '';
 		}
