@@ -19,6 +19,19 @@ const DateDivider = (date) => (
 );
 
 /**
+ * Divider configuration for ScrollableList to separate messages by date.
+ *
+ * @type {object}
+ */
+const Divider =
+{
+	skipFirst: true,
+	itemProperty: 'createdAt',
+	layout: DateDivider,
+	customCompare: (lastValue, value) => DateTime.format('standard', lastValue) !== DateTime.format('standard', value)
+};
+
+/**
  * ConversationMessages
  *
  * Renders the chat messages using ScrollableList with real-time SSE sync.
@@ -95,7 +108,6 @@ export const ConversationMessages = Jot(
 		{
 			// @ts-ignore
 			const isAtBottom = (typeof this.isAtBottom === 'function' && this.isAtBottom());
-			console.log(isAtBottom)
 			// @ts-ignore
 			this.list.mingle(data.merge);
 
@@ -192,17 +204,13 @@ export const ConversationMessages = Jot(
 							number: 3,
 							row: ThreadSkeleton
 						},
-						divider: {
-							skipFirst: true,
-							itemProperty: 'createdAt',
-							layout: DateDivider,
-							customCompare: (lastValue, value) => DateTime.format('standard', lastValue) !== DateTime.format('standard', value)
-						},
+						divider: Divider,
 						rowItem: (message) => new MessageBubble({
 							message,
 							onReactionToggle: (messageId) => parent.updateMessage(messageId)
 						}),
-						scrollContainer: parent.parent.panel,
+						// @ts-ignore
+						scrollContainer: this.scrollContainer,
 						emptyState: () => EmptyState({
 							title: 'No messages yet',
 							description: 'Start the conversation by sending a message!'

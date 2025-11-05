@@ -56,12 +56,6 @@ export const ThreadDetail = Jot(
 	isAtBottom()
 	{
 		const BOTTOM_GRACE = 60;
-		console.log('Checking if at bottom:',
-			// @ts-ignore
-			this.panel.scrollHeight, this.panel.scrollTop, this.panel.clientHeight,
-			// @ts-ignore
-			this.panel.scrollHeight - this.panel.scrollTop - this.panel.clientHeight
-		);
 		// @ts-ignore
 		return this.panel.scrollHeight - this.panel.scrollTop - this.panel.clientHeight <= BOTTOM_GRACE;
 	},
@@ -84,25 +78,12 @@ export const ThreadDetail = Jot(
 				const currentUserId = app.data.user.id;
 
 				// Find the other participant (not the current user)
-				const otherParticipant = conversation.participants?.find(p => p.userId !== currentUserId);
-
-				// Map participant data to expected format
-				const otherUser = otherParticipant ? {
-					id: otherParticipant.userId,
-					firstName: otherParticipant.firstName,
-					lastName: otherParticipant.lastName,
-					displayName: otherParticipant.displayName,
-					email: otherParticipant.email,
-					image: otherParticipant.image,
-					status: otherParticipant.status
-				} : null;
+				const otherUser = conversation.participants?.find(p => p.userId !== currentUserId);
 
 				// Set the conversation data with computed fields
 				// @ts-ignore
 				this.data.set({
-					conversation: {
-						...conversation
-					},
+					conversation,
 					otherUser
 				});
 			}
@@ -142,6 +123,8 @@ export const ThreadDetail = Jot(
 						isAtBottom: () => this.isAtBottom(),
 						// @ts-ignore
 						scrollToBottom: () => this.scrollToBottom(),
+						// @ts-ignore
+						scrollContainer: this.panel
 					}),
 					// @ts-ignore
 					new ThreadComposer({
