@@ -248,10 +248,10 @@ class MessageController extends ResourceController
 
 			if (!empty($messages))
 			{
-				return json_encode([
+				return [
 					'messages' => $messages,
 					'lastId' => end($messages)->id
-				]);
+				];
 			}
 
 			return null;
