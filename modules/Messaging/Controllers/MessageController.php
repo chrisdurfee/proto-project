@@ -41,12 +41,6 @@ class MessageController extends ResourceController
 	 */
 	public function add(Request $request): object
 	{
-		$userId = session()->user->id ?? null;
-		if (!$userId)
-		{
-			return $this->error('Unauthorized', 401);
-		}
-
 		$data = $this->getRequestItem($request);
 		$conversationId = (int)$request->params()->conversationId ?? null;
 
@@ -60,6 +54,7 @@ class MessageController extends ResourceController
 		}
 
 		// Set sender and defaults
+		$userId = session()->user->id ?? null;
 		$data->senderId = $userId;
 		$data->type = $data->type ?? 'text';
 		$data->conversationId = $conversationId;
@@ -164,36 +159,13 @@ class MessageController extends ResourceController
 	 */
 	public function delete(Request $request): object
 	{
-		$userId = session()->user->id ?? null;
-		if (!$userId)
-		{
-			return $this->error('Unauthorized', 401);
-		}
-
 		$messageId = (int)$this->getResourceId($request);
-		if (!$messageId)
-		{
-			return $this->error('Message ID is required', 400);
-		}
-
-		$message = Message::get($messageId);
-		if (!$message)
-		{
-			return $this->error('Message not found', 404);
-		}
-
-		// Only sender can delete their message
-		if ($message->senderId != $userId)
-		{
-			return $this->error('You can only delete your own messages', 403);
-		}
-
-		// Soft delete
-		$message->deletedAt = date('Y-m-d H:i:s');
-		$message->update();
+		$success = Message::remove((object)[
+			'id' => $messageId
+		]);
 
 		return $this->response([
-			'success' => true,
+			'success' => $success,
 			'messageId' => $messageId
 		]);
 	}
