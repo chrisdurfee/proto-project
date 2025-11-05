@@ -4,6 +4,7 @@ namespace Modules\Messaging\Controllers;
 use Proto\Controllers\ResourceController as Controller;
 use Proto\Http\Router\Request;
 use Modules\Messaging\Models\MessageReaction;
+use Modules\Messaging\Models\Message;
 
 /**
  * MessageReactionController
@@ -56,6 +57,12 @@ class MessageReactionController extends Controller
 			// Remove reaction - use controller's deleteItem method
 			$deleteResult = $this->deleteItem((object)['id' => $existing->id]);
 
+			// Update message's updatedAt timestamp
+			if ($deleteResult->success ?? false)
+			{
+				Message::touch($messageId);
+			}
+
 			return $this->response([
 				'success' => $deleteResult->success ?? false,
 				'action' => 'removed',
@@ -71,6 +78,12 @@ class MessageReactionController extends Controller
 			'userId' => $userId,
 			'emoji' => $data->emoji
 		]);
+
+		// Update message's updatedAt timestamp
+		if ($result !== false)
+		{
+			Message::touch($messageId);
+		}
 
 		return $this->response([
 			'success' => $result !== false,
