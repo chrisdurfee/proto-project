@@ -40,7 +40,18 @@ export default defineConfig({
 				target: apiTarget,
 				changeOrigin: true,
 				secure: false,
-				ws: true
+				ws: true,
+				bypass(req, res) {
+					const accept = req.headers.accept || '';
+					// Detect EventSource or Fetch('text/event-stream')
+					if (accept.includes('text/event-stream')) {
+						const target = `${apiTarget}${req.url}`;
+						console.log('[vite] redirecting SSE to', target);
+						res.writeHead(301, { Location: target });
+						res.end();
+						return false;
+					}
+				}
 			},
 			'/files': {
 				target: apiTarget,
