@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Messaging\Controllers;
 
+use Modules\Messaging\Auth\Policies\MessagePolicy;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;
 use Modules\Messaging\Models\Message;
@@ -15,6 +16,11 @@ use Modules\Messaging\Services\MessageAttachmentService;
  */
 class MessageController extends ResourceController
 {
+	/**
+	 * @var string|null $policy
+	 */
+	protected ?string $policy = MessagePolicy::class;
+
 	/**
 	 * Constructor
 	 *
@@ -184,7 +190,7 @@ class MessageController extends ResourceController
 
 		// Soft delete
 		$message->deletedAt = date('Y-m-d H:i:s');
-		$message->save();
+		$message->update();
 
 		return $this->response([
 			'success' => true,
