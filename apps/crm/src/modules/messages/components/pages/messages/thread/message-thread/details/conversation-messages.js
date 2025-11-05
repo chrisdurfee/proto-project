@@ -94,7 +94,7 @@ export const ConversationMessages = Jot(
 		if (data.new && data.new.length > 0)
 		{
 			// @ts-ignore
-			this.list.append(data.new);
+			this.list.mingle(data.new);
 		}
 
 		// Handle updated messages (e.g., reactions added/removed)

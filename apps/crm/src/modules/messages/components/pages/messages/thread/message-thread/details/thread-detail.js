@@ -117,8 +117,11 @@ export const ThreadDetail = Jot(
 						placeholder: "Type something...",
 						submitCallBack: (parent) =>
 						{
-							const shouldScroll = true;
-							parent.conversation.list.fetchNew(shouldScroll);
+							// scroll this.panel to bottom after new message
+							// @ts-ignore
+							this.panel.scrollTo({ top: this.panel.scrollHeight, behavior: 'smooth' });
+							// const shouldScroll = true;
+							// parent.conversation.list.fetchNew(shouldScroll);
 						}
 					})
 				]);
