@@ -1,6 +1,6 @@
 import { Div, Span, UseParent } from "@base-framework/atoms";
 import { DateTime, Jot } from "@base-framework/base";
-import { IntervalTimer, ScrollableList } from "@base-framework/organisms";
+import { ScrollableList } from "@base-framework/organisms";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { MessageModel } from "@modules/messages/models/message-model.js";
 import { MessageBubble } from "./message-bubble.js";
@@ -21,8 +21,8 @@ const DateDivider = (date) => (
 /**
  * ConversationMessages
  *
- * Renders the chat messages using ScrollableList with automatic data loading.
- * Includes polling for new messages every 10 seconds.
+ * Renders the chat messages using ScrollableList with real-time SSE sync.
+ * Uses Server-Sent Events to receive new, updated, and deleted messages.
  *
  * @param {object} props - The props object containing conversationId
  * @returns {object}
@@ -48,32 +48,71 @@ export const ConversationMessages = Jot(
 	},
 
 	/**
-	 * Initialize polling timer.
+	 * Initialize SSE connection for real-time updates.
 	 *
 	 * @returns {void}
 	 */
 	onCreated()
 	{
-		// Poll for new messages every 10 seconds
 		// @ts-ignore
-		this.pollTimer = new IntervalTimer(10000, () => this.pollNewMessages());
+		this.setupSync();
 	},
 
 	/**
-	 * Poll for new messages.
+	 * Set up Server-Sent Events for real-time message sync.
 	 *
 	 * @returns {void}
 	 */
-	pollNewMessages()
+	setupSync()
 	{
 		// @ts-ignore
-		if (!this.list || !this.data)
+		const conversationId = this.conversationId;
+		new MessageModel({ conversationId })
+			.xhr.sync({}, (data) =>
+			{
+				// @ts-ignore
+				this.handleSyncUpdate(data);
+			});
+	},
+
+	/**
+	 * Handle sync updates from the server.
+	 *
+	 * @param {object} data - The sync data containing new, updated, and deleted messages
+	 * @returns {void}
+	 */
+	handleSyncUpdate(data)
+	{
+		console.log('Received sync data:', data);
+		// @ts-ignore
+		if (!this.list)
 		{
 			return;
 		}
 
-		// @ts-ignore
-		this.list.fetchNew();
+		// Handle new messages
+		if (data.new && data.new.length > 0)
+		{
+			// @ts-ignore
+			this.list.append(data.new);
+		}
+
+		// Handle updated messages (e.g., reactions added/removed)
+		if (data.updated && data.updated.length > 0)
+		{
+			// @ts-ignore
+			this.list.mingle(data.updated);
+		}
+
+		// Handle deleted messages
+		if (data.deleted && data.deleted.length > 0)
+		{
+			data.deleted.forEach(messageId =>
+			{
+				// @ts-ignore
+				this.list.removeItem(messageId);
+			});
+		}
 	},
 
 	/**
@@ -91,49 +130,43 @@ export const ConversationMessages = Jot(
 		}
 
 		// Fetch the updated message from the server
-		const model = new MessageModel({
-			id: messageId,
-			// @ts-ignore
-			conversationId: this.conversationId
-		});
-
-		model.xhr.get({}, (response) =>
-		{
-			if (!response || response.success === false)
-			{
-				return;
-			}
-
-			// @ts-ignore
-			this.list.mingle([
-				response.row
-			])
-		});
-	},
-
-	/**
-	 * Start polling after component is set up.
-	 *
-	 * @returns {void}
-	 */
-	after()
-	{
 		// @ts-ignore
-		this.pollTimer.start();
+		new MessageModel({ id: messageId, conversationId: this.conversationId })
+			.xhr.get({}, (response) =>
+			{
+				if (!response || response.success === false)
+				{
+					return;
+				}
+
+				// @ts-ignore
+				this.list.mingle([
+					response.row
+				])
+			});
 	},
 
 	/**
-	 * Clean up timer on destroy.
+	 * Clean up SSE connection on destroy.
 	 *
 	 * @returns {void}
 	 */
 	destroy()
 	{
 		// @ts-ignore
-		if (this.pollTimer)
+		if (this.eventSource)
 		{
 			// @ts-ignore
-			this.pollTimer.stop();
+			this.eventSource.close();
+			// @ts-ignore
+			this.eventSource = null;
+		}
+
+		// @ts-ignore
+		if (this.reconnectTimeout)
+		{
+			// @ts-ignore
+			clearTimeout(this.reconnectTimeout);
 		}
 	},
 
