@@ -64,7 +64,9 @@ class Conversation extends Model
 					'lastName',
 					'email',
 					'image',
-					'status'
+					'status',
+					'email',
+					'mobile'
 				])
 				->on(['userId', 'id']);
 	}
