@@ -176,8 +176,7 @@ class Message extends Model
 			// First sync, return recent messages (limit to last 50)
 			$result['new'] = $model
 				->storage
-				->table()
-				->select(['m.*'])
+				->select()
 				->where(
 					['m.conversation_id', $conversationId],
 					"m.deleted_at IS NULL"
@@ -193,8 +192,7 @@ class Message extends Model
 		// Get newly created messages
 		$result['new'] = $model
 			->storage
-			->table()
-			->select(['m.*'])
+			->select()
 			->where(
 				['m.conversation_id', $conversationId],
 				"m.created_at > '{$lastSync}'",
@@ -206,8 +204,7 @@ class Message extends Model
 		// Get updated messages (updated after last sync, but created before)
 		$result['updated'] = $model
 			->storage
-			->table()
-			->select(['m.*'])
+			->select()
 			->where(
 				['m.conversation_id', $conversationId],
 				"m.created_at <= '{$lastSync}'",
@@ -219,8 +216,7 @@ class Message extends Model
 		// Get deleted messages (soft-deleted after last sync)
 		$deletedMessages = $model
 			->storage
-			->table()
-			->select(['m.id'])
+			->select()
 			->where(
 				['m.conversation_id', $conversationId],
 				"m.deleted_at > '{$lastSync}'"

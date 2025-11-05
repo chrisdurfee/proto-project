@@ -273,19 +273,11 @@ class MessageController extends ResourceController
 			return;
 		}
 
-		$lastSync = null;
-		$startTime = time();
-		$MAX_DURATION = 20;
+		$lastSync = date('Y-m-d H:i:s');
 		$INTERVAL_IN_SECONDS = 20;
 
-		serverEvent($INTERVAL_IN_SECONDS, function() use($conversationId, &$lastSync, $startTime, $MAX_DURATION)
+		serverEvent($INTERVAL_IN_SECONDS, function() use($conversationId, &$lastSync)
 		{
-			// Force reconnection after max duration
-			if ((time() - $startTime) > $MAX_DURATION)
-			{
-				return false;
-			}
-
 			$response = Message::sync($conversationId, $lastSync);
 
 			/**
@@ -297,7 +289,7 @@ class MessageController extends ResourceController
 			 * Only return data if there are changes.
 			 */
 			$hasChanges = !empty($response['new']) || !empty($response['updated']) || !empty($response['deleted']);
-			return $response;
+			return $hasChanges ? $response : null;
 		});
 	}
 }
