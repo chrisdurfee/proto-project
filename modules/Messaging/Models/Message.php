@@ -56,7 +56,7 @@ class Message extends Model
 		$builder
 			->one(
 				User::class,
-				fields: ['displayName', 'firstName', 'lastName', 'email', 'image']
+				fields: ['displayName', 'firstName', 'lastName', 'email', 'image', 'status']
 			)
 			->on(['sender_id', 'id']);
 
@@ -164,8 +164,7 @@ class Message extends Model
 	public static function sync(int $conversationId, ?string $lastSync = null): array
 	{
 		$result = [
-			'new' => [],
-			'updated' => [],
+			'merge' => [],
 			'deleted' => []
 		];
 
@@ -174,7 +173,7 @@ class Message extends Model
 		if (!$lastSync)
 		{
 			// First sync, return recent messages (limit to last 50)
-			$result['new'] = $model
+			$result['merge'] = $model
 				->storage
 				->select()
 				->where(
@@ -185,32 +184,23 @@ class Message extends Model
 				->limit(50)
 				->fetch() ?? [];
 
-			$result['new'] = $model->convertRows($result['new']);
+			$result['merge'] = $model->convertRows($result['merge']);
 			return $result;
 		}
 
-		// Get newly created messages
-		$result['new'] = $model
+		// Get newly created and updated messages
+		$result['merge'] = $model
 			->storage
 			->select()
 			->where(
 				['m.conversation_id', $conversationId],
-				"m.created_at > '{$lastSync}'",
 				"m.deleted_at IS NULL"
+			)
+			->orWhere(
+				"m.created_at > '{$lastSync}'",
+				"m.updated_at > '{$lastSync}'"
 			)
 			->orderBy('m.created_at ASC')
-			->fetch() ?? [];
-
-		// Get updated messages (updated after last sync, but created before)
-		$result['updated'] = $model
-			->storage
-			->select()
-			->where(
-				['m.conversation_id', $conversationId],
-				"m.created_at <= '{$lastSync}'",
-				"m.updated_at > '{$lastSync}'",
-				"m.deleted_at IS NULL"
-			)
 			->fetch() ?? [];
 
 		// Get deleted messages (soft-deleted after last sync)
@@ -224,8 +214,7 @@ class Message extends Model
 			->fetch();
 
 		$result['deleted'] = array_map(fn($msg) => $msg->id, $deletedMessages ?? []);
-		$result['new'] = $model->convertRows($result['new']);
-		$result['updated'] = $model->convertRows($result['updated']);
+		$result['merge'] = $model->convertRows($result['merge']);
 		$result['deleted'] = $model->convertRows($result['deleted']);
 
 		return $result;

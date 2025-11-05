@@ -65,7 +65,7 @@ export const ThreadDetail = Jot(
 					displayName: otherParticipant.displayName,
 					email: otherParticipant.email,
 					image: otherParticipant.image,
-					status: otherParticipant.userStatus
+					status: otherParticipant.status
 				} : null;
 
 				// Set the conversation data with computed fields

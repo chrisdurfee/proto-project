@@ -288,7 +288,7 @@ class MessageController extends ResourceController
 			/**
 			 * Only return data if there are changes.
 			 */
-			$hasChanges = !empty($response['new']) || !empty($response['updated']) || !empty($response['deleted']);
+			$hasChanges = !empty($response['merge']) || !empty($response['deleted']);
 			return $hasChanges ? $response : null;
 		});
 	}

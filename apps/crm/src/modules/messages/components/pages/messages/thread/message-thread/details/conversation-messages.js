@@ -90,18 +90,11 @@ export const ConversationMessages = Jot(
 			return;
 		}
 
-		// Handle new messages
-		if (data.new && data.new.length > 0)
+		// Handle new and updated messages
+		if (data.merge && data.merge.length > 0)
 		{
 			// @ts-ignore
-			this.list.mingle(data.new);
-		}
-
-		// Handle updated messages (e.g., reactions added/removed)
-		if (data.updated && data.updated.length > 0)
-		{
-			// @ts-ignore
-			this.list.mingle(data.updated);
+			this.list.mingle(data.merge);
 		}
 
 		// Handle deleted messages
@@ -160,13 +153,6 @@ export const ConversationMessages = Jot(
 			this.eventSource.close();
 			// @ts-ignore
 			this.eventSource = null;
-		}
-
-		// @ts-ignore
-		if (this.reconnectTimeout)
-		{
-			// @ts-ignore
-			clearTimeout(this.reconnectTimeout);
 		}
 	},
 

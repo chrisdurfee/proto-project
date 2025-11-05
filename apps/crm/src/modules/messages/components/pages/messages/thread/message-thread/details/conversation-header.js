@@ -1,7 +1,7 @@
 import { A, Div, Span } from "@base-framework/atoms";
 import { Button, Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { Avatar, StaticStatusIndicator } from "@base-framework/ui/molecules";
+import { Avatar, StatusIndicator } from "@base-framework/ui/molecules";
 import { BackButton } from "@base-framework/ui/organisms";
 
 /**
@@ -33,7 +33,7 @@ export const ConversationHeader = () =>
 						size: "md"
 					}),
 					Div({ class: "absolute bottom-0 right-0" }, [
-						StaticStatusIndicator('[[otherUser.status]]')
+						StatusIndicator({ propName: 'otherUser.status' })
 					])
 				]),
 
