@@ -28,8 +28,12 @@ export default defineConfig({
 						target: apiTarget,
 						changeOrigin: true,
 						secure: false,
-						selfHandleResponse: false,
-						onProxyRes(proxyRes) {
+						selfHandleResponse: true,
+						onProxyReq(proxyReq, req, res) {
+							proxyReq.setHeader('Accept', 'text/event-stream');
+						},
+						onProxyRes(proxyRes, req, res) {
+							res.writeHead(proxyRes.statusCode, proxyRes.headers);
 							proxyRes.pipe(res);
 						}
 					});
