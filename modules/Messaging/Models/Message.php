@@ -239,13 +239,9 @@ class Message extends Model
 	 */
 	public static function touch(int $messageId): bool
 	{
-		$message = static::get($messageId);
-		if (!$message)
-		{
-			return false;
-		}
-
-		$message->updatedAt = date('Y-m-d H:i:s');
-		return $message->save();
+		return static::edit((object)[
+			'id' => $messageId,
+			'updatedAt' => date('Y-m-d H:i:s')
+		]);
 	}
 }
