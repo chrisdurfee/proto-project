@@ -274,7 +274,7 @@ class MessageController extends ResourceController
 		}
 
 		$lastSync = date('Y-m-d H:i:s');
-		$INTERVAL_IN_SECONDS = 20;
+		$INTERVAL_IN_SECONDS = 5;
 
 		serverEvent($INTERVAL_IN_SECONDS, function() use($conversationId, &$lastSync)
 		{
