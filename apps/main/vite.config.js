@@ -1,5 +1,6 @@
 import tailwindcss from '@tailwindcss/vite';
 import fs from 'fs';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import path from 'path';
 import { defineConfig } from 'vite';
 import { generateUrls } from '../../infrastructure/config/domain.config.js';
@@ -13,7 +14,30 @@ const BASE_URL = (isDev ? '/' : '/main/');
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [
-		tailwindcss()
+		tailwindcss(),
+		{
+			name: 'sse-proxy',
+			configureServer(server) {
+				server.middlewares.use('/api', (req, res, next) => {
+					const accept = req.headers.accept || '';
+					if (!accept.includes('text/event-stream')) {
+						return next();
+					}
+
+					const proxy = createProxyMiddleware({
+						target: apiTarget,
+						changeOrigin: true,
+						secure: false,
+						selfHandleResponse: false,
+						onProxyRes(proxyRes) {
+							proxyRes.pipe(res);
+						}
+					});
+
+					proxy(req, res, next);
+				});
+			}
+		}
 	],
 	base: BASE_URL,
 	resolve: {
