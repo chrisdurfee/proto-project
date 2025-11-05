@@ -18,7 +18,7 @@ export const MessageHeader = (isSent, displayName, createdAt) =>
 				class: "text-xs text-muted-foreground mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
 			}, "You")
 			: Span({
-				class: "text-xs text-muted-foreground mr-2"
+				class: "text-xs text-muted-foreground mr-2 capitalize"
 			}, displayName || 'Unknown'),
 		Span({
 			class: "opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out text-xs text-muted-foreground ml-2 capitalize"
