@@ -15,6 +15,7 @@ export const MessageModel = Model.extend({
 		/**
 		 * Set up an EventSource for real-time message updates.
 		 *
+		 * @param {string} url - The URL path relative to the model's base URL.
 		 * @param {string} params - The query parameters.
 		 * @param {function} callBack - The callback function for incoming messages.
 		 * @returns {EventSource}
@@ -44,8 +45,7 @@ export const MessageModel = Model.extend({
 		 */
 		sync(instanceParams, callBack)
 		{
-			const data = this.model.get();
-            const params = '';
+			const params = '';
 			const url = '/sync';
 
 			return this.setupEventSource(url, params, callBack);
