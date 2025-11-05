@@ -44,26 +44,12 @@ class MessageController extends ResourceController
 		$data = $this->getRequestItem($request);
 		$conversationId = (int)$request->params()->conversationId ?? null;
 
-		// Check if we have either content or files
-		$hasFiles = !empty($_FILES['attachments']) && !empty($_FILES['attachments']['name']);
-		$hasContent = !empty($data->content);
-
-		if (empty($conversationId) || (!$hasContent && !$hasFiles))
+		if (!$this->validateMessageInput($conversationId, $data))
 		{
 			return $this->error('Conversation ID and either content or attachments are required', 400);
 		}
 
-		// Set sender and defaults
-		$userId = session()->user->id ?? null;
-		$data->senderId = $userId;
-		$data->type = $data->type ?? 'text';
-		$data->conversationId = $conversationId;
-
-		// Allow empty content if files are present
-		if (!$hasContent && $hasFiles)
-		{
-			$data->content = '';
-		}
+		$this->prepareMessageData($data, $conversationId);
 
 		$result = $this->addItem($data);
 		if ($result->success === false)
@@ -71,17 +57,78 @@ class MessageController extends ResourceController
 			return $result;
 		}
 
-		// Handle file attachments if present
-		if ($hasFiles)
-		{
-			$attachmentService = new MessageAttachmentService();
-			$attachmentService->handleAttachments($request, $result->id);
-		}
-
-		// Update conversation's last message
+		$this->processAttachments($request, $result->id);
 		$this->updateConversationLastMessage($conversationId, $result->id);
 
 		return $result;
+	}
+
+	/**
+	 * Validate that the message has required data.
+	 *
+	 * @param int|null $conversationId
+	 * @param object $data
+	 * @return bool
+	 */
+	protected function validateMessageInput(?int $conversationId, object $data): bool
+	{
+		if (empty($conversationId))
+		{
+			return false;
+		}
+
+		$hasFiles = $this->hasAttachments();
+		$hasContent = !empty($data->content);
+
+		return $hasContent || $hasFiles;
+	}
+
+	/**
+	 * Check if the request has file attachments.
+	 *
+	 * @return bool
+	 */
+	protected function hasAttachments(): bool
+	{
+		return !empty($_FILES['attachments']) && !empty($_FILES['attachments']['name']);
+	}
+
+	/**
+	 * Prepare message data for creation.
+	 *
+	 * @param object $data
+	 * @param int $conversationId
+	 * @return void
+	 */
+	protected function prepareMessageData(object $data, int $conversationId): void
+	{
+		$data->senderId = session()->user->id ?? null;
+		$data->type = $data->type ?? 'text';
+		$data->conversationId = $conversationId;
+
+		// Allow empty content if files are present
+		if (empty($data->content) && $this->hasAttachments())
+		{
+			$data->content = '';
+		}
+	}
+
+	/**
+	 * Process and attach files to the message.
+	 *
+	 * @param Request $request
+	 * @param int $messageId
+	 * @return void
+	 */
+	protected function processAttachments(Request $request, int $messageId): void
+	{
+		if (!$this->hasAttachments())
+		{
+			return;
+		}
+
+		$attachmentService = new MessageAttachmentService();
+		$attachmentService->handleAttachments($request, $messageId);
 	}
 
 	/**
