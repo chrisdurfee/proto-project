@@ -273,22 +273,23 @@ class MessageController extends ResourceController
 			return;
 		}
 
-		// Check if user has access to this conversation
-		$userId = session()->user->id ?? null;
-		if (!$userId)
-		{
-			return;
-		}
-
 		$lastSync = null;
-		$INTERVAL_IN_SECONDS = 5; // Check every 5 seconds
+		$startTime = time();
+		$MAX_DURATION = 20;
+		$INTERVAL_IN_SECONDS = 20;
 
-		serverEvent($INTERVAL_IN_SECONDS, function() use($conversationId, &$lastSync)
+		serverEvent($INTERVAL_IN_SECONDS, function() use($conversationId, &$lastSync, $startTime, $MAX_DURATION)
 		{
+			// Force reconnection after max duration
+			if ((time() - $startTime) > $MAX_DURATION)
+			{
+				return false;
+			}
+
 			$response = Message::sync($conversationId, $lastSync);
 
 			/**
-			 * This will update the last sync for the next check.
+			 * Update the last sync timestamp for the next check.
 			 */
 			$lastSync = date('Y-m-d H:i:s');
 
@@ -296,7 +297,7 @@ class MessageController extends ResourceController
 			 * Only return data if there are changes.
 			 */
 			$hasChanges = !empty($response['new']) || !empty($response['updated']) || !empty($response['deleted']);
-			return $hasChanges ? $response : null;
+			return $response;
 		});
 	}
 }
