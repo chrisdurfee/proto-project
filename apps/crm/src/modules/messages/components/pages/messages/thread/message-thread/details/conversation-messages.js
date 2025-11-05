@@ -94,7 +94,18 @@ export const ConversationMessages = Jot(
 		if (data.merge && data.merge.length > 0)
 		{
 			// @ts-ignore
+			const isAtBottom = (typeof this.isAtBottom === 'function' && this.isAtBottom());
+			console.log(isAtBottom)
+			// @ts-ignore
 			this.list.mingle(data.merge);
+
+			// If the panel was at the bottom, scroll to bottom after adding new messages
+			// @ts-ignore
+			if (isAtBottom && typeof this.scrollToBottom === 'function')
+			{
+				// @ts-ignore
+				this.scrollToBottom();
+			}
 		}
 
 		// Handle deleted messages

@@ -38,6 +38,35 @@ export const ThreadDetail = Jot(
 	},
 
 	/**
+	 * Scroll the message panel to the bottom.
+	 *
+	 * @returns {void}
+	 */
+	scrollToBottom()
+	{
+		// @ts-ignore
+		this.panel.scrollTo({ top: this.panel.scrollHeight, behavior: 'smooth' });
+	},
+
+	/**
+	 * Check if the message panel is scrolled to the bottom.
+	 *
+	 * @returns {boolean}
+	 */
+	isAtBottom()
+	{
+		const BOTTOM_GRACE = 60;
+		console.log('Checking if at bottom:',
+			// @ts-ignore
+			this.panel.scrollHeight, this.panel.scrollTop, this.panel.clientHeight,
+			// @ts-ignore
+			this.panel.scrollHeight - this.panel.scrollTop - this.panel.clientHeight
+		);
+		// @ts-ignore
+		return this.panel.scrollHeight - this.panel.scrollTop - this.panel.clientHeight <= BOTTOM_GRACE;
+	},
+
+	/**
 	 * Fetch messages after component is mounted.
 	 *
 	 * @return {void}
@@ -108,7 +137,11 @@ export const ThreadDetail = Jot(
 					new ConversationMessages({
 						cache: 'conversation',
 						// @ts-ignore
-						conversationId: this.conversationId
+						conversationId: this.conversationId,
+						// @ts-ignore
+						isAtBottom: () => this.isAtBottom(),
+						// @ts-ignore
+						scrollToBottom: () => this.scrollToBottom(),
 					}),
 					// @ts-ignore
 					new ThreadComposer({
@@ -119,7 +152,7 @@ export const ThreadDetail = Jot(
 						{
 							// scroll this.panel to bottom after new message
 							// @ts-ignore
-							this.panel.scrollTo({ top: this.panel.scrollHeight, behavior: 'smooth' });
+							this.scrollToBottom();
 							// const shouldScroll = true;
 							// parent.conversation.list.fetchNew(shouldScroll);
 						}
