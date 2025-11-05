@@ -96,7 +96,6 @@ export const ConversationMessages = Jot(
 	 */
 	handleSyncUpdate(data)
 	{
-		console.log('Received sync data:', data);
 		// @ts-ignore
 		if (!this.list)
 		{
