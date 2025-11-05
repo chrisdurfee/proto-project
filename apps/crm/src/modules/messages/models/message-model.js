@@ -31,7 +31,13 @@ export const MessageModel = Model.extend({
 
 			source.onmessage = (event) =>
 			{
-				callBack(event.data);
+				if (!event.data)
+				{
+					return;
+				}
+
+				const data = JSON.parse(event.data);
+				callBack(data);
 			};
 			return source;
 		},

@@ -185,6 +185,8 @@ class Message extends Model
 				->orderBy('m.created_at DESC')
 				->limit(50)
 				->fetch() ?? [];
+
+			$result['new'] = $model->convertRows($result['new']);
 			return $result;
 		}
 
@@ -226,6 +228,9 @@ class Message extends Model
 			->fetch();
 
 		$result['deleted'] = array_map(fn($msg) => $msg->id, $deletedMessages ?? []);
+		$result['new'] = $model->convertRows($result['new']);
+		$result['updated'] = $model->convertRows($result['updated']);
+		$result['deleted'] = $model->convertRows($result['deleted']);
 
 		return $result;
 	}
