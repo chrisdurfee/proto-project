@@ -144,7 +144,10 @@ class MessageController extends ResourceController
 	 */
 	public function markAsRead(Request $request): object
 	{
-		$conversationId = $request->getInt('conversationId');
+		$conversationId = (int)($request->params()->conversationId ?? null);
+		$data = $this->getRequestItem($request);
+		$messageId = isset($data->messageId) ? (int)$data->messageId : null;
+
 		$userId = session()->user->id ?? null;
 		if (!$userId)
 		{
@@ -156,7 +159,7 @@ class MessageController extends ResourceController
 			return $this->error('Conversation ID required', 400);
 		}
 
-		$result = Message::markAsRead($conversationId, $userId);
+		$result = Message::markAsRead($conversationId, $userId, $messageId);
 
 		return $this->response([
 			'success' => $result,

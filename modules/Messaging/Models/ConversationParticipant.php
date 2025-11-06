@@ -163,4 +163,31 @@ class ConversationParticipant extends Model
 			)
 			->fetch();
 	}
+
+	/**
+	 * Update the last read position for a participant.
+	 *
+	 * @param int $conversationId
+	 * @param int $userId
+	 * @param int $messageId
+	 * @return bool
+	 */
+	public static function updateLastRead(int $conversationId, int $userId, int $messageId): bool
+	{
+		$participant = static::getBy([
+			'conversationId' => $conversationId,
+			'userId' => $userId
+		]);
+
+		if (!$participant)
+		{
+			return false;
+		}
+
+		return static::edit((object)[
+			'id' => $participant->id,
+			'lastReadMessageId' => $messageId,
+			'lastReadAt' => date('Y-m-d H:i:s')
+		]);
+	}
 }
