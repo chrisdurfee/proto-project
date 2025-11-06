@@ -102,7 +102,7 @@ export const ThreadDetail = Jot(
 	{
 		return Div({ class: "flex flex-auto flex-col w-full bg-background max-h-screen overflow-y-auto" },
 		[
-			OnState("loaded", (loaded, ele, parent) =>
+			OnState("loaded", (loaded) =>
 			{
 				if (!loaded)
 				{
