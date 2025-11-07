@@ -1,10 +1,10 @@
 import { Div, OnState } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
+import { ThreadComposer } from "./composer/thread-composer.js";
 import { ConversationHeader } from "./conversation-header.js";
 import { ConversationMessages } from "./list/conversation-messages.js";
 import { HeaderSkeleton, ThreadSkeleton } from "./skeletons.js";
-import { ThreadComposer } from "./thread-composer.js";
 
 /**
  * ThreadDetail
