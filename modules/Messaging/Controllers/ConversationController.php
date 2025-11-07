@@ -313,7 +313,7 @@ class ConversationController extends ResourceController
 			$result = $this->getConversationsWithOtherParticipants(
 				$userId,
 				(object)[
-					'updated_at' => ['>', $lastSync]
+					'updated_at' => ['>=', $lastSync]
 				],
 				0,
 				50,

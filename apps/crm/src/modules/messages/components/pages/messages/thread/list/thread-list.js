@@ -26,7 +26,7 @@ export const ThreadList = ({ data }) =>
 				limit: 25,
 				rowItem: ThreadListItem,
 				scrollContainer: parent.listContainer,
-				emptyState: () => ListEmptyState({ filter: 'all' })
+				emptyState: () => ListEmptyState()
 			})
 		))
 	]));
