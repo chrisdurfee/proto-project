@@ -82,6 +82,22 @@ export const MessageBubble = Jot(
 	},
 
 	/**
+	 * Set up intersection observer when the element is created.
+	 *
+	 * @param {HTMLElement} element
+	 * @returns {void}
+	 */
+	startObserver(element)
+	{
+		// @ts-ignore
+		if (this.observer && element)
+		{
+			// @ts-ignore
+			this.observer.observe(element);
+		}
+	},
+
+	/**
 	 * Render the message bubble.
 	 *
 	 * @returns {object}
@@ -95,6 +111,9 @@ export const MessageBubble = Jot(
 
 		return Div({
 				class: `group flex flex-none flex-col ${isSent ? "items-end" : "items-start"}`,
+				'data-message-id': msg.id,
+				// @ts-ignore
+				onCreated: (element) => this.startObserver(element),
 				// @ts-ignore
 				pointerenter: () => this.state.emojiPickerOpen = true,
 				// @ts-ignore

@@ -48,7 +48,7 @@ class ConversationParticipant extends Model
 		$builder
 			->one(
 				User::class,
-				fields: ['id', 'displayName', 'firstName', 'lastName', 'email', 'image', ['status', 'userStatus']]
+				fields: ['displayName', 'firstName', 'lastName', 'email', 'image', ['status', 'userStatus']]
 			)
 			->on(['user_id', 'id']);
 
@@ -56,7 +56,7 @@ class ConversationParticipant extends Model
 		$builder
 			->one(
 				Conversation::class,
-				fields: ['id', 'title', 'createdAt', 'updatedAt', 'type', 'lastMessageAt', 'lastMessageId']
+				fields: ['title', 'type', 'lastMessageAt', 'lastMessageId']
 			)
 			->on(['conversation_id', 'id']);
 
@@ -64,7 +64,7 @@ class ConversationParticipant extends Model
 		$builder
 			->one(
 				Message::class,
-				fields: ['id', 'content', 'messageType', 'senderId', 'createdAt']
+				fields: ['content', 'type', 'parentId', 'senderId', 'isEdited', 'editedAt']
 			)
 			->on(['lastMessageId', 'id'])
 			->as('lastMessage');

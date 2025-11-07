@@ -69,6 +69,8 @@ export const ConversationMessages = Jot(
 	{
 		// @ts-ignore
 		this.setupSync();
+		// @ts-ignore
+		this.setupIntersectionObserver();
 	},
 
 	/**
@@ -162,7 +164,79 @@ export const ConversationMessages = Jot(
 	},
 
 	/**
-	 * Clean up SSE connection on destroy.
+	 * Set up Intersection Observer to mark messages as read when they come into view.
+	 *
+	 * @returns {void}
+	 */
+	setupIntersectionObserver()
+	{
+		const options = {
+			root: null, // viewport
+			rootMargin: '0px',
+			threshold: 0.5 // 50% visible
+		};
+
+		// @ts-ignore
+		this.observer = new IntersectionObserver((entries) =>
+		{
+			entries.forEach(entry =>
+			{
+				if (entry.isIntersecting)
+				{
+					// Message is in view
+					// @ts-ignore
+					const messageId = parseInt(entry.target.dataset.messageId);
+					if (messageId)
+					{
+						// @ts-ignore
+						this.markMessageAsRead(messageId);
+						// Stop observing this message once it's been marked as read
+						// @ts-ignore
+						this.observer.unobserve(entry.target);
+					}
+				}
+			});
+		}, options);
+	},
+
+	/**
+	 * Mark a message as read (debounced to avoid excessive API calls).
+	 *
+	 * @param {number} messageId
+	 * @returns {void}
+	 */
+	markMessageAsRead(messageId)
+	{
+		// Track the highest message ID seen
+		// @ts-ignore
+		if (!this.lastReadMessageId || messageId > this.lastReadMessageId)
+		{
+			// @ts-ignore
+			this.lastReadMessageId = messageId;
+
+			// Debounce the API call
+			// @ts-ignore
+			clearTimeout(this.readTimeout);
+			// @ts-ignore
+			this.readTimeout = setTimeout(() =>
+			{
+				// @ts-ignore
+				const conversationId = this.conversationId;
+				new MessageModel({ conversationId })
+					// @ts-ignore
+					.xhr.markAsRead({ messageId: this.lastReadMessageId }, (response) =>
+					{
+						if (response && response.success)
+						{
+							console.log('Messages marked as read up to:', messageId);
+						}
+					});
+			}, 1000); // Wait 1 second after last visible message
+		}
+	},
+
+	/**
+	 * Clean up SSE connection and intersection observer on destroy.
 	 *
 	 * @returns {void}
 	 */
@@ -176,6 +250,18 @@ export const ConversationMessages = Jot(
 			// @ts-ignore
 			this.eventSource = null;
 		}
+
+		// @ts-ignore
+		if (this.observer)
+		{
+			// @ts-ignore
+			this.observer.disconnect();
+			// @ts-ignore
+			this.observer = null;
+		}
+
+		// @ts-ignore
+		clearTimeout(this.readTimeout);
 	},
 
 	/**
@@ -206,7 +292,8 @@ export const ConversationMessages = Jot(
 						divider: Divider,
 						rowItem: (message) => new MessageBubble({
 							message,
-							onReactionToggle: (messageId) => parent.updateMessage(messageId)
+							onReactionToggle: (messageId) => parent.updateMessage(messageId),
+							observer: parent.observer
 						}),
 						// @ts-ignore
 						scrollContainer: this.scrollContainer,

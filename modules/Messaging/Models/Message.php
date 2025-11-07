@@ -261,7 +261,6 @@ class Message extends Model
 			$messageId = $latestMessage->id;
 		}
 
-		// Update the participant's last read position
 		return ConversationParticipant::updateLastRead($conversationId, $userId, $messageId);
 	}
 

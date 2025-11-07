@@ -119,18 +119,23 @@ export const MessageModel = Model.extend({
 		},
 
 		/**
-		 * Mark messages as read.
+		 * Mark messages as read up to a specific message ID.
 		 *
-		 * @param {object} instanceParams - The instance parameters.
+		 * @param {object} instanceParams - The instance parameters including optional messageId.
 		 * @param {function} callBack - The callback function.
 		 * @returns {object}
 		 */
 		markAsRead(instanceParams, callBack)
 		{
-			const conversationId = this.model.get('conversationId');
-			const params = `conversationId=${conversationId}`;
+			const data = {};
 
-			return this._post('/mark-read', params, instanceParams, callBack);
+			// If a specific message ID is provided, include it
+			if (instanceParams?.messageId)
+			{
+				data.messageId = instanceParams.messageId;
+			}
+
+			return this._post('/mark-read', data, instanceParams, callBack);
 		}
 	}
 });

@@ -145,20 +145,14 @@ class MessageController extends ResourceController
 	public function markAsRead(Request $request): object
 	{
 		$conversationId = (int)($request->params()->conversationId ?? null);
-		$data = $this->getRequestItem($request);
-		$messageId = isset($data->messageId) ? (int)$data->messageId : null;
-
-		$userId = session()->user->id ?? null;
-		if (!$userId)
-		{
-			return $this->error('Unauthorized', 401);
-		}
-
 		if (!$conversationId)
 		{
 			return $this->error('Conversation ID required', 400);
 		}
 
+		$data = $this->getRequestItem($request);
+		$userId = session()->user->id ?? null;
+		$messageId = isset($data->messageId) ? (int)$data->messageId : null;
 		$result = Message::markAsRead($conversationId, $userId, $messageId);
 
 		return $this->response([
