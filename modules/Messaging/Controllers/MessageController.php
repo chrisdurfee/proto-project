@@ -192,49 +192,35 @@ class MessageController extends ResourceController
 		}
 
 		$userId = session()->user->id ?? null;
-		if (!$userId)
-		{
-			return $this->error('Unauthorized', 401);
-		}
-
-		// Get the participant record (use direct query to avoid ambiguous columns from joins)
 		$participant = ConversationParticipant::getBy([
 			'cp.conversation_id' => $conversationId,
 			'cp.user_id' => $userId
 		]);
 
+		$table = (new Message())->storage->table();
+		$sql = $table->select([['COUNT(*)'], 'count']);
 		if (!$participant || !$participant->lastReadMessageId)
 		{
-			// If no last read message, all messages are unread
-			$model = new Message();
-			$count = $model->storage->table()
-				->select('COUNT(*) as count')
+			$sql
 				->where(
 					['m.conversation_id', $conversationId],
 					'm.deleted_at IS NULL'
-				)
-				->fetch()[0] ?? null;
-
-			$unreadCount = (int)($count->count ?? 0);
+				);
 		}
 		else
 		{
-			// Count messages with ID greater than last read
-			$model = new Message();
-			$count = $model->storage->table()
-				->select('COUNT(*) as count')
+			$sql
 				->where(
 					['m.conversation_id', $conversationId],
 					['m.id', '>', $participant->lastReadMessageId],
 					'm.deleted_at IS NULL'
-				)
-				->fetch()[0] ?? null;
-
-			$unreadCount = (int)($count->count ?? 0);
+				);
 		}
 
+		$count = $sql->first();
+
 		return $this->response([
-			'count' => $unreadCount
+			'count' => $count->count ?? 0
 		]);
 	}
 
