@@ -137,7 +137,7 @@ class MessageController extends ResourceController
 	}
 
 	/**
-	 * Mark messages as read.
+	 * Mark messages as read up to a specific message ID.
 	 *
 	 * @param Request $request
 	 * @return object
@@ -150,14 +150,91 @@ class MessageController extends ResourceController
 			return $this->error('Conversation ID required', 400);
 		}
 
-		$data = $this->getRequestItem($request);
 		$userId = session()->user->id ?? null;
+		$data = $this->getRequestItem($request);
 		$messageId = isset($data->messageId) ? (int)$data->messageId : null;
-		$result = Message::markAsRead($conversationId, $userId, $messageId);
+		if ($messageId === null)
+		{
+			$latestMessage = Message::find()
+				->where(['m.conversation_id', $conversationId])
+				->orderBy('m.id DESC')
+				->first();
+
+			if (!$latestMessage)
+			{
+				return $this->error('No messages found in conversation', 404);
+			}
+
+			$messageId = $latestMessage->id;
+		}
+
+		// Update the participant's last read position
+		$result = ConversationParticipant::updateLastRead($conversationId, $userId, $messageId);
 
 		return $this->response([
 			'success' => $result,
 			'message' => $result ? 'Messages marked as read' : 'Failed to mark messages as read'
+		]);
+	}
+
+	/**
+	 * Get the count of unread messages for a conversation.
+	 *
+	 * @param Request $request
+	 * @return object
+	 */
+	public function getUnreadCount(Request $request): object
+	{
+		$conversationId = (int)($request->params()->conversationId ?? null);
+		if (!$conversationId)
+		{
+			return $this->error('Conversation ID required', 400);
+		}
+
+		$userId = session()->user->id ?? null;
+		if (!$userId)
+		{
+			return $this->error('Unauthorized', 401);
+		}
+
+		// Get the participant record
+		$participant = ConversationParticipant::getBy([
+			'conversationId' => $conversationId,
+			'userId' => $userId
+		]);
+
+		if (!$participant || !$participant->lastReadMessageId)
+		{
+			// If no last read message, all messages are unread
+			$model = new Message();
+			$count = $model->storage->table()
+				->select('COUNT(*) as count')
+				->where(
+					['m.conversation_id', $conversationId],
+					'm.deleted_at IS NULL'
+				)
+				->fetch()[0] ?? null;
+
+			$unreadCount = (int)($count->count ?? 0);
+		}
+		else
+		{
+			// Count messages with ID greater than last read
+			$model = new Message();
+			$count = $model->storage->table()
+				->select('COUNT(*) as count')
+				->where(
+					['m.conversation_id', $conversationId],
+					['m.id', '>', $participant->lastReadMessageId],
+					'm.deleted_at IS NULL'
+				)
+				->fetch()[0] ?? null;
+
+			$unreadCount = (int)($count->count ?? 0);
+		}
+
+		return $this->response([
+			'count' => $unreadCount
 		]);
 	}
 
