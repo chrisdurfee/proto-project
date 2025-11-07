@@ -159,4 +159,38 @@ class MessagePolicy extends Policy
 
 		return $this->isParticipant($conversationId);
 	}
+
+	/**
+	 * Determines if the user can mark messages as read.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function markAsRead(Request $request): bool
+	{
+		$conversationId = (int)($request->params()->conversationId ?? null);
+		if (!$conversationId)
+		{
+			return false;
+		}
+
+		return $this->isParticipant($conversationId);
+	}
+
+	/**
+	 * Determines if the user can get the unread count for a conversation.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function getUnreadCount(Request $request): bool
+	{
+		$conversationId = (int)($request->params()->conversationId ?? null);
+		if (!$conversationId)
+		{
+			return false;
+		}
+
+		return $this->isParticipant($conversationId);
+	}
 }
