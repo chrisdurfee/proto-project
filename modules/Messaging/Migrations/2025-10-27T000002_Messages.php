@@ -38,7 +38,8 @@ class Messages extends Migration
 			$table->index('conversation')->fields('conversation_id', 'created_at');
 			$table->index('sender')->fields('sender_id', 'created_at');
 			$table->index('thread_parent')->fields('parent_id');
-			$table->index('deleted_at_idx')->fields('deleted_at');
+			$table->index('deleted_at_idx')->fields('deleted_at', 'conversation_id');
+			$table->index('conversation_id')->fields('conversation_id', 'created_at', 'updated_at', 'deleted_at');
 
 			// Foreign Keys
 			$table->foreign('conversation_id')

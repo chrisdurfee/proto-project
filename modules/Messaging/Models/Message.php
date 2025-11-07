@@ -168,54 +168,35 @@ class Message extends Model
 			'deleted' => []
 		];
 
-		$model = new static();
-
-		if (!$lastSync)
-		{
-			// First sync, return recent messages (limit to last 50)
-			$result['merge'] = $model
-				->storage
-				->select()
-				->where(
-					['m.conversation_id', $conversationId],
-					"m.deleted_at IS NULL"
-				)
-				->orderBy('m.created_at DESC')
-				->limit(50)
-				->fetch() ?? [];
-
-			$result['merge'] = $model->convertRows($result['merge']);
-			return $result;
-		}
-
 		// Get newly created and updated messages
-		$result['merge'] = $model
-			->storage
-			->select()
-			->where(
-				['m.conversation_id', $conversationId],
-				"m.deleted_at IS NULL"
-			)
-			->orWhere(
+		$sql = static::where([
+			['m.conversation_id', $conversationId],
+			"m.deleted_at IS NULL"
+		]);
+
+		if (!empty($lastSync))
+		{
+			$sql->orWhere(
 				"m.created_at > '{$lastSync}'",
 				"m.updated_at > '{$lastSync}'"
-			)
-			->orderBy('m.created_at ASC')
-			->fetch() ?? [];
+			);
+		}
+
+		$result['merge'] = $sql->fetch() ?? [];
 
 		// Get deleted messages (soft-deleted after last sync)
+		$model = new static();
 		$deletedMessages = $model
 			->storage
-			->select()
+			->select(['m.id'])
 			->where(
 				['m.conversation_id', $conversationId],
 				"m.deleted_at > '{$lastSync}'"
 			)
 			->fetch();
 
-		$result['deleted'] = array_map(fn($msg) => $msg->id, $deletedMessages ?? []);
 		$result['merge'] = $model->convertRows($result['merge']);
-		$result['deleted'] = $model->convertRows($result['deleted']);
+		$result['deleted'] = $model->convertRows($deletedMessages);
 
 		return $result;
 	}
