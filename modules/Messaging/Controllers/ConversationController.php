@@ -141,13 +141,6 @@ class ConversationController extends ResourceController
 			$filter->{'m.id'} = ['>', $since];
 		}
 
-		// Support "view" parameter for filtering conversations
-		$view = $filter->view ?? null;
-		if ($view)
-		{
-			unset($filter->view);
-		}
-
 		return $filter;
 	}
 
@@ -162,8 +155,16 @@ class ConversationController extends ResourceController
 		$inputs = $this->getAllInputs($request);
 		if (isset($inputs->filter->userId))
 		{
-			$userId = (int) $inputs->filter->userId;
-			unset($inputs->filter->userId);
+			$filter = $inputs->filter;
+			$userId = (int) $filter->userId;
+			unset($filter->userId);
+
+			$inputs->modifiers['view'] = 'all';
+			if (!empty($filter->view))
+			{
+				$inputs->modifiers['view'] = $filter->view;
+				unset($filter->view);
+			}
 
 			// Get conversations with other participant details
 			$result = $this->getConversationsWithOtherParticipants(
@@ -219,6 +220,24 @@ class ConversationController extends ResourceController
 			}
 		}
 
+		// Add view filter for unread messages
+		$viewSql = '';
+		$view = $modifiers['view'] ?? 'all';
+		if ($view === 'unread')
+		{
+			$viewSql = "
+				AND EXISTS (
+					SELECT 1
+					FROM messages m3
+					WHERE m3.conversation_id = c.id
+					  AND m3.sender_id != ?
+					  AND (m3.created_at > COALESCE(cp.last_read_at, '1970-01-01') OR cp.last_read_at IS NULL)
+					LIMIT 1
+				)
+			";
+			$params[] = $userId; // for the EXISTS subquery
+		}
+
 		$sql = "
 			SELECT
 				cp.id,
@@ -240,6 +259,7 @@ class ConversationController extends ResourceController
 				u.status AS userStatus,
 				m.id AS lastMessageId,
 				m.content AS lastMessageContent,
+				m.type AS lastMessageType,
 				m.sender_id AS lastMessageSenderId,
 				(SELECT COUNT(*)
 				 FROM messages m2
@@ -256,7 +276,8 @@ class ConversationController extends ResourceController
 			  AND cp.deleted_at IS NULL
 			  AND (cp2.deleted_at IS NULL OR cp2.id IS NULL)
 			  {$filterSql}
-			ORDER BY c.last_message_at DESC
+			  {$viewSql}
+			ORDER BY c.last_message_at DESC, c.id DESC
 			LIMIT {$limit}
 			OFFSET {$offset}
 		";
@@ -267,5 +288,52 @@ class ConversationController extends ResourceController
 			'rows' => $rows ?? [],
 			'count' => count($rows ?? [])
 		];
+	}
+
+	/**
+	 * Stream conversation updates via Server-Sent Events.
+	 *
+	 * @param Request $request
+	 * @return void
+	 */
+	public function sync(Request $request): void
+	{
+		$userId = (int)($request->params()->userId ?? null);
+		if (!$userId)
+		{
+			return;
+		}
+
+		$lastSync = date('Y-m-d H:i:s');
+		$INTERVAL_IN_SECONDS = 5;
+
+		serverEvent($INTERVAL_IN_SECONDS, function() use ($userId, $lastSync)
+		{
+			// Get updated conversations
+			$result = $this->getConversationsWithOtherParticipants(
+				$userId,
+				(object)[
+					'updated_at' => ['>', $lastSync]
+				],
+				0,
+				50,
+				null
+			);
+
+			/**
+			 * Update the last sync timestamp for the next check.
+			 */
+			$lastSync = date('Y-m-d H:i:s');
+
+			if (!empty($result->rows))
+			{
+				return [
+					'conversations' => $result->rows,
+					'timestamp' => time()
+				];
+			}
+
+			return null;
+		});
 	}
 }

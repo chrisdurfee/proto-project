@@ -42,8 +42,57 @@ export const MessagesPage = () =>
 	 */
 	const Props =
 	{
-		title: 'Messages',
-		data
+		data,
+
+		/**
+		 * Set up the SSE connection for conversation updates.
+		 *
+		 * @returns {void}
+		 */
+		setupSync()
+		{
+			// @ts-ignore
+			this.eventSource = this.data.xhr.sync({}, (response) =>
+			{
+				if (response && response.conversations)
+				{
+					// @ts-ignore
+					if (this.list)
+					{
+						// Update or add conversations
+						// @ts-ignore
+						this.list.mingle(response.conversations);
+					}
+				}
+			});
+		},
+
+		/**
+		 * Clean up the SSE connection on destroy.
+		 *
+		 * @returns {void}
+		 */
+		afterSetup()
+		{
+			this.setupSync();
+		},
+
+		/**
+		 * Clean up the SSE connection.
+		 *
+		 * @returns {void}
+		 */
+		beforeDestroy()
+		{
+			// @ts-ignore
+			if (this.eventSource)
+			{
+				// @ts-ignore
+				this.eventSource.close();
+				// @ts-ignore
+				this.eventSource = null;
+			}
+		}
 	};
 
 	return new BlankPage(Props, [

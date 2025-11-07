@@ -133,11 +133,25 @@ export const ThreadDetail = Jot(
 						placeholder: "Type something...",
 						submitCallBack: (parent) =>
 						{
-							// scroll this.panel to bottom after new message
+							// Scroll to bottom after new message
 							// @ts-ignore
 							this.scrollToBottom();
-							// const shouldScroll = true;
-							// parent.conversation.list.fetchNew(shouldScroll);
+
+							// Update the conversation list to show the new message
+							// @ts-ignore
+							if (this.mingle)
+							{
+								// Fetch the updated conversation to refresh the list
+								// @ts-ignore
+								this.data.xhr.get({}, (response) =>
+								{
+									if (response && response.row)
+									{
+										// @ts-ignore
+										this.mingle(response.row);
+									}
+								});
+							}
 						}
 					})
 				]);
