@@ -187,7 +187,6 @@ class Message extends Model
 		// Get deleted messages (soft-deleted after last sync)
 		$model = new static();
 		$deletedMessages = $model
-			->storage
 			->select(['m.id'])
 			->where(
 				['m.conversation_id', $conversationId],
