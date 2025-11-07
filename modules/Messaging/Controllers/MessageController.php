@@ -291,11 +291,26 @@ class MessageController extends ResourceController
 	 */
 	protected function updateConversationLastMessage(int $conversationId, int $messageId): void
 	{
-		Conversation::edit((object)[
-			'id' => $conversationId,
-			'lastMessageId' => $messageId,
-			'lastMessageAt' => date('Y-m-d H:i:s')
-		]);
+		// Get the message to extract content and type
+		$message = Message::get($messageId);
+		if ($message)
+		{
+			Conversation::updateLastMessage(
+				$conversationId,
+				$messageId,
+				$message->content,
+				$message->type ?? 'text'
+			);
+		}
+		else
+		{
+			// Fallback to just updating the ID and timestamp
+			Conversation::edit((object)[
+				'id' => $conversationId,
+				'lastMessageId' => $messageId,
+				'lastMessageAt' => date('Y-m-d H:i:s')
+			]);
+		}
 	}
 
 	/**

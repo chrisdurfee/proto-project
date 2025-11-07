@@ -31,6 +31,8 @@ class Conversations extends Migration
 			$table->int('created_by', 30);
 			$table->datetime('last_message_at')->nullable();
 			$table->int('last_message_id', 30)->nullable();
+			$table->text('last_message_content')->nullable();
+			$table->enum('last_message_type', 'text', 'image', 'video', 'file')->default("'text'");
 
 			// Indexes
 			$table->index('by_type')->fields('type', 'created_at');
