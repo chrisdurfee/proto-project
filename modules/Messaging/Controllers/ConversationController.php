@@ -138,7 +138,8 @@ class ConversationController extends ResourceController
 		$since = $request->getInt('since');
 		if ($since)
 		{
-			$filter->{'m.id'} = ['>', $since];
+			// Filter by conversations updated since last sync
+			$filter->updatedAt = ['>', date('Y-m-d H:i:s', $since)];
 		}
 
 		return $filter;
@@ -153,86 +154,19 @@ class ConversationController extends ResourceController
 	public function all(Request $request): object
 	{
 		$inputs = $this->getAllInputs($request);
-		if (1 || isset($inputs->filter->userId))
+		$userId = (int) $inputs->filter->userId;
+		$view = $inputs->filter->view ?? 'all';
+		unset($inputs->filter->view);
+
+		// Apply view filter for unread
+		if ($view === 'unread')
 		{
-			$userId = (int) $inputs->filter->userId;
-			$view = $inputs->filter->view ?? 'all';
-			unset($inputs->filter->view);
-
-			$rows = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
-			return $rows;
-
-			unset($inputs->filter->userId);
-			unset($inputs->filter->view);
-
-			// Use storage->select() to use model's default fields and joins
-			$model = $this->model();
-			$builder = $model->storage
-				->select()
-				// Manually join to filter by user_id - same pattern as sync()
-				->join(function($joins) use ($userId)
-				{
-					$joins->left('conversation_participants', 'cpp')
-						->on("c.id = cpp.conversation_id AND cpp.deleted_at IS NULL");
-				})
-				->where(
-					['cpp.user_id', $userId]
-				);
-
-			// Apply additional filters
-			if ($inputs->filter && !empty((array)$inputs->filter))
-			{
-				foreach ((array)$inputs->filter as $key => $value)
-				{
-					$builder->where(['c.' . $key => $value]);
-				}
-			}
-
-			// Apply view filter for unread
-			if ($view === 'unread')
-			{
-				// Use subquery to filter conversations with unread messages
-				$builder->where(
-					"EXISTS (SELECT 1 FROM messages m3 WHERE m3.conversation_id = c.id AND m3.sender_id != {$userId} AND (m3.id > COALESCE((SELECT cp2.last_read_message_id FROM conversation_participants cp2 WHERE cp2.conversation_id = c.id AND cp2.user_id = {$userId}), 0)) AND m3.deleted_at IS NULL LIMIT 1)"
-				);
-			}
-
-			$builder->orderBy('c.last_message_at DESC, c.id DESC');
-
-			if ($inputs->limit > 0)
-			{
-				$builder->limit($inputs->limit, $inputs->offset);
-			}
-
-			$rows = $builder->fetch();
-
-			if (!empty($rows))
-			{
-				// Get all conversation IDs for batch unread count query
-				$conversationIds = array_column($rows, 'id');
-
-				// Batch query for unread counts - single query instead of O(n)
-				$unreadCounts = Conversation::getUnreadCountsForConversations($conversationIds, $userId);
-
-				// Attach unread counts to conversations
-				foreach ($rows as $conversation)
-				{
-					$conversation->unreadCount = $unreadCounts[$conversation->id] ?? 0;
-				}
-			}
-
-			return $this->response((object)[
-				'rows' => $rows,
-				'count' => count($rows)
-			]);
+			// Add subquery filter to only get conversations with unread messages
+			$inputs->filter->{'EXISTS (SELECT 1 FROM messages m3 WHERE m3.conversation_id = cp.conversation_id AND m3.sender_id != cp.user_id AND (m3.id > COALESCE(cp.last_read_message_id, 0)) AND m3.deleted_at IS NULL LIMIT 1)'} = null;
 		}
 
-		$result = $this->model::all(
-			$inputs->filter,
-			$inputs->offset,
-			$inputs->limit,
-			$inputs->modifiers
-		);
+		// Use ConversationParticipant::all() with Proto's built-in joins
+		$result = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
 		return $this->response($result);
 	}
 
