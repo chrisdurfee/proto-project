@@ -48,20 +48,16 @@ class ConversationParticipant extends Model
 		$builder
 			->one(
 				User::class,
-				fields: ['displayName', 'firstName', 'lastName', 'email', 'image', ['status', 'userStatus']]
+				fields: ['displayName', 'firstName', 'lastName', 'email', 'image', 'status']
 			)
 			->on(['user_id', 'id']);
 
-		// Join the conversation details
 		$builder
 			->one(
 				Conversation::class,
 				fields: ['title', 'type', 'lastMessageAt', 'lastMessageId']
 			)
-			->on(['conversation_id', 'id']);
-
-		// Join the last message details
-		$builder
+			->on(['conversation_id', 'id'])
 			->one(
 				Message::class,
 				fields: ['content', 'type', 'parentId', 'senderId', 'isEdited', 'editedAt']
@@ -175,8 +171,8 @@ class ConversationParticipant extends Model
 	public static function updateLastRead(int $conversationId, int $userId, int $messageId): bool
 	{
 		$participant = static::getBy([
-			'conversationId' => $conversationId,
-			'userId' => $userId
+			'cp.conversation_id' => $conversationId,
+			'cp.user_id' => $userId
 		]);
 
 		if (!$participant)

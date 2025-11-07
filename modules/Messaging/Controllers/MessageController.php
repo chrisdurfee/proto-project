@@ -197,10 +197,10 @@ class MessageController extends ResourceController
 			return $this->error('Unauthorized', 401);
 		}
 
-		// Get the participant record
+		// Get the participant record (use direct query to avoid ambiguous columns from joins)
 		$participant = ConversationParticipant::getBy([
-			'conversationId' => $conversationId,
-			'userId' => $userId
+			'cp.conversation_id' => $conversationId,
+			'cp.user_id' => $userId
 		]);
 
 		if (!$participant || !$participant->lastReadMessageId)
