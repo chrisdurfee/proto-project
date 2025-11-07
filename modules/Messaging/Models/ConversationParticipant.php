@@ -64,6 +64,31 @@ class ConversationParticipant extends Model
 			)
 			->on(['lastMessageId', 'id'])
 			->as('lastMessage');
+
+		// Join participants
+		$builder->many(ConversationParticipant::class, alias: 'cpp', fields: [
+				'id',
+				'userId',
+				'role',
+				'joinedAt',
+				'lastReadAt',
+				'lastReadMessageId',
+				'createdAt',
+				'updatedAt',
+				'deletedAt'
+			])
+			->on(['conversationId', 'conversationId'])
+			->as('participants')
+			// Join user info for each participant
+			->one(User::class, fields: [
+					'displayName',
+					'firstName',
+					'lastName',
+					'email',
+					'image',
+					'status'
+				])
+				->on(['userId', 'id']);
 	}
 
 	/**

@@ -131,7 +131,7 @@ class ConversationController extends ResourceController
 		$userId = $request->params()->userId ?? null;
 		if (isset($userId))
 		{
-			$filter->userId = $userId;
+			$filter->{'cp.user_id'} = $userId;
 		}
 
 		// Support "since" parameter for fetching newer conversations
@@ -153,10 +153,14 @@ class ConversationController extends ResourceController
 	public function all(Request $request): object
 	{
 		$inputs = $this->getAllInputs($request);
-		if (isset($inputs->filter->userId))
+		if (1 || isset($inputs->filter->userId))
 		{
 			$userId = (int) $inputs->filter->userId;
 			$view = $inputs->filter->view ?? 'all';
+			unset($inputs->filter->view);
+
+			$rows = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+			return $rows;
 
 			unset($inputs->filter->userId);
 			unset($inputs->filter->view);
