@@ -1,9 +1,9 @@
 import { Div } from "@base-framework/atoms";
 import { Jot } from "@base-framework/base";
 import { MessageReactionModel } from "@modules/messages/models/message-reaction-model.js";
-import { Attachments } from "./list/attachment.js";
-import { MessageBubbleContent, MessageCredits, MessageHeader } from "./list/message-bubble-layout.js";
-import { ReactionDisplay } from "./list/reaction.js";
+import { Attachments } from "./attachment.js";
+import { MessageBubbleContent, MessageCredits, MessageHeader } from "./message-bubble-layout.js";
+import { ReactionDisplay } from "./reaction.js";
 
 /**
  * Gets the user ID of the current user.

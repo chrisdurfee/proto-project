@@ -4,8 +4,8 @@ import { ScrollableList } from "@base-framework/organisms";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { MessageModel } from "@modules/messages/models/message-model.js";
 import { MessageReadTracker } from "@modules/messages/models/message-read-tracker.js";
-import { MessageBubble } from "./message-bubble.js";
-import { ThreadSkeleton } from "./skeletons.js";
+import { MessageBubble } from "../message-bubble.js";
+import { ThreadSkeleton } from "../skeletons.js";
 
 /**
  * This will create a date divider row.
