@@ -34,6 +34,8 @@ class Conversation extends Model
 		'createdBy',
 		'lastMessageAt',
 		'lastMessageId',
+		'lastMessageContent',
+		'lastMessageType',
 	];
 
 	/**
@@ -44,6 +46,7 @@ class Conversation extends Model
 	 */
 	protected static function joins(object $builder): void
 	{
+		// Join other participants (not the current user)
 		$builder->many(ConversationParticipant::class, fields: [
 				'id',
 				'conversationId',
@@ -58,16 +61,14 @@ class Conversation extends Model
 			])
 			->on(['id', 'conversationId'])
 			->as('participants')
+			// Join user info for each participant
 			->one(User::class, fields: [
-					'id',
 					'displayName',
 					'firstName',
 					'lastName',
 					'email',
 					'image',
-					'status',
-					'email',
-					'mobile'
+					'status'
 				])
 				->on(['userId', 'id']);
 	}
@@ -135,5 +136,96 @@ class Conversation extends Model
 			)
 			->orderBy('c.last_message_at DESC')
 			->fetch();
+	}
+
+	/**
+	 * Update the last message data for a conversation.
+	 * This should be called whenever a new message is added.
+	 *
+	 * @param int $conversationId
+	 * @param int $messageId
+	 * @param string $content
+	 * @param string $type
+	 * @return bool
+	 */
+	public static function updateLastMessage(
+		int $conversationId,
+		int $messageId,
+		string $content,
+		string $type = 'text'
+	): bool
+	{
+		return static::edit((object)[
+			'id' => $conversationId,
+			'lastMessageId' => $messageId,
+			'lastMessageContent' => $content,
+			'lastMessageType' => $type,
+			'lastMessageAt' => date('Y-m-d H:i:s'),
+			'updatedAt' => date('Y-m-d H:i:s')
+		]);
+	}
+
+	/**
+	 * Sync conversations for a user - gets new and updated conversations.
+	 *
+	 * @param int $userId
+	 * @param string|null $lastSync The last sync timestamp
+	 * @return array Array with 'merge' and 'deleted' conversations
+	 */
+	public static function sync(int $userId, ?string $lastSync = null): array
+	{
+		$result = [
+			'merge' => [],
+			'deleted' => []
+		];
+
+		// Use storage directly to avoid join conflicts with model joins
+		$model = new static();
+		$sql = $model->storage->table()
+			->select([
+				'c.id',
+				'c.created_at',
+				'c.updated_at',
+				'c.title',
+				'c.description',
+				'c.type',
+				'c.created_by',
+				'c.last_message_at',
+				'c.last_message_id',
+				'c.last_message_content',
+				'c.last_message_type'
+			])
+			->join(function($joins) {
+				$joins->left('conversation_participants', 'cp')
+					->on('c.id = cp.conversation_id', 'cp.deleted_at IS NULL');
+			})
+			->where(
+				['cp.user_id', $userId],
+				'c.deleted_at IS NULL'
+			);
+
+		if (!empty($lastSync))
+		{
+			$sql->where(['c.updated_at', '>', $lastSync]);
+		}
+
+		$sql->orderBy('c.last_message_at DESC, c.id DESC');
+		$conversations = $sql->fetch() ?? [];
+
+		// Load participants for each conversation
+		foreach ($conversations as $conversation)
+		{
+			// Get all participants with user details
+			$participants = ConversationParticipant::where([
+				'cp.conversation_id' => $conversation->id,
+				'cp.deleted_at IS NULL'
+			])->fetch();
+
+			$conversation->participants = $participants;
+			$conversation->unreadCount = ConversationParticipant::getUnreadCount($conversation->id, $userId);
+		}
+
+		$result['merge'] = $conversations;
+		return $result;
 	}
 }

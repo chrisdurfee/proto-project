@@ -155,26 +155,82 @@ class ConversationController extends ResourceController
 		$inputs = $this->getAllInputs($request);
 		if (isset($inputs->filter->userId))
 		{
-			$filter = $inputs->filter;
-			$userId = (int) $filter->userId;
-			unset($filter->userId);
+			$userId = (int) $inputs->filter->userId;
+			$view = $inputs->filter->view ?? 'all';
 
-			$inputs->modifiers['view'] = 'all';
-			if (!empty($filter->view))
+			unset($inputs->filter->userId);
+			unset($inputs->filter->view);
+
+			// Use storage directly to avoid join conflicts
+			$model = new Conversation();
+			$builder = $model->storage->table()
+				->select([
+					'c.id',
+					'c.created_at',
+					'c.updated_at',
+					'c.title',
+					'c.description',
+					'c.type',
+					'c.created_by',
+					'c.last_message_at',
+					'c.last_message_id',
+					'c.last_message_content',
+					'c.last_message_type'
+				])
+				->join(function($joins) {
+					$joins->inner('conversation_participants', 'cp')
+						->on('c.id = cp.conversation_id');
+				})
+				->where(
+					['cp.user_id', $userId],
+					'cp.deleted_at IS NULL',
+					'c.deleted_at IS NULL'
+				);
+
+			// Apply additional filters
+			if ($inputs->filter && !empty((array)$inputs->filter))
 			{
-				$inputs->modifiers['view'] = $filter->view;
-				unset($filter->view);
+				foreach ((array)$inputs->filter as $key => $value)
+				{
+					$builder->where(['c.' . $key => $value]);
+				}
 			}
 
-			// Get conversations with other participant details
-			$result = $this->getConversationsWithOtherParticipants(
-				$userId,
-				$inputs->filter,
-				$inputs->offset,
-				$inputs->limit,
-				$inputs->modifiers
-			);
-			return $this->response($result);
+			// Apply view filter for unread
+			if ($view === 'unread')
+			{
+				// Use subquery to filter conversations with unread messages
+				$builder->where(
+					"EXISTS (SELECT 1 FROM messages m3 WHERE m3.conversation_id = c.id AND m3.sender_id != {$userId} AND (m3.id > COALESCE((SELECT cp2.last_read_message_id FROM conversation_participants cp2 WHERE cp2.conversation_id = c.id AND cp2.user_id = {$userId}), 0)) AND m3.deleted_at IS NULL LIMIT 1)"
+				);
+			}
+
+			$builder->orderBy('c.last_message_at DESC, c.id DESC');
+
+			if ($inputs->limit > 0)
+			{
+				$builder->limit($inputs->limit, $inputs->offset);
+			}
+
+			$rows = $builder->fetch();
+
+			// Load participants and calculate unread count for each conversation
+			foreach ($rows as $conversation)
+			{
+				// Get all participants with user details
+				$participants = ConversationParticipant::where([
+					'cp.conversation_id' => $conversation->id,
+					'cp.deleted_at IS NULL'
+				])->fetch();
+
+				$conversation->participants = $participants;
+				$conversation->unreadCount = ConversationParticipant::getUnreadCount($conversation->id, $userId);
+			}
+
+			return $this->response((object)[
+				'rows' => $rows ?? [],
+				'count' => count($rows ?? [])
+			]);
 		}
 
 		$result = $this->model::all(
@@ -184,110 +240,6 @@ class ConversationController extends ResourceController
 			$inputs->modifiers
 		);
 		return $this->response($result);
-	}
-
-	/**
-	 * Get conversations with the other participant's details.
-	 *
-	 * @param int $userId The current user's ID
-	 * @param object|null $filter Additional filters
-	 * @param int $offset Pagination offset
-	 * @param int $limit Pagination limit
-	 * @param array|null $modifiers Query modifiers
-	 * @return object Result with rows and pagination
-	 */
-	private function getConversationsWithOtherParticipants(
-		int $userId,
-		?object $filter,
-		int $offset,
-		int $limit,
-		?array $modifiers
-	): object
-	{
-		$model = new ConversationParticipant();
-		$storage = $model->storage;
-
-		// Use direct SQL to avoid alias doubling issues
-		$params = [$userId, $userId, $userId]; // for subquery, JOIN condition, WHERE cp.user_id
-
-		$filterSql = '';
-		if ($filter && !empty((array)$filter))
-		{
-			foreach ((array)$filter as $key => $value)
-			{
-				$filterSql .= " AND c.{$key} = ?";
-				$params[] = $value;
-			}
-		}
-
-		// Add view filter for unread messages
-		$viewSql = '';
-		$view = $modifiers['view'] ?? 'all';
-		if ($view === 'unread')
-		{
-			$viewSql = "
-				AND EXISTS (
-					SELECT 1
-					FROM messages m3
-					WHERE m3.conversation_id = c.id
-					  AND m3.sender_id != ?
-					  AND (m3.created_at > COALESCE(cp.last_read_at, '1970-01-01') OR cp.last_read_at IS NULL)
-					LIMIT 1
-				)
-			";
-			$params[] = $userId; // for the EXISTS subquery
-		}
-
-		$sql = "
-			SELECT
-				cp.id,
-				cp.conversation_id AS conversationId,
-				cp.last_read_at AS lastReadAt,
-				cp.last_read_message_id AS lastReadMessageId,
-				c.id AS id,
-				c.title AS title,
-				c.type AS type,
-				c.created_at AS createdAt,
-				c.updated_at AS updatedAt,
-				c.last_message_at AS lastMessageAt,
-				u.id AS userId,
-				u.first_name AS firstName,
-				u.last_name AS lastName,
-				u.email AS email,
-				u.image AS image,
-				u.display_name AS displayName,
-				u.status AS userStatus,
-				m.id AS lastMessageId,
-				m.content AS lastMessageContent,
-				m.type AS lastMessageType,
-				m.sender_id AS lastMessageSenderId,
-				(SELECT COUNT(*)
-				 FROM messages m2
-				 WHERE m2.conversation_id = c.id
-				   AND m2.sender_id != ?
-				   AND (m2.created_at > COALESCE(cp.last_read_at, '1970-01-01') OR cp.last_read_at IS NULL)
-				) AS unreadCount
-			FROM conversation_participants AS cp
-			LEFT JOIN conversations AS c ON cp.conversation_id = c.id
-			LEFT JOIN conversation_participants AS cp2 ON c.id = cp2.conversation_id AND cp2.user_id != ?
-			LEFT JOIN users AS u ON cp2.user_id = u.id
-			LEFT JOIN messages AS m ON c.last_message_id = m.id
-			WHERE cp.user_id = ?
-			  AND cp.deleted_at IS NULL
-			  AND (cp2.deleted_at IS NULL OR cp2.id IS NULL)
-			  {$filterSql}
-			  {$viewSql}
-			ORDER BY c.last_message_at DESC, c.id DESC
-			LIMIT {$limit}
-			OFFSET {$offset}
-		";
-
-		$rows = $storage->fetch($sql, $params);
-
-		return (object)[
-			'rows' => $rows ?? [],
-			'count' => count($rows ?? [])
-		];
 	}
 
 	/**
@@ -307,33 +259,20 @@ class ConversationController extends ResourceController
 		$lastSync = date('Y-m-d H:i:s');
 		$INTERVAL_IN_SECONDS = 5;
 
-		serverEvent($INTERVAL_IN_SECONDS, function() use ($userId, $lastSync)
+		serverEvent($INTERVAL_IN_SECONDS, function() use ($userId, &$lastSync)
 		{
-			// Get updated conversations
-			$result = $this->getConversationsWithOtherParticipants(
-				$userId,
-				(object)[
-					'updated_at' => ['>=', $lastSync]
-				],
-				0,
-				50,
-				null
-			);
+			$response = Conversation::sync($userId, $lastSync);
 
 			/**
 			 * Update the last sync timestamp for the next check.
 			 */
 			$lastSync = date('Y-m-d H:i:s');
 
-			if (!empty($result->rows))
-			{
-				return [
-					'conversations' => $result->rows,
-					'timestamp' => time()
-				];
-			}
-
-			return null;
+			/**
+			 * Only return data if there are changes.
+			 */
+			$hasChanges = !empty($response['merge']) || !empty($response['deleted']);
+			return $hasChanges ? $response : null;
 		});
 	}
 }

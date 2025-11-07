@@ -186,4 +186,48 @@ class ConversationParticipant extends Model
 			'lastReadAt' => date('Y-m-d H:i:s')
 		]);
 	}
+
+	/**
+	 * Get unread message count for a participant.
+	 *
+	 * @param int $conversationId
+	 * @param int $userId
+	 * @return int
+	 */
+	public static function getUnreadCount(int $conversationId, int $userId): int
+	{
+		$participant = static::getBy([
+			'cp.conversation_id' => $conversationId,
+			'cp.user_id' => $userId
+		]);
+
+		if (!$participant)
+		{
+			return 0;
+		}
+
+		$model = new Message();
+		$sql = $model->storage->table()->select([['COUNT(*)'], 'count']);
+
+		if (!$participant->lastReadMessageId)
+		{
+			$sql->where(
+				['m.conversation_id', $conversationId],
+				['m.sender_id', '!=', $userId],
+				'm.deleted_at IS NULL'
+			);
+		}
+		else
+		{
+			$sql->where(
+				['m.conversation_id', $conversationId],
+				['m.id', '>', $participant->lastReadMessageId],
+				['m.sender_id', '!=', $userId],
+				'm.deleted_at IS NULL'
+			);
+		}
+
+		$count = $sql->first();
+		return (int)($count->count ?? 0);
+	}
 }
