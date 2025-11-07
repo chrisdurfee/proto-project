@@ -30,6 +30,7 @@ export const MessagesPage = () =>
 	const data = new ConversationModel({
 		userId: userId,
 		filter: {
+			view: 'all',
 			userId: userId
 		}
 	});

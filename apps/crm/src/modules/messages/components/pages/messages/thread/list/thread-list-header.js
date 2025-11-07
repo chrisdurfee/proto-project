@@ -46,7 +46,7 @@ export const ThreadListHeader = () => (
                             { label: "All", value: "all" },
                             { label: "Unread", value: "unread" },
                         ],
-                        onSelect: (value, { state }) => state.filter = value
+                        onSelect: (value, { data }) => data.filter.view = value
                     })
                 ])
             ])

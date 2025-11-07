@@ -141,6 +141,13 @@ class ConversationController extends ResourceController
 			$filter->{'m.id'} = ['>', $since];
 		}
 
+		// Support "view" parameter for filtering conversations
+		$view = $filter->view ?? null;
+		if ($view)
+		{
+			unset($filter->view);
+		}
+
 		return $filter;
 	}
 
