@@ -192,7 +192,7 @@ class Conversation extends Model
 
 		if (!empty($lastSync))
 		{
-			$sql->where("c.updated_at > '{$lastSync}'");
+			$sql->orWhere("c.updated_at > '{$lastSync}'", "c.created_at > '{$lastSync}'");
 		}
 
 		$sql->orderBy('c.last_message_at DESC, c.id DESC');
