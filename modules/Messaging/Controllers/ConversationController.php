@@ -164,28 +164,24 @@ class ConversationController extends ResourceController
 			// Use storage directly to avoid join conflicts
 			$model = new Conversation();
 			$builder = $model->storage->table()
-				->select([
-					'c.id',
-					'c.created_at',
-					'c.updated_at',
-					'c.title',
-					'c.description',
-					'c.type',
-					'c.created_by',
-					'c.last_message_at',
-					'c.last_message_id',
-					'c.last_message_content',
-					'c.last_message_type'
-				])
+				->select(
+					['c.id'],
+					['c.created_at'],
+					['c.updated_at'],
+					['c.title'],
+					['c.description'],
+					['c.type'],
+					['c.created_by'],
+					['c.last_message_at'],
+					['c.last_message_id'],
+					['c.last_message_content'],
+					['c.last_message_type']
+				)
 				->join(function($joins) {
 					$joins->inner('conversation_participants', 'cp')
-						->on('c.id = cp.conversation_id');
+						->on('c.id = cp.conversation_id AND cp.deleted_at IS NULL');
 				})
-				->where(
-					['cp.user_id', $userId],
-					'cp.deleted_at IS NULL',
-					'c.deleted_at IS NULL'
-				);
+				->where(['cp.user_id', $userId]);
 
 			// Apply additional filters
 			if ($inputs->filter && !empty((array)$inputs->filter))

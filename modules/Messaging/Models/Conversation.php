@@ -181,47 +181,26 @@ class Conversation extends Model
 
 		// Use storage directly to avoid join conflicts with model joins
 		$model = new static();
-		$sql = $model->storage->table()
-			->select([
-				'c.id',
-				'c.created_at',
-				'c.updated_at',
-				'c.title',
-				'c.description',
-				'c.type',
-				'c.created_by',
-				'c.last_message_at',
-				'c.last_message_id',
-				'c.last_message_content',
-				'c.last_message_type'
-			])
-			->join(function($joins) {
-				$joins->left('conversation_participants', 'cp')
-					->on('c.id = cp.conversation_id', 'cp.deleted_at IS NULL');
+		$sql = $model->storage
+			->select()
+			->join(function($joins)
+			{
+				$joins->left('conversation_participants', 'cpp')
+					->on('c.id = cpp.conversation_id AND cpp.deleted_at IS NULL');
 			})
-			->where(
-				['cp.user_id', $userId],
-				'c.deleted_at IS NULL'
-			);
+			->where(['cpp.user_id', $userId]);
 
 		if (!empty($lastSync))
 		{
-			$sql->where(['c.updated_at', '>', $lastSync]);
+			$sql->where("c.updated_at > '{$lastSync}'");
 		}
 
 		$sql->orderBy('c.last_message_at DESC, c.id DESC');
-		$conversations = $sql->fetch() ?? [];
+		$conversations = $sql->fetch();
 
 		// Load participants for each conversation
 		foreach ($conversations as $conversation)
 		{
-			// Get all participants with user details
-			$participants = ConversationParticipant::where([
-				'cp.conversation_id' => $conversation->id,
-				'cp.deleted_at IS NULL'
-			])->fetch();
-
-			$conversation->participants = $participants;
 			$conversation->unreadCount = ConversationParticipant::getUnreadCount($conversation->id, $userId);
 		}
 
