@@ -161,27 +161,19 @@ class ConversationController extends ResourceController
 			unset($inputs->filter->userId);
 			unset($inputs->filter->view);
 
-			// Use storage directly to avoid join conflicts
-			$model = new Conversation();
-			$builder = $model->storage->table()
-				->select(
-					['c.id'],
-					['c.created_at'],
-					['c.updated_at'],
-					['c.title'],
-					['c.description'],
-					['c.type'],
-					['c.created_by'],
-					['c.last_message_at'],
-					['c.last_message_id'],
-					['c.last_message_content'],
-					['c.last_message_type']
-				)
-				->join(function($joins) {
-					$joins->inner('conversation_participants', 'cp')
-						->on('c.id = cp.conversation_id AND cp.deleted_at IS NULL');
+			// Use storage->select() to use model's default fields and joins
+			$model = $this->model();
+			$builder = $model->storage
+				->select()
+				// Manually join to filter by user_id - same pattern as sync()
+				->join(function($joins) use ($userId)
+				{
+					$joins->left('conversation_participants', 'cpp')
+						->on("c.id = cpp.conversation_id AND cpp.deleted_at IS NULL");
 				})
-				->where(['cp.user_id', $userId]);
+				->where(
+					['cpp.user_id', $userId]
+				);
 
 			// Apply additional filters
 			if ($inputs->filter && !empty((array)$inputs->filter))
@@ -210,22 +202,24 @@ class ConversationController extends ResourceController
 
 			$rows = $builder->fetch();
 
-			// Load participants and calculate unread count for each conversation
-			foreach ($rows as $conversation)
+			if (!empty($rows))
 			{
-				// Get all participants with user details
-				$participants = ConversationParticipant::where([
-					'cp.conversation_id' => $conversation->id,
-					'cp.deleted_at IS NULL'
-				])->fetch();
+				// Get all conversation IDs for batch unread count query
+				$conversationIds = array_column($rows, 'id');
 
-				$conversation->participants = $participants;
-				$conversation->unreadCount = ConversationParticipant::getUnreadCount($conversation->id, $userId);
+				// Batch query for unread counts - single query instead of O(n)
+				$unreadCounts = Conversation::getUnreadCountsForConversations($conversationIds, $userId);
+
+				// Attach unread counts to conversations
+				foreach ($rows as $conversation)
+				{
+					$conversation->unreadCount = $unreadCounts[$conversation->id] ?? 0;
+				}
 			}
 
 			return $this->response((object)[
-				'rows' => $rows ?? [],
-				'count' => count($rows ?? [])
+				'rows' => $rows,
+				'count' => count($rows)
 			]);
 		}
 

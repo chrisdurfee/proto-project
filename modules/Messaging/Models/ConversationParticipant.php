@@ -55,7 +55,7 @@ class ConversationParticipant extends Model
 		$builder
 			->one(
 				Conversation::class,
-				fields: ['title', 'type', 'lastMessageAt', 'lastMessageId']
+				fields: ['title', 'type', 'lastMessageAt', 'lastMessageId', 'lastMessageContent', 'lastMessageType']
 			)
 			->on(['conversation_id', 'id'])
 			->one(
