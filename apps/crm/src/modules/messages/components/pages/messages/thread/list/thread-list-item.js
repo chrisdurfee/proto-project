@@ -37,7 +37,7 @@ export const ThreadListItem = (conversation) =>
 {
     // Find the other participant (not the current user)
     const otherParticipant = conversation.participants?.find(p => p.userId !== conversation.userId) || {};
-    
+
     const fullName = `${otherParticipant.firstName || ''} ${otherParticipant.lastName || ''}`.trim() || conversation.title || 'Unknown';
     const lastMessagePreview = conversation.lastMessageContent
         ? (conversation.lastMessageType === 'text'
