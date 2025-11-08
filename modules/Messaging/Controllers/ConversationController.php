@@ -167,7 +167,20 @@ class ConversationController extends ResourceController
 
 		// Use ConversationParticipant::all() with Proto's built-in joins
 		$result = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
-		return $this->response($result);
+
+		// Add unread counts in batch (single query instead of O(n))
+		if (!empty($result->rows))
+		{
+			$conversationIds = array_column($result->rows, 'conversationId');
+			$unreadCounts = Conversation::getUnreadCountsForConversations($conversationIds, $userId);
+
+			foreach ($result->rows as $row)
+			{
+				$row->unreadCount = $unreadCounts[$row->conversationId] ?? 0;
+			}
+		}
+
+		return $result;
 	}
 
 	/**
