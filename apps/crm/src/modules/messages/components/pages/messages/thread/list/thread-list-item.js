@@ -20,6 +20,27 @@ export const ThreadListItemSkeleton = () =>
     ]);
 
 /**
+ * Gets the message preview based on the last message content and type.
+ *
+ * @param {object} conversation
+ * @returns {string}
+ */
+const getMessagePreview = (conversation) =>
+{
+    if (!conversation.lastMessageContent)
+    {
+        return 'No messages yet';
+    }
+
+    if (conversation.lastMessageType === 'text')
+    {
+        return conversation.lastMessageContent;
+    }
+
+    return `[${conversation.lastMessageType}]`;
+};
+
+/**
  * ThreadListItem
  *
  * A list item showing a single thread's summary:
@@ -39,14 +60,12 @@ export const ThreadListItem = (conversation) =>
     const otherParticipant = conversation.participants?.find(p => p.userId !== conversation.userId) || {};
 
     const fullName = `${otherParticipant.firstName || ''} ${otherParticipant.lastName || ''}`.trim() || conversation.title || 'Unknown';
-    const lastMessagePreview = conversation.lastMessageContent
-        ? (conversation.lastMessageType === 'text'
-            ? conversation.lastMessageContent
-            : `[${conversation.lastMessageType}]`)
-        : 'No messages yet';
+    const lastMessagePreview = getMessagePreview(conversation);
 
     return UseParent(({ parent }) =>
-        A({
+    {
+        console.log(parent, conversation);
+        return A({
             href: `messages/${conversation.conversationId}`,
             class: `
                 flex items-center gap-3 p-4 lg:p-5 rounded-md hover:bg-muted/50
@@ -89,6 +108,6 @@ export const ThreadListItem = (conversation) =>
                     }, conversation.unreadCount.toString())
                 ])
             ])
-        ])
-    )
+        ]);
+    })
 };
