@@ -32,6 +32,9 @@ export const MessagesPage = () =>
 		filter: {
 			view: 'all',
 			userId: userId
+		},
+		orderBy: {
+			updatedAt: 'desc'
 		}
 	});
 
