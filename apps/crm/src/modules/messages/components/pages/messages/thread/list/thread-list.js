@@ -2,7 +2,7 @@ import { Div, On, UseParent } from "@base-framework/atoms";
 import { ScrollableList } from "@base-framework/organisms";
 import { ListEmptyState } from "./list-empty-state.js";
 import { ThreadListHeader } from "./thread-list-header.js";
-import { ThreadListItem } from "./thread-list-item.js";
+import { ListItemCreator } from "./thread-list-item.js";
 
 /**
  * ThreadList
@@ -24,7 +24,7 @@ export const ThreadList = ({ data }) =>
 				role: 'list',
 				class: 'flex flex-col gap-y-2 px-4 pb-4 overflow-y-auto',
 				limit: 25,
-				rowItem: ThreadListItem,
+				rowItem: ListItemCreator(parent.route),
 				scrollContainer: parent.listContainer,
 				emptyState: () => ListEmptyState()
 			})
