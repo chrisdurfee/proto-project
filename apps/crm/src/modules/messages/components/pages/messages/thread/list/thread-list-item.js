@@ -35,16 +35,19 @@ export const ThreadListItemSkeleton = () =>
  */
 export const ThreadListItem = (conversation) =>
 {
-    const fullName = `${conversation.firstName} ${conversation.lastName}`;
+    // Find the other participant (not the current user)
+    const otherParticipant = conversation.participants?.find(p => p.userId !== conversation.userId) || {};
+    
+    const fullName = `${otherParticipant.firstName || ''} ${otherParticipant.lastName || ''}`.trim() || conversation.title || 'Unknown';
     const lastMessagePreview = conversation.lastMessageContent
         ? (conversation.lastMessageType === 'text'
             ? conversation.lastMessageContent
             : `[${conversation.lastMessageType}]`)
-        : conversation.title || 'No messages yet';
+        : 'No messages yet';
 
     return UseParent(({ parent }) =>
         A({
-            href: `messages/${conversation.id}`,
+            href: `messages/${conversation.conversationId}`,
             class: `
                 flex items-center gap-3 p-4 lg:p-5 rounded-md hover:bg-muted/50
             `,
@@ -53,19 +56,19 @@ export const ThreadListItem = (conversation) =>
              * Highlights the current item if selected (based on route messageId).
              */
             onSet: [parent.route, "messageId", {
-                'bg-muted/50': conversation.id.toString()
+                'bg-muted/50': conversation.conversationId.toString()
             }],
         }, [
             // Avatar + status
             Div({ class: "relative flex-none" }, [
                 Avatar({
-                    src: `/files/users/profile/${conversation.image}`,
+                    src: otherParticipant.image ? `/files/users/profile/${otherParticipant.image}` : null,
                     alt: fullName,
                     fallbackText: fullName,
                     size: "md",
                 }),
                 Div({ class: "absolute bottom-0 right-0" }, [
-                    StaticStatusIndicator(conversation.userStatus)
+                    StaticStatusIndicator(otherParticipant.status)
                 ])
             ]),
 

@@ -20,7 +20,7 @@ export const ThreadList = ({ data }) =>
 			ScrollableList({
 				data,
 				cache: 'list',
-				key: 'id',
+				key: 'conversationId',
 				role: 'list',
 				class: 'flex flex-col gap-y-2 px-4 pb-4 overflow-y-auto',
 				limit: 25,
