@@ -32,7 +32,8 @@ class ConversationParticipantStorage extends Storage
 			if ($userId)
 			{
 				// Add EXISTS subquery to filter conversations with unread messages
-				$sql->where("EXISTS (SELECT 1 FROM messages m3 WHERE m3.conversation_id = cp.conversation_id AND m3.sender_id != {$userId} AND (m3.id > COALESCE(cp.last_read_message_id, 0)) AND m3.deleted_at IS NULL LIMIT 1)");
+				$sql->where("EXISTS (SELECT 1 FROM messages m3 WHERE m3.conversation_id = cp.conversation_id AND m3.sender_id != ? AND (m3.id > COALESCE(cp.last_read_message_id, 0)) AND m3.deleted_at IS NULL LIMIT 1)");
+                $params[] = $userId;
 			}
 		}
 	}

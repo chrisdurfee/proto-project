@@ -157,8 +157,8 @@ class ConversationController extends ResourceController
 		$userId = $request->params()->userId ?? null;
 
 		// Extract view from request filter parameter
-		$rawFilter = $request->get('filter');
-		$view = $rawFilter['view'] ?? 'all';
+		$view = $inputs->filter->view ?? 'all';
+		unset($inputs->filter->view);
 
 		// Convert modifiers object to array if needed
 		$modifiers = is_object($inputs->modifiers) ? (array)$inputs->modifiers : ($inputs->modifiers ?? []);
