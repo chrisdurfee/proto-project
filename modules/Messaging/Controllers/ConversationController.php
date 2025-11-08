@@ -154,18 +154,21 @@ class ConversationController extends ResourceController
 	public function all(Request $request): object
 	{
 		$inputs = $this->getAllInputs($request);
-		$userId = (int) $inputs->filter->userId;
-		
+		$userId = $request->params()->userId ?? null;
+
 		// Move view from filter to modifiers
 		$view = $inputs->filter->view ?? 'all';
 		unset($inputs->filter->view);
-		
+
 		if (!isset($inputs->modifiers) || !is_array($inputs->modifiers))
 		{
 			$inputs->modifiers = [];
 		}
 		$inputs->modifiers['view'] = $view;
 		$inputs->modifiers['userId'] = $userId;
+
+		// Debug: Log the modifier values
+		error_log("Modifiers being passed: " . json_encode($inputs->modifiers));
 
 		// Use ConversationParticipant::all() with Proto's built-in joins
 		$result = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);

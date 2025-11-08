@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Messaging\Models;
 
-use Modules\Messagin\Storage\ConversationParticipantStorage;
+use Modules\Messaging\Storage\ConversationParticipantStorage;
 use Modules\User\Models\User;
 use Proto\Models\Model;
 
