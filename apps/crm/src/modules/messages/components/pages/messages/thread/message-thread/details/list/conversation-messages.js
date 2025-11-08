@@ -99,7 +99,8 @@ export const ConversationMessages = Jot(
 	{
 		// @ts-ignore
 		const conversationId = this.conversationId;
-		new MessageModel({ conversationId })
+		// @ts-ignore
+		this.eventSource = new MessageModel({ conversationId })
 			.xhr.sync({}, (data) =>
 			{
 				// @ts-ignore

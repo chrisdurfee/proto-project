@@ -170,6 +170,7 @@ class Conversation extends Model
 	 *
 	 * @param int $userId
 	 * @param string|null $lastSync The last sync timestamp
+	 * @suppresswarnings PHP0407
 	 * @return array Array with 'merge' and 'deleted' conversations
 	 */
 	public static function sync(int $userId, ?string $lastSync = null): array
@@ -203,6 +204,8 @@ class Conversation extends Model
 			return $result;
 		}
 
+		$result['merge'] = $model->convertRows($conversations);
+
 		// Get all conversation IDs for batch unread count query
 		$conversationIds = array_column($conversations, 'id');
 
@@ -210,12 +213,15 @@ class Conversation extends Model
 		$unreadCounts = static::getUnreadCountsForConversations($conversationIds, $userId);
 
 		// Attach unread counts to conversations
+		$conversations = $result['merge'];
 		foreach ($conversations as $conversation)
 		{
+			$conversation->conversationId = $conversation->id;
 			$conversation->unreadCount = $unreadCounts[$conversation->id] ?? 0;
 		}
 
 		$result['merge'] = $conversations;
+
 		return $result;
 	}
 

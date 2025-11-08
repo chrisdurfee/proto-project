@@ -54,14 +54,14 @@ export const MessagesPage = () =>
 			// @ts-ignore
 			this.eventSource = this.data.xhr.sync({}, (response) =>
 			{
-				if (response && response.conversations)
+				if (response && response.merge)
 				{
 					// @ts-ignore
 					if (this.list)
 					{
 						// Update or add conversations
 						// @ts-ignore
-						this.list.mingle(response.conversations);
+						this.list.mingle(response.merge);
 					}
 				}
 			});
