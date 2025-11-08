@@ -156,20 +156,14 @@ class ConversationController extends ResourceController
 		$inputs = $this->getAllInputs($request);
 		$userId = $request->params()->userId ?? null;
 
-		// Debug: See what's in filter
-		file_put_contents('/tmp/debug.log', "filter->view: " . json_encode($inputs->filter->view ?? 'NOT SET') . "\n", FILE_APPEND);
-		file_put_contents('/tmp/debug.log', "Full filter: " . json_encode($inputs->filter) . "\n", FILE_APPEND);
-
-		// Extract view from filter before it gets into modifiers
-		$view = $inputs->filter->view ?? 'all';
-		unset($inputs->filter->view);
+		// Extract view from request filter parameter
+		$rawFilter = $request->get('filter');
+		$view = $rawFilter['view'] ?? 'all';
 
 		// Convert modifiers object to array if needed
 		$modifiers = is_object($inputs->modifiers) ? (array)$inputs->modifiers : ($inputs->modifiers ?? []);
 		$modifiers['view'] = $view;
 		$modifiers['userId'] = $userId;
-
-		file_put_contents('/tmp/debug.log', "Setting view to: {$view}\n", FILE_APPEND);
 
 		// Use ConversationParticipant::all() with Proto's built-in joins
 		$result = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $modifiers);
