@@ -155,15 +155,17 @@ class ConversationController extends ResourceController
 	{
 		$inputs = $this->getAllInputs($request);
 		$userId = (int) $inputs->filter->userId;
+		
+		// Move view from filter to modifiers
 		$view = $inputs->filter->view ?? 'all';
 		unset($inputs->filter->view);
-
-		// Apply view filter for unread
-		if ($view === 'unread')
+		
+		if (!isset($inputs->modifiers) || !is_array($inputs->modifiers))
 		{
-			// Add subquery filter to only get conversations with unread messages
-			$inputs->filter->{'EXISTS (SELECT 1 FROM messages m3 WHERE m3.conversation_id = cp.conversation_id AND m3.sender_id != cp.user_id AND (m3.id > COALESCE(cp.last_read_message_id, 0)) AND m3.deleted_at IS NULL LIMIT 1)'} = null;
+			$inputs->modifiers = [];
 		}
+		$inputs->modifiers['view'] = $view;
+		$inputs->modifiers['userId'] = $userId;
 
 		// Use ConversationParticipant::all() with Proto's built-in joins
 		$result = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);

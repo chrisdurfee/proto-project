@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Messaging\Models;
 
+use Modules\Messagin\Storage\ConversationParticipantStorage;
 use Modules\User\Models\User;
 use Proto\Models\Model;
 
@@ -255,4 +256,9 @@ class ConversationParticipant extends Model
 		$count = $sql->first();
 		return (int)($count->count ?? 0);
 	}
+
+	/**
+	 * @var string $storageType
+	 */
+	protected static string $storageType = ConversationParticipantStorage::class;
 }
