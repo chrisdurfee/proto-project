@@ -24,8 +24,10 @@ export const MessageModel = Model.extend({
 		{
 			const fullUrl = this.getUrl(url);
 			const source = new EventSource(fullUrl + '?' + params);
+
 			source.onerror = (event) =>
 			{
+				console.error('EventSource error:', event);
 				source.close();
 			};
 
@@ -36,9 +38,17 @@ export const MessageModel = Model.extend({
 					return;
 				}
 
-				const data = JSON.parse(event.data);
-				callBack(data);
+				try
+				{
+					const data = JSON.parse(event.data);
+					callBack(data);
+				}
+				catch (error)
+				{
+					console.error('Error parsing SSE message:', error, event.data);
+				}
 			};
+
 			return source;
 		},
 
