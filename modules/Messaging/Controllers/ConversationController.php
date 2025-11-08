@@ -156,22 +156,23 @@ class ConversationController extends ResourceController
 		$inputs = $this->getAllInputs($request);
 		$userId = $request->params()->userId ?? null;
 
-		// Move view from filter to modifiers
+		// Debug: See what's in filter
+		file_put_contents('/tmp/debug.log', "filter->view: " . json_encode($inputs->filter->view ?? 'NOT SET') . "\n", FILE_APPEND);
+		file_put_contents('/tmp/debug.log', "Full filter: " . json_encode($inputs->filter) . "\n", FILE_APPEND);
+
+		// Extract view from filter before it gets into modifiers
 		$view = $inputs->filter->view ?? 'all';
 		unset($inputs->filter->view);
 
-		if (!isset($inputs->modifiers) || !is_array($inputs->modifiers))
-		{
-			$inputs->modifiers = [];
-		}
-		$inputs->modifiers['view'] = $view;
-		$inputs->modifiers['userId'] = $userId;
+		// Convert modifiers object to array if needed
+		$modifiers = is_object($inputs->modifiers) ? (array)$inputs->modifiers : ($inputs->modifiers ?? []);
+		$modifiers['view'] = $view;
+		$modifiers['userId'] = $userId;
 
-		// Debug: Log the modifier values
-		error_log("Modifiers being passed: " . json_encode($inputs->modifiers));
+		file_put_contents('/tmp/debug.log', "Setting view to: {$view}\n", FILE_APPEND);
 
 		// Use ConversationParticipant::all() with Proto's built-in joins
-		$result = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+		$result = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $modifiers);
 
 		// Add unread counts in batch (single query instead of O(n))
 		if (!empty($result->rows))
