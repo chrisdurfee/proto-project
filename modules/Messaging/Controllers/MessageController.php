@@ -168,6 +168,13 @@ class MessageController extends ResourceController
 			$messageId = $latestMessage->id;
 		}
 
+		/**
+		 * This will touch the conversation to update its last modified timestamp.
+		 */
+		Conversation::edit((object)[
+			'id' => $conversationId
+		]);
+
 		// Update the participant's last read position
 		$result = ConversationParticipant::updateLastRead($conversationId, $userId, $messageId);
 
