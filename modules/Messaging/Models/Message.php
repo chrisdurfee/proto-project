@@ -191,7 +191,7 @@ class Message extends Model
 			->select(['m.id'])
 			->where(
 				['m.conversation_id', $conversationId],
-				"m.deleted_at > '{$lastSync}'"
+				"m.deleted_at >= '{$lastSync}'"
 			)
 			->fetch();
 
