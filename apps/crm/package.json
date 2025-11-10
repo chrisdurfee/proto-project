@@ -33,7 +33,7 @@
 		"d3": "^7.9.0",
 		"http-proxy-middleware": "^3.0.5",
 		"typescript": "^5.9.3",
-		"vite": "^7.1.12"
+		"vite": "7.1.12"
 	},
 	"files": [
 		"package.json",

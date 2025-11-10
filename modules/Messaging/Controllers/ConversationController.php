@@ -199,15 +199,23 @@ class ConversationController extends ResourceController
 
 		$lastSync = date('Y-m-d H:i:s');
 		$INTERVAL_IN_SECONDS = 5;
+		$firstSync = true;
 
-		serverEvent($INTERVAL_IN_SECONDS, function() use ($userId, &$lastSync)
+		serverEvent($INTERVAL_IN_SECONDS, function() use ($userId, &$lastSync, &$firstSync)
 		{
-			$response = Conversation::sync($userId, $lastSync);
+			$previousSync = $lastSync;
 
 			/**
 			 * Update the last sync timestamp for the next check.
 			 */
 			$lastSync = date('Y-m-d H:i:s');
+			$response = Conversation::sync($userId, $previousSync);
+
+			if ($firstSync)
+			{
+				$firstSync = false;
+				return $response;
+			}
 
 			/**
 			 * Only return data if there are changes.

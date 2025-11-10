@@ -387,19 +387,23 @@ class MessageController extends ResourceController
 
 		$lastSync = date('Y-m-d H:i:s');
 		$INTERVAL_IN_SECONDS = 5;
+		$firstSync = true;
 
-		serverEvent($INTERVAL_IN_SECONDS, function() use($conversationId, &$lastSync)
+		serverEvent($INTERVAL_IN_SECONDS, function() use($conversationId, &$lastSync, &$firstSync)
 		{
-			$response = Message::sync($conversationId, $lastSync);
-
+			$previousSync = $lastSync;
 			/**
 			 * Update the last sync timestamp for the next check.
 			 */
 			$lastSync = date('Y-m-d H:i:s');
+			$response = Message::sync($conversationId, $previousSync);
 
-			/**
-			 * Only return data if there are changes.
-			 */
+			if ($firstSync)
+			{
+				$firstSync = false;
+				return $response;
+			}
+
 			$hasChanges = !empty($response['merge']) || !empty($response['deleted']);
 			return $hasChanges ? $response : null;
 		});
