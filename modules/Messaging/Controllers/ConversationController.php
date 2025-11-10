@@ -45,19 +45,13 @@ class ConversationController extends ResourceController
 			return $result;
 		}
 
-		$userId = session()->user->id ?? null;
-		if (!$userId)
-		{
-			return $this->error('Unauthorized', 401);
-		}
-
 		$data = $this->getRequestItem($request);
 		if (empty($data))
 		{
 			return $this->error('No data provided', 400);
 		}
 
-		// Add participants
+		$userId = session()->user->id ?? null;
 		$addResult = $this->addParticipants(
 			$result->id,
 			[
@@ -66,12 +60,9 @@ class ConversationController extends ResourceController
 			]
 		);
 
-		if ($addResult === false)
-		{
-			return $this->error('Failed to add participants', 500);
-		}
-
-		return $result;
+		return $addResult
+			? $this->response(['id' => $result->id])
+			: $this->error('Failed to add participants', 500);
 	}
 
 	/**
