@@ -1,4 +1,5 @@
 import { Div, H3, Header, Span } from "@base-framework/atoms";
+import { Model } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Skeleton } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
@@ -16,7 +17,7 @@ const handleFollowerClick = (follower) =>
 	const userName = followedUser.displayName || `${followedUser.firstName || ''} ${followedUser.lastName || ''}`.trim() || followedUser.email;
 
 	const conversationModel = new ConversationModel({
-		userId: app.user.id,
+		userId: app.data.user.id,
 		participantId: followedUser.id,
 		title: `Conversation with ${userName}`,
 		type: 'direct'
@@ -81,16 +82,11 @@ const SidebarRowItem = () =>
  *
  * Model for fetching the user's following list
  *
- * @param {number} userId
  * @returns {object}
  */
-const FollowingModel = (userId) =>
-{
-	const Model = app.base.Model;
-	return Model.extend({
-		url: `/api/user/${userId}/following`,
-	});
-};
+const FollowingModel = Model.extend({
+	url: `/api/user/[[userId]]/following`,
+});
 
 /**
  * MessagesSidebar
@@ -102,14 +98,14 @@ const FollowingModel = (userId) =>
  */
 export const MessagesSidebar = () =>
 {
-	const userId = app.user?.id;
+	const userId = app.data.user?.id;
 	if (!userId)
 	{
-		return Div({ class: "flex-auto flex-col pb-12 hidden 2xl:flex p-6 border-l bg-sidebar w-full max-w-[320px] h-full" });
+		return Div({ class: "flex-auto flex-col pb-12 hidden 2xl:flex p-6 border-l bg-sidebar w-full max-w-[320px] h-full" }, 'No user data available.');
 	}
 
-	const FollowingModelClass = FollowingModel(userId);
-	const data = new FollowingModelClass({
+	const data = new FollowingModel({
+		userId,
 		orderBy: {
 			createdAt: 'DESC'
 		}
@@ -118,7 +114,7 @@ export const MessagesSidebar = () =>
 	return Div({ class: "flex-auto flex-col pb-12 hidden 2xl:flex p-6 border-l bg-sidebar w-full max-w-[320px] h-full" },
 		[
 			Header({ class: "pb-4 px-2 flex flex-col" }, [
-				H3({ class: "scroll-m-20 text-lg font-bold tracking-tight" }, "Following")
+				H3({ class: "scroll-m-20 text-lg font-bold tracking-tight" }, "Connections")
 			]),
 			ScrollableList({
 				data,
