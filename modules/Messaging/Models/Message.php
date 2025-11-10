@@ -177,8 +177,8 @@ class Message extends Model
 		if (!empty($lastSync))
 		{
 			$sql->orWhere(
-				"m.created_at > '{$lastSync}'",
-				"m.updated_at > '{$lastSync}'"
+				"m.created_at >= '{$lastSync}'",
+				"m.updated_at >= '{$lastSync}'"
 			);
 		}
 
