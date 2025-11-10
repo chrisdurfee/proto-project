@@ -1,40 +1,16 @@
 <?php declare(strict_types=1);
 namespace Modules\Messaging\Auth\Policies;
 
-use Proto\Auth\Policies\Policy;
 use Proto\Http\Router\Request;
 use Modules\Messaging\Models\Message;
-use Modules\Messaging\Models\ConversationParticipant;
 
 /**
  * MessagePolicy
  *
  * @package Modules\Messaging\Auth\Policies
  */
-class MessagePolicy extends Policy
+class MessagePolicy extends MessagingPolicy
 {
-	/**
-	 * Check if the user is a participant of the conversation.
-	 *
-	 * @param int $conversationId
-	 * @return bool
-	 */
-	protected function isParticipant(int $conversationId): bool
-	{
-		$userId = session()->user->id ?? null;
-		if (!$userId)
-		{
-			return false;
-		}
-
-		$participant = ConversationParticipant::getBy([
-			'conversation_id' => $conversationId,
-			'user_id' => $userId
-		]);
-
-		return $participant !== null;
-	}
-
 	/**
 	 * Check if the user owns the message.
 	 *
@@ -43,7 +19,7 @@ class MessagePolicy extends Policy
 	 */
 	protected function ownsMessage(int $messageId): bool
 	{
-		$userId = session()->user->id ?? null;
+		$userId = $this->getUserId();
 		if (!$userId)
 		{
 			return false;
@@ -81,7 +57,7 @@ class MessagePolicy extends Policy
 	 * @param Request $request
 	 * @return bool
 	 */
-	public function getAll(Request $request): bool
+	public function all(Request $request): bool
 	{
 		$conversationId = (int)($request->params()->conversationId ?? null);
 		if (!$conversationId)

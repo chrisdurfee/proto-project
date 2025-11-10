@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Messaging\Controllers;
 
+use Modules\Messaging\Auth\Policies\ConversationPolicy;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;
 use Modules\Messaging\Models\Conversation;
@@ -13,6 +14,11 @@ use Modules\Messaging\Models\ConversationParticipant;
  */
 class ConversationController extends ResourceController
 {
+	/**
+	 * @var string|null $policy
+	 */
+	protected ?string $policy = ConversationPolicy::class;
+
 	/**
 	 * Constructor
 	 *
