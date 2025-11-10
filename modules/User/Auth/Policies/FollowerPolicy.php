@@ -75,6 +75,6 @@ class FollowerPolicy extends Policy
 	 */
 	public function all(Request $request): bool
 	{
-		return true;
+		return $this->isSignedIn();
 	}
 }

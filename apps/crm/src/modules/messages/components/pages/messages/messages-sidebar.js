@@ -1,25 +1,61 @@
-import { A, Div, H3, Header, Span } from "@base-framework/atoms";
+import { Div, H3, Header, Span } from "@base-framework/atoms";
 import { ScrollableList } from "@base-framework/organisms";
 import { Skeleton } from "@base-framework/ui/atoms";
+import { Icons } from "@base-framework/ui/icons";
 import { Avatar, StaticStatusIndicator } from "@base-framework/ui/molecules";
-import { UserModel } from "@modules/users/components/pages/users/models/user-model.js";
+import { ConversationModel } from "@modules/messages/models/conversation-model.js";
+
+/**
+ * Handle user selection - create or open conversation
+ *
+ * @param {object} follower
+ */
+const handleFollowerClick = (follower) =>
+{
+	const followedUser = follower.followedUser || follower;
+	const userName = followedUser.displayName || `${followedUser.firstName || ''} ${followedUser.lastName || ''}`.trim() || followedUser.email;
+
+	const conversationModel = new ConversationModel({
+		userId: app.user.id,
+		participantId: followedUser.id,
+		title: `Conversation with ${userName}`,
+		type: 'direct'
+	});
+
+	conversationModel.xhr.add({}, (result) =>
+	{
+		if (result && result.id)
+		{
+			app.navigate(`messages/${result.id}`);
+			return;
+		}
+
+		app.notify({
+			type: 'error',
+			title: 'Error',
+			description: 'Failed to start conversation. Please try again.',
+			icon: Icons.circleX
+		});
+	});
+};
 
 /**
  * Sidebar row item to display the user's name and status,
- * then navigate to new conversation on click.
+ * then create/open conversation on click.
  *
  * @returns {object}
  */
 const SidebarRowItem = () =>
 {
-	return (user) =>
+	return (follower) =>
 	{
-		const displayName = user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
-		const avatarSrc = user.image ? `/files/users/profile/${user.image}` : null;
+		const followedUser = follower.followedUser || follower;
+		const displayName = followedUser.displayName || `${followedUser.firstName || ''} ${followedUser.lastName || ''}`.trim() || followedUser.email;
+		const avatarSrc = followedUser.image ? `/files/users/profile/${followedUser.image}` : null;
 
-		return A({
+		return Div({
 			class: "flex items-center justify-between p-2 rounded-md hover:bg-muted/50 cursor-pointer",
-			href: `messages/${user.id}`
+			click: () => handleFollowerClick(follower)
 		},
 			[
 				Div({ class: "flex items-center gap-2" }, [
@@ -31,7 +67,7 @@ const SidebarRowItem = () =>
 							size: "sm",
 						}),
 						Div({ class: "absolute bottom-0 right-0" }, [
-							StaticStatusIndicator(user.status || 'offline')
+							StaticStatusIndicator(followedUser.status || 'offline')
 						])
 					]),
 					Span({ class: "text-sm font-medium capitalize" }, displayName)
@@ -41,21 +77,48 @@ const SidebarRowItem = () =>
 };
 
 /**
+ * FollowingModel
+ *
+ * Model for fetching the user's following list
+ *
+ * @param {number} userId
+ * @returns {object}
+ */
+const FollowingModel = (userId) =>
+{
+	const Model = app.base.Model;
+	return Model.extend({
+		url: `/api/user/${userId}/following`,
+	});
+};
+
+/**
  * MessagesSidebar
  *
- * A sidebar that lists all available users for starting conversations.
- * Clicking an item navigates to start a new conversation with that user.
+ * A sidebar that lists the user's following connections for starting conversations.
+ * Clicking an item creates a new conversation or opens the existing one with that user.
  *
  * @returns {object}
  */
 export const MessagesSidebar = () =>
 {
-	const data = new UserModel();
+	const userId = app.user?.id;
+	if (!userId)
+	{
+		return Div({ class: "flex-auto flex-col pb-12 hidden 2xl:flex p-6 border-l bg-sidebar w-full max-w-[320px] h-full" });
+	}
+
+	const FollowingModelClass = FollowingModel(userId);
+	const data = new FollowingModelClass({
+		orderBy: {
+			createdAt: 'DESC'
+		}
+	});
 
 	return Div({ class: "flex-auto flex-col pb-12 hidden 2xl:flex p-6 border-l bg-sidebar w-full max-w-[320px] h-full" },
 		[
 			Header({ class: "pb-4 px-2 flex flex-col" }, [
-				H3({ class: "scroll-m-20 text-lg font-bold tracking-tight" }, "Connections")
+				H3({ class: "scroll-m-20 text-lg font-bold tracking-tight" }, "Following")
 			]),
 			ScrollableList({
 				data,

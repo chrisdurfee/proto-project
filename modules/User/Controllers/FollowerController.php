@@ -81,6 +81,11 @@ class FollowerController extends Controller
 			return $this->error('Invalid user ID to follow.');
 		}
 
+		if ($followerId == $userId)
+		{
+			return $this->error('Follower user ID cannot be the same as the user ID.');
+		}
+
 		$result = $this->followerService->toggleFollower((int)$userId, (int)$followerId);
 		if (!$result->success)
 		{
@@ -108,6 +113,11 @@ class FollowerController extends Controller
 		if ($userId === null)
 		{
 			return $this->error('Invalid user ID to follow.');
+		}
+
+		if ($followerId == $userId)
+		{
+			return $this->error('Follower user ID cannot be the same as the user ID.');
 		}
 
 		$result = $this->followerService->followUser((int)$userId, (int)$followerId);

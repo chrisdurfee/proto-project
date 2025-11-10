@@ -42,6 +42,17 @@ class UserGate extends Gate
 	}
 
 	/**
+	 * Checks if the user is signed in.
+	 *
+	 * @return bool True if the user is signed in, otherwise false.
+	 */
+	public function isSignedIn(): bool
+	{
+		$user = $this->get('user');
+		return isset($user);
+	}
+
+	/**
 	 * This will check if the user is an admin.
 	 *
 	 * @return bool

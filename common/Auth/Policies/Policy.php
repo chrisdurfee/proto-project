@@ -74,6 +74,16 @@ class Policy extends BasePolicy
 	}
 
 	/**
+	 * Checks if the user is signed in.
+	 *
+	 * @return bool True if the user is signed in, otherwise false.
+	 */
+	public function isSignedIn(): bool
+	{
+		return auth()->user->isSignedIn();
+	}
+
+	/**
 	 * Checks if the user has a specific role.
 	 *
 	 * @param string $roleSlug

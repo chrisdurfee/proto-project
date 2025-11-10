@@ -51,6 +51,11 @@ class BlockUserController extends Controller
 			return $this->error('Invalid user ID to block.');
 		}
 
+		if ($blockUserId == $userId)
+		{
+			return $this->error('Blocked user ID cannot be the same as the user ID.');
+		}
+
 		$result = $this->blockUserService->toggleBlock((int)$userId, (int)$blockUserId);
 		if (!$result->success)
 		{
@@ -78,6 +83,11 @@ class BlockUserController extends Controller
 		if ($userId === null)
 		{
 			return $this->error('Invalid user ID.');
+		}
+
+		if ($blockUserId == $userId)
+		{
+			return $this->error('Blocked user ID cannot be the same as the user ID.');
 		}
 
 		$result = $this->blockUserService->blockUser((int)$userId, (int)$blockUserId);
