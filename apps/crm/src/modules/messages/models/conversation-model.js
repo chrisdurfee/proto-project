@@ -13,41 +13,86 @@ export const ConversationModel = Model.extend({
 
 	xhr: {
 		/**
-		 * Set up an EventSource for real-time conversation updates.
+		 * Set up an EventSource for real-time conversation updates with auto-reconnection.
 		 *
 		 * @param {string} url - The URL path relative to the model's base URL.
 		 * @param {string} params - The query parameters.
 		 * @param {function} callBack - The callback function for incoming updates.
-		 * @returns {EventSource}
+		 * @returns {object} Object with source and cleanup function
 		 */
 		setupEventSource(url, params, callBack)
 		{
-			const fullUrl = this.getUrl(url);
-			const eventSource = new EventSource(fullUrl);
+			let source = null;
+			let reconnectTimer = null;
+			let intentionallyClosed = false;
+			const RECONNECT_DELAY = 3000; // 3 seconds
 
-			eventSource.onmessage = (event) =>
+			const connect = () =>
 			{
-				try
+				if (intentionallyClosed)
 				{
-					const data = JSON.parse(event.data);
-					if (callBack)
+					return;
+				}
+
+				const fullUrl = this.getUrl(url);
+				const queryString = params ? '?' + params : '';
+				source = new EventSource(fullUrl + queryString);
+
+				source.onopen = () =>
+				{
+					console.log('[SSE] Conversation sync established');
+				};
+
+				source.onerror = (error) =>
+				{
+					console.error('[SSE] Conversation sync error, will attempt reconnect in', RECONNECT_DELAY / 1000, 'seconds');
+					source.close();
+
+					if (!intentionallyClosed)
 					{
-						callBack(data);
+						reconnectTimer = setTimeout(() =>
+						{
+							console.log('[SSE] Attempting to reconnect conversation sync...');
+							connect();
+						}, RECONNECT_DELAY);
+					}
+				};
+
+				source.onmessage = (event) =>
+				{
+					try
+					{
+						const data = JSON.parse(event.data);
+						if (callBack)
+						{
+							callBack(data);
+						}
+					}
+					catch (error)
+					{
+						console.error('[SSE] Error parsing conversation message:', error);
+					}
+				};
+			};
+
+			connect();
+
+			// Return object with source getter and cleanup function
+			return {
+				get source() { return source; },
+				close: () =>
+				{
+					intentionallyClosed = true;
+					if (reconnectTimer)
+					{
+						clearTimeout(reconnectTimer);
+					}
+					if (source)
+					{
+						source.close();
 					}
 				}
-				catch (error)
-				{
-					console.error('Error parsing SSE message:', error);
-				}
 			};
-
-			eventSource.onerror = (error) =>
-			{
-				console.error('EventSource error:', error);
-				eventSource.close();
-			};
-
-			return eventSource;
 		},
 
 		/**

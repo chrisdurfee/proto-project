@@ -13,43 +13,87 @@ export const MessageModel = Model.extend({
 	xhr: {
 
 		/**
-		 * Set up an EventSource for real-time message updates.
+		 * Set up an EventSource for real-time message updates with auto-reconnection.
 		 *
 		 * @param {string} url - The URL path relative to the model's base URL.
 		 * @param {string} params - The query parameters.
 		 * @param {function} callBack - The callback function for incoming messages.
-		 * @returns {EventSource}
+		 * @returns {object} Object with source and cleanup function
 		 */
 		setupEventSource(url, params, callBack)
 		{
-			const fullUrl = this.getUrl(url);
-			const source = new EventSource(fullUrl + '?' + params);
+			let source = null;
+			let reconnectTimer = null;
+			let intentionallyClosed = false;
+			const RECONNECT_DELAY = 3000; // 3 seconds
 
-			source.onerror = (event) =>
+			const connect = () =>
 			{
-				console.error('EventSource error:', event);
-				source.close();
-			};
-
-			source.onmessage = (event) =>
-			{
-				if (!event.data)
+				if (intentionallyClosed)
 				{
 					return;
 				}
 
-				try
+				const fullUrl = this.getUrl(url);
+				source = new EventSource(fullUrl + '?' + params);
+
+				source.onopen = () =>
 				{
-					const data = JSON.parse(event.data);
-					callBack(data);
-				}
-				catch (error)
+					console.log('[SSE] Connection established');
+				};
+
+				source.onerror = (event) =>
 				{
-					console.error('Error parsing SSE message:', error, event.data);
-				}
+					console.error('[SSE] Connection error, will attempt reconnect in', RECONNECT_DELAY / 1000, 'seconds');
+					source.close();
+
+					if (!intentionallyClosed)
+					{
+						reconnectTimer = setTimeout(() =>
+						{
+							console.log('[SSE] Attempting to reconnect...');
+							connect();
+						}, RECONNECT_DELAY);
+					}
+				};
+
+				source.onmessage = (event) =>
+				{
+					if (!event.data)
+					{
+						return;
+					}
+
+					try
+					{
+						const data = JSON.parse(event.data);
+						callBack(data);
+					}
+					catch (error)
+					{
+						console.error('[SSE] Error parsing message:', error, event.data);
+					}
+				};
 			};
 
-			return source;
+			connect();
+
+			// Return object with source getter and cleanup function
+			return {
+				get source() { return source; },
+				close: () =>
+				{
+					intentionallyClosed = true;
+					if (reconnectTimer)
+					{
+						clearTimeout(reconnectTimer);
+					}
+					if (source)
+					{
+						source.close();
+					}
+				}
+			};
 		},
 
 		/**

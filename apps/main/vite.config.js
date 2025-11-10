@@ -1,6 +1,5 @@
 import tailwindcss from '@tailwindcss/vite';
 import fs from 'fs';
-import { createProxyMiddleware } from 'http-proxy-middleware';
 import path from 'path';
 import { defineConfig } from 'vite';
 import { generateUrls } from '../../infrastructure/config/domain.config.js';
@@ -14,34 +13,7 @@ const BASE_URL = (isDev ? '/' : '/main/');
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [
-		tailwindcss(),
-		{
-			name: 'sse-proxy',
-			configureServer(server) {
-				server.middlewares.use('/api', (req, res, next) => {
-					const accept = req.headers.accept || '';
-					if (!accept.includes('text/event-stream')) {
-						return next();
-					}
-
-					const proxy = createProxyMiddleware({
-						target: apiTarget,
-						changeOrigin: true,
-						secure: false,
-						selfHandleResponse: true,
-						onProxyReq(proxyReq, req, res) {
-							proxyReq.setHeader('Accept', 'text/event-stream');
-						},
-						onProxyRes(proxyRes, req, res) {
-							res.writeHead(proxyRes.statusCode, proxyRes.headers);
-							proxyRes.pipe(res);
-						}
-					});
-
-					proxy(req, res, next);
-				});
-			}
-		}
+		tailwindcss()
 	],
 	base: BASE_URL,
 	resolve: {
@@ -68,7 +40,18 @@ export default defineConfig({
 				target: apiTarget,
 				changeOrigin: true,
 				secure: false,
-				ws: true
+				ws: true,
+				bypass(req, res) {
+					const accept = req.headers.accept || '';
+					// Detect EventSource or Fetch('text/event-stream')
+					if (accept.includes('text/event-stream')) {
+						const target = `${apiTarget}${req.url}`;
+						console.log('[vite] redirecting SSE to', target);
+						res.writeHead(301, { Location: target });
+						res.end();
+						return false;
+					}
+				}
 			},
 			'/files': {
 				target: apiTarget,
