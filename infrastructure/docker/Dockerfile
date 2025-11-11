@@ -120,7 +120,7 @@ COPY modules/ ./modules/
 COPY public/ ./public/
 
 # Install Node.js for building frontend apps
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
