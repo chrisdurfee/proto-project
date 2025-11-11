@@ -81,6 +81,13 @@ export const ConversationMessages = Jot(
 	 */
 	setupReadTracking()
 	{
+		// Don't set up read tracking if there's no conversation ID
+		// @ts-ignore
+		if (!this.conversationId)
+		{
+			return;
+		}
+		
 		// @ts-ignore
 		this.readTracker = new MessageReadTracker(this.conversationId, {
 			threshold: 0.5,
@@ -99,6 +106,13 @@ export const ConversationMessages = Jot(
 	{
 		// @ts-ignore
 		const conversationId = this.conversationId;
+		
+		// Don't set up sync if there's no conversation ID
+		if (!conversationId)
+		{
+			return;
+		}
+		
 		// @ts-ignore
 		this.eventSource = new MessageModel({ conversationId })
 			.xhr.sync({}, (data) =>
