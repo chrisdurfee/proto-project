@@ -17,4 +17,5 @@ router()
 		CrossSiteProtectionMiddleware::class
 	]))
 	->get('messaging/:userId/conversations/sync', [ConversationController::class, 'sync'])
+	->post('messaging/:userId/conversations/find-or-create', [ConversationController::class, 'findOrCreate'])
 	->resource('messaging/:userId/conversations', ConversationController::class);

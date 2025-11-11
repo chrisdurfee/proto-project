@@ -7,67 +7,43 @@ import { Avatar, StaticStatusIndicator } from "@base-framework/ui/molecules";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
 
 /**
- * Handle user selection - create or open conversation
+ * Handle user selection - find existing conversation or create new one
  *
  * @param {object} follower
- * @param {object} conversationsData - The parent's conversation data
+ * @param {object} conversationsData - The parent's conversation data (unused now - backend handles lookup)
  */
 const handleFollowerClick = (follower, conversationsData) =>
 {
+	// The follower object has followedUser which is the person the current user is following
 	const followedUser = follower.followedUser || follower;
-	const userName = followedUser.displayName || `${followedUser.firstName || ''} ${followedUser.lastName || ''}`.trim() || followedUser.email;
+	const targetUserId = followedUser.id;
 	const currentUserId = app.data.user.id;
 
-	// Check if a conversation already exists with this user
-	const existingConversation = conversationsData?.items?.find(conversation =>
-	{
-		// Only check direct conversations
-		if (conversation.type !== 'direct')
-		{
-			return false;
-		}
-
-		// Check if this conversation includes both the current user and the selected user
-		const participants = conversation.participants || [];
-		const hasCurrentUser = participants.some(p => p.userId === currentUserId);
-		const hasFollowedUser = participants.some(p => p.userId === followedUser.id);
-
-		return hasCurrentUser && hasFollowedUser && participants.length === 2;
-	});
-
-	// If conversation exists, navigate to it
-	if (existingConversation)
-	{
-		app.navigate(`messages/${existingConversation.id}`);
-		return;
-	}
-
-	// Otherwise, create a new conversation
+	// Use backend to find existing conversation or create new one
 	const conversationModel = new ConversationModel({
-		userId: currentUserId,
-		participantId: followedUser.id,
-		title: `Conversation with ${userName}`,
-		type: 'direct'
+		userId: currentUserId
 	});
 
-	conversationModel.xhr.add({}, (result) =>
-	{
-		if (result && result.id)
+	conversationModel.xhr.findOrCreate(
+		{ participantId: targetUserId },
+		(result) =>
 		{
-			app.navigate(`messages/${result.id}`);
-			return;
+			if (result?.success && result?.id)
+			{
+				app.navigate(`messages/${result.id}`);
+			}
+			else
+			{
+				app.notify({
+					type: 'error',
+					title: 'Error',
+					description: 'Failed to start conversation. Please try again.',
+					icon: Icons.circleX
+				});
+			}
 		}
-
-		app.notify({
-			type: 'error',
-			title: 'Error',
-			description: 'Failed to start conversation. Please try again.',
-			icon: Icons.circleX
-		});
-	});
-};
-
-/**
+	);
+};/**
  * Sidebar row item to display the user's name and status,
  * then create/open conversation on click.
  *

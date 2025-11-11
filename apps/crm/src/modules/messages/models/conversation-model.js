@@ -109,6 +109,18 @@ export const ConversationModel = Model.extend({
 
 			const params = `lastId=${lastId}`;
 			return this.setupEventSource('/sync', params, callBack);
+		},
+
+		/**
+		 * Find existing conversation with a user or create a new one.
+		 *
+		 * @param {object} data - Object with participantId
+		 * @param {function} callBack - The callback function.
+		 * @returns {object}
+		 */
+		findOrCreate(data, callBack)
+		{
+			return this._post('/find-or-create', data, {}, callBack);
 		}
 	}
 });

@@ -263,4 +263,37 @@ class Conversation extends Model
 
 		return $counts;
 	}
+
+	/**
+	 * Find an existing direct conversation between two users.
+	 *
+	 * @param int $userId1 First user ID
+	 * @param int $userId2 Second user ID
+	 * @return int|null Conversation ID if found, null otherwise
+	 */
+	public static function findByUser(int $userId1, int $userId2): ?int
+	{
+		$model = new static();
+
+		// Find conversations where both users are participants
+		// and the conversation is of type 'direct'
+		$sql = "
+			SELECT c.id
+			FROM conversations c
+			INNER JOIN conversation_participants cp1
+				ON c.id = cp1.conversation_id
+				AND cp1.user_id = ?
+				AND cp1.deleted_at IS NULL
+			INNER JOIN conversation_participants cp2
+				ON c.id = cp2.conversation_id
+				AND cp2.user_id = ?
+				AND cp2.deleted_at IS NULL
+			WHERE c.type = 'direct'
+				AND c.deleted_at IS NULL
+			LIMIT 1
+		";
+
+		$result = $model->storage->fetchOne($sql, [$userId1, $userId2]);
+		return $result ? (int)$result->id : null;
+	}
 }
