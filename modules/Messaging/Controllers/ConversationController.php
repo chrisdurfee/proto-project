@@ -132,7 +132,7 @@ class ConversationController extends ResourceController
 
 		$userId = session()->user->id ?? null;
 		$conversationId = Conversation::findByUser($userId, $participantId);
-		if ($conversationId)
+		if (is_int($conversationId))
 		{
 			return $this->response([
 				'id' => $conversationId,

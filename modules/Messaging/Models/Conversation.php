@@ -282,15 +282,14 @@ class Conversation extends Model
 			->select(['c.id'])
 			->join(function($joins)
 			{
-				$joins->inner('conversation_participants', 'cp1')
+				$joins->right('conversation_participants', 'cp1')
 					->on('c.id = cp1.conversation_id', 'cp1.user_id = ?', 'cp1.deleted_at IS NULL');
 
-				$joins->inner('conversation_participants', 'cp2')
+				$joins->right('conversation_participants', 'cp2')
 					->on('c.id = cp2.conversation_id', 'cp2.user_id = ?', 'cp2.deleted_at IS NULL');
 			})
 			->where(
-				['c.type', 'direct'],
-				'c.deleted_at IS NULL'
+				['c.type', "'direct'"]
 			)
 			->first($params);
 
