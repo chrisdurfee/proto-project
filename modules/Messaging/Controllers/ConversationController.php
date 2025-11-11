@@ -32,6 +32,19 @@ class ConversationController extends ResourceController
 	}
 
 	/**
+	 * Validation rules
+	 */
+	protected function validate(): array
+	{
+		return [
+			'title' => 'string:255',
+			'type' => 'string:20',
+			'description' => 'string:500',
+			'participantId' => 'int'
+		];
+	}
+
+	/**
 	 * Override the add method to handle participants.
 	 *
 	 * @param Request $request The HTTP request object.
@@ -40,17 +53,8 @@ class ConversationController extends ResourceController
 	public function add(Request $request): object
 	{
 		$data = $this->getRequestItem($request);
-		if (empty($data))
-		{
-			return $this->error('No data provided', 400);
-		}
-
-		$userId = session()->user->id ?? null;
 		$participantId = $data->participantId ?? null;
-		if (!$participantId)
-		{
-			return $this->error('Participant ID required', 400);
-		}
+		$userId = session()->user->id ?? null;
 
 		return $this->createConversationWithParticipants(
 			(object)[
@@ -72,9 +76,8 @@ class ConversationController extends ResourceController
 	 */
 	protected function createConversationWithParticipants(object $conversationData, array $participantIds): object
 	{
-		$model = new Conversation($conversationData);
+		$model = $this->model($conversationData);
 		$result = $model->add();
-
 		if (!$result || !isset($model->id))
 		{
 			return $this->error('Failed to create conversation', 500);
@@ -125,19 +128,6 @@ class ConversationController extends ResourceController
 			'userId' => $userId,
 			'isActive' => 1
 		]);
-	}
-
-	/**
-	 * Validation rules
-	 */
-	protected function validate(): array
-	{
-		return [
-			'title' => 'string:255',
-			'type' => 'string:20',
-			'description' => 'string:500',
-			'participantId' => 'int'
-		];
 	}
 
 	/**
@@ -222,14 +212,11 @@ class ConversationController extends ResourceController
 		unset($inputs->filter->view);
 
 		// Convert modifiers object to array if needed
-		$modifiers = is_object($inputs->modifiers) ? (array)$inputs->modifiers : ($inputs->modifiers ?? []);
+		$modifiers = $inputs->modifiers;
 		$modifiers['view'] = $view;
 		$modifiers['userId'] = $userId;
 
-		// Use ConversationParticipant::all() with Proto's built-in joins
 		$result = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $modifiers);
-
-		// Add unread counts in batch (single query instead of O(n))
 		if (!empty($result->rows))
 		{
 			$conversationIds = array_column($result->rows, 'conversationId');

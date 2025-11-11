@@ -204,7 +204,7 @@ class MessageController extends ResourceController
 			'cp.user_id' => $userId
 		]);
 
-		$table = (new Message())->storage->table();
+		$table = Message::builder();
 		$sql = $table->select([['COUNT(*)'], 'count']);
 		if (!$participant || !$participant->lastReadMessageId)
 		{
