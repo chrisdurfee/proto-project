@@ -47,7 +47,6 @@ class ConversationController extends ResourceController
 
 		$userId = session()->user->id ?? null;
 		$participantId = $data->participantId ?? null;
-
 		if (!$participantId)
 		{
 			return $this->error('Participant ID required', 400);
