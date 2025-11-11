@@ -40,7 +40,7 @@ class MessageReaction extends Model
 	 */
 	public function message()
 	{
-		return $this->belongsTo(Message::class, 'message_id');
+		return $this->belongsTo(Message::class);
 	}
 
 	/**
@@ -50,7 +50,7 @@ class MessageReaction extends Model
 	 */
 	public function user()
 	{
-		return $this->belongsTo(User::class, 'user_id');
+		return $this->belongsTo(User::class);
 	}
 
 }
