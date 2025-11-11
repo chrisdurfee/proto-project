@@ -49,12 +49,12 @@ const NoteListItem = (note, openNoteDetailsModal) =>
 		}),
 		Div({ class: "flex flex-1 flex-col gap-y-3" }, [
 			Div({ class: "flex items-center gap-x-2" }, [
-				P({ class: "text-sm font-medium" }, name),
+				P({ class: "text-sm font-medium capitalize" }, name),
 				note.noteType && Span({ class: "text-xs text-muted-foreground" },
 					`• ${note.noteType.replace('_', ' ')}`
 				)
 			]),
-			note.title && P({ class: "text-sm font-semibold mt-1" }, note.title),
+			note.title && P({ class: "text-sm font-semibold mt-1 capitalize" }, note.title),
 			note.content && P({ class: "text-sm text-muted-foreground mt-1 whitespace-pre-line" }, note.content),
 			note.tags && Div({ class: "flex gap-2 mt-2 flex-wrap" },
 				note.tags.split(',').map(tag =>
