@@ -32,19 +32,13 @@ class ConversationController extends ResourceController
 	}
 
 	/**
-	 * Override the add method to handle file attachments.
+	 * Override the add method to handle participants.
 	 *
 	 * @param Request $request The HTTP request object.
-	 * @return object Response with created conversation and attachments.
+	 * @return object Response with created conversation.
 	 */
 	public function add(Request $request): object
 	{
-		$result = parent::add($request);
-		if ($result->success === false)
-		{
-			return $result;
-		}
-
 		$data = $this->getRequestItem($request);
 		if (empty($data))
 		{
@@ -52,17 +46,48 @@ class ConversationController extends ResourceController
 		}
 
 		$userId = session()->user->id ?? null;
-		$addResult = $this->addParticipants(
-			$result->id,
-			[
-				$data->participantId,
-				$userId
-			]
-		);
+		$participantId = $data->participantId ?? null;
 
-		return $addResult
-			? $this->response(['id' => $result->id])
-			: $this->error('Failed to add participants', 500);
+		if (!$participantId)
+		{
+			return $this->error('Participant ID required', 400);
+		}
+
+		return $this->createConversationWithParticipants(
+			(object)[
+				'type' => $data->type ?? 'direct',
+				'title' => $data->title ?? null,
+				'description' => $data->description ?? null,
+				'createdBy' => $userId
+			],
+			[$userId, $participantId]
+		);
+	}
+
+	/**
+	 * Create a conversation and add participants.
+	 *
+	 * @param object $conversationData
+	 * @param array $participantIds
+	 * @return object Response with conversation ID
+	 */
+	protected function createConversationWithParticipants(object $conversationData, array $participantIds): object
+	{
+		$model = new Conversation($conversationData);
+		$result = $model->add();
+
+		if (!$result || !isset($model->id))
+		{
+			return $this->error('Failed to create conversation', 500);
+		}
+
+		$success = $this->addParticipants((int)$model->id, $participantIds);
+		if (!$success)
+		{
+			return $this->error('Failed to add participants', 500);
+		}
+
+		return $this->response(['id' => (int)$model->id]);
 	}
 
 	/**
@@ -140,28 +165,20 @@ class ConversationController extends ResourceController
 			]);
 		}
 
-		$model = new Conversation((object)[
-			'type' => 'direct',
-			'createdBy' => $userId
-		]);
+		$result = $this->createConversationWithParticipants(
+			(object)[
+				'type' => 'direct',
+				'createdBy' => $userId
+			],
+			[$userId, $participantId]
+		);
 
-		$result = $model->add();
-		if (!$result || !isset($model->id))
+		if ($result->success)
 		{
-			return $this->error('Failed to create conversation', 500);
+			$result->existing = false;
 		}
 
-		// Add both participants
-		$success = $this->addParticipants((int)$model->id, [$userId, $participantId]);
-		if (!$success)
-		{
-			return $this->error('Failed to add participants', 500);
-		}
-
-		return $this->response([
-			'id' => (int)$conversationId,
-			'existing' => false
-		]);
+		return $result;
 	}
 
 	/**

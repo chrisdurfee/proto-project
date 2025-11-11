@@ -76,6 +76,18 @@ class ConversationPolicy extends MessagingPolicy
 	}
 
 	/**
+	 * Determines if the user can find or create a conversation.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function findOrCreate(Request $request): bool
+	{
+		// Authenticated users can find or create conversations
+		return $this->getUserId() !== null;
+	}
+
+	/**
 	 * Determines if the user can update a conversation.
 	 *
 	 * @param Request $request
