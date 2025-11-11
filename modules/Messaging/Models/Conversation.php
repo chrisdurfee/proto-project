@@ -275,25 +275,25 @@ class Conversation extends Model
 	{
 		$model = new static();
 
-		// Find conversations where both users are participants
-		// and the conversation is of type 'direct'
-		$sql = "
-			SELECT c.id
-			FROM conversations c
-			INNER JOIN conversation_participants cp1
-				ON c.id = cp1.conversation_id
-				AND cp1.user_id = ?
-				AND cp1.deleted_at IS NULL
-			INNER JOIN conversation_participants cp2
-				ON c.id = cp2.conversation_id
-				AND cp2.user_id = ?
-				AND cp2.deleted_at IS NULL
-			WHERE c.type = 'direct'
-				AND c.deleted_at IS NULL
-			LIMIT 1
-		";
+		$params = [$userId1, $userId2];
+		$result = $model
+			->storage
+			->table()
+			->select(['c.id'])
+			->join(function($joins)
+			{
+				$joins->inner('conversation_participants', 'cp1')
+					->on('c.id = cp1.conversation_id', 'cp1.user_id = ?', 'cp1.deleted_at IS NULL');
 
-		$result = $model->storage->fetchOne($sql, [$userId1, $userId2]);
+				$joins->inner('conversation_participants', 'cp2')
+					->on('c.id = cp2.conversation_id', 'cp2.user_id = ?', 'cp2.deleted_at IS NULL');
+			})
+			->where(
+				['c.type', 'direct'],
+				'c.deleted_at IS NULL'
+			)
+			->first($params);
+
 		return $result ? (int)$result->id : null;
 	}
 }

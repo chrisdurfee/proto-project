@@ -124,22 +124,14 @@ class ConversationController extends ResourceController
 	 */
 	public function findOrCreate(Request $request): object
 	{
-		$userId = session()->user->id ?? null;
-		if (!$userId)
-		{
-			return $this->error('Not authenticated', 401);
-		}
-
 		$participantId = $request->getInt('participantId');
 		if (!$participantId)
 		{
 			return $this->error('Participant ID required', 400);
 		}
 
-		// Try to find existing conversation
+		$userId = session()->user->id ?? null;
 		$conversationId = Conversation::findByUser($userId, $participantId);
-
-		// If conversation exists, return it
 		if ($conversationId)
 		{
 			return $this->response([
@@ -148,23 +140,19 @@ class ConversationController extends ResourceController
 			]);
 		}
 
-		// Create new conversation using storage
-		$model = new Conversation();
-		$conversationId = $model->storage->create((object)[
+		$model = new Conversation((object)[
 			'type' => 'direct',
-			'createdBy' => $userId,
-			'createdAt' => date('Y-m-d H:i:s'),
-			'updatedAt' => date('Y-m-d H:i:s')
+			'createdBy' => $userId
 		]);
 
-		if (!$conversationId)
+		$result = $model->add();
+		if (!$result || !isset($model->id))
 		{
 			return $this->error('Failed to create conversation', 500);
 		}
 
 		// Add both participants
-		$success = $this->addParticipants((int)$conversationId, [$userId, $participantId]);
-
+		$success = $this->addParticipants((int)$model->id, [$userId, $participantId]);
 		if (!$success)
 		{
 			return $this->error('Failed to add participants', 500);
