@@ -204,25 +204,35 @@ class Conversation extends Model
 			return $result;
 		}
 
+		$model = new static();
 		$result['merge'] = $model->convertRows($conversations);
 
+		// Get all conversation IDs for batch unread count query
+		$result['merge'] = static::getConversationUnreadCounts($result['merge'], $userId);
+
+		return $result;
+	}
+
+	/**
+	 * Get conversations with their unread message counts for a user.
+	 *
+	 * @param array $conversations Array of conversation objects
+	 * @param int $userId The user ID to get unread counts for
+	 * @return array Conversations with unreadCount property added
+	 */
+	protected static function getConversationUnreadCounts(array $conversations, int $userId): array
+	{
 		// Get all conversation IDs for batch unread count query
 		$conversationIds = array_column($conversations, 'id');
 
 		// Batch query for unread counts - single query instead of O(n)
 		$unreadCounts = static::getUnreadCountsForConversations($conversationIds, $userId);
-
-		// Attach unread counts to conversations
-		$conversations = $result['merge'];
 		foreach ($conversations as $conversation)
 		{
 			$conversation->conversationId = $conversation->id;
 			$conversation->unreadCount = $unreadCounts[$conversation->id] ?? 0;
 		}
-
-		$result['merge'] = $conversations;
-
-		return $result;
+		return $conversations;
 	}
 
 	/**
@@ -273,12 +283,8 @@ class Conversation extends Model
 	 */
 	public static function findByUser(int $userId1, int $userId2): ?int
 	{
-		$model = new static();
-
 		$params = [$userId1, $userId2];
-		$result = $model
-			->storage
-			->table()
+		$result = static::builder()
 			->select(['c.id'])
 			->join(function($joins)
 			{
