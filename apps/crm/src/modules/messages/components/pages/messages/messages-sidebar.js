@@ -31,16 +31,15 @@ const handleFollowerClick = (follower, conversationsData) =>
 			if (result?.success && result?.id)
 			{
 				app.navigate(`messages/${result.id}`);
+				return;
 			}
-			else
-			{
-				app.notify({
-					type: 'error',
-					title: 'Error',
-					description: 'Failed to start conversation. Please try again.',
-					icon: Icons.circleX
-				});
-			}
+
+			app.notify({
+				type: 'error',
+				title: 'Error',
+				description: 'Failed to start conversation. Please try again.',
+				icon: Icons.circleX
+			});
 		}
 	);
 };/**
