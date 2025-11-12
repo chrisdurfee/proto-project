@@ -453,36 +453,35 @@ class MessageController extends ResourceController
 		// Subscribe to conversation's message updates channel
 		$channel = "conversation:{$conversationId}:messages";
 		redisEvent($channel, function($channel, $message): array|null
+		{
+			// Message contains message ID from Redis publish
+			$messageId = $message['id'] ?? $message['messageId'] ?? null;
+			if (!$messageId)
 			{
-				// Message contains message ID from Redis publish
-				$messageId = $message['id'] ?? $message['messageId'] ?? null;
-				if (!$messageId)
-				{
-					return null;
-				}
+				return null;
+			}
 
-				$action = $message['action'] ?? 'merge';
-				if ($action === 'delete')
-				{
-					return [
-						'merge' => [],
-						'deleted' => [$messageId]
-					];
-				}
-
-				// Fetch the updated message data
-				$messageData = Message::get($messageId);
-				if (!$messageData)
-				{
-					// Message not found
-					return null;
-				}
-
+			$action = $message['action'] ?? 'merge';
+			if ($action === 'delete')
+			{
 				return [
-					'merge' => [$messageData],
-					'deleted' => []
+					'merge' => [],
+					'deleted' => [$messageId]
 				];
 			}
-		);
+
+			// Fetch the updated message data
+			$messageData = Message::get($messageId);
+			if (!$messageData)
+			{
+				// Message not found
+				return null;
+			}
+
+			return [
+				'merge' => [$messageData],
+				'deleted' => []
+			];
+		});
 	}
 }
