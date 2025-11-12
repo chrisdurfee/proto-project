@@ -47,27 +47,6 @@ const SendButton = () => (
 export const ThreadComposer = VeilJot(
 {
 	/**
-	 * Initialize component state.
-	 *
-	 * @returns {void}
-	 */
-	onCreated()
-	{
-		// @ts-ignore
-		this.selectedFiles = [];
-	},
-
-	/**
-	 * Component state.
-	 *
-	 * @returns {object}
-	 */
-	state()
-	{
-		return { fileCount: 0 };
-	},
-
-	/**
 	 * Handle file selection.
 	 *
 	 * @param {Event} e
@@ -76,65 +55,12 @@ export const ThreadComposer = VeilJot(
 	handleFileSelect(e)
 	{
 		// @ts-ignore
-		const files = Array.from(e.target.files || []);
-		// @ts-ignore
-		this.selectedFiles = files;
-		// @ts-ignore
-		this.state.fileCount = files.length;
-		// @ts-ignore
-		this.updatePreview();
-	},
-
-	/**
-	 * Remove a file from selection by index.
-	 *
-	 * @param {number} index
-	 * @returns {void}
-	 */
-	removeFile(index)
-	{
-		// @ts-ignore
-		this.selectedFiles.splice(index, 1);
-		// @ts-ignore
-		this.state.fileCount = this.selectedFiles.length;
-
-		// Clear file input if no files selected
-		// @ts-ignore
-		if (this.selectedFiles.length === 0 && this.fileInput)
+		if (this.attachmentPreview)
 		{
 			// @ts-ignore
-			this.fileInput.value = '';
-		}
-		// @ts-ignore
-		this.updatePreview();
-	},
-
-	/**
-	 * Update the attachment preview.
-	 *
-	 * @returns {void}
-	 */
-	updatePreview()
-	{
-		// @ts-ignore
-		if (this.previewContainer)
-		{
-			// Clear existing preview
+			const files = Array.from(e.target.files || []);
 			// @ts-ignore
-			this.previewContainer.innerHTML = '';
-
-			// @ts-ignore
-			if (this.selectedFiles.length > 0)
-			{
-				// Create new preview
-				// @ts-ignore
-				const preview = AttachmentPreview(this.selectedFiles, (index) => this.removeFile(index));
-				if (preview)
-				{
-					// @ts-ignore
-					this.previewContainer.appendChild(preview.element);
-				}
-			}
+			this.attachmentPreview.addFiles(files);
 		}
 	},
 
@@ -186,6 +112,10 @@ export const ThreadComposer = VeilJot(
 			content
 		});
 
+		// Get files from attachment preview
+		// @ts-ignore
+		const files = this.attachmentPreview ? this.attachmentPreview.getFiles() : [];
+
 		// @ts-ignore
 		data.xhr.add({}, (response) =>
 		{
@@ -198,22 +128,21 @@ export const ThreadComposer = VeilJot(
 					this.submitCallBack(this.parent);
 				}
 			}
-		// @ts-ignore
-		}, this.selectedFiles);
+		}, files);
 
 		// Reset selected files after sending
 		// @ts-ignore
-		this.selectedFiles = [];
-		// @ts-ignore
-		this.state.fileCount = 0;
+		if (this.attachmentPreview)
+		{
+			// @ts-ignore
+			this.attachmentPreview.clearAll();
+		}
 		// @ts-ignore
 		if (this.fileInput)
 		{
 			// @ts-ignore
 			this.fileInput.value = '';
 		}
-		// @ts-ignore
-		this.updatePreview();
 	},
 
 	/**
@@ -225,7 +154,7 @@ export const ThreadComposer = VeilJot(
 	{
 		return Div({ class: "w-full sticky z-10 bottom-0" }, [
 			// Attachment preview section (above composer)
-			Div({ cache: 'previewContainer' }),
+			new AttachmentPreview({ cache: 'attachmentPreview' }),
 
 			// Composer section
 			Div({ class: "fadeIn p-4 w-full fadeIn bg-background/80 backdrop-blur-md" }, [

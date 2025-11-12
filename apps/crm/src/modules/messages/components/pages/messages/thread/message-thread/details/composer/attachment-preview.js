@@ -1,4 +1,5 @@
-import { Div, Img, P, Span } from "@base-framework/atoms";
+import { Div, Img, On, P, Span } from "@base-framework/atoms";
+import { Component, Data, Jot } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 
@@ -78,20 +79,20 @@ const AttachmentIcon = (ext) =>
  */
 const ImageThumbnail = (file) =>
 {
-	const reader = new FileReader();
-	const img = Img({
+	return Img({
 		alt: file.name,
-		class: "w-12 h-12 rounded object-cover border border-border"
+		class: "w-12 h-12 rounded object-cover border border-border",
+		onCreated(img)
+		{
+			const reader = new FileReader();
+			reader.onload = (e) =>
+			{
+				// @ts-ignore
+				img.src = e.target.result;
+			};
+			reader.readAsDataURL(file);
+		}
 	});
-
-	reader.onload = (e) =>
-	{
-		// @ts-ignore
-		img.element.src = e.target.result;
-	};
-	reader.readAsDataURL(file);
-
-	return img;
 };
 
 /**
@@ -101,10 +102,10 @@ const ImageThumbnail = (file) =>
  *
  * @param {File} file
  * @param {number} index
- * @param {Function} onRemove
+ * @param {object} parent - Parent component with removeFile method
  * @returns {object}
  */
-const AttachmentPreviewItem = (file, index, onRemove) =>
+const AttachmentPreviewItem = (file, index, parent) =>
 {
 	const ext = getFileExtension(file.name);
 	const isImage = isImageFile(ext);
@@ -128,12 +129,12 @@ const AttachmentPreviewItem = (file, index, onRemove) =>
 		// Remove button
 		Button({
 			variant: "icon",
-			icon: Icons.xMark,
+			icon: Icons.x,
 			class: "text-muted-foreground hover:text-destructive h-6 w-6",
 			click: (e) =>
 			{
 				e.stopPropagation();
-				onRemove(index);
+				parent.removeFile(index);
 			}
 		})
 	]);
@@ -145,40 +146,102 @@ const AttachmentPreviewItem = (file, index, onRemove) =>
  * Container for attachment previews above the composer
  * Displays selected files before sending with ability to remove them
  *
- * @param {Array<File>} files
- * @param {Function} onRemove - Callback to remove file by index
- * @returns {object|null}
+ * @type {typeof Component}
  */
-export const AttachmentPreview = (files, onRemove) =>
+export const AttachmentPreview = Jot(
 {
-	if (!files || files.length === 0)
+	/**
+	 * Initialize component data.
+	 *
+	 * @returns {void}
+	 */
+	onCreated()
 	{
-		return null;
+		// @ts-ignore
+		this.data = new Data({ files: [] });
+	},
+
+	/**
+	 * Add files to the preview.
+	 *
+	 * @param {Array<File>} files
+	 * @returns {void}
+	 */
+	addFiles(files)
+	{
+		// @ts-ignore
+		this.data.concat('files', files);
+	},
+
+	/**
+	 * Remove a file by index.
+	 *
+	 * @param {number} index
+	 * @returns {void}
+	 */
+	removeFile(index)
+	{
+		// @ts-ignore
+		this.data.splice('files', index);
+	},
+
+	/**
+	 * Clear all files.
+	 *
+	 * @returns {void}
+	 */
+	clearAll()
+	{
+		// @ts-ignore
+		this.data.set({ files: [] });
+	},
+
+	/**
+	 * Get all files.
+	 *
+	 * @returns {Array<File>}
+	 */
+	getFiles()
+	{
+		// @ts-ignore
+		return this.data.files;
+	},
+
+	/**
+	 * Render the component.
+	 *
+	 * @returns {object}
+	 */
+	render()
+	{
+		return On('files', (files) =>
+		{
+			if (!files || files.length === 0)
+			{
+				return null;
+			}
+
+			return Div({ class: "px-4 pb-2 w-full bg-background/80 backdrop-blur-md" }, [
+				Div({ class: "lg:max-w-5xl m-auto" }, [
+					// Header
+					Div({ class: "flex items-center justify-between mb-2" }, [
+						Span({ class: "text-sm font-medium text-muted-foreground" }, `${files.length} file${files.length !== 1 ? 's' : ''} selected`),
+						Button({
+							variant: "ghost",
+							class: "text-xs text-muted-foreground hover:text-foreground",
+							// @ts-ignore
+							click: () => this.clearAll()
+						}, "Clear all")
+					]),
+
+					// Attachment grid
+					Div({
+						class: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2",
+						// @ts-ignore
+						for: ['files', (file, index) => AttachmentPreviewItem(file, index, this)]
+					})
+				])
+			]);
+		});
 	}
-
-	return Div({ class: "px-4 pb-2 w-full bg-background/80 backdrop-blur-md" }, [
-		Div({ class: "lg:max-w-5xl m-auto" }, [
-			// Header
-			Div({ class: "flex items-center justify-between mb-2" }, [
-				Span({ class: "text-sm font-medium text-muted-foreground" }, `${files.length} file${files.length !== 1 ? 's' : ''} selected`),
-				Button({
-					variant: "ghost",
-					class: "text-xs text-muted-foreground hover:text-foreground",
-					click: () =>
-					{
-						// Remove all files
-						while (files.length > 0)
-						{
-							onRemove(0);
-						}
-					}
-				}, "Clear all")
-			]),
-
-			// Attachment grid
-			Div({
-				class: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2"
-			}, files.map((file, index) => AttachmentPreviewItem(file, index, onRemove)))
-		])
-	]);
-};
+});
