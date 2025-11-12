@@ -57,7 +57,8 @@ const getMessagePreview = (conversation) =>
 export const ThreadListItem = (conversation, route) =>
 {
 	// Find the other participant (not the current user)
-	const otherParticipant = conversation.participants?.find(p => p.userId !== conversation.userId) || {};
+	const otherParticipant = conversation.participants?.find(p => p.userId !== app.data.user.id) || {};
+	console.log(otherParticipant, conversation.participants)
 
 	const fullName = `${otherParticipant.firstName || ''} ${otherParticipant.lastName || ''}`.trim() || conversation.title || 'Unknown';
 	const lastMessagePreview = getMessagePreview(conversation);
