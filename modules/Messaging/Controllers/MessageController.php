@@ -451,21 +451,17 @@ class MessageController extends ResourceController
 		}
 
 		// Subscribe to conversation's message updates channel
-		redisEvent(
-			"conversation:{$conversationId}:messages",
-			function($channel, $message)
+		$channel = "conversation:{$conversationId}:messages";
+		redisEvent($channel, function($channel, $message): array|null
 			{
 				// Message contains message ID from Redis publish
 				$messageId = $message['id'] ?? $message['messageId'] ?? null;
 				if (!$messageId)
 				{
-					return null; // Invalid message, skip
+					return null;
 				}
 
-				// Determine action type
 				$action = $message['action'] ?? 'merge';
-
-				// For delete actions, just return the ID
 				if ($action === 'delete')
 				{
 					return [
@@ -478,7 +474,8 @@ class MessageController extends ResourceController
 				$messageData = Message::get($messageId);
 				if (!$messageData)
 				{
-					return null; // Message not found
+					// Message not found
+					return null;
 				}
 
 				return [
