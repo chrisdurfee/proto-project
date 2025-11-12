@@ -4,6 +4,7 @@ import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
 import { MessageModel } from "@modules/messages/models/message-model.js";
+import { AttachmentPreview } from "./attachment-preview.js";
 import { ThreadTextarea } from "./thread-textarea.js";
 
 /**
@@ -57,6 +58,16 @@ export const ThreadComposer = VeilJot(
 	},
 
 	/**
+	 * Component state.
+	 *
+	 * @returns {object}
+	 */
+	state()
+	{
+		return { fileCount: 0 };
+	},
+
+	/**
 	 * Handle file selection.
 	 *
 	 * @param {Event} e
@@ -68,14 +79,62 @@ export const ThreadComposer = VeilJot(
 		const files = Array.from(e.target.files || []);
 		// @ts-ignore
 		this.selectedFiles = files;
+		// @ts-ignore
+		this.state.fileCount = files.length;
+		// @ts-ignore
+		this.updatePreview();
+	},
 
-		if (files.length > 0)
+	/**
+	 * Remove a file from selection by index.
+	 *
+	 * @param {number} index
+	 * @returns {void}
+	 */
+	removeFile(index)
+	{
+		// @ts-ignore
+		this.selectedFiles.splice(index, 1);
+		// @ts-ignore
+		this.state.fileCount = this.selectedFiles.length;
+
+		// Clear file input if no files selected
+		// @ts-ignore
+		if (this.selectedFiles.length === 0 && this.fileInput)
 		{
-			app.notify({
-				title: `${files.length} file(s) selected`,
-				description: files.map(f => f.name).join(', '),
-				icon: Icons.paperClip
-			});
+			// @ts-ignore
+			this.fileInput.value = '';
+		}
+		// @ts-ignore
+		this.updatePreview();
+	},
+
+	/**
+	 * Update the attachment preview.
+	 *
+	 * @returns {void}
+	 */
+	updatePreview()
+	{
+		// @ts-ignore
+		if (this.previewContainer)
+		{
+			// Clear existing preview
+			// @ts-ignore
+			this.previewContainer.innerHTML = '';
+
+			// @ts-ignore
+			if (this.selectedFiles.length > 0)
+			{
+				// Create new preview
+				// @ts-ignore
+				const preview = AttachmentPreview(this.selectedFiles, (index) => this.removeFile(index));
+				if (preview)
+				{
+					// @ts-ignore
+					this.previewContainer.appendChild(preview.element);
+				}
+			}
 		}
 	},
 
@@ -146,11 +205,15 @@ export const ThreadComposer = VeilJot(
 		// @ts-ignore
 		this.selectedFiles = [];
 		// @ts-ignore
+		this.state.fileCount = 0;
+		// @ts-ignore
 		if (this.fileInput)
 		{
 			// @ts-ignore
 			this.fileInput.value = '';
 		}
+		// @ts-ignore
+		this.updatePreview();
 	},
 
 	/**
@@ -160,43 +223,49 @@ export const ThreadComposer = VeilJot(
 	 */
 	render()
 	{
-		return Div({ class: "fadeIn p-4 w-full fadeIn sticky bg-background/80 backdrop-blur-md z-10 bottom-0" }, [
-			// Hidden file input
-			Input({
-				type: "file",
-				multiple: true,
-				cache: 'fileInput',
-				class: "hidden",
-				accept: "image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip",
-				// @ts-ignore
-				change: (e) => this.handleFileSelect(e)
-			}),
-			// @ts-ignore
-			Form({ class: "relative flex border rounded-lg p-3 bg-surface max-h-40 overflow-y-auto overflow-x-hidden lg:max-w-5xl m-auto", submit: () => this.submit(this.textareaComponent.getValue()) }, [
-				Div({ class: 'flex flex-col sticky top-0' }, [
-					Button({
-						variant: "icon",
-						icon: Icons.paperclip,
-						class: "text-foreground hover:text-accent sticky top-0",
-						// @ts-ignore
-						click: () => this.openFilePicker()
-					})
-				]),
-				// Textarea for reply
-				new ThreadTextarea({
-					cache: 'textareaComponent',
+		return Div({ class: "w-full sticky z-10 bottom-0" }, [
+			// Attachment preview section (above composer)
+			Div({ cache: 'previewContainer' }),
+
+			// Composer section
+			Div({ class: "fadeIn p-4 w-full fadeIn bg-background/80 backdrop-blur-md" }, [
+				// Hidden file input
+				Input({
+					type: "file",
+					multiple: true,
+					cache: 'fileInput',
+					class: "hidden",
+					accept: "image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip",
 					// @ts-ignore
-					placeholder: this.placeholder,
-					// @ts-ignore
-					charLimit: this.charLimit ?? 5000,
-					// @ts-ignore
-					onSubmit: (content) => this.submit(content)
+					change: (e) => this.handleFileSelect(e)
 				}),
-				Div({ class: 'flex flex-col sticky top-0' }, [
-					TextCount(),
-					SendButton()
-				])
-			]),
+				// @ts-ignore
+				Form({ class: "relative flex border rounded-lg p-3 bg-surface max-h-40 overflow-y-auto overflow-x-hidden lg:max-w-5xl m-auto", submit: () => this.submit(this.textareaComponent.getValue()) }, [
+					Div({ class: 'flex flex-col sticky top-0' }, [
+						Button({
+							variant: "icon",
+							icon: Icons.paperclip,
+							class: "text-foreground hover:text-accent sticky top-0",
+							// @ts-ignore
+							click: () => this.openFilePicker()
+						})
+					]),
+					// Textarea for reply
+					new ThreadTextarea({
+						cache: 'textareaComponent',
+						// @ts-ignore
+						placeholder: this.placeholder,
+						// @ts-ignore
+						charLimit: this.charLimit ?? 5000,
+						// @ts-ignore
+						onSubmit: (content) => this.submit(content)
+					}),
+					Div({ class: 'flex flex-col sticky top-0' }, [
+						TextCount(),
+						SendButton()
+					])
+				]),
+			])
 		]);
 	}
 });
