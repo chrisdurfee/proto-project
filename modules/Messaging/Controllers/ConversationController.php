@@ -281,6 +281,14 @@ class ConversationController extends ResourceController
 
 				// Get unread count for this conversation
 				$unreadCounts = Conversation::getUnreadCountsForConversations([$conversationId], $userId);
+
+				/**
+				 * The conversation model will not allow you to set
+				 * properties that are not added to the fields or joins fields.
+				 *
+				 * This will get the model data as an object so we can map
+				 * custom properties to the it before sending.
+				 */
 				$conversation = $conversation->getData();
 				$conversation->unreadCount = $unreadCounts[$conversationId] ?? 0;
 				$conversation->conversationId = $conversationId;
