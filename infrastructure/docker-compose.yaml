@@ -37,8 +37,8 @@ services:
     image: redis:7-alpine
     container_name: proto-redis
     restart: unless-stopped
-    ports:
-      - "6380:6379"  # Redis port exposed for development
+    # ports:
+    #   - "6380:6379"  # Removed: Redis should only be accessible within Docker network
     volumes:
       - redis_data:/data
       - ./infrastructure/config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
@@ -46,9 +46,9 @@ services:
     networks:
       - proto-network
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:?Please set REDIS_PASSWORD in infrastructure/.env file}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a \"${REDIS_PASSWORD}\" ping | grep PONG || exit 1"]
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5

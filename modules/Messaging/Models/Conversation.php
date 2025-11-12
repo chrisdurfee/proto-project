@@ -183,11 +183,11 @@ class Conversation extends Model
 		// Use storage directly to avoid join conflicts with model joins
 		$model = new static();
 		$sql = $model->storage
-			->select()
+			->select(['c.*'])
 			->join(function($joins)
 			{
 				$joins->left('conversation_participants', 'cpp')
-					->on('c.id = cpp.conversation_id AND cpp.deleted_at IS NULL');
+					->on('c.id = cpp.conversation_id', 'cpp.deleted_at IS NULL');
 			})
 			->where(['cpp.user_id', $userId]);
 
@@ -244,6 +244,11 @@ class Conversation extends Model
 	 */
 	protected static function getUnreadCountsForConversations(array $conversationIds, int $userId): array
 	{
+		if (empty($conversationIds))
+		{
+			return [];
+		}
+
 		$model = new static();
 		$placeholders = implode(',', array_fill(0, count($conversationIds), '?'));
 

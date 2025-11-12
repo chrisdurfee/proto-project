@@ -60,6 +60,15 @@ class MessageController extends ResourceController
 		$this->processAttachments($request, $result->id);
 		$this->updateConversationLastMessage($conversationId, $result->id);
 
+		// Publish Redis event for real-time message delivery
+		events()->emit("redis:conversation:{$conversationId}:messages", [
+			'id' => $result->id,
+			'action' => 'merge'
+		]);
+
+		// Also notify all participants about conversation update
+		$this->notifyConversationUpdate($conversationId);
+
 		return $result;
 	}
 
@@ -168,12 +177,8 @@ class MessageController extends ResourceController
 			$messageId = $latestMessage->id;
 		}
 
-		/**
-		 * This will touch the conversation to update its last modified timestamp.
-		 */
-		Conversation::edit((object)[
-			'id' => $conversationId
-		]);
+		// Update conversation timestamp and notify participants
+		$this->touchAndNotifyConversation($conversationId);
 
 		// Update the participant's last read position
 		$result = ConversationParticipant::updateLastRead($conversationId, $userId, $messageId);
@@ -279,9 +284,23 @@ class MessageController extends ResourceController
 	public function delete(Request $request): object
 	{
 		$messageId = (int)$this->getResourceId($request);
+		$conversationId = (int)$request->params()->conversationId ?? null;
+
 		$success = Message::remove((object)[
 			'id' => $messageId
 		]);
+
+		if ($success && $conversationId)
+		{
+			// Publish Redis event for message deletion
+			events()->emit("redis:conversation:{$conversationId}:messages", [
+				'id' => $messageId,
+				'action' => 'delete'
+			]);
+
+			// Notify participants about conversation update
+			$this->notifyConversationUpdate($conversationId);
+		}
 
 		return $this->response([
 			'success' => $success,
@@ -318,6 +337,52 @@ class MessageController extends ResourceController
 				'lastMessageAt' => date('Y-m-d H:i:s')
 			]);
 		}
+	}
+
+	/**
+	 * Notify all conversation participants about an update.
+	 *
+	 * @param int $conversationId
+	 * @return void
+	 */
+	protected function notifyConversationUpdate(int $conversationId): void
+	{
+		// Get all participants for this conversation
+		$participants = ConversationParticipant::fetchWhere([
+			['cp.conversationId', $conversationId]
+		]);
+
+		if (empty($participants))
+		{
+			return;
+		}
+
+		// Publish to each participant's conversation channel
+		foreach ($participants as $participant)
+		{
+			events()->emit("redis:user:{$participant->userId}:conversations", [
+				'id' => $conversationId,
+				'conversationId' => $conversationId,
+				'action' => 'merge'
+			]);
+		}
+	}
+
+	/**
+	 * Touch conversation to update timestamp and notify all participants.
+	 *
+	 * @param int $conversationId
+	 * @return void
+	 */
+	protected function touchAndNotifyConversation(int $conversationId): void
+	{
+		// Update the conversation's last modified timestamp
+		Conversation::edit((object)[
+			'id' => $conversationId
+		]);
+
+		// Notify all participants about the update
+		$this->notifyConversationUpdate($conversationId);
 	}
 
 	/**
@@ -371,8 +436,8 @@ class MessageController extends ResourceController
 	}
 
 	/**
-	 * Sync messages for a conversation since the last sync time.
-	 * Uses Server-Sent Events (SSE) to stream updates.
+	 * Sync messages for a conversation via Redis-based Server-Sent Events.
+	 * Listens to message updates published via Redis pub/sub.
 	 *
 	 * @param Request $request
 	 * @return void
@@ -385,27 +450,42 @@ class MessageController extends ResourceController
 			return;
 		}
 
-		$lastSync = date('Y-m-d H:i:s');
-		$INTERVAL_IN_SECONDS = 5;
-		$firstSync = true;
-
-		serverEvent($INTERVAL_IN_SECONDS, function() use($conversationId, &$lastSync, &$firstSync)
-		{
-			$previousSync = $lastSync;
-			/**
-			 * Update the last sync timestamp for the next check.
-			 */
-			$lastSync = date('Y-m-d H:i:s');
-			$response = Message::sync($conversationId, $previousSync);
-
-			if ($firstSync)
+		// Subscribe to conversation's message updates channel
+		redisEvent(
+			"conversation:{$conversationId}:messages",
+			function($channel, $message)
 			{
-				$firstSync = false;
-				return $response;
-			}
+				// Message contains message ID from Redis publish
+				$messageId = $message['id'] ?? $message['messageId'] ?? null;
+				if (!$messageId)
+				{
+					return null; // Invalid message, skip
+				}
 
-			$hasChanges = !empty($response['merge']) || !empty($response['deleted']);
-			return $hasChanges ? $response : null;
-		});
+				// Determine action type
+				$action = $message['action'] ?? 'merge';
+
+				// For delete actions, just return the ID
+				if ($action === 'delete')
+				{
+					return [
+						'merge' => [],
+						'deleted' => [$messageId]
+					];
+				}
+
+				// Fetch the updated message data
+				$messageData = Message::get($messageId);
+				if (!$messageData)
+				{
+					return null; // Message not found
+				}
+
+				return [
+					'merge' => [$messageData],
+					'deleted' => []
+				];
+			}
+		);
 	}
 }

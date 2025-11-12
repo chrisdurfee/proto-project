@@ -89,6 +89,15 @@ class ConversationController extends ResourceController
 			return $this->error('Failed to add participants', 500);
 		}
 
+		// Publish Redis event to notify all participants
+		foreach ($participantIds as $userId)
+		{
+			events()->emit("redis:user:{$userId}:conversations", [
+				'id' => (int)$model->id,
+				'action' => 'merge'
+			]);
+		}
+
 		return $this->response(['id' => (int)$model->id]);
 	}
 
@@ -232,7 +241,8 @@ class ConversationController extends ResourceController
 	}
 
 	/**
-	 * Stream conversation updates via Server-Sent Events.
+	 * Stream conversation updates via Redis-based Server-Sent Events.
+	 * Listens to conversation updates published via Redis pub/sub.
 	 *
 	 * @param Request $request
 	 * @return void
@@ -245,31 +255,39 @@ class ConversationController extends ResourceController
 			return;
 		}
 
-		$lastSync = date('Y-m-d H:i:s');
-		$INTERVAL_IN_SECONDS = 5;
-		$firstSync = true;
-
-		serverEvent($INTERVAL_IN_SECONDS, function() use ($userId, &$lastSync, &$firstSync)
-		{
-			$previousSync = $lastSync;
-
-			/**
-			 * Update the last sync timestamp for the next check.
-			 */
-			$lastSync = date('Y-m-d H:i:s');
-			$response = Conversation::sync($userId, $previousSync);
-
-			if ($firstSync)
+		// Subscribe to user's conversation updates channel
+		redisEvent(
+			"user:{$userId}:conversations",
+			function($channel, $message) use ($userId)
 			{
-				$firstSync = false;
-				return $response;
-			}
+				// Message contains conversation ID from Redis publish
+				$conversationId = $message['id'] ?? $message['conversationId'] ?? null;
+				if (!$conversationId)
+				{
+					return null; // Invalid message, skip
+				}
 
-			/**
-			 * Only return data if there are changes.
-			 */
-			$hasChanges = !empty($response['merge']) || !empty($response['deleted']);
-			return $hasChanges ? $response : null;
-		});
+				// Fetch the updated conversation data
+				$conversation = Conversation::get($conversationId);
+				if (!$conversation)
+				{
+					return null; // Conversation not found
+				}
+
+				// Get unread count for this conversation
+				$unreadCounts = Conversation::getUnreadCountsForConversations([$conversationId], $userId);
+				$conversation = $conversation->getData();
+				$conversation->unreadCount = $unreadCounts[$conversationId] ?? 0;
+				$conversation->conversationId = $conversationId;
+
+				// Determine action type from message
+				$action = $message['action'] ?? 'merge';
+
+				return [
+					'merge' => $action === 'merge' ? [$conversation] : [],
+					'deleted' => $action === 'delete' ? [$conversationId] : []
+				];
+			}
+		);
 	}
 }
