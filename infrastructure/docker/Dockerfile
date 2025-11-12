@@ -36,8 +36,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     intl \
     opcache
 
-# Install Redis extension
-RUN pecl install redis && docker-php-ext-enable redis
+# Install Redis extension 6.3.0 (latest stable with pubSubLoop support)
+RUN pecl install redis-6.3.0 && docker-php-ext-enable redis
 
 # Copy module enablement script
 COPY infrastructure/docker/enable-modules.sh /tmp/enable-modules.sh
