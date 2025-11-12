@@ -85,7 +85,7 @@ class MessageReactionController extends Controller
 		$success = $deleteResult->success ?? false;
 		if ($success)
 		{
-			Message::touch($messageId);
+			$this->touchAndNotifyMessage($messageId);
 		}
 
 		return $this->response([
@@ -94,6 +94,40 @@ class MessageReactionController extends Controller
 			'message' => $success ? 'Reaction removed' : 'Failed to remove reaction',
 			'messageId' => $messageId,
 			'reactionId' => $reaction->id
+		]);
+	}
+
+	/**
+	 * Touch conversation to update timestamp and notify all participants.
+	 *
+	 * @param int $messageId
+	 * @return void
+	 */
+	protected function touchAndNotifyMessage(int $messageId): void
+	{
+		Message::touch($messageId);
+
+		// Notify all participants about the update
+		$this->notifyMessageUpdate($messageId);
+	}
+
+	/**
+	 * Notify all conversation participants about an update.
+	 *
+	 * @param int $conversationId
+	 * @return void
+	 */
+	protected function notifyMessageUpdate(int $messageId): void
+	{
+		$message = Message::get($messageId);
+		if (!$message)
+		{
+			return;
+		}
+
+		events()->emit("redis:conversation:{$message->conversationId}:messages", [
+			'id' => $messageId,
+			'action' => 'merge'
 		]);
 	}
 
@@ -116,7 +150,7 @@ class MessageReactionController extends Controller
 		$success = $result !== false;
 		if ($success)
 		{
-			Message::touch($messageId);
+			$this->touchAndNotifyMessage($messageId);
 		}
 
 		return $this->response([
