@@ -246,6 +246,38 @@ class ConversationController extends ResourceController
 	}
 
 	/**
+	 * Helper to fetch conversation data with unread count.
+	 *
+	 * @param int $conversationId
+	 * @param int $userId
+	 * @return object|null
+	 */
+	protected function getConversationData(int $conversationId, int $userId): ?object
+	{
+		// Fetch the updated conversation data
+		$conversation = Conversation::get($conversationId);
+		if (!$conversation)
+		{
+			return null; // Conversation not found
+		}
+
+		// Get unread count for this conversation
+		$unreadCounts = Conversation::getUnreadCountsForConversations([$conversationId], $userId);
+
+		/**
+		 * The conversation model will not allow you to set
+		 * properties that are not added to the fields or joins fields.
+		 *
+		 * This will get the model data as an object so we can map
+		 * custom properties to the it before sending.
+		 */
+		$conversation = $conversation->getData();
+		$conversation->unreadCount = $unreadCounts[$conversationId] ?? 0;
+		$conversation->conversationId = $conversationId;
+		return $conversation;
+	}
+
+	/**
 	 * Stream conversation updates via Redis-based Server-Sent Events.
 	 * Listens to conversation updates published via Redis pub/sub.
 	 *
@@ -273,25 +305,11 @@ class ConversationController extends ResourceController
 				}
 
 				// Fetch the updated conversation data
-				$conversation = Conversation::get($conversationId);
+				$conversation = $this->getConversationData((int)$conversationId, (int)$userId);
 				if (!$conversation)
 				{
 					return null; // Conversation not found
 				}
-
-				// Get unread count for this conversation
-				$unreadCounts = Conversation::getUnreadCountsForConversations([$conversationId], $userId);
-
-				/**
-				 * The conversation model will not allow you to set
-				 * properties that are not added to the fields or joins fields.
-				 *
-				 * This will get the model data as an object so we can map
-				 * custom properties to the it before sending.
-				 */
-				$conversation = $conversation->getData();
-				$conversation->unreadCount = $unreadCounts[$conversationId] ?? 0;
-				$conversation->conversationId = $conversationId;
 
 				// Determine action type from message
 				$action = $message['action'] ?? 'merge';
