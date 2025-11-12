@@ -225,7 +225,12 @@ class ConversationController extends ResourceController
 		$modifiers['view'] = $view;
 		$modifiers['userId'] = $userId;
 
-		$result = ConversationParticipant::all($inputs->filter, $inputs->offset, $inputs->limit, $modifiers);
+		$result = ConversationParticipant::all(
+			$inputs->filter,
+			$inputs->offset,
+			$inputs->limit,
+			$modifiers
+		);
 		if (!empty($result->rows))
 		{
 			$conversationIds = array_column($result->rows, 'conversationId');
