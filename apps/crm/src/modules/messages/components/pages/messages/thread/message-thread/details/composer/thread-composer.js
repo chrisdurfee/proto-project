@@ -4,7 +4,7 @@ import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
 import { MessageModel } from "@modules/messages/models/message-model.js";
-import { AttachmentPreview } from "./attachment-preview.js";
+import { AttachmentPreview } from "./attachment/attachment-preview.js";
 import { ThreadTextarea } from "./thread-textarea.js";
 
 /**
