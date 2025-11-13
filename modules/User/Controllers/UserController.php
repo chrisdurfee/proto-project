@@ -421,4 +421,24 @@ class UserController extends ResourceController
 
 		return $this->error($result->message);
 	}
+
+	/**
+	 * We want to override the status update to publish a Redis event.
+	 *
+	 * @param object $data The data to set up the model with.
+	 * @return object The response object.
+	 */
+	protected function updateItemStatus(object $data): object
+	{
+		$response = parent::updateItem($data);
+		if ($response->success)
+		{
+			// Publish Redis event for real-time status tracking
+			events()->emit("redis:user:{$data->id}:status", [
+				'id' => $data->id,
+				'status' => $data->status
+			]);
+		}
+		return $response;
+	}
 }
