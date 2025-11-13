@@ -69,13 +69,11 @@ COPY infrastructure/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY infrastructure/docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
 COPY infrastructure/docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
-# Generate self-signed SSL certificate for local development
-RUN mkdir -p /etc/ssl/private && \
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/ssl/private/localhost.key \
-    -out /etc/ssl/certs/localhost.crt \
-    -subj "/C=US/ST=Development/L=Local/O=Proto/OU=Development/CN=localhost" \
-    -addext "subjectAltName=DNS:localhost,DNS:*.localhost,IP:127.0.0.1" && \
+# Copy mkcert-generated trusted SSL certificates for local development
+# These should be generated with: mkcert localhost 127.0.0.1 ::1
+COPY infrastructure/docker/ssl/localhost.crt /etc/ssl/certs/localhost.crt
+COPY infrastructure/docker/ssl/localhost.key /etc/ssl/private/localhost.key
+RUN chmod 644 /etc/ssl/certs/localhost.crt && \
     chmod 600 /etc/ssl/private/localhost.key
 
 # Disable prefork MPM and enable event MPM for HTTP/2 support
