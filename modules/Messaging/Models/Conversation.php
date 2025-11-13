@@ -200,7 +200,6 @@ class Conversation extends Model
 			return $result;
 		}
 
-		$model = new static();
 		$result['merge'] = $model->convertRows($conversations);
 
 		return $result;

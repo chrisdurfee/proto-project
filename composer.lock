@@ -815,16 +815,16 @@
         },
         {
             "name": "protoframework/proto",
-            "version": "1.0.140",
+            "version": "1.0.141",
             "source": {
                 "type": "git",
                 "url": "https://github.com/chrisdurfee/proto.git",
-                "reference": "890ea5c55d2434785b99adbc5a91a16ecdc3b40e"
+                "reference": "1e76c78892d94a099fc7ec90f26d2c28a9a9802f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/890ea5c55d2434785b99adbc5a91a16ecdc3b40e",
-                "reference": "890ea5c55d2434785b99adbc5a91a16ecdc3b40e",
+                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/1e76c78892d94a099fc7ec90f26d2c28a9a9802f",
+                "reference": "1e76c78892d94a099fc7ec90f26d2c28a9a9802f",
                 "shasum": ""
             },
             "require": {
@@ -874,9 +874,9 @@
             ],
             "support": {
                 "issues": "https://github.com/chrisdurfee/proto/issues",
-                "source": "https://github.com/chrisdurfee/proto/tree/1.0.140"
+                "source": "https://github.com/chrisdurfee/proto/tree/1.0.141"
             },
-            "time": "2025-11-13T10:30:48+00:00"
+            "time": "2025-11-13T21:02:49+00:00"
         },
         {
             "name": "psr/clock",
@@ -3390,16 +3390,16 @@
         },
         {
             "name": "theseer/tokenizer",
-            "version": "1.2.3",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/theseer/tokenizer.git",
-                "reference": "737eda637ed5e28c3413cb1ebe8bb52cbf1ca7a2"
+                "reference": "d74205c497bfbca49f34d4bc4c19c17e22db4ebb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/theseer/tokenizer/zipball/737eda637ed5e28c3413cb1ebe8bb52cbf1ca7a2",
-                "reference": "737eda637ed5e28c3413cb1ebe8bb52cbf1ca7a2",
+                "url": "https://api.github.com/repos/theseer/tokenizer/zipball/d74205c497bfbca49f34d4bc4c19c17e22db4ebb",
+                "reference": "d74205c497bfbca49f34d4bc4c19c17e22db4ebb",
                 "shasum": ""
             },
             "require": {
@@ -3428,7 +3428,7 @@
             "description": "A small library for converting tokenized PHP source code into XML and potentially other formats",
             "support": {
                 "issues": "https://github.com/theseer/tokenizer/issues",
-                "source": "https://github.com/theseer/tokenizer/tree/1.2.3"
+                "source": "https://github.com/theseer/tokenizer/tree/1.3.0"
             },
             "funding": [
                 {
@@ -3436,7 +3436,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-03-03T12:36:25+00:00"
+            "time": "2025-11-13T13:44:09+00:00"
         }
     ],
     "aliases": [],
