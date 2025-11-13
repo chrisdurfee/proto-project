@@ -63,6 +63,6 @@ export const setupServiceWorker = () =>
 		scope: baseUrl
 	}).then((serviceWorker) =>
 	{
-		setupServiceMessages(serviceWorker)
+		setupServiceMessages(serviceWorker);
 	});
 }

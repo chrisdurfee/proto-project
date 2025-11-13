@@ -76,7 +76,7 @@ export const setupServiceWorker = () =>
 		scope: baseUrl
 	}).then((serviceWorker) =>
 	{
-		setupServiceMessages(serviceWorker)
+		setupServiceMessages(serviceWorker);
 
 		if (Configs.push && Configs.push.publicId)
 		{
