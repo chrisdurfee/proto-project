@@ -129,10 +129,7 @@ class Message extends Model
 	 */
 	public static function getForConversation(int $conversationId, int $limit = 50, int $offset = 0): array
 	{
-		$model = new static();
-		return $model
-			->storage
-			->table()
+		return static::builder()
 			->select(
 				['m.*'],
 				[['u.first_name'], 'senderFirstName'],
@@ -182,12 +179,10 @@ class Message extends Model
 			);
 		}
 
-		$result['merge'] = $sql->fetch() ?? [];
+		$result['merge'] = $sql->fetch();
 
 		// Get deleted messages (soft-deleted after last sync)
-		$model = new static();
-		$deletedMessages = $model
-			->storage
+		$deletedMessages = static::builder()
 			->select(['m.id'])
 			->where(
 				['m.conversation_id', $conversationId],
@@ -195,10 +190,83 @@ class Message extends Model
 			)
 			->fetch();
 
+		$model = new static();
 		$result['merge'] = $model->convertRows($result['merge']);
 		$result['deleted'] = $model->convertRows($deletedMessages);
 
 		return $result;
+	}
+
+	/**
+	 * Get unread message count for a participant.
+	 *
+	 * @param int $conversationId
+	 * @param int $userId
+	 * @return int
+	 */
+	public static function getUnreadCount(int $conversationId, int $userId): int
+	{
+		$count = static::builder()
+			->select([['COUNT(*)'], 'count'])
+			->join(function($joins)
+			{
+				$joins->left('conversation_participants', 'cp')
+					->on('m.conversation_id = cp.conversation_id', 'cp.user_id = ?');
+			})
+			->where(
+				['m.conversation_id', $conversationId],
+				['m.sender_id', '!=', $userId],
+				"(m.id > COALESCE(cp.last_read_message_id, 0))",
+				"m.deleted_at IS NULL"
+			)
+			->first();
+
+		return (int)($count->count ?? 0);
+	}
+
+	/**
+	 * Get unread message counts for multiple conversations in a single query.
+	 *
+	 * @param array $conversationIds
+	 * @param int $userId
+	 * @return array Array keyed by conversation_id with unread counts
+	 */
+	public static function getUnreadCountsForConversations(array $conversationIds, int $userId): array
+	{
+		if (empty($conversationIds))
+		{
+			return [];
+		}
+
+		$placeholders = implode(',', array_fill(0, count($conversationIds), '?'));
+
+		$rows = static::builder()
+			->select(
+				['m.conversation_id'],
+				[['COUNT(*)'], 'unread_count']
+			)
+			->join(function($joins)
+			{
+				$joins->left('conversation_participants', 'cp')
+					->on('m.conversation_id = cp.conversation_id');
+			})
+			->where(
+				["m.conversation_id IN ({$placeholders})", $conversationIds],
+				['m.sender_id', '!=', $userId],
+				["cp.user_id", $userId],
+				"(m.id > COALESCE(cp.last_read_message_id, 0))",
+				"m.deleted_at IS NULL"
+			)
+			->groupBy('m.conversation_id')
+			->fetch();
+
+		$counts = [];
+		foreach ($rows as $row)
+		{
+			$counts[$row->conversation_id] = (int)$row->unread_count;
+		}
+
+		return $counts;
 	}
 
 	/**
