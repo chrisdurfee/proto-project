@@ -1,4 +1,4 @@
-import { Div, Span } from "@base-framework/atoms";
+import { Div, Pre, Span } from "@base-framework/atoms";
 import { TimeFrame } from "@base-framework/ui/molecules";
 
 /**
@@ -34,7 +34,7 @@ export const MessageHeader = (isSent, displayName, createdAt) =>
  * @returns {object}
  */
 export const MessageContent = (content) =>
-	content && Span({ class: "text-sm" }, content);
+	content && Pre({ class: "text-sm font-sans text-wrap" }, content);
 
 /**
  * AudioBubble

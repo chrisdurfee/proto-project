@@ -57,15 +57,17 @@ export const MessagesPage = () =>
 			// @ts-ignore
 			this.eventSource = this.data.xhr.sync({}, (response) =>
 			{
-				if (response && response.merge)
+				if (!response && !response.merge)
 				{
+					return;
+				}
+
+				// @ts-ignore
+				if (this.list)
+				{
+					// Update or add conversations
 					// @ts-ignore
-					if (this.list)
-					{
-						// Update or add conversations
-						// @ts-ignore
-						this.list.mingle(response.merge);
-					}
+					this.list.mingle(response.merge);
 				}
 			});
 		},
