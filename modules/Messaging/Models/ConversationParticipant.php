@@ -194,7 +194,7 @@ class ConversationParticipant extends Model
 	 * @param int $messageId
 	 * @return bool
 	 */
-	public static function updateLastRead(int $conversationId, int $userId, int $messageId): bool
+	public static function updateLastRead(int $conversationId, int $userId, int $messageId): ?bool
 	{
 		$participant = static::getBy([
 			'cp.conversation_id' => $conversationId,
@@ -204,6 +204,11 @@ class ConversationParticipant extends Model
 		if (!$participant)
 		{
 			return false;
+		}
+
+		if ($participant->lastReadMessageId >= $messageId)
+		{
+			return null;
 		}
 
 		return static::edit((object)[

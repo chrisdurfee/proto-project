@@ -201,12 +201,19 @@ class MessageController extends ResourceController
 			$messageId = $latestMessage->id;
 		}
 
-		// Update conversation timestamp and notify participants
-		$this->touchAndNotifyConversation($conversationId);
-
 		// Update the participant's last read position
 		$userId = session()->user->id ?? null;
 		$result = ConversationParticipant::updateLastRead($conversationId, $userId, $messageId);
+		if ($result === null)
+		{
+			return $this->response([
+				'success' => true,
+				'message' => 'Messages already marked as read'
+			]);
+		}
+
+		// Update conversation timestamp and notify participants
+		$this->touchAndNotifyConversation($conversationId);
 
 		return $this->response([
 			'success' => $result,

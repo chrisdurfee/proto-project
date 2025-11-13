@@ -67,7 +67,11 @@ export const MessagesPage = () =>
 				{
 					// Update or add conversations
 					// @ts-ignore
-					this.list.mingle(response.merge);
+					this.list.merge(
+						response.merge,
+						false,
+						true
+					);
 				}
 			});
 		},
