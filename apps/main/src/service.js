@@ -55,7 +55,8 @@ const setupServiceMessages = (serviceWorker) =>
  */
 const setupPush = (serviceWorker, pushId) =>
 {
-	return new Push(pushId, serviceWorker);
+	const push = new Push(pushId, serviceWorker);
+	push.setup();
 };
 
 /**
