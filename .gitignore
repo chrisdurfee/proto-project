@@ -27,6 +27,8 @@ letsencrypt/
 *.crt
 *.key
 *.pem
+*.crt.bak
+*.key.bak
 
 # Generated SSL/Certificate files
 renew-certificates.sh
