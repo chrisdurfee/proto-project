@@ -111,10 +111,7 @@ class Conversation extends Model
 	 */
 	public static function getForUser(int $userId): array
 	{
-		$model = new static();
-		return $model
-			->storage
-			->table()
+		return static::builder()
 			->select(
 				['c.*'],
 				[['u.first_name'], 'creatorFirstName'],
@@ -197,8 +194,7 @@ class Conversation extends Model
 		}
 
 		$sql->orderBy('c.last_message_at DESC, c.id DESC');
-		$conversations = $sql->fetch() ?? [];
-
+		$conversations = $sql->fetch();
 		if (empty($conversations))
 		{
 			return $result;
@@ -207,76 +203,7 @@ class Conversation extends Model
 		$model = new static();
 		$result['merge'] = $model->convertRows($conversations);
 
-		// Get all conversation IDs for batch unread count query
-		$result['merge'] = static::getConversationUnreadCounts($result['merge'], $userId);
-
 		return $result;
-	}
-
-	/**
-	 * Get conversations with their unread message counts for a user.
-	 *
-	 * @param array $conversations Array of conversation objects
-	 * @param int $userId The user ID to get unread counts for
-	 * @return array Conversations with unreadCount property added
-	 */
-	protected static function getConversationUnreadCounts(array $conversations, int $userId): array
-	{
-		// Get all conversation IDs for batch unread count query
-		$conversationIds = array_column($conversations, 'id');
-
-		// Batch query for unread counts - single query instead of O(n)
-		$unreadCounts = static::getUnreadCountsForConversations($conversationIds, $userId);
-		foreach ($conversations as $conversation)
-		{
-			$conversation->conversationId = $conversation->id;
-			$conversation->unreadCount = $unreadCounts[$conversation->id] ?? 0;
-		}
-		return $conversations;
-	}
-
-	/**
-	 * Get unread message counts for multiple conversations in a single query.
-	 *
-	 * @param array $conversationIds
-	 * @param int $userId
-	 * @return array Array keyed by conversation_id with unread counts
-	 */
-	protected static function getUnreadCountsForConversations(array $conversationIds, int $userId): array
-	{
-		if (empty($conversationIds))
-		{
-			return [];
-		}
-
-		$model = new static();
-		$placeholders = implode(',', array_fill(0, count($conversationIds), '?'));
-
-		$sql = "
-			SELECT
-				m.conversation_id,
-				COUNT(*) as unread_count
-			FROM messages m
-			LEFT JOIN conversation_participants cp
-				ON m.conversation_id = cp.conversation_id
-				AND cp.user_id = ?
-			WHERE m.conversation_id IN ({$placeholders})
-				AND m.sender_id != ?
-				AND (m.id > COALESCE(cp.last_read_message_id, 0))
-				AND m.deleted_at IS NULL
-			GROUP BY m.conversation_id
-		";
-
-		$params = array_merge([$userId], $conversationIds, [$userId]);
-		$results = $model->storage->fetch($sql, $params);
-
-		$counts = [];
-		foreach ($results as $row)
-		{
-			$counts[$row->conversation_id] = (int)$row->unread_count;
-		}
-
-		return $counts;
 	}
 
 	/**
