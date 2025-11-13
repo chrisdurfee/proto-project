@@ -45,60 +45,33 @@ class ConversationController extends ResourceController
 	}
 
 	/**
-	 * Override the add method to handle participants.
+	 * Adds a model item.
 	 *
-	 * @param Request $request The HTTP request object.
-	 * @return object Response with created conversation.
-	 */
-	public function add(Request $request): object
-	{
-		$data = $this->getRequestItem($request);
-		$participantId = $data->participantId ?? null;
-		$userId = session()->user->id ?? null;
-
-		return $this->createConversationWithParticipants(
-			(object)[
-				'type' => $data->type ?? 'direct',
-				'title' => $data->title ?? null,
-				'description' => $data->description ?? null,
-				'createdBy' => $userId
-			],
-			[$userId, $participantId]
-		);
-	}
-
-	/**
-	 * Create a conversation and add participants.
+	 * This method initializes the model with the provided data and adds user data for creation and updates.
 	 *
-	 * @param object $conversationData
-	 * @param array $participantIds
-	 * @return object Response with conversation ID
+	 * @param object $data The data to set up the model with.
+	 * @return object The response object.
 	 */
-	protected function createConversationWithParticipants(object $conversationData, array $participantIds): object
+	protected function addItem(object $data): object
 	{
-		$model = $this->model($conversationData);
-		$result = $model->add();
-		if (!$result || !isset($model->id))
+		$data->type ??= 'direct';
+		$result = parent::addItem($data);
+		if (!$result->success)
 		{
-			return $this->error('Failed to create conversation', 500);
+			return $result;
 		}
 
-		$success = $this->addParticipants((int)$model->id, $participantIds);
+		/**
+		 * We need to add the participants to the conversation.
+		 */
+		$userId = session()->user->id ?? null;
+		$participantIds = [$userId, $data->participantId ?? null];
+		$success = $this->addParticipants((int)$result->id, $participantIds);
 		if (!$success)
 		{
 			return $this->error('Failed to add participants', 500);
 		}
-
-		// Publish Redis event to notify all participants
-		foreach ($participantIds as $userId)
-		{
-			events()->emit("redis:user:{$userId}:conversations", [
-				'id' => (int)$model->id,
-				'action' => 'merge'
-			]);
-		}
-
-		return $this->response(['id' => (int)$model->id]);
+		return $result;
 	}
 
 	/**
@@ -118,6 +91,15 @@ class ConversationController extends ResourceController
 			{
 				$success = false;
 			}
+		}
+
+		// Publish Redis event to notify all participants
+		foreach ($userIds as $userId)
+		{
+			events()->emit("redis:user:{$userId}:conversations", [
+				'id' => (int)$conversationId,
+				'action' => 'merge'
+			]);
 		}
 
 		return $success;
@@ -148,11 +130,15 @@ class ConversationController extends ResourceController
 	public function findOrCreate(Request $request): object
 	{
 		$participantId = $request->getInt('participantId');
-		if (!$participantId)
+		if (!is_int($participantId))
 		{
 			return $this->error('Participant ID required', 400);
 		}
 
+		/**
+		 * We want to check if we already have a conversation
+		 * between the current user and the participant.
+		 */
 		$userId = session()->user->id ?? null;
 		$conversationId = Conversation::findByUser($userId, $participantId);
 		if (is_int($conversationId))
@@ -163,13 +149,17 @@ class ConversationController extends ResourceController
 			]);
 		}
 
-		$result = $this->createConversationWithParticipants(
+		/**
+		 * No existing conversation found, create a new one.
+		 */
+		$result = $this->addItem(
 			(object)[
 				'type' => 'direct',
-				'createdBy' => $userId
-			],
-			[$userId, $participantId]
-		);
+				'createdBy' => $userId,
+				'title' => null,
+				'description' => null,
+				'participantId' => $participantId
+			]);
 
 		if ($result->success)
 		{
@@ -225,14 +215,27 @@ class ConversationController extends ResourceController
 		$modifiers['view'] = $view;
 		$modifiers['userId'] = $userId;
 
+		/**
+		 * We want to select by participant userId so we use the
+		 * ConversationParticipant model to fetch conversations
+		 * for the user.
+		 */
 		$result = ConversationParticipant::all(
 			$inputs->filter,
 			$inputs->offset,
 			$inputs->limit,
 			$modifiers
 		);
+
+		/**
+		 * We need to add all the unread counts to the messages.
+		 */
 		if (!empty($result->rows))
 		{
+			/**
+			 * Fetch unread counts for all conversations in one query
+			 * to optimize performance.
+			 */
 			$conversationIds = array_column($result->rows, 'conversationId');
 			$unreadCounts = Conversation::getUnreadCountsForConversations($conversationIds, $userId);
 

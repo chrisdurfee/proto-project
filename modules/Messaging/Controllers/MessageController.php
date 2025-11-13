@@ -44,32 +44,78 @@ class MessageController extends ResourceController
 		$data = $this->getRequestItem($request);
 		$conversationId = (int)$request->params()->conversationId ?? null;
 
+		/**
+		 * Light check that we have data to save.
+		 */
 		if (!$this->validateMessageInput($conversationId, $data))
 		{
 			return $this->error('Conversation ID and either content or attachments are required', 400);
 		}
 
+		/**
+		 * Prepare the message data for creation.
+		 */
 		$this->prepareMessageData($data, $conversationId);
-
 		$result = $this->addItem($data);
 		if ($result->success === false)
 		{
 			return $result;
 		}
 
+		/**
+		 * Process attachments and notify the conversation
+		 * has been updated.
+		 */
 		$this->processAttachments($request, $result->id);
-		$this->updateConversationLastMessage($conversationId, $result->id);
+		$this->updateConversationForSync($conversationId, $result->id);
+
+		return $result;
+	}
+
+	/**
+	 * Prepare message data for creation.
+	 *
+	 * @param object $data
+	 * @param int $conversationId
+	 * @return void
+	 */
+	protected function prepareMessageData(object $data, int $conversationId): void
+	{
+		$data->senderId = session()->user->id ?? null;
+		$data->type = $data->type ?? 'text';
+		$data->conversationId = $conversationId;
+
+		// Decode URL-encoded content (happens with multipart/form-data)
+		if (!empty($data->content))
+		{
+			$data->content = urldecode($data->content);
+		}
+		// Allow empty content if files are present
+		else if ($this->hasAttachments())
+		{
+			$data->content = '';
+		}
+	}
+
+	/**
+	 * Update conversation data for sync operations.
+	 *
+	 * @param int $conversationId
+	 * @param int $messageId
+	 * @return void
+	 */
+	protected function updateConversationForSync(int $conversationId, int $messageId): void
+	{
+		$this->updateConversationLastMessage($conversationId, $messageId);
 
 		// Publish Redis event for real-time message delivery
 		events()->emit("redis:conversation:{$conversationId}:messages", [
-			'id' => $result->id,
+			'id' => $messageId,
 			'action' => 'merge'
 		]);
 
 		// Also notify all participants about conversation update
 		$this->notifyConversationUpdate($conversationId);
-
-		return $result;
 	}
 
 	/**
@@ -100,31 +146,6 @@ class MessageController extends ResourceController
 	protected function hasAttachments(): bool
 	{
 		return !empty($_FILES['attachments']) && !empty($_FILES['attachments']['name']);
-	}
-
-	/**
-	 * Prepare message data for creation.
-	 *
-	 * @param object $data
-	 * @param int $conversationId
-	 * @return void
-	 */
-	protected function prepareMessageData(object $data, int $conversationId): void
-	{
-		$data->senderId = session()->user->id ?? null;
-		$data->type = $data->type ?? 'text';
-		$data->conversationId = $conversationId;
-
-		// Decode URL-encoded content (happens with multipart/form-data)
-		if (!empty($data->content))
-		{
-			$data->content = urldecode($data->content);
-		}
-		// Allow empty content if files are present
-		else if ($this->hasAttachments())
-		{
-			$data->content = '';
-		}
 	}
 
 	/**
@@ -159,9 +180,12 @@ class MessageController extends ResourceController
 			return $this->error('Conversation ID required', 400);
 		}
 
-		$userId = session()->user->id ?? null;
 		$data = $this->getRequestItem($request);
 		$messageId = isset($data->messageId) ? (int)$data->messageId : null;
+
+		/**
+		 * This will find the last message if no message id was sent.
+		 */
 		if ($messageId === null)
 		{
 			$latestMessage = Message::find()
@@ -181,6 +205,7 @@ class MessageController extends ResourceController
 		$this->touchAndNotifyConversation($conversationId);
 
 		// Update the participant's last read position
+		$userId = session()->user->id ?? null;
 		$result = ConversationParticipant::updateLastRead($conversationId, $userId, $messageId);
 
 		return $this->response([

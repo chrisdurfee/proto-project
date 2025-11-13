@@ -86,6 +86,23 @@ class MessagePolicy extends MessagingPolicy
 	}
 
 	/**
+	 * Determines if the user can setup a message.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function setup(Request $request): bool
+	{
+		$messageId = $this->getResourceId($request);
+		if (!$messageId)
+		{
+			return false;
+		}
+
+		return $this->ownsMessage($messageId);
+	}
+
+	/**
 	 * Determines if the user can update a message.
 	 *
 	 * @param Request $request

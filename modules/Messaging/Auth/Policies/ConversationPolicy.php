@@ -76,6 +76,17 @@ class ConversationPolicy extends MessagingPolicy
 	}
 
 	/**
+	 * Determines if the user can setup a conversation.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function setup(Request $request): bool
+	{
+		return $this->getUserId() !== null;
+	}
+
+	/**
 	 * Determines if the user can find or create a conversation.
 	 *
 	 * @param Request $request
