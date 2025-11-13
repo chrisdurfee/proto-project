@@ -5,6 +5,7 @@ use Modules\Messaging\Auth\Policies\ConversationPolicy;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;
 use Modules\Messaging\Models\Conversation;
+use Modules\Messaging\Models\Message;
 use Modules\Messaging\Models\ConversationParticipant;
 
 /**
@@ -237,7 +238,7 @@ class ConversationController extends ResourceController
 			 * to optimize performance.
 			 */
 			$conversationIds = array_column($result->rows, 'conversationId');
-			$unreadCounts = Conversation::getUnreadCountsForConversations($conversationIds, $userId);
+			$unreadCounts = Message::getUnreadCountsForConversations($conversationIds, (int)$userId);
 
 			foreach ($result->rows as $row)
 			{
@@ -265,7 +266,7 @@ class ConversationController extends ResourceController
 		}
 
 		// Get unread count for this conversation
-		$unreadCounts = Conversation::getUnreadCountsForConversations([$conversationId], $userId);
+		$unreadCounts = Message::getUnreadCountsForConversations([$conversationId], $userId);
 
 		/**
 		 * The conversation model will not allow you to set
