@@ -184,7 +184,7 @@ Events::update('redis:cache.cleared', ['timestamp' => time()]);`
 				CodeBlock(
 `<?php declare(strict_types=1);
 
-use Proto\\Events\\RedisAsyncEvent;
+use Modules\\Messaging\\Models\\Message;
 use Proto\\Http\\Loop\\EventLoop;
 
 class NotificationController extends ApiController
@@ -194,38 +194,45 @@ class NotificationController extends ApiController
 	 */
 	public function stream(Request $req): void
 	{
-		// Set SSE headers
-		header('Content-Type: text/event-stream');
-		header('Cache-Control: no-cache');
-		header('Connection: keep-alive');
-		header('X-Accel-Buffering: no');
+		$conversationId = (int)($request->params()->conversationId ?? null);
+		if (!$conversationId)
+		{
+			return;
+		}
 
-		$userId = $req->input('user_id');
-
-		// Create event loop
-		$loop = new EventLoop(tickInterval: 50);
-
-		// Subscribe to user notifications via Redis
-		$redisEvent = new RedisAsyncEvent(
-			channels: "user:{$userId}:notifications",
-			callback: function ($channel, $message) {
-				echo "event: notification\\n";
-				echo "data: " . json_encode($message) . "\\n\\n";
-				ob_flush();
-				flush();
+		// Subscribe to conversation's message updates channel
+		$channel = "conversation:{$conversationId}:messages";
+		redisEvent($channel, function($channel, $message): array|null
+		{
+			// Message contains message ID from Redis publish
+			$messageId = $message['id'] ?? $message['messageId'] ?? null;
+			if (!$messageId)
+			{
+				return null;
 			}
-		);
 
-		$loop->addEvent($redisEvent);
+			$action = $message['action'] ?? 'merge';
+			if ($action === 'delete')
+			{
+				return [
+					'merge' => [],
+					'deleted' => [$messageId]
+				];
+			}
 
-		// Send connection confirmation
-		echo "event: connected\\n";
-		echo "data: {\\"status\\":\\"connected\\"}\\n\\n";
-		ob_flush();
-		flush();
+			// Fetch the updated message data
+			$messageData = Message::get($messageId);
+			if (!$messageData)
+			{
+				// Message not found
+				return null;
+			}
 
-		// Start the event loop (blocks until connection closes)
-		$loop->loop();
+			return [
+				'merge' => [$messageData],
+				'deleted' => []
+			];
+		});
 	}
 }`
 				),
@@ -426,38 +433,53 @@ Events::update('redis:system.broadcast', (object)[
 			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Multi-Channel Subscriptions'),
 				P({ class: 'text-muted-foreground' },
-					`RedisAsyncEvent supports subscribing to multiple channels simultaneously,
+					`redisEvent supports subscribing to multiple channels simultaneously,
 					useful for aggregating events from different sources:`
 				),
 				CodeBlock(
 `<?php declare(strict_types=1);
 
-use Proto\\Events\\RedisAsyncEvent;
+use Modules\\Messaging\\Models\\Message;
 use Proto\\Http\\Loop\\EventLoop;
 
-// Stream from multiple channels
-$loop = new EventLoop();
+$conversationId = 1;
 
-$redisEvent = new RedisAsyncEvent(
-	channels: ['orders', 'payments', 'shipments'],
-	callback: function ($channel, $message) {
-		// Handle different event types based on channel
-		match($channel) {
-			'orders' => handleOrder($message),
-			'payments' => handlePayment($message),
-			'shipments' => handleShipment($message)
-		};
-
-		// Send to SSE client
-		echo "event: {$channel}\\n";
-		echo "data: " . json_encode($message) . "\\n\\n";
-		ob_flush();
-		flush();
+// Subscribe to conversation's message updates channel
+$channel = [
+	"conversation:{$conversationId}:messages",
+	"conversation:{$conversationId}:notifications"
+];
+redisEvent($channel, function($channel, $message): array|null
+{
+	// Message contains message ID from Redis publish
+	$messageId = $message['id'] ?? $message['messageId'] ?? null;
+	if (!$messageId)
+	{
+		return null;
 	}
-);
 
-$loop->addEvent($redisEvent);
-$loop->loop();`
+	$action = $message['action'] ?? 'merge';
+	if ($action === 'delete')
+	{
+		return [
+			'merge' => [],
+			'deleted' => [$messageId]
+		];
+	}
+
+	// Fetch the updated message data
+	$messageData = Message::get($messageId);
+	if (!$messageData)
+	{
+		// Message not found
+		return null;
+	}
+
+	return [
+		'merge' => [$messageData],
+		'deleted' => []
+	];
+});`
 				)
 			]),
 
