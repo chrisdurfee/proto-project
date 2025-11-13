@@ -2,6 +2,7 @@
 namespace Modules\Messaging\Controllers;
 
 use Modules\Messaging\Auth\Policies\MessagePolicy;
+use Modules\Messaging\Push\NewMessage;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;
 use Modules\Messaging\Models\Message;
@@ -115,7 +116,7 @@ class MessageController extends ResourceController
 		]);
 
 		// Also notify all participants about conversation update
-		$this->notifyConversationUpdate($conversationId);
+		$this->notifyConversationUpdate($conversationId, $messageId);
 	}
 
 	/**
@@ -213,7 +214,7 @@ class MessageController extends ResourceController
 		}
 
 		// Update conversation timestamp and notify participants
-		$this->touchAndNotifyConversation($conversationId);
+		$this->touchAndNotifyConversation($conversationId, $messageId);
 
 		return $this->response([
 			'success' => $result,
@@ -331,7 +332,7 @@ class MessageController extends ResourceController
 			]);
 
 			// Notify participants about conversation update
-			$this->notifyConversationUpdate($conversationId);
+			$this->notifyConversationUpdate($conversationId, $messageId);
 		}
 
 		return $this->response([
@@ -375,9 +376,10 @@ class MessageController extends ResourceController
 	 * Notify all conversation participants about an update.
 	 *
 	 * @param int $conversationId
+	 * @param int $messageId
 	 * @return void
 	 */
-	protected function notifyConversationUpdate(int $conversationId): void
+	protected function notifyConversationUpdate(int $conversationId, int $messageId): void
 	{
 		// Get all participants for this conversation
 		$participants = ConversationParticipant::fetchWhere([
@@ -385,6 +387,12 @@ class MessageController extends ResourceController
 		]);
 
 		if (empty($participants))
+		{
+			return;
+		}
+
+		$message = Message::get($messageId);
+		if (!$message)
 		{
 			return;
 		}
@@ -397,16 +405,52 @@ class MessageController extends ResourceController
 				'conversationId' => $conversationId,
 				'action' => 'merge'
 			]);
+
+			if ($participant->userId !== $message->senderId)
+			{
+				$this->sendNotifications($participant->userId, $message);
+			}
 		}
+	}
+
+	/**
+	 * Send notifications for the new message.
+	 *
+	 * @param int $userId
+	 * @param Message $message
+	 * @return void
+	 */
+	protected function sendNotifications(int $userId, Message $message): void
+	{
+		$settings = (object)[
+			'template' => NewMessage::class,
+			'queue' => false
+		];
+
+		$data = (object)[
+			'displayName' => $message->displayName,
+			'conversationId' => $message->conversationId,
+			'messageId' => $message->id,
+			'message' => $message->content
+		];
+
+		var_dump($data);
+
+		modules()->user()->push()->send(
+			$userId,
+			$settings,
+			$data
+		);
 	}
 
 	/**
 	 * Touch conversation to update timestamp and notify all participants.
 	 *
 	 * @param int $conversationId
+	 * @param int $messageId
 	 * @return void
 	 */
-	protected function touchAndNotifyConversation(int $conversationId): void
+	protected function touchAndNotifyConversation(int $conversationId, int $messageId): void
 	{
 		// Update the conversation's last modified timestamp
 		Conversation::edit((object)[
@@ -414,7 +458,7 @@ class MessageController extends ResourceController
 		]);
 
 		// Notify all participants about the update
-		$this->notifyConversationUpdate($conversationId);
+		$this->notifyConversationUpdate($conversationId, $messageId);
 	}
 
 	/**
