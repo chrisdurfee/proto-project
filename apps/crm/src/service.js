@@ -32,6 +32,12 @@ const setupServiceMessages = (serviceWorker) =>
 			app.navigate(data.url);
 		}
 
+		if (e.data && e.data.type === 'NAVIGATE_TO')
+		{
+			const targetUrl = e.data.url;
+			app.navigate(targetUrl);
+		}
+
 		// this will reload the page
 		if (data.action === 'reload')
 		{

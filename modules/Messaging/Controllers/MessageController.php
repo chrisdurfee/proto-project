@@ -2,13 +2,12 @@
 namespace Modules\Messaging\Controllers;
 
 use Modules\Messaging\Auth\Policies\MessagePolicy;
-use Modules\Messaging\Push\NewMessage;
+use Modules\Messaging\Models\Message;
+use Modules\Messaging\Services\MessageService;
+use Modules\Messaging\Services\MessageReadService;
+use Modules\Messaging\Services\MessageServiceTrait;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;
-use Modules\Messaging\Models\Message;
-use Modules\Messaging\Models\Conversation;
-use Modules\Messaging\Models\ConversationParticipant;
-use Modules\Messaging\Services\MessageAttachmentService;
 
 /**
  * MessageController
@@ -17,6 +16,8 @@ use Modules\Messaging\Services\MessageAttachmentService;
  */
 class MessageController extends ResourceController
 {
+	use MessageServiceTrait;
+
 	/**
 	 * @var string|null $policy
 	 */
@@ -45,126 +46,8 @@ class MessageController extends ResourceController
 		$data = $this->getRequestItem($request);
 		$conversationId = (int)$request->params()->conversationId ?? null;
 
-		/**
-		 * Light check that we have data to save.
-		 */
-		if (!$this->validateMessageInput($conversationId, $data))
-		{
-			return $this->error('Conversation ID and either content or attachments are required', 400);
-		}
-
-		/**
-		 * Prepare the message data for creation.
-		 */
-		$this->prepareMessageData($data, $conversationId);
-		$result = $this->addItem($data);
-		if ($result->success === false)
-		{
-			return $result;
-		}
-
-		/**
-		 * Process attachments and notify the conversation
-		 * has been updated.
-		 */
-		$this->processAttachments($request, $result->id);
-		$this->updateConversationForSync($conversationId, $result->id);
-
-		return $result;
-	}
-
-	/**
-	 * Prepare message data for creation.
-	 *
-	 * @param object $data
-	 * @param int $conversationId
-	 * @return void
-	 */
-	protected function prepareMessageData(object $data, int $conversationId): void
-	{
-		$data->senderId = session()->user->id ?? null;
-		$data->type = $data->type ?? 'text';
-		$data->conversationId = $conversationId;
-
-		// Decode URL-encoded content (happens with multipart/form-data)
-		if (!empty($data->content))
-		{
-			$data->content = urldecode($data->content);
-		}
-		// Allow empty content if files are present
-		else if ($this->hasAttachments())
-		{
-			$data->content = '';
-		}
-	}
-
-	/**
-	 * Update conversation data for sync operations.
-	 *
-	 * @param int $conversationId
-	 * @param int $messageId
-	 * @return void
-	 */
-	protected function updateConversationForSync(int $conversationId, int $messageId): void
-	{
-		$this->updateConversationLastMessage($conversationId, $messageId);
-
-		// Publish Redis event for real-time message delivery
-		events()->emit("redis:conversation:{$conversationId}:messages", [
-			'id' => $messageId,
-			'action' => 'merge'
-		]);
-
-		// Also notify all participants about conversation update
-		$this->notifyConversationUpdate($conversationId, $messageId, true);
-	}
-
-	/**
-	 * Validate that the message has required data.
-	 *
-	 * @param int|null $conversationId
-	 * @param object $data
-	 * @return bool
-	 */
-	protected function validateMessageInput(?int $conversationId, object $data): bool
-	{
-		if (empty($conversationId))
-		{
-			return false;
-		}
-
-		$hasFiles = $this->hasAttachments();
-		$hasContent = !empty($data->content);
-
-		return $hasContent || $hasFiles;
-	}
-
-	/**
-	 * Check if the request has file attachments.
-	 *
-	 * @return bool
-	 */
-	protected function hasAttachments(): bool
-	{
-		return !empty($_FILES['attachments']) && !empty($_FILES['attachments']['name']);
-	}
-
-	/**
-	 * Process and attach files to the message.
-	 *
-	 * @param Request $request
-	 * @param int $messageId
-	 * @return void
-	 */
-	protected function processAttachments(Request $request, int $messageId): void
-	{
-		if (!$this->hasAttachments())
-		{
-			return;
-		}
-
-		$attachmentService = new MessageAttachmentService();
-		$attachmentService->handleAttachments($request, $messageId);
+		$messageService = new MessageService();
+		return $messageService->createMessage($conversationId, $data, $request);
 	}
 
 	/**
@@ -176,50 +59,11 @@ class MessageController extends ResourceController
 	public function markAsRead(Request $request): object
 	{
 		$conversationId = (int)($request->params()->conversationId ?? null);
-		if (!$conversationId)
-		{
-			return $this->error('Conversation ID required', 400);
-		}
-
 		$data = $this->getRequestItem($request);
 		$messageId = isset($data->messageId) ? (int)$data->messageId : null;
 
-		/**
-		 * This will find the last message if no message id was sent.
-		 */
-		if ($messageId === null)
-		{
-			$latestMessage = Message::find()
-				->where(['m.conversation_id', $conversationId])
-				->orderBy('m.id DESC')
-				->first();
-
-			if (!$latestMessage)
-			{
-				return $this->error('No messages found in conversation', 404);
-			}
-
-			$messageId = $latestMessage->id;
-		}
-
-		// Update the participant's last read position
-		$userId = session()->user->id ?? null;
-		$result = ConversationParticipant::updateLastRead($conversationId, $userId, $messageId);
-		if ($result === null)
-		{
-			return $this->response([
-				'success' => true,
-				'message' => 'Messages already marked as read'
-			]);
-		}
-
-		// Update conversation timestamp and notify participants
-		$this->touchAndNotifyConversation($conversationId, $messageId);
-
-		return $this->response([
-			'success' => $result,
-			'message' => $result ? 'Messages marked as read' : 'Failed to mark messages as read'
-		]);
+		$readService = new MessageReadService();
+		return $readService->markAsRead($conversationId, $messageId);
 	}
 
 	/**
@@ -236,37 +80,10 @@ class MessageController extends ResourceController
 			return $this->error('Conversation ID required', 400);
 		}
 
-		$userId = session()->user->id ?? null;
-		$participant = ConversationParticipant::getBy([
-			'cp.conversation_id' => $conversationId,
-			'cp.user_id' => $userId
-		]);
+		$readService = new MessageReadService();
+		$count = $readService->getUnreadCount($conversationId);
 
-		$table = Message::builder();
-		$sql = $table->select([['COUNT(*)'], 'count']);
-		if (!$participant || !$participant->lastReadMessageId)
-		{
-			$sql
-				->where(
-					['m.conversation_id', $conversationId],
-					'm.deleted_at IS NULL'
-				);
-		}
-		else
-		{
-			$sql
-				->where(
-					['m.conversation_id', $conversationId],
-					['m.id', '>', $participant->lastReadMessageId],
-					'm.deleted_at IS NULL'
-				);
-		}
-
-		$count = $sql->first();
-
-		return $this->response([
-			'count' => $count->count ?? 0
-		]);
+		return $this->response(['count' => $count]);
 	}
 
 	/**
@@ -325,14 +142,8 @@ class MessageController extends ResourceController
 
 		if ($success && $conversationId)
 		{
-			// Publish Redis event for message deletion
-			events()->emit("redis:conversation:{$conversationId}:messages", [
-				'id' => $messageId,
-				'action' => 'delete'
-			]);
-
-			// Notify participants about conversation update
-			$this->notifyConversationUpdate($conversationId, $messageId);
+			$this->publishRedisEvent($conversationId, $messageId, 'delete');
+			$this->notifyConversationParticipants($conversationId, $messageId);
 		}
 
 		return $this->response([
@@ -342,131 +153,9 @@ class MessageController extends ResourceController
 	}
 
 	/**
-	 * Update the conversation's last message reference.
-	 *
-	 * @param int $conversationId
-	 * @param int $messageId
-	 * @return void
-	 */
-	protected function updateConversationLastMessage(int $conversationId, int $messageId): void
-	{
-		// Get the message to extract content and type
-		$message = Message::get($messageId);
-		if ($message)
-		{
-			Conversation::updateLastMessage(
-				$conversationId,
-				$messageId,
-				$message->content,
-				$message->type ?? 'text'
-			);
-		}
-		else
-		{
-			// Fallback to just updating the ID and timestamp
-			Conversation::edit((object)[
-				'id' => $conversationId,
-				'lastMessageId' => $messageId,
-				'lastMessageAt' => date('Y-m-d H:i:s')
-			]);
-		}
-	}
-
-	/**
-	 * Notify all conversation participants about an update.
-	 *
-	 * @param int $conversationId
-	 * @param int $messageId
-	 * @param boolean $notify
-	 * @return void
-	 */
-	protected function notifyConversationUpdate(int $conversationId, int $messageId, bool $notify = false): void
-	{
-		// Get all participants for this conversation
-		$participants = ConversationParticipant::fetchWhere([
-			['cp.conversationId', $conversationId]
-		]);
-
-		if (empty($participants))
-		{
-			return;
-		}
-
-		$message = Message::get($messageId);
-		if (!$message)
-		{
-			return;
-		}
-
-		// Publish to each participant's conversation channel
-		foreach ($participants as $participant)
-		{
-			events()->emit("redis:user:{$participant->userId}:conversations", [
-				'id' => $conversationId,
-				'conversationId' => $conversationId,
-				'action' => 'merge'
-			]);
-
-			if ($participant->userId !== $message->senderId && $notify === true)
-			{
-				$this->sendNotifications($participant->userId, $message);
-			}
-		}
-	}
-
-	/**
-	 * Send notifications for the new message.
-	 *
-	 * @param int $userId
-	 * @param Message $message
-	 * @return void
-	 */
-	protected function sendNotifications(int $userId, Message $message): void
-	{
-		$settings = (object)[
-			'template' => NewMessage::class,
-			'queue' => false
-		];
-
-		$data = (object)[
-			'displayName' => $message->displayName,
-			'conversationId' => $message->conversationId,
-			'messageId' => $message->id,
-			'message' => $message->content
-		];
-
-		modules()->user()->push()->send(
-			$userId,
-			$settings,
-			$data
-		);
-	}
-
-	/**
-	 * Touch conversation to update timestamp and notify all participants.
-	 *
-	 * @param int $conversationId
-	 * @param int $messageId
-	 * @param boolean $notify
-	 * @return void
-	 */
-	protected function touchAndNotifyConversation(
-		int $conversationId,
-		int $messageId,
-		bool $notify = false
-	): void
-	{
-		// Update the conversation's last modified timestamp
-		Conversation::edit((object)[
-			'id' => $conversationId
-		]);
-
-		// Notify all participants about the update
-		$this->notifyConversationUpdate($conversationId, $messageId, $notify);
-	}
-
-	/**
 	 * Validation rules
+	 *
+	 * @return array
 	 */
 	protected function validate(): array
 	{
