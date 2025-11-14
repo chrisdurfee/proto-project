@@ -116,7 +116,7 @@ class MessageController extends ResourceController
 		]);
 
 		// Also notify all participants about conversation update
-		$this->notifyConversationUpdate($conversationId, $messageId);
+		$this->notifyConversationUpdate($conversationId, $messageId, true);
 	}
 
 	/**
@@ -377,9 +377,10 @@ class MessageController extends ResourceController
 	 *
 	 * @param int $conversationId
 	 * @param int $messageId
+	 * @param boolean $notify
 	 * @return void
 	 */
-	protected function notifyConversationUpdate(int $conversationId, int $messageId): void
+	protected function notifyConversationUpdate(int $conversationId, int $messageId, bool $notify = false): void
 	{
 		// Get all participants for this conversation
 		$participants = ConversationParticipant::fetchWhere([
@@ -406,7 +407,7 @@ class MessageController extends ResourceController
 				'action' => 'merge'
 			]);
 
-			if ($participant->userId !== $message->senderId)
+			if ($participant->userId !== $message->senderId && $notify === true)
 			{
 				$this->sendNotifications($participant->userId, $message);
 			}
@@ -423,7 +424,8 @@ class MessageController extends ResourceController
 	protected function sendNotifications(int $userId, Message $message): void
 	{
 		$settings = (object)[
-			'template' => NewMessage::class
+			'template' => NewMessage::class,
+			'queue' => false
 		];
 
 		$data = (object)[
@@ -433,12 +435,11 @@ class MessageController extends ResourceController
 			'message' => $message->content
 		];
 
-		$result = modules()->user()->push()->send(
+		modules()->user()->push()->send(
 			$userId,
 			$settings,
 			$data
 		);
-		var_dump($result);
 	}
 
 	/**
@@ -446,9 +447,14 @@ class MessageController extends ResourceController
 	 *
 	 * @param int $conversationId
 	 * @param int $messageId
+	 * @param boolean $notify
 	 * @return void
 	 */
-	protected function touchAndNotifyConversation(int $conversationId, int $messageId): void
+	protected function touchAndNotifyConversation(
+		int $conversationId,
+		int $messageId,
+		bool $notify = false
+	): void
 	{
 		// Update the conversation's last modified timestamp
 		Conversation::edit((object)[
@@ -456,7 +462,7 @@ class MessageController extends ResourceController
 		]);
 
 		// Notify all participants about the update
-		$this->notifyConversationUpdate($conversationId, $messageId);
+		$this->notifyConversationUpdate($conversationId, $messageId, $notify);
 	}
 
 	/**

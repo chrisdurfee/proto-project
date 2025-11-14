@@ -24,6 +24,9 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y libapache2-mod-brotli || echo "Brotli module not available" \
     && rm -rf /var/lib/apt/lists/*
 
+# Install GMP library for faster VAPID calculations
+RUN apt-get update && apt-get install -y libgmp-dev && rm -rf /var/lib/apt/lists/*
+
 # Configure and install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
@@ -34,7 +37,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     mbstring \
     xml \
     intl \
-    opcache
+    opcache \
+    gmp
 
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
