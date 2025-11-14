@@ -79,6 +79,7 @@ class PushController
 					for (const client of clientList)
 					{
 						const clientUrl = new URL(client.url);
+						console.log(clientUrl.origin, self.location.origin);
 
 						// If the app is already open in *any tab* (same origin)
 						if (clientUrl.origin === self.location.origin)
@@ -86,14 +87,10 @@ class PushController
 							// Focus it first
 							client.focus();
 
-							// If it’s not already at the right route, send a message to navigate
-							if (clientUrl.pathname !== normalizedTarget.pathname)
-							{
-								client.postMessage({
-									type: 'NAVIGATE_TO',
-									url: normalizedTarget.pathname
-								});
-							}
+							client.postMessage({
+								type: 'NAVIGATE_TO',
+								url: normalizedTarget.pathname
+							});
 							return;
 						}
 					}

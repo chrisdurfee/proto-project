@@ -5,7 +5,7 @@ use Modules\Messaging\Auth\Policies\MessagePolicy;
 use Modules\Messaging\Models\Message;
 use Modules\Messaging\Services\MessageService;
 use Modules\Messaging\Services\MessageReadService;
-use Modules\Messaging\Services\MessageServiceTrait;
+use Modules\Messaging\Services\MessageDeleteService;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;
 
@@ -16,8 +16,6 @@ use Proto\Http\Router\Request;
  */
 class MessageController extends ResourceController
 {
-	use MessageServiceTrait;
-
 	/**
 	 * @var string|null $policy
 	 */
@@ -122,20 +120,8 @@ class MessageController extends ResourceController
 		$messageId = (int)$this->getResourceId($request);
 		$conversationId = (int)$request->params()->conversationId ?? null;
 
-		$success = Message::remove((object)[
-			'id' => $messageId
-		]);
-
-		if ($success && $conversationId)
-		{
-			$this->publishRedisEvent($conversationId, $messageId, 'delete');
-			$this->notifyConversationParticipants($conversationId, $messageId);
-		}
-
-		return $this->response([
-			'success' => $success,
-			'messageId' => $messageId
-		]);
+		$deleteService = new MessageDeleteService();
+		return $deleteService->deleteMessage($messageId, $conversationId);
 	}
 
 	/**

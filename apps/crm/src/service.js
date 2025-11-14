@@ -25,17 +25,18 @@ const setupServiceMessages = (serviceWorker) =>
 	{
 		const data = e.data;
 
+		if (e.data && e.data.type === 'NAVIGATE_TO')
+		{
+			const targetUrl = e.data.url;
+			app.navigate(targetUrl);
+			return;
+		}
+
 		// this will check to route the push notifiction to the page url
 		if (data.url)
 		{
 			// @ts-ignore
 			app.navigate(data.url);
-		}
-
-		if (e.data && e.data.type === 'NAVIGATE_TO')
-		{
-			const targetUrl = e.data.url;
-			app.navigate(targetUrl);
 		}
 
 		// this will reload the page
