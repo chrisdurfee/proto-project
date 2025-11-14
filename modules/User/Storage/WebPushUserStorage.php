@@ -52,7 +52,7 @@ class WebPushUserStorage extends Storage
 		$rows = $this->select('id')
 			->where('user_id = ?', 'endpoint = ?')
 			->limit(1)
-			->fetch([$data->userId, $data->endpoint]);
+			->fetch([$data->user_id, $data->endpoint]);
 
 		return $this->checkExistCount($rows);
 	}
