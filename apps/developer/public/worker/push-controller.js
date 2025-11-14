@@ -66,27 +66,37 @@ class PushController
 		 */
 		self.addEventListener('notificationclick', (event) =>
 		{
-			const notification = event.notification;
-			notification.close();
+			event.notification.close();
+
+			const { url } = event.notification.data || {};
+			const targetUrl = url || '/';
 
 			event.waitUntil(
-				clients.matchAll({
-					type: 'window'
-				})
-				.then((clientList) =>
+				clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) =>
 				{
-					let url = notification.data.url;
-					if (clientList.length > 0)
+					const normalizedTarget = new URL(targetUrl, self.location.origin);
+
+					for (const client of clientList)
 					{
-						const client = clientList[0];
-						if (url && client.url.includes(url) === url)
+						const clientUrl = new URL(client.url);
+
+						// If the app is already open in *any tab* (same origin)
+						if (clientUrl.origin === self.location.origin)
 						{
-							return client.focus();
+							// Focus it first, then post message
+							return client.focus().then(() =>
+							{
+								client.postMessage({
+									type: 'NAVIGATE_TO',
+									url: normalizedTarget.pathname
+								});
+								return client;
+							});
 						}
 					}
 
-					url = url || '/';
-					return clients.openWindow(url);
+					// If no existing tab found, open a new one
+					return clients.openWindow(targetUrl);
 				})
 			);
 		});

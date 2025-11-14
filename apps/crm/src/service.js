@@ -23,13 +23,11 @@ const setupServiceMessages = (serviceWorker) =>
 {
 	navigator.serviceWorker.addEventListener('message', (e) =>
 	{
-		console.log('Service worker message received:', e.data);
 		const data = e.data;
 
 		if (e.data && e.data.type === 'NAVIGATE_TO')
 		{
 			const targetUrl = e.data.url;
-			console.log('Navigating to:', targetUrl);
 			app.navigate(targetUrl);
 			return;
 		}
