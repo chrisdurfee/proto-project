@@ -55,16 +55,16 @@ const setupServiceMessages = (serviceWorker) =>
  */
 const setupPush = (serviceWorker, pushId) =>
 {
-	const push = new Push(pushId, serviceWorker);
-	push.setup();
+	return new Push(pushId, serviceWorker);
 };
 
 /**
  * This will setup the service worker.
  *
+ * @param {object} app
  * @returns {void}
  */
-export const setupServiceWorker = () =>
+export const setupServiceWorker = (app) =>
 {
 	if (isSupported() === false)
 	{
@@ -81,7 +81,7 @@ export const setupServiceWorker = () =>
 
 		if (Configs.push && Configs.push.publicId)
 		{
-			setupPush(serviceWorker, Configs.push.publicId);
+			app.push = setupPush(serviceWorker, Configs.push.publicId);
 		}
 	});
 }

@@ -37,15 +37,20 @@ export class AppController
 	root = null;
 
 	/**
+	 * @member {Push|null} push
+	 */
+	push = null;
+
+	/**
 	 * This will setup the main controller.
 	 */
 	constructor()
 	{
 		setHtmlThemeBySettings();
-		this.setupService();
-		this.setupRouter();
 		this.setData();
 		this.getCsrfToken();
+		this.setupService();
+		this.setupRouter();
 	}
 
 	/**
@@ -88,7 +93,7 @@ export class AppController
 	 */
 	setupService()
 	{
-		setupServiceWorker();
+		setupServiceWorker(this);
 	}
 
 	/**
@@ -161,6 +166,11 @@ export class AppController
 	{
 		this.appShell.state.isSignedIn = true;
 		this.setUserData(user);
+
+		if (this.push)
+		{
+			this.push.setup();
+		}
 	}
 
 	/**
