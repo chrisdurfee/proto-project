@@ -222,6 +222,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup SSL stub files for Docker build
+        run: |
+          mkdir -p infrastructure/docker/ssl
+          # Create stub SSL files for Docker build
+          openssl req -x509 -newkey rsa:2048 -nodes -days 365 \
+            -keyout infrastructure/docker/ssl/localhost.key \
+            -out infrastructure/docker/ssl/localhost.crt \
+            -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
