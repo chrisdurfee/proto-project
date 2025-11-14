@@ -112,20 +112,6 @@ class MessageController extends ResourceController
 	}
 
 	/**
-	 * Modifies the modifiers array to add custom SQL conditions.
-	 *
-	 * @param array $modifiers
-	 * @param Request $request
-	 * @return array
-	 */
-	protected function modifyModifiers(array $modifiers, Request $request): array
-	{
-		// Filter out soft-deleted messages by default using the model's table alias
-		$modifiers[] = 'm.deleted_at IS NULL';
-		return $modifiers;
-	}
-
-	/**
 	 * Delete (soft delete) a message.
 	 *
 	 * @param Request $request

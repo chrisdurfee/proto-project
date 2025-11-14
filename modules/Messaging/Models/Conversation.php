@@ -226,7 +226,7 @@ class Conversation extends Model
 					->on('c.id = cp2.conversation_id', 'cp2.user_id = ?', 'cp2.deleted_at IS NULL');
 			})
 			->where(
-				['c.type', "'direct'"]
+				"c.type = 'direct'"
 			)
 			->first($params);
 
