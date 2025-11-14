@@ -79,19 +79,19 @@ class PushController
 					for (const client of clientList)
 					{
 						const clientUrl = new URL(client.url);
-						console.log(clientUrl.origin, self.location.origin);
 
 						// If the app is already open in *any tab* (same origin)
 						if (clientUrl.origin === self.location.origin)
 						{
-							// Focus it first
-							client.focus();
-
-							client.postMessage({
-								type: 'NAVIGATE_TO',
-								url: normalizedTarget.pathname
+							// Focus it first, then post message
+							return client.focus().then(() =>
+							{
+								client.postMessage({
+									type: 'NAVIGATE_TO',
+									url: normalizedTarget.pathname
+								});
+								return client;
 							});
-							return;
 						}
 					}
 
