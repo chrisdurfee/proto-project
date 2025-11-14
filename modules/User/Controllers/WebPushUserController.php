@@ -44,6 +44,29 @@ class WebPushUserController extends Controller
 	}
 
 	/**
+	 * This will format the subscriptions for the dispatcher.
+	 *
+	 * @param array $subscriptions
+	 * @return array
+	 */
+	protected function formatSubscriptions(array $subscriptions): array
+	{
+		$pushSubscriptions = [];
+		foreach ($subscriptions as $subscription)
+		{
+			array_push($pushSubscriptions, [
+				'id' => $subscription->id,
+				'endpoint' => $subscription->endpoint,
+				'keys' => [
+					'auth' => $subscription->authKeys->auth ?? '',
+					'p256dh' => $subscription->authKeys->p256dh ?? ''
+				]
+			]);
+		}
+		return $pushSubscriptions;
+	}
+
+	/**
 	 * Sends a web push notification to the user.
 	 *
 	 * @param mixed $userId The user ID to send the notification to.
@@ -70,7 +93,7 @@ class WebPushUserController extends Controller
 			return null;
 		}
 
-		$settings->subscriptions = $subscriptions;
+		$settings->subscriptions = $this->formatSubscriptions($subscriptions);
 		return Dispatcher::push($settings, $data);
 	}
 }

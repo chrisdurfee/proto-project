@@ -423,8 +423,7 @@ class MessageController extends ResourceController
 	protected function sendNotifications(int $userId, Message $message): void
 	{
 		$settings = (object)[
-			'template' => NewMessage::class,
-			'queue' => false
+			'template' => NewMessage::class
 		];
 
 		$data = (object)[
@@ -434,13 +433,12 @@ class MessageController extends ResourceController
 			'message' => $message->content
 		];
 
-		var_dump($data);
-
-		modules()->user()->push()->send(
+		$result = modules()->user()->push()->send(
 			$userId,
 			$settings,
 			$data
 		);
+		var_dump($result);
 	}
 
 	/**
