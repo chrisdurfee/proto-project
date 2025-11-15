@@ -83,6 +83,12 @@ class Service
 				return false;
 			}
 
+			// Don't cache API requests - always fetch fresh
+			if (e.request.url.includes('/api/'))
+			{
+				return false;
+			}
+
 			const response = this.cache.fetchFile(e);
 			e.respondWith(response);
 		});
