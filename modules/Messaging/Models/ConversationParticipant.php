@@ -51,14 +51,14 @@ class ConversationParticipant extends Model
 				User::class,
 				fields: ['displayName', 'firstName', 'lastName', 'email', 'image', 'status']
 			)
-			->on(['user_id', 'id']);
+			->on(['userId', 'id']);
 
 		$builder
 			->one(
 				Conversation::class,
 				fields: ['title', 'type', 'lastMessageAt', 'lastMessageId', 'lastMessageContent', 'lastMessageType']
 			)
-			->on(['conversation_id', 'id'])
+			->on(['conversationId', 'id'])
 			->one(
 				Message::class,
 				fields: ['content', 'type', 'parentId', 'senderId', 'isEdited', 'editedAt']
@@ -260,6 +260,20 @@ class ConversationParticipant extends Model
 
 		$count = $sql->first();
 		return (int)($count->count ?? 0);
+	}
+
+	/**
+	 * Get searchable fields for the model.
+	 *
+	 * @return array
+	 */
+	public function getSearchableFields(): array
+	{
+		return [
+			["CONCAT(u.first_name, ' ', u.last_name)"],
+			["CONCAT(u.last_name, ', ', u.first_name)"],
+			["u.display_name"]
+		];
 	}
 
 	/**

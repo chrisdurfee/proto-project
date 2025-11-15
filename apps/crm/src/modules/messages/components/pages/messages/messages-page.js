@@ -29,6 +29,7 @@ export const MessagesPage = () =>
 	const userId = app.data.user.id;
 	const data = new ConversationModel({
 		userId: userId,
+		search: '',
 		filter: {
 			view: 'all',
 			userId: userId

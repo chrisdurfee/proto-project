@@ -1,5 +1,7 @@
 import { Div, On, UseParent } from "@base-framework/atoms";
 import { ScrollableList } from "@base-framework/organisms";
+import { Icons } from "@base-framework/ui/icons";
+import { SearchInput } from "@base-framework/ui/organisms";
 import { ListEmptyState } from "./list-empty-state.js";
 import { ThreadListHeader } from "./thread-list-header.js";
 import { ListItemCreator } from "./thread-list-item.js";
@@ -16,6 +18,15 @@ export const ThreadList = ({ data }) =>
 	UseParent((parent) =>
 		Div({ class: "w-full pt-0 lg:pt-2 flex flex-col gap-y-2" }, [
 		ThreadListHeader(),
+		Div({ class: 'flex p-2 px-4 bg-background/80 backdrop-blur-md sticky top-0 z-10' }, [
+			SearchInput({
+				class: 'min-w-40 lg:min-w-96',
+				placeholder: 'Search...',
+				bind: 'search',
+				keyup: (e, parent) => parent.list.refresh(),
+				icon: Icons.magnifyingGlass.default
+			}),
+		]),
 		On('filter.view', () => (
 			ScrollableList({
 				data,

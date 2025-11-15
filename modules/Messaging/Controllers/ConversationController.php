@@ -183,6 +183,7 @@ class ConversationController extends ResourceController
 		if (isset($userId))
 		{
 			$filter->{'cp.user_id'} = $userId;
+			unset($filter->userId);
 		}
 
 		// Support "since" parameter for fetching newer conversations
