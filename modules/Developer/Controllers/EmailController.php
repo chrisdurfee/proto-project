@@ -25,6 +25,8 @@ class EmailController extends Controller
 		$template = $req->input('template') ?? null;
 		$template = !empty($template) ? $template : "Common\\Email\\BasicEmail";
 
+		header('Content-Type: text/html; charset=utf-8');
+
 		$email = Template::create($template);
 		echo (string)$email;
 		die;

@@ -68,6 +68,12 @@ class Service
 				return false;
 			}
 
+			// Don't cache API requests - always fetch fresh (check before navigate mode)
+			if (e.request.url.includes('/api/'))
+			{
+				return false;
+			}
+
 			if (e.request.mode === 'navigate')
 			{
 				e.respondWith(caches.match('index.html'));
@@ -79,12 +85,6 @@ class Service
 			}
 
 			if (e.request.url.startsWith('chrome-extension://'))
-			{
-				return false;
-			}
-
-			// Don't cache API requests - always fetch fresh
-			if (e.request.url.includes('/api/'))
 			{
 				return false;
 			}
