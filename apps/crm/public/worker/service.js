@@ -98,6 +98,14 @@ class Service
 			}
 
 			/**
+			 * Prevent the service worker from handling the data requests.
+			 */
+			if (this.isDataRequest(e.request.url))
+			{
+				return;
+			}
+
+			/**
 			 * Prevent the service worker from handling the navigation requests.
 			 */
 			if (e.request.mode === 'navigate')
@@ -120,14 +128,6 @@ class Service
 			 * Prevent the service worker from handling the extension requests.
 			 */
 			if (e.request.url.startsWith('chrome-extension://'))
-			{
-				return;
-			}
-
-			/**
-			 * Prevent the service worker from handling the data requests.
-			 */
-			if (this.isDataRequest(e.request.url))
 			{
 				return;
 			}
