@@ -96,7 +96,7 @@ class MessageController extends ResourceController
 		$conversationId = $request->params()->conversationId ?? null;
 		if (isset($conversationId))
 		{
-			$filter->conversationId = $conversationId;
+			$filter->{'m.conversation_id'} = $conversationId;
 		}
 
 		// Support "since" parameter for fetching newer messages
