@@ -67,7 +67,7 @@ export const AssistantMessages = Jot(
 	{
 		// @ts-ignore
 		this.data.set({ conversationId });
-		
+
 		// Now load the messages
 		// @ts-ignore
 		if (this.list)

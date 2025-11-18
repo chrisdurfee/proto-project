@@ -64,9 +64,9 @@ const AssistantChatContent = Jot(
 				// @ts-ignore
 				this.conversationId = response.id;
 				// @ts-ignore
-				data.set({ 
+				data.set({
 					conversation: response,
-					conversationId: response.id 
+					conversationId: response.id
 				});
 
 				// Now that we have conversation ID, initialize the messages
