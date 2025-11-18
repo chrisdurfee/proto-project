@@ -56,14 +56,15 @@ const AssistantChatContent = Jot(
 		// @ts-ignore
 		this.state.loaded = false;
 		// @ts-ignore
-		this.parent.data.getActive({}, (response) =>
+        const data = this.parent.data;
+		data.xhr.getActive({}, (response) =>
 		{
 			if (response && response.success !== false)
 			{
 				// @ts-ignore
 				this.conversationId = response.id;
 				// @ts-ignore
-				this.parent.data.set({ conversation: response });
+				data.set({ conversation: response });
 			}
 
 			// @ts-ignore

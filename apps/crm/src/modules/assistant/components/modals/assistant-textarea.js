@@ -1,90 +1,187 @@
-import { Data, Textarea } from '@base-framework/atoms';
-import { Jot } from '@base-framework/base';
+import { Textarea } from "@base-framework/atoms";
+import { Veil, VeilJot } from "@base-framework/ui";
+import { Icons } from "@base-framework/ui/icons";
+
+/**
+ * This will check if the count is over the limit.
+ *
+ * @param {number} count
+ * @param {number} limit
+ * @returns {boolean}
+ */
+const isOverLimit = (count, limit) => count > limit;
+
+/**
+ * This will filter newlines from the text.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+const filterNewlines = (text) =>
+{
+	const normalizedText = text.replace(/\n/g, ' ');
+    return normalizedText.trim();
+};
 
 /**
  * AssistantTextarea
  *
- * Custom textarea for assistant chat with character limit and auto-resize.
+ * Handles the textarea logic for message composition:
+ * - Auto-resizing
+ * - Character counting
+ * - Submit on Enter (without Shift)
+ * - Input validation
  *
- * @type {typeof Textarea}
+ * @type {typeof Veil}
  */
-export const AssistantTextarea = Jot(
+export const AssistantTextarea = VeilJot(
 {
 	/**
-	 * Character limit for the textarea.
-	 *
-	 * @type {number}
-	 */
-	charLimit: 5000,
-
-	/**
-	 * This will setup the state.
+	 * This will set the state object.
 	 *
 	 * @returns {object}
 	 */
 	state()
 	{
-		return new Data({
+		return {
 			empty: true,
 			charCount: 0,
 			// @ts-ignore
-			charLimit: this.charLimit || 5000
-		});
+			charLimit: this.charLimit ?? 5000,
+			isOverLimit: false
+		};
 	},
 
 	/**
-	 * Update character count and empty state.
+	 * This will check the submit.
 	 *
-	 * @param {string} value
+	 * @param {object} e
 	 * @returns {void}
 	 */
-	updateState(value)
+	checkSubmit(e)
 	{
-		const charCount = value.length;
+		e.preventDefault();
+		e.stopPropagation();
+
 		// @ts-ignore
-		this.state.set({
-			empty: charCount === 0,
-			charCount
-		});
+		this.resizeTextarea();
+
+        const keyCode = e.keyCode;
+		if (keyCode !== 13)
+		{
+			return;
+		}
+
+		// Allow Shift+Enter for new lines
+		if (e.shiftKey === true)
+		{
+			// @ts-ignore
+			this.resizeTextarea();
+			return;
+		}
+
+		// @ts-ignore
+		if (this.validate() === false)
+		{
+			return;
+		}
+
+		// @ts-ignore
+		if (this.onSubmit)
+		{
+			// @ts-ignore
+			this.onSubmit(this.panel.value);
+		}
 	},
 
+    /**
+     * This will validate the textarea content.
+     *
+     * @returns {boolean}
+     */
+    validate()
+    {
+        // @ts-ignore
+        if (this.state.empty === true)
+        {
+            app.notify({
+                icon: Icons.warning,
+                type: 'warning',
+                title: 'Missing Message',
+                description: 'Please enter a message.',
+            });
+
+            return false;
+        }
+
+        // @ts-ignore
+        if (this.state.isOverLimit === true)
+        {
+            app.notify({
+                icon: Icons.warning,
+                type: 'warning',
+                title: 'Message Too Long',
+                description: 'Your message exceeds the character limit.',
+            });
+
+            return false;
+        }
+
+        return true;
+    },
+
 	/**
-	 * Get the textarea value.
+	 * This will resize the textarea.
 	 *
-	 * @returns {string}
+	 * @returns {void}
 	 */
-	getValue()
+	resizeTextarea()
 	{
+		const startHeight = 48;
+		let height = startHeight;
+
+		const text = this.panel.value;
+		const normalizedText = filterNewlines(text);
 		// @ts-ignore
-		return this.textarea?.value || '';
+		if (normalizedText !== '')
+		{
+			// @ts-ignore
+			const targetHeight = this.panel.scrollHeight;
+			height = (targetHeight > startHeight) ? targetHeight : startHeight;
+		}
+
+		// @ts-ignore
+		this.panel.style = 'height:' + height + 'px;';
 	},
 
 	/**
-	 * Clear the textarea.
+	 * This will clear the textarea.
 	 *
 	 * @returns {void}
 	 */
 	clear()
 	{
 		// @ts-ignore
-		if (this.textarea)
-		{
-			// @ts-ignore
-			this.textarea.value = '';
-			this.updateState('');
-		}
+		this.panel.value = '';
+		// @ts-ignore
+		this.state.charCount = 0;
+		// @ts-ignore
+		this.state.isOverLimit = false;
+		// @ts-ignore
+		this.state.empty = true;
+		// @ts-ignore
+		this.resizeTextarea();
 	},
 
 	/**
-	 * Validate the textarea.
+	 * This will get the current value.
 	 *
-	 * @returns {boolean}
+	 * @returns {string}
 	 */
-	validate()
+	getValue()
 	{
-		const value = this.getValue();
 		// @ts-ignore
-		return value.length > 0 && value.length <= this.charLimit;
+		return this.panel.value;
 	},
 
 	/**
@@ -94,37 +191,32 @@ export const AssistantTextarea = Jot(
 	 */
 	render()
 	{
-		return Textarea({
-			cache: 'textarea',
-			// @ts-ignore
-			placeholder: this.placeholder || "Type a message...",
-			class: "flex-1 bg-transparent resize-none outline-none border-none focus:ring-0 max-h-32 overflow-y-auto",
-			rows: 1,
-			input: (e) =>
-			{
-				// @ts-ignore
-				this.updateState(e.target.value);
+		// @ts-ignore
+		const charLimit = this.state.charLimit;
+		const updateCharCount = (e) =>
+		{
+			const text = e.target.value;
+            // replace newlines with spaces
+            const normalizedText = filterNewlines(text);
 
-				// Auto-resize
-				// @ts-ignore
-				e.target.style.height = 'auto';
-				// @ts-ignore
-				e.target.style.height = e.target.scrollHeight + 'px';
-			},
-			keydown: (e) =>
-			{
-				// Submit on Enter (without Shift)
-				if (e.key === 'Enter' && !e.shiftKey)
-				{
-					e.preventDefault();
-					// @ts-ignore
-					if (this.onSubmit && this.validate())
-					{
-						// @ts-ignore
-						this.onSubmit(this.getValue());
-					}
-				}
-			}
+			// @ts-ignore
+			const state = this.state;
+			state.charCount = normalizedText.length;
+			state.isOverLimit = (isOverLimit(normalizedText.length, charLimit));
+			state.empty = normalizedText.length === 0;
+		};
+
+		return Textarea({
+			class: "w-full border-none bg-transparent overflow-hidden resize-none focus:outline-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground",
+			// @ts-ignore
+			placeholder: this.placeholder,
+			input: updateCharCount,
+			// @ts-ignore
+			bind: this.bind,
+			required: true,
+			// @ts-ignore
+			keyup: (e) => this.checkSubmit(e),
+			cache: 'panel'
 		});
 	}
 });

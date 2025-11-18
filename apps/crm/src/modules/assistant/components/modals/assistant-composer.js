@@ -107,7 +107,7 @@ export const AssistantComposer = VeilJot(
 	render()
 	{
 		return Div({ class: "w-full sticky z-10 bottom-0" }, [
-			Div({ class: "fadeIn p-4 w-full fadeIn bg-background/80 backdrop-blur-md border-t" }, [
+			Div({ class: "fadeIn p-4 w-full fadeIn bg-background/80 backdrop-blur-md" }, [
 				// @ts-ignore
 				Form({
 					class: "relative flex border rounded-lg p-3 bg-surface max-h-40 overflow-y-auto overflow-x-hidden lg:max-w-5xl m-auto",
