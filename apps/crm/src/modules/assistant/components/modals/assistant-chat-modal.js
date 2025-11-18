@@ -18,18 +18,6 @@ const AssistantChatContent = Jot(
 	state: { loaded: false },
 
 	/**
-	 * Setup the conversation data.
-	 *
-	 * @returns {object}
-	 */
-	setData()
-	{
-		return new AssistantConversationModel({
-			userId: app.data.user.id
-		});
-	},
-
-	/**
 	 * Scroll the message panel to the bottom.
 	 *
 	 * @returns {void}
@@ -68,14 +56,14 @@ const AssistantChatContent = Jot(
 		// @ts-ignore
 		this.state.loaded = false;
 		// @ts-ignore
-		this.data.getActive((response) =>
+		this.parent.data.getActive({}, (response) =>
 		{
 			if (response && response.success !== false)
 			{
 				// @ts-ignore
 				this.conversationId = response.id;
 				// @ts-ignore
-				this.data.set({ conversation: response });
+				this.parent.data.set({ conversation: response });
 			}
 
 			// @ts-ignore
@@ -150,7 +138,12 @@ const AssistantChatContent = Jot(
  */
 export const AssistantChatModal = (props = {}) =>
 {
+	const data = new AssistantConversationModel({
+		userId: app.data.user.id
+	});
+
 	return new Modal({
+		data,
 		title: '',
 		size: 'full',
 		type: 'right',

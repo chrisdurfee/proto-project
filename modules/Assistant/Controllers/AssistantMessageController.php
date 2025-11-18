@@ -41,7 +41,7 @@ class AssistantMessageController extends ResourceController
 	{
 		$data = $this->getRequestItem($request);
 		$conversationId = (int)($request->params()->conversationId ?? $data->conversationId ?? null);
-		$userId = (int)auth()->user->id();
+		$userId = session()->user->id ?? null;
 
 		if (!$conversationId || !$userId)
 		{
@@ -77,7 +77,7 @@ class AssistantMessageController extends ResourceController
 		}
 
 		// Only show messages for the authenticated user's conversations
-		$userId = auth()->user->id();
+		$userId = session()->user->id ?? null;
 		if ($userId)
 		{
 			$filter->{'am.user_id'} = $userId;
