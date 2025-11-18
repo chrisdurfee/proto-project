@@ -1,4 +1,4 @@
-import { Div } from '@base-framework/atoms';
+import { Div, UseParent } from '@base-framework/atoms';
 import { ScrollableList } from '@base-framework/organisms';
 import { Badge } from '@base-framework/ui';
 import { Card } from '@base-framework/ui/atoms';
@@ -107,23 +107,26 @@ export const ClientSearchModal = (props = {}) =>
 		Div({ class: 'flex flex-col h-full' }, [
 			SearchInput(data),
 			Div({ class: 'flex-1 overflow-hidden mt-8' }, [
-				ScrollableList({
-					data,
-					cache: 'list',
-					key: 'id',
-					role: 'list',
-					skeleton: true,
-					rowItem: (client) => ClientSearchItem(client, handleClientClick),
-					emptyState: () =>
-					{
-						const searchValue = data.get?.().search || '';
-						return EmptyState({
-							title: 'No Clients Found',
-							description: searchValue ? 'Try adjusting your search terms.' : 'Start typing to search clients.',
-							icon: Icons.magnifyingGlass.default
-						});
-					}
-				})
+				UseParent((parent) => (
+					ScrollableList({
+						data,
+						cache: 'list',
+						key: 'id',
+						role: 'list',
+						skeleton: true,
+						rowItem: (client) => ClientSearchItem(client, handleClientClick),
+						scrollContainer: parent.panel,
+						emptyState: () =>
+						{
+							const searchValue = data.get?.().search || '';
+							return EmptyState({
+								title: 'No Clients Found',
+								description: searchValue ? 'Try adjusting your search terms.' : 'Start typing to search clients.',
+								icon: Icons.magnifyingGlass.default
+							});
+						}
+					})
+				))
 			])
 		])
 	]).open();

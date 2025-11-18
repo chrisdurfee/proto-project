@@ -62,6 +62,14 @@ export const AssistantMessageModel = Model.extend({
 						return;
 					}
 
+                    if (event.data === '[DONE]')
+                    {
+                        intentionallyClosed = true;
+                        clearTimeout(reconnectTimer);
+                        source.close();
+                        return;
+                    }
+
 					try
 					{
 						const data = JSON.parse(event.data);

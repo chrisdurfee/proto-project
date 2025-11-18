@@ -92,10 +92,7 @@ const AssistantChatContent = Jot(
 	{
 		return Div({ class: "flex flex-col h-full" }, [
 			// Messages container with scroll
-			Div({
-				class: "flex-1 overflow-hidden",
-				cache: 'panel'
-			}, [
+			Div({ class: "flex-1" }, [
 				// @ts-ignore
 				new AssistantMessages({
 					cache: 'messages',
