@@ -77,6 +77,18 @@ const SearchButton = () => ({
 });
 
 /**
+ * Assitant Button
+ *
+ * @returns {object}
+ */
+const AssistantChatButton = () => ({
+	label: 'Void',
+	icon: Icons.ai,
+	exact: true,
+	click: () => {}
+});
+
+/**
  * MainNavigation
  *
  * This will create the main navigation.
@@ -100,7 +112,7 @@ export const MainNavigation = Jot(
 					// @ts-ignore
 					useShortNav: this.useShortNav || false,
 					// @ts-ignore
-					options: [SearchButton(), ...this.options]
+					options: [SearchButton(), ...this.options, AssistantChatButton()]
 				}),
 				LowerNavigation()
 			])
