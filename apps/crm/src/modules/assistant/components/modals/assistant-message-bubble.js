@@ -3,6 +3,55 @@ import { TimeFrame } from "@base-framework/ui";
 import { Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar } from "@base-framework/ui/molecules";
+import { AssistantMessageModel } from "../../models/assistant-message-model.js";
+
+/**
+ * Helper function to create streaming data model and initiate streaming.
+ *
+ * @param {object} dynamic - Dynamic configuration object
+ * @returns {object} - Data model for binding
+ */
+const createStreamingModel = (dynamic) =>
+{
+	const aiData = new AssistantMessageModel({
+		userId: dynamic.userId,
+		conversationId: dynamic.conversationId,
+		role: 'assistant',
+		content: '',
+		replyResponse: ''
+	});
+
+	// Start streaming
+	aiData.xhr.generate({ conversationId: dynamic.conversationId }, (response) =>
+	{
+		if (!response || response.success === false)
+		{
+			aiData.set('replyResponse', response?.message || 'Service Error');
+			return;
+		}
+
+		const choices = response?.choices;
+		if (!choices)
+		{
+			return;
+		}
+
+		const choice = choices[0];
+		if (!choice || !choice.delta?.content)
+		{
+			return;
+		}
+
+		if (choice.finish_reason === 'stop')
+		{
+			return;
+		}
+
+		aiData.concat('replyResponse', choice.delta.content);
+	});
+
+	return aiData;
+};
 
 /**
  * AssistantMessageBubble
@@ -11,12 +60,19 @@ import { Avatar } from "@base-framework/ui/molecules";
  *
  * @param {object} props
  * @param {object} props.message - The message object
- * @param {object} props.data - Additional data
  * @returns {object}
  */
-export const AssistantMessageBubble = ({ message, data }) =>
+export const AssistantMessageBubble = ({ message }) =>
 {
 	const isUser = message.role === 'user';
+
+	// Check if this message has dynamic streaming configuration
+	let streamData = null;
+	if (message.dynamic)
+	{
+		// Create the streaming model
+		streamData = createStreamingModel(message.dynamic);
+	}
 
 	return Div({
 		class: `flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} fadeIn`,
@@ -46,9 +102,14 @@ export const AssistantMessageBubble = ({ message, data }) =>
 						: 'bg-surface border'
 				}`
 			}, [
-				Pre({
-					class: "whitespace-pre-wrap wrap-break-words text-sm font-sans"
-				}, data ? [ "[[replyResponse]]", data ] : message.content)
+				streamData
+					? Pre({
+						class: "whitespace-pre-wrap wrap-break-words text-sm font-sans",
+						watch: { replyResponse: (value, ele) => ele.textContent = value }
+					}, streamData)
+					: Pre({
+						class: "whitespace-pre-wrap wrap-break-words text-sm font-sans"
+					}, message.content)
 			]),
 
 			// Timestamp

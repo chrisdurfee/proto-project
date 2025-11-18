@@ -115,58 +115,28 @@ export const AssistantComposer = VeilJot(
 	 */
 	streamAiResponse(conversationId)
 	{
-		const aiData = new AssistantMessageModel({
-			userId: app.data.user.id,
-			conversationId,
-			role: 'assistant',
-			content: '',
-			replyResponse: ''
-		});
+		const streamingId = 'streaming-' + Date.now();
 
 		// Get parent list component and append AI message bubble
 		// @ts-ignore
 		const messagesComponent = this.parent.messages;
 		if (messagesComponent && messagesComponent.list)
 		{
+			// Append message with dynamic property for bubble to handle streaming
 			messagesComponent.list.append([{
-				id: 'streaming-' + Date.now(),
+				id: streamingId,
 				conversationId,
 				userId: app.data.user.id,
 				role: 'assistant',
 				content: '',
 				createdAt: new Date().toISOString(),
-				data: aiData
+				// Dynamic property with streaming configuration
+				dynamic: {
+					conversationId,
+					userId: app.data.user.id
+				}
 			}]);
 		}
-
-		// Call generate endpoint to stream response
-		aiData.xhr.generate({ conversationId }, (response) =>
-		{
-			if (!response || response.success === false)
-			{
-				aiData.set('replyResponse', response?.message || 'Service Error');
-				return;
-			}
-
-			const choices = response?.choices;
-			if (!choices)
-			{
-				return;
-			}
-
-			const choice = choices[0];
-			if (!choice || !choice.delta?.content)
-			{
-				return;
-			}
-
-			if (choice.finish_reason === 'stop')
-			{
-				return;
-			}
-
-			aiData.concat('replyResponse', choice.delta.content);
-		});
 	},
 
 	/**
