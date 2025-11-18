@@ -6,14 +6,14 @@ import { Avatar } from "@base-framework/ui/molecules";
 import { AssistantMessageModel } from "../../models/assistant-message-model.js";
 
 /**
- * Helper function to create streaming data model and initiate streaming.
+ * Creates streaming data model and initiates streaming.
  *
  * @param {object} dynamic - Dynamic configuration object
  * @returns {object} - Data model for binding
  */
 const createStreamingModel = (dynamic) =>
 {
-	const aiData = new AssistantMessageModel({
+	const data = new AssistantMessageModel({
 		userId: dynamic.userId,
 		conversationId: dynamic.conversationId,
 		role: 'assistant',
@@ -21,30 +21,94 @@ const createStreamingModel = (dynamic) =>
 		replyResponse: ''
 	});
 
-	// Start streaming (conversationId is already in the URL path via [[conversationId]])
-	aiData.xhr.generate({}, (response) =>
+	data.xhr.generate({}, (response) =>
 	{
 		// Handle different response formats
 		if (response?.content)
 		{
 			// Direct content (test mode or formatted response)
-			aiData.set({ replyResponse: response.content });
+            // @ts-ignore
+			data.replyResponse = response.content;
 		}
 		else if (response?.choices?.[0]?.delta?.content)
 		{
 			// OpenAI streaming format
-			const currentContent = aiData.get('replyResponse') || '';
-			aiData.set({ replyResponse: currentContent + response.choices[0].delta.content });
+            // @ts-ignore
+			data.replyResponse += response.choices[0].delta.content;
 		}
 		else if (response?.error)
 		{
 			// Error message
-			aiData.set({ replyResponse: 'Error: ' + response.error });
+            // @ts-ignore
+			data.replyResponse = 'Error: ' + response.error;
 		}
 	});
 
-	return aiData;
+	return data;
 };
+
+/**
+ * Renders user avatar.
+ *
+ * @returns {object}
+ */
+const UserAvatar = () => Avatar({
+	src: app.data.user.image,
+	alt: app.data.user.displayName,
+	fallbackText: app.data.user.displayName || 'U',
+	size: 'sm'
+});
+
+/**
+ * Renders AI assistant avatar.
+ *
+ * @returns {object}
+ */
+const AiAvatar = () => Div({
+	class: "flex items-center justify-center w-8 h-8 rounded-full bg-primary/10"
+}, [
+	Icon({ size: 'sm' }, Icons.ai)
+]);
+
+/**
+ * Renders message avatar based on role.
+ *
+ * @param {boolean} isUser
+ * @returns {object}
+ */
+const MessageAvatar = (isUser) => Div({ class: "shrink-0" }, [
+	isUser ? UserAvatar() : AiAvatar()
+]);
+
+/**
+ * Renders message content.
+ *
+ * @param {boolean} isUser
+ * @param {object|null} streamData
+ * @param {string} content
+ * @returns {object}
+ */
+const MessageContent = (isUser, streamData, content) => Div({
+	class: `rounded-lg px-4 py-3 ${
+		isUser
+			? 'bg-primary text-primary-foreground'
+			: 'bg-surface border'
+	}`
+}, [
+	Pre({
+		class: "whitespace-pre-wrap wrap-break-words text-sm font-sans"
+	}, streamData ? ['[[replyResponse]]', streamData] : content)
+]);
+
+/**
+ * Renders message timestamp.
+ *
+ * @param {string} createdAt
+ * @returns {object}
+ */
+const MessageTimestamp = (createdAt) => Span({
+	class: "opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out text-xs text-muted-foreground ml-2 capitalize"
+}, TimeFrame({ dateTime: createdAt }));
 
 /**
  * AssistantMessageBubble
@@ -58,52 +122,13 @@ const createStreamingModel = (dynamic) =>
 export const AssistantMessageBubble = ({ message }) =>
 {
 	const isUser = message.role === 'user';
+	const streamData = message.dynamic ? createStreamingModel(message.dynamic) : null;
 
-	// Check if this message has dynamic streaming configuration
-	let streamData = null;
-	if (message.dynamic)
-	{
-		// Create the streaming model
-		streamData = createStreamingModel(message.dynamic);
-	}
-
-	return Div({
-		class: `flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} fadeIn`,
-		'data-message-id': message.id
-	}, [
-		// Avatar
-		Div({ class: "shrink-0" }, [
-			isUser
-				? Avatar({
-					src: app.data.user.image,
-					alt: app.data.user.displayName,
-					fallbackText: app.data.user.displayName || 'U',
-					size: 'sm'
-				})
-				: Div({ class: "flex items-center justify-center w-8 h-8 rounded-full bg-primary/10" }, [
-					Icon({ size: 'sm' }, Icons.ai)
-				])
-		]),
-
-		// Message bubble
+	return Div({ class: `flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} fadeIn` }, [
+		MessageAvatar(isUser),
 		Div({ class: "group flex flex-col gap-1 max-w-[80%]" }, [
-			// Message content
-			Div({
-				class: `rounded-lg px-4 py-3 ${
-					isUser
-						? 'bg-primary text-primary-foreground'
-						: 'bg-surface border'
-				}`
-			}, [
-				Pre({
-                    class: "whitespace-pre-wrap wrap-break-words text-sm font-sans"
-                }, streamData ? ['[[replyResponse]]', streamData] : message.content)
-			]),
-
-			// Timestamp
-			Span({
-                class: "opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out text-xs text-muted-foreground ml-2 capitalize"
-            }, TimeFrame({ dateTime: message.createdAt }))
+			MessageContent(isUser, streamData, message.content),
+			MessageTimestamp(message.createdAt)
 		])
 	]);
 };

@@ -161,7 +161,7 @@ class AssistantMessage extends Model
 	 * @param int $limit
 	 * @return array
 	 */
-	public static function getConversationHistory(int $conversationId, int $limit = 20): array
+	public static function getConversationHistory(int $conversationId, int $limit = 6): array
 	{
 		$messages = static::builder()
 			->select(['am.role'], ['am.content'])

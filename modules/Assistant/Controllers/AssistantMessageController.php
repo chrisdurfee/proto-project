@@ -7,6 +7,7 @@ use Modules\Assistant\Models\AssistantConversation;
 use Modules\Assistant\Services\AssistantService;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;
+use Proto\Http\Router\StreamResponse;
 
 /**
  * AssistantMessageController
@@ -43,7 +44,6 @@ class AssistantMessageController extends ResourceController
 		$data = $this->getRequestItem($request);
 		$conversationId = (int)($request->params()->conversationId ?? $data->conversationId ?? null);
 		$userId = session()->user->id ?? null;
-
 		if (!$conversationId || !$userId)
 		{
 			return $this->error('Conversation ID and user ID required', 400);
@@ -92,23 +92,34 @@ class AssistantMessageController extends ResourceController
 	 */
 	public function generate(Request $request): void
 	{
+		// EventSource doesn't send cookies reliably, so we pass userId as query param
+		// The frontend sends it from app.data.user.id
+		$userId = (int)($request->getInt('userId') ?? null);
 		$conversationId = (int)($request->params()->conversationId ?? $request->getInt('conversationId') ?? null);
-		$userId = session()->user->id ?? null;
-
-		// TEMPORARY: Fallback to user ID 97 for testing without authentication
-		// TODO: Remove this and require proper authentication
-		if (!$userId)
-		{
-			$userId = 97;
-			error_log("WARNING: Using fallback userId 97 for testing");
-		}
 
 		if (!$conversationId)
 		{
-			// Use Proto's StreamResponse for error
-			$response = new \Proto\Http\Router\StreamResponse();
-			$response->sendHeaders(200);
-			$response->sendEvent(json_encode(['error' => 'Missing conversationId']));
+			(new StreamResponse())
+				->sendHeaders(200)
+				->sendEvent(json_encode(['error' => 'Missing conversationId']));
+			return;
+		}
+
+		if (!$userId)
+		{
+			(new StreamResponse())
+				->sendHeaders(200)
+				->sendEvent(json_encode(['error' => 'User not authenticated']));
+			return;
+		}
+
+		// Verify user has access to this conversation for security
+		$conversation = AssistantConversation::get($conversationId);
+		if (!$conversation || (int)$conversation->userId !== $userId)
+		{
+			(new StreamResponse())
+				->sendHeaders(200)
+				->sendEvent(json_encode(['error' => 'Access denied']));
 			return;
 		}
 

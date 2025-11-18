@@ -34,7 +34,7 @@ export const AssistantMessageModel = Model.extend({
 				}
 
 				const fullUrl = this.getUrl(url);
-				source = new EventSource(fullUrl + '?' + params);
+				source = new EventSource(fullUrl + '?' + params, { withCredentials: true });
 
 				source.onopen = () =>
 				{
@@ -109,8 +109,8 @@ export const AssistantMessageModel = Model.extend({
 		 */
 		generate(instanceParams, callBack)
 		{
-			const params = instanceParams && Object.keys(instanceParams).length > 0 
-				? new URLSearchParams(instanceParams).toString() 
+			const params = instanceParams && Object.keys(instanceParams).length > 0
+				? new URLSearchParams(instanceParams).toString()
 				: '';
 			const url = '/generate';
 
