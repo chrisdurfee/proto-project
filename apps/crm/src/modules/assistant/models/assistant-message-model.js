@@ -38,7 +38,7 @@ export const AssistantMessageModel = Model.extend({
 
 				source.onopen = () =>
 				{
-					console.log('[SSE] Connection established');
+
 				};
 
 				source.onerror = (event) =>
@@ -50,7 +50,6 @@ export const AssistantMessageModel = Model.extend({
 					{
 						reconnectTimer = setTimeout(() =>
 						{
-							console.log('[SSE] Attempting to reconnect...');
 							connect();
 						}, RECONNECT_DELAY);
 					}
@@ -70,7 +69,6 @@ export const AssistantMessageModel = Model.extend({
 					}
 					catch (error)
 					{
-						console.error('[SSE] Error parsing message:', error, event.data);
 					}
 				};
 			};
