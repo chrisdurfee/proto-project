@@ -82,7 +82,6 @@ class AssistantConversation extends Model
 	 */
 	public static function getOrCreateForUser(int $userId): ?object
 	{
-		// Try to get the most recent conversation
 		$conversation = static::builder()
 			->select(['ac.*'])
 			->where(
@@ -97,13 +96,20 @@ class AssistantConversation extends Model
 			return $conversation;
 		}
 
-		// Create a new conversation
-		return static::add((object)[
+		$model = new static((object)[
 			'userId' => $userId,
 			'title' => 'New Chat',
 			'createdAt' => date('Y-m-d H:i:s'),
 			'updatedAt' => date('Y-m-d H:i:s')
 		]);
+
+		$result = $model->add();
+		if (!$result)
+		{
+			return null;
+		}
+
+		return static::get((int)$model->id);
 	}
 
 	/**
