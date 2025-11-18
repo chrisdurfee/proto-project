@@ -21,10 +21,13 @@ const createStreamingModel = (dynamic) =>
 		replyResponse: ''
 	});
 
-	// Start streaming
-	aiData.xhr.generate({ conversationId: dynamic.conversationId }, (response) =>
+	// Start streaming (conversationId is already in the URL path via [[conversationId]])
+	aiData.xhr.generate({}, (response) =>
 	{
-        return;
+		if (response?.content)
+		{
+			aiData.set({ replyResponse: response.content });
+		}
 	});
 
 	return aiData;

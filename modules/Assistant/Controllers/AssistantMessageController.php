@@ -94,88 +94,18 @@ class AssistantMessageController extends ResourceController
 	{
 		$conversationId = (int)($request->params()->conversationId ?? $request->getInt('conversationId') ?? null);
 		$userId = session()->user->id ?? null;
+		
 		if (!$conversationId || !$userId)
 		{
+			// Use Proto's StreamResponse for error
+			$response = new \Proto\Http\Router\StreamResponse();
+			$response->sendHeaders(200);
+			$response->sendEvent(json_encode(['error' => 'Missing conversationId or userId']));
 			return;
 		}
 
 		$assistantService = new AssistantService();
-		eventStream(function() use ($conversationId, $userId, $assistantService)
-		{
-			// Create AI message placeholder
-			$aiModel = new AssistantMessage((object)[
-				'conversationId' => $conversationId,
-				'userId' => $userId,
-				'role' => 'assistant',
-				'content' => '',
-				'type' => 'text',
-				'isStreaming' => 1,
-				'isComplete' => 0,
-				'createdAt' => date('Y-m-d H:i:s'),
-				'updatedAt' => date('Y-m-d H:i:s')
-			]);
-
-			$aiResult = $aiModel->add();
-			if (!$aiResult)
-			{
-				return null;
-			}
-
-			$aiMessageId = (int)$aiModel->id;
-			$fullResponse = '';
-
-			// Get conversation history
-			$history = AssistantMessage::getConversationHistory($conversationId, 10);
-
-			// Stream from OpenAI
-			return $assistantService->getChatService()->stream(
-				$history,
-				'assistant',
-				null,
-				null,
-				function($chunk) use (&$fullResponse, $aiMessageId, $conversationId)
-				{
-					$responses = explode("\n\ndata:", $chunk);
-					foreach ($responses as $response)
-					{
-						$clean = preg_replace("/^data: |\n\n$/", "", $response);
-
-						if (strpos($clean, "[DONE]") !== false)
-						{
-							// Mark complete
-							AssistantMessage::edit((object)[
-								'id' => $aiMessageId,
-								'isStreaming' => 0,
-								'isComplete' => 1,
-								'content' => $fullResponse,
-								'updatedAt' => date('Y-m-d H:i:s')
-							]);
-
-							AssistantConversation::updateLastMessage($conversationId, $aiMessageId, $fullResponse);
-							return ['finish_reason' => 'stop'];
-						}
-
-						$result = json_decode($clean);
-						if (isset($result->choices[0]->delta->content))
-						{
-							$fullResponse .= $result->choices[0]->delta->content;
-
-							// Update database periodically
-							AssistantMessage::edit((object)[
-								'id' => $aiMessageId,
-								'content' => $fullResponse,
-								'updatedAt' => date('Y-m-d H:i:s')
-							]);
-
-							// Return chunk to frontend
-							return $result;
-						}
-					}
-
-					return null;
-				}
-			);
-		});
+		$assistantService->generateWithStreaming($conversationId, $userId);
 	}
 
 	/**

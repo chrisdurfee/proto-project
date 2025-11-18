@@ -101,15 +101,17 @@ export const AssistantMessageModel = Model.extend({
 		},
 
 		/**
-		 * Generate AI response with streaming.
+		 * Generate AI response using EventSource for streaming.
 		 *
-		 * @param {object} instanceParams
+		 * @param {object} instanceParams - Optional query parameters
 		 * @param {function} callBack
 		 * @returns {object}
 		 */
 		generate(instanceParams, callBack)
 		{
-			const params = new URLSearchParams(instanceParams).toString();
+			const params = instanceParams && Object.keys(instanceParams).length > 0 
+				? new URLSearchParams(instanceParams).toString() 
+				: '';
 			const url = '/generate';
 
 			return this.setupEventSource(url, params, callBack);

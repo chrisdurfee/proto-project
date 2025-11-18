@@ -166,30 +166,6 @@ class AssistantService extends Service
 	}
 
     /**
-	 * Stream the AI response and update the message.
-	 *
-	 * @param int $conversationId
-	 * @param int $aiMessageId
-	 * @return void
-	 */
-	protected function streamReply(int $conversationId): void
-	{
-		$history = AssistantMessage::getConversationHistory($conversationId, 10);
-		$fullResponse = '';
-
-		$this->chatService->stream(
-			$history,
-			'assistant',
-			null,
-			null,
-			function($chunk) use ($conversationId, &$fullResponse)
-			{
-				$this->handleStreamChunk($chunk, $conversationId, $aiMessageId, $fullResponse);
-			}
-		);
-	}
-
-	/**
 	 * Handle a single stream chunk from the AI service.
 	 *
 	 * @param string $chunk
@@ -260,6 +236,106 @@ class AssistantService extends Service
 
 		AssistantConversation::updateLastMessage($conversationId, $aiMessageId, $fullResponse);
 		$this->publishMessage($conversationId, $aiMessageId);
+	}
+
+	/**
+	 * Generate AI response with streaming.
+	 *
+	 * @param int $conversationId
+	 * @param int $userId
+	 * @return void
+	 */
+	public function generateWithStreaming(int $conversationId, int $userId): void
+	{
+		// Use Proto's StreamResponse to set up SSE properly
+		$response = new \Proto\Http\Router\StreamResponse();
+		$response->sendHeaders(200);
+
+		// Create AI message placeholder
+		$aiModel = new AssistantMessage((object)[
+			'conversationId' => $conversationId,
+			'userId' => $userId,
+			'role' => 'assistant',
+			'content' => '',
+			'type' => 'text',
+			'isStreaming' => 1,
+			'isComplete' => 0,
+			'createdAt' => date('Y-m-d H:i:s'),
+			'updatedAt' => date('Y-m-d H:i:s')
+		]);
+
+		$aiResult = $aiModel->add();
+		if (!$aiResult)
+		{
+			$response->sendEvent(json_encode(['error' => 'Failed to create AI message']));
+			return;
+		}
+
+		$aiMessageId = (int)$aiModel->id;
+		$fullResponse = '';
+
+		// Send initial message with messageId
+		$response->sendEvent(json_encode(['messageId' => $aiMessageId, 'status' => 'streaming']));
+
+		// Get conversation history
+		$history = AssistantMessage::getConversationHistory($conversationId, 10);
+
+		try {
+			// Stream from OpenAI using ChatService
+			// ChatService->stream() uses Message class for SSE output (data is already formatted)
+			$this->chatService->stream(
+				$history,
+				'assistant',
+				null,
+				null, // No event object - ChatService uses Message class directly
+				function($chunk) use (&$fullResponse, $aiMessageId, $conversationId)
+				{
+					if (connection_aborted()) {
+						return;
+					}
+
+					// Parse chunk to update database
+					$responses = explode("\n\ndata:", $chunk);
+					foreach ($responses as $response)
+					{
+						$clean = preg_replace("/^data: |\\n\\n$/", "", $response);
+
+						if (strpos($clean, "[DONE]") !== false)
+						{
+							// Mark complete
+							AssistantMessage::edit((object)[
+								'id' => $aiMessageId,
+								'isStreaming' => 0,
+								'isComplete' => 1,
+								'content' => $fullResponse,
+								'updatedAt' => date('Y-m-d H:i:s')
+							]);
+
+							AssistantConversation::updateLastMessage($conversationId, $aiMessageId, $fullResponse);
+							return;
+						}
+
+						$result = json_decode($clean);
+						if (isset($result->choices[0]->delta->content))
+						{
+							$fullResponse .= $result->choices[0]->delta->content;
+
+							// Update database every few chunks
+							static $chunkCount = 0;
+							if (++$chunkCount % 5 === 0) {
+								AssistantMessage::edit((object)[
+									'id' => $aiMessageId,
+									'content' => $fullResponse,
+									'updatedAt' => date('Y-m-d H:i:s')
+								]);
+							}
+						}
+					}
+				}
+			);
+		} catch (\Exception $e) {
+			$response->sendEvent(json_encode(['error' => $e->getMessage()]));
+		}
 	}
 
 	/**

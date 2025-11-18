@@ -135,4 +135,21 @@ class AssistantMessagePolicy extends AssistantPolicy
 
 		return $this->ownsConversation($conversationId);
 	}
+
+	/**
+	 * Determines if the user can generate AI responses.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function generate(Request $request): bool
+	{
+		$conversationId = (int)($request->params()->conversationId ?? null);
+		if (!$conversationId)
+		{
+			return false;
+		}
+
+		return $this->ownsConversation($conversationId);
+	}
 }
