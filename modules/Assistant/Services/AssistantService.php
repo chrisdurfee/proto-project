@@ -48,7 +48,32 @@ class AssistantService extends Service
 	 */
 	public function streamResponse(int $conversationId, int $userId, string $content): void
 	{
-        $model = new AssistantMessage((object)[
+		$userMessageId = $this->createUserMessage($conversationId, $userId, $content);
+		if (!$userMessageId)
+		{
+			return;
+		}
+
+		$aiMessageId = $this->createAiMessagePlaceholder($conversationId, $userId);
+		if (!$aiMessageId)
+		{
+			return;
+		}
+
+		$this->streamAiResponse($conversationId, $aiMessageId);
+	}
+
+	/**
+	 * Create and save a user message.
+	 *
+	 * @param int $conversationId
+	 * @param int $userId
+	 * @param string $content
+	 * @return int|null The message ID or null on failure
+	 */
+	protected function createUserMessage(int $conversationId, int $userId, string $content): ?int
+	{
+		$model = new AssistantMessage((object)[
 			'conversationId' => $conversationId,
 			'userId' => $userId,
 			'role' => 'user',
@@ -58,24 +83,31 @@ class AssistantService extends Service
 			'createdAt' => date('Y-m-d H:i:s'),
 			'updatedAt' => date('Y-m-d H:i:s')
 		]);
+
 		$result = $model->add();
 		if (!$result)
 		{
-			return;
+			return null;
 		}
 
-		// Update conversation last message
-		AssistantConversation::updateLastMessage(
-			$conversationId,
-			(int)$model->id,
-			$content
-		);
+		$messageId = (int)$model->id;
 
-		// Publish user message to Redis for real-time updates
-		$this->publishMessage($conversationId, (int)$model->id);
+		AssistantConversation::updateLastMessage($conversationId, $messageId, $content);
+		$this->publishMessage($conversationId, $messageId);
 
-		// Create placeholder for AI response
-        $aiModel = new AssistantMessage(((object)[
+		return $messageId;
+	}
+
+	/**
+	 * Create a placeholder message for the AI response.
+	 *
+	 * @param int $conversationId
+	 * @param int $userId
+	 * @return int|null The message ID or null on failure
+	 */
+	protected function createAiMessagePlaceholder(int $conversationId, int $userId): ?int
+	{
+		$aiModel = new AssistantMessage((object)[
 			'conversationId' => $conversationId,
 			'userId' => $userId,
 			'role' => 'assistant',
@@ -85,23 +117,32 @@ class AssistantService extends Service
 			'isComplete' => 0,
 			'createdAt' => date('Y-m-d H:i:s'),
 			'updatedAt' => date('Y-m-d H:i:s')
-		]));
-		$aiResult = $aiModel->add();
-		if (!$aiResult)
+		]);
+
+		$result = $aiModel->add();
+		if (!$result)
 		{
-			return;
+			return null;
 		}
 
 		$aiMessageId = (int)$aiModel->id;
-
-		// Publish AI message creation
 		$this->publishMessage($conversationId, $aiMessageId);
 
-		// Get conversation history for context
-		$history = AssistantMessage::getConversationHistory($conversationId, 10);
+		return $aiMessageId;
+	}
 
-		// Stream the AI response
+	/**
+	 * Stream the AI response and update the message.
+	 *
+	 * @param int $conversationId
+	 * @param int $aiMessageId
+	 * @return void
+	 */
+	protected function streamAiResponse(int $conversationId, int $aiMessageId): void
+	{
+		$history = AssistantMessage::getConversationHistory($conversationId, 10);
 		$fullResponse = '';
+
 		$this->chatService->stream(
 			$history,
 			'assistant',
@@ -109,51 +150,82 @@ class AssistantService extends Service
 			null,
 			function($chunk) use ($conversationId, $aiMessageId, &$fullResponse)
 			{
-				// Parse the streaming chunk
-				if (strpos($chunk, 'data: ') === 0)
-				{
-					$data = trim(substr($chunk, 6));
-					if ($data === '[DONE]')
-					{
-						// Mark message as complete
-						AssistantMessage::edit((object)[
-							'id' => $aiMessageId,
-							'isStreaming' => 0,
-							'isComplete' => 1,
-							'updatedAt' => date('Y-m-d H:i:s')
-						]);
-
-						// Update conversation last message
-						AssistantConversation::updateLastMessage(
-							$conversationId,
-							$aiMessageId,
-							$fullResponse
-						);
-
-						// Publish final update
-						$this->publishMessage($conversationId, $aiMessageId);
-						return;
-					}
-
-					$json = json_decode($data);
-					if (isset($json->choices[0]->delta->content))
-					{
-						$content = $json->choices[0]->delta->content;
-						$fullResponse .= $content;
-
-						// Update the message in the database
-						AssistantMessage::edit((object)[
-							'id' => $aiMessageId,
-							'content' => $fullResponse,
-							'updatedAt' => date('Y-m-d H:i:s')
-						]);
-
-						// Publish update to Redis for real-time sync
-						$this->publishMessage($conversationId, $aiMessageId);
-					}
-				}
+				$this->handleStreamChunk($chunk, $conversationId, $aiMessageId, $fullResponse);
 			}
 		);
+	}
+
+	/**
+	 * Handle a single stream chunk from the AI service.
+	 *
+	 * @param string $chunk
+	 * @param int $conversationId
+	 * @param int $aiMessageId
+	 * @param string &$fullResponse
+	 * @return void
+	 */
+	protected function handleStreamChunk(string $chunk, int $conversationId, int $aiMessageId, string &$fullResponse): void
+	{
+		if (strpos($chunk, 'data: ') !== 0)
+		{
+			return;
+		}
+
+		$data = trim(substr($chunk, 6));
+		if ($data === '[DONE]')
+		{
+			$this->finalizeAiMessage($conversationId, $aiMessageId, $fullResponse);
+			return;
+		}
+
+		$json = json_decode($data);
+		if (!isset($json->choices[0]->delta->content))
+		{
+			return;
+		}
+
+		$content = $json->choices[0]->delta->content;
+		$fullResponse .= $content;
+
+		$this->updateAiMessage($aiMessageId, $fullResponse);
+		$this->publishMessage($conversationId, $aiMessageId);
+	}
+
+	/**
+	 * Update an AI message with new content.
+	 *
+	 * @param int $aiMessageId
+	 * @param string $content
+	 * @return void
+	 */
+	protected function updateAiMessage(int $aiMessageId, string $content): void
+	{
+		AssistantMessage::edit((object)[
+			'id' => $aiMessageId,
+			'content' => $content,
+			'updatedAt' => date('Y-m-d H:i:s')
+		]);
+	}
+
+	/**
+	 * Finalize an AI message when streaming is complete.
+	 *
+	 * @param int $conversationId
+	 * @param int $aiMessageId
+	 * @param string $fullResponse
+	 * @return void
+	 */
+	protected function finalizeAiMessage(int $conversationId, int $aiMessageId, string $fullResponse): void
+	{
+		AssistantMessage::edit((object)[
+			'id' => $aiMessageId,
+			'isStreaming' => 0,
+			'isComplete' => 1,
+			'updatedAt' => date('Y-m-d H:i:s')
+		]);
+
+		AssistantConversation::updateLastMessage($conversationId, $aiMessageId, $fullResponse);
+		$this->publishMessage($conversationId, $aiMessageId);
 	}
 
 	/**
@@ -168,6 +240,6 @@ class AssistantService extends Service
 		events()->emit("redis:assistant_conversation:{$conversationId}:messages", [
 			'id' => $messageId,
 			'action' => 'merge'
-		]);
+        ]);
 	}
 }

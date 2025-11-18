@@ -196,7 +196,7 @@ export const AssistantMessages = Jot(
 						class: 'flex flex-col gap-4',
 						limit: 50,
 						divider: Divider,
-						rowItem: (message) => new AssistantMessageBubble({ message }),
+						rowItem: (message) => AssistantMessageBubble({ message }),
 						// @ts-ignore
 						scrollContainer: this.scrollContainer,
 						emptyState: () => EmptyState({
