@@ -7,6 +7,6 @@ use Modules\Assistant\Controllers\AssistantConversationController;
  * This will register the Conversation API routes.
  */
 router()
-    ->get('assistant/conversation/active', AssistantConversationController::class, 'getActive')
-    ->get('assistant/conversation/sync', AssistantConversationController::class, 'sync')
+    ->get('assistant/conversation/active', [AssistantConversationController::class, 'getActive'])
+    ->get('assistant/conversation/sync', [AssistantConversationController::class, 'sync'])
     ->resource('assistant/conversation', AssistantConversationController::class);

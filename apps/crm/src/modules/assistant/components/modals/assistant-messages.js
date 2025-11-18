@@ -47,12 +47,10 @@ export const AssistantMessages = Jot(
 	 */
 	setData()
 	{
-		// @ts-ignore
-		const conversationId = typeof this.getConversationId === 'function' ? this.getConversationId() : null;
-
+		// Initialize with null conversation ID - will be set later
 		return new AssistantMessageModel({
 			userId: app.data.user.id,
-			conversationId,
+			conversationId: null,
 			orderBy: {
 				createdAt: 'desc'
 			}
@@ -60,12 +58,25 @@ export const AssistantMessages = Jot(
 	},
 
 	/**
-	 * Initialize SSE connection for real-time updates.
+	 * Set the conversation ID and initialize data loading.
 	 *
+	 * @param {number} conversationId
 	 * @returns {void}
 	 */
-	onCreated()
+	setConversationId(conversationId)
 	{
+		// @ts-ignore
+		this.data.set({ conversationId });
+		
+		// Now load the messages
+		// @ts-ignore
+		if (this.list)
+		{
+			// @ts-ignore
+			this.list.refresh();
+		}
+
+		// Set up SSE sync
 		// @ts-ignore
 		this.setupSync();
 	},
@@ -78,15 +89,23 @@ export const AssistantMessages = Jot(
 	setupSync()
 	{
 		// @ts-ignore
-		const conversationId = typeof this.getConversationId === 'function' ? this.getConversationId() : null;
+		const conversationId = this.data.get?.().conversationId;
 
 		if (!conversationId)
 		{
 			return;
 		}
 
+		// Close existing connection if any
 		// @ts-ignore
-		this.eventSource = this.data.setupSync({}, (data) =>
+		if (this.eventSource)
+		{
+			// @ts-ignore
+			this.eventSource.close();
+		}
+
+		// @ts-ignore
+		this.eventSource = this.data.xhr.sync({}, (data) =>
 		{
 			// @ts-ignore
 			this.handleSyncUpdate(data);
