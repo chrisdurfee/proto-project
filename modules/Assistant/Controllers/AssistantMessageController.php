@@ -128,7 +128,7 @@ class AssistantMessageController extends ResourceController
 			$history = AssistantMessage::getConversationHistory($conversationId, 10);
 
 			// Stream from OpenAI
-			$assistantService->getChatService()->stream(
+			return $assistantService->getChatService()->stream(
 				$history,
 				'assistant',
 				null,

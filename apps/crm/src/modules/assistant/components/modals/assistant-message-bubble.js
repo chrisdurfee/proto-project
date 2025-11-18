@@ -24,30 +24,7 @@ const createStreamingModel = (dynamic) =>
 	// Start streaming
 	aiData.xhr.generate({ conversationId: dynamic.conversationId }, (response) =>
 	{
-		if (!response || response.success === false)
-		{
-			aiData.set('replyResponse', response?.message || 'Service Error');
-			return;
-		}
-
-		const choices = response?.choices;
-		if (!choices)
-		{
-			return;
-		}
-
-		const choice = choices[0];
-		if (!choice || !choice.delta?.content)
-		{
-			return;
-		}
-
-		if (choice.finish_reason === 'stop')
-		{
-			return;
-		}
-
-		aiData.concat('replyResponse', choice.delta.content);
+        return;
 	});
 
 	return aiData;
@@ -102,14 +79,9 @@ export const AssistantMessageBubble = ({ message }) =>
 						: 'bg-surface border'
 				}`
 			}, [
-				streamData
-					? Pre({
-						class: "whitespace-pre-wrap wrap-break-words text-sm font-sans",
-						watch: { replyResponse: (value, ele) => ele.textContent = value }
-					}, streamData)
-					: Pre({
-						class: "whitespace-pre-wrap wrap-break-words text-sm font-sans"
-					}, message.content)
+				Pre({
+                    class: "whitespace-pre-wrap wrap-break-words text-sm font-sans"
+                }, streamData ? ['[[replyResponse]]', streamData] : message.content)
 			]),
 
 			// Timestamp
