@@ -1,4 +1,4 @@
-import { Div } from '@base-framework/atoms';
+import { Div, OnLoad } from '@base-framework/atoms';
 import { Component, Jot } from '@base-framework/base';
 import { AssistantComposer } from './assistant-composer.js';
 import { AssistantMessages } from './assistant-messages.js';
@@ -88,35 +88,40 @@ export const AssistantChatContent = Jot(
 	render()
 	{
 		return Div({ class: "flex flex-col h-full" }, [
-			// Messages container with scroll
-			Div({ class: "flex-1" }, [
-				// @ts-ignore
-				new AssistantMessages({
-					cache: 'messages',
-					// @ts-ignore
-					getConversationId: () => this.conversationId,
-					// @ts-ignore
-					isAtBottom: () => this.isAtBottom(),
-					// @ts-ignore
-					scrollToBottom: () => this.scrollToBottom(),
-					// @ts-ignore
-					scrollContainer: this.panel
-				})
-			]),
+			OnLoad(() =>
+            {
+                return Div({ class: 'flex flex-auto flex-col ' }, [
+                    // Messages container with scroll
+                    Div({ class: "flex-1" }, [
+                        // @ts-ignore
+                        new AssistantMessages({
+                            cache: 'messages',
+                            // @ts-ignore
+                            conversationId: this.conversationId,
+                            // @ts-ignore
+                            isAtBottom: () => this.isAtBottom(),
+                            // @ts-ignore
+                            scrollToBottom: () => this.scrollToBottom(),
+                            // @ts-ignore
+                            scrollContainer: this.panel
+                        })
+                    ]),
 
-			// Composer at bottom
-			// @ts-ignore
-			new AssistantComposer({
-				// @ts-ignore
-				getConversationId: () => this.conversationId,
-				placeholder: "Ask me anything...",
-				submitCallBack: (parent) =>
-				{
-					// Scroll to bottom after new message
-					// @ts-ignore
-					this.scrollToBottom();
-				}
-			})
+                    // Composer at bottom
+                    // @ts-ignore
+                    new AssistantComposer({
+                        // @ts-ignore
+                        conversationId: this.conversationId,
+                        placeholder: "Ask me anything...",
+                        submitCallBack: (parent) =>
+                        {
+                            // Scroll to bottom after new message
+                            // @ts-ignore
+                            this.scrollToBottom();
+                        }
+                    })
+                ])
+            })
 		]);
 	}
 });

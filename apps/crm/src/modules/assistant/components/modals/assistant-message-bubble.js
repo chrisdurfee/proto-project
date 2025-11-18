@@ -1,5 +1,6 @@
-import { Div, Pre } from "@base-framework/atoms";
-import { DateTime } from "@base-framework/base";
+import { Div, Pre, Span } from "@base-framework/atoms";
+import { TimeFrame } from "@base-framework/ui";
+import { Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar } from "@base-framework/ui/molecules";
 
@@ -19,7 +20,7 @@ export const AssistantMessageBubble = ({ message }) =>
 
 	return Div({
 		class: `flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} fadeIn`,
-		dataSet: [['message-id', message.id]]
+		'data-message-id': message.id
 	}, [
 		// Avatar
 		Div({ class: "shrink-0" }, [
@@ -31,12 +32,12 @@ export const AssistantMessageBubble = ({ message }) =>
 					size: 'sm'
 				})
 				: Div({ class: "flex items-center justify-center w-8 h-8 rounded-full bg-primary/10" }, [
-					Icons.ai({ class: "w-5 h-5 text-primary" })
+					Icon({ size: 'sm' }, Icons.ai)
 				])
 		]),
 
 		// Message bubble
-		Div({ class: "flex flex-col gap-1 max-w-[80%]" }, [
+		Div({ class: "group flex flex-col gap-1 max-w-[80%]" }, [
 			// Message content
 			Div({
 				class: `rounded-lg px-4 py-3 ${
@@ -47,14 +48,14 @@ export const AssistantMessageBubble = ({ message }) =>
 			}, [
 				Pre({
 					class: "whitespace-pre-wrap wrap-break-words text-sm font-sans",
-					bind: isStreaming ? ['content', null, message] : null
-				}, isStreaming ? '' : message.content)
+					//bind: isStreaming ? ['content', null, message] : null
+				}, message.content)
 			]),
 
 			// Timestamp
-			Div({
-				class: `text-xs text-muted-foreground ${isUser ? 'text-right' : 'text-left'}`
-			}, DateTime.format('time', message.createdAt))
+			Span({
+                class: "opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out text-xs text-muted-foreground ml-2 capitalize"
+            }, TimeFrame({ dateTime: message.createdAt }))
 		])
 	]);
 };

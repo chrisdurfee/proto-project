@@ -49,8 +49,10 @@ export const AssistantMessages = Jot(
 	{
 		return new AssistantMessageModel({
 			userId: app.data.user.id,
-			conversationId: null,
+            // @ts-ignore
+			conversationId: this.conversationId,
 			orderBy: {
+                id: 'desc',
 				createdAt: 'desc'
 			}
 		});

@@ -164,7 +164,7 @@ class AssistantMessage extends Model
 	public static function getConversationHistory(int $conversationId, int $limit = 20): array
 	{
 		$messages = static::builder()
-			->select(['am.role', 'am.content'])
+			->select(['am.role'], ['am.content'])
 			->where(
 				['am.conversation_id', $conversationId],
 				'am.deleted_at IS NULL',
