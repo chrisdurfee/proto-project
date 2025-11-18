@@ -197,6 +197,118 @@ $this->find(function($sql, &$params) {
 				)
 			]),
 
+			// SEARCHBYJOIN
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'Search By Join'),
+				P({ class: 'text-muted-foreground' },
+					`The searchByJoin() method automatically generates EXISTS subqueries for searching within nested join data. This eliminates the need to write complex raw SQL when searching across relationships.`
+				),
+				H4({ class: 'font-semibold' }, 'Method Signature'),
+				CodeBlock(
+`searchByJoin(
+	string $joinAlias,
+	array $searchFields,
+	string $searchValue,
+	array &$params
+): string`
+				),
+				P({ class: 'text-muted-foreground' },
+					`Returns an EXISTS subquery SQL string and appends bound parameters to the $params array.`
+				),
+				H4({ class: 'font-semibold' }, 'Parameters'),
+				Ul({ class: 'list-disc pl-6 text-muted-foreground' }, [
+					Li("joinAlias - The alias of the join relationship defined in your model"),
+					Li("searchFields - Array of field names to search (in camelCase)"),
+					Li("searchValue - The value to search for (wrapped with % wildcards automatically)"),
+					Li("params - Reference to params array (method appends bound values)")
+				]),
+				H4({ class: 'font-semibold' }, 'Example: Search Nested Join Data'),
+				P({ class: 'text-muted-foreground' },
+					`Without searchByJoin() you would need to write complex EXISTS subqueries manually:`
+				),
+				CodeBlock(
+`// OLD WAY - Manual EXISTS subquery
+protected function setCustomWhere($sql, &$params, $options)
+{
+	if (!empty($options['search']))
+	{
+		$search = '%' . $options['search'] . '%';
+		$sql->where("EXISTS (
+			SELECT 1 FROM conversation_participants cpp
+			INNER JOIN users u ON cpp.user_id = u.id
+			WHERE cpp.conversation_id = cp.conversation_id
+			AND cpp.deleted_at IS NULL
+			AND (u.first_name LIKE ? OR u.last_name LIKE ?)
+		)");
+		$params[] = $search;
+		$params[] = $search;
+	}
+}`
+				),
+				P({ class: 'text-muted-foreground' },
+					`With searchByJoin() the same query becomes a single line:`
+				),
+				CodeBlock(
+`// NEW WAY - Automatic subquery generation
+protected function setCustomWhere($sql, &$params, $options)
+{
+	if (!empty($options['search']))
+	{
+		$sql->where(
+			$this->searchByJoin('participants', ['firstName', 'lastName'], $options['search'], $params)
+		);
+	}
+}`
+				),
+				H4({ class: 'font-semibold' }, 'How It Works'),
+				Ul({ class: 'list-disc pl-6 text-muted-foreground' }, [
+					Li("Automatically walks your model's join tree to find the target join by alias"),
+					Li("Builds the complete chain of joins from parent to target relationship"),
+					Li("Generates proper EXISTS subquery with INNER JOINs and table aliases"),
+					Li("Converts camelCase field names to snake_case for database columns"),
+					Li("Handles NULL checks on intermediate join tables (deleted_at, etc.)"),
+					Li("Binds parameters safely with LIKE wildcards for fuzzy matching")
+				]),
+				H4({ class: 'font-semibold' }, 'Multiple Field Search'),
+				P({ class: 'text-muted-foreground' },
+					`Search across multiple fields with OR conditions:`
+				),
+				CodeBlock(
+`// Searches firstName OR lastName OR email
+$sql->where(
+	$this->searchByJoin(
+		'participants',
+		['firstName', 'lastName', 'email'],
+		$searchTerm,
+		$params
+	)
+);`
+				),
+				H4({ class: 'font-semibold' }, 'Nested Join Support'),
+				P({ class: 'text-muted-foreground' },
+					`Works with deeply nested relationships defined in your model:`
+				),
+				CodeBlock(
+`// In your Model class:
+protected function setJoins(): array
+{
+	return [
+		$this->many('participants', 'conversation_id', ConversationParticipant::class, 'conversationId', function($join) {
+			return [
+				$join->one('user', 'userId', User::class, 'id')
+			];
+		})
+	];
+}
+
+// In your Storage class:
+// Searches in the nested user relationship
+$sql->where(
+	$this->searchByJoin('participants', ['firstName', 'lastName'], $search, $params)
+);`
+				)
+			]),
+
 			// EXAMPLES
 			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Example Queries'),

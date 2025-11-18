@@ -4,6 +4,7 @@ import { Icons } from '@base-framework/ui/icons';
 import { InlineNavigation } from '@base-framework/ui/organisms';
 import { Configs } from '../../configs.js';
 import { ClientSearchModal } from '../../modules/clients/components/organisms/modals/client-search-modal.js';
+import { openAssistantChatModal } from '../../modules/assistant/components/modals/assistant-chat-modal.js';
 import { NavigationAvatar } from './avatars/navigation-avatar.js';
 import { MainHeader } from './main-header.js';
 import { ShortNavigation } from './short/short-navigation.js';
@@ -77,15 +78,15 @@ const SearchButton = () => ({
 });
 
 /**
- * Assitant Button
+ * Assistant Button
  *
  * @returns {object}
  */
 const AssistantChatButton = () => ({
-	label: 'Void',
+	label: 'AI Assistant',
 	icon: Icons.ai,
 	exact: true,
-	click: () => {}
+	click: () => openAssistantChatModal()
 });
 
 /**

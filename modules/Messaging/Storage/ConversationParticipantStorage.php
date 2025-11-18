@@ -25,6 +25,12 @@ class ConversationParticipantStorage extends Storage
 			return;
 		}
 
+		if (!empty($modifiers['search']))
+		{
+			$search = '%' . $modifiers['search'] . '%';
+			$sql->whereJoin('participants', [["firstName" => 'bruce']], $params);
+		}
+
 		// Handle 'unread' view filter
 		if (isset($modifiers['view']) && $modifiers['view'] === 'unread')
 		{

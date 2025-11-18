@@ -263,17 +263,20 @@ class ConversationParticipant extends Model
 	}
 
 	/**
-	 * Get searchable fields for the model.
+	 * (Optional) Sets a custom where clause.
 	 *
-	 * @return array
+	 * @param object $sql Query builder instance.
+	 * @param array|null $modifiers Modifiers.
+	 * @param array|null $params Parameter array.
+	 * @return void
 	 */
-	public function getSearchableFields(): array
+	protected function setCustomWhere(object $sql, ?array $modifiers = null, ?array &$params = null): void
 	{
-		return [
-			["CONCAT(u.first_name, ' ', u.last_name)"],
-			["CONCAT(u.last_name, ', ', u.first_name)"],
-			["u.display_name"]
-		];
+		if (!empty($modifiers['search']))
+		{
+			$search = '%' . $modifiers['search'] . '%';
+			$sql->whereJoin('participants', ["firstName" => $search], $params);
+		}
 	}
 
 	/**
