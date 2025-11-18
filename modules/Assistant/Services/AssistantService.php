@@ -28,6 +28,16 @@ class AssistantService extends Service
 	}
 
 	/**
+	 * Get the chat service instance.
+	 *
+	 * @return ChatService
+	 */
+	public function getChatService(): ChatService
+	{
+		return $this->chatService;
+	}
+
+	/**
 	 * Get or create a conversation for the user.
 	 *
 	 * @param int $userId

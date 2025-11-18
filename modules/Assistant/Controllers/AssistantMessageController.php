@@ -3,8 +3,8 @@ namespace Modules\Assistant\Controllers;
 
 use Modules\Assistant\Auth\Policies\AssistantMessagePolicy;
 use Modules\Assistant\Models\AssistantMessage;
+use Modules\Assistant\Models\AssistantConversation;
 use Modules\Assistant\Services\AssistantService;
-use Proto\Http\Loop\UpdateEvent;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;
 
@@ -33,7 +33,7 @@ class AssistantMessageController extends ResourceController
 	}
 
 	/**
-	 * Send a new message and stream AI response.
+	 * Send a new user message (no AI streaming here).
 	 *
 	 * @param Request $request
 	 * @return object
@@ -55,11 +55,127 @@ class AssistantMessageController extends ResourceController
 			return $this->error('Message content required', 400);
 		}
 
-		// Stream the AI response via SSE
-		$assistantService = new AssistantService();
-		$assistantService->streamResponse($conversationId, $userId, $content);
+		// Create user message only
+		$result = $this->addItem((object)[
+			'conversationId' => $conversationId,
+			'userId' => $userId,
+			'role' => 'user',
+			'content' => $content,
+			'type' => 'text',
+			'isComplete' => 1
+		]);
 
-		return $this->response(['success' => true]);
+		if (!$result)
+		{
+			return $this->error('Failed to create message', 500);
+		}
+
+		$messageId = (int)$result->id;
+
+		// Update conversation last message
+		AssistantConversation::updateLastMessage($conversationId, $messageId, $content);
+
+		// Publish to Redis for sync
+		events()->emit("redis:assistant_conversation:{$conversationId}:messages", [
+			'id' => $messageId,
+			'action' => 'merge'
+		]);
+
+		return $this->response(['success' => true, 'id' => $messageId]);
+	}
+
+	/**
+	 * Generate AI response with streaming.
+	 *
+	 * @param Request $request
+	 * @return void
+	 */
+	public function generate(Request $request): void
+	{
+		$conversationId = (int)($request->params()->conversationId ?? $request->getInt('conversationId') ?? null);
+		$userId = session()->user->id ?? null;
+		if (!$conversationId || !$userId)
+		{
+			return;
+		}
+
+		$assistantService = new AssistantService();
+		eventStream(function() use ($conversationId, $userId, $assistantService)
+		{
+			// Create AI message placeholder
+			$aiModel = new AssistantMessage((object)[
+				'conversationId' => $conversationId,
+				'userId' => $userId,
+				'role' => 'assistant',
+				'content' => '',
+				'type' => 'text',
+				'isStreaming' => 1,
+				'isComplete' => 0,
+				'createdAt' => date('Y-m-d H:i:s'),
+				'updatedAt' => date('Y-m-d H:i:s')
+			]);
+
+			$aiResult = $aiModel->add();
+			if (!$aiResult)
+			{
+				return null;
+			}
+
+			$aiMessageId = (int)$aiModel->id;
+			$fullResponse = '';
+
+			// Get conversation history
+			$history = AssistantMessage::getConversationHistory($conversationId, 10);
+
+			// Stream from OpenAI
+			$assistantService->getChatService()->stream(
+				$history,
+				'assistant',
+				null,
+				null,
+				function($chunk) use (&$fullResponse, $aiMessageId, $conversationId)
+				{
+					$responses = explode("\n\ndata:", $chunk);
+					foreach ($responses as $response)
+					{
+						$clean = preg_replace("/^data: |\n\n$/", "", $response);
+
+						if (strpos($clean, "[DONE]") !== false)
+						{
+							// Mark complete
+							AssistantMessage::edit((object)[
+								'id' => $aiMessageId,
+								'isStreaming' => 0,
+								'isComplete' => 1,
+								'content' => $fullResponse,
+								'updatedAt' => date('Y-m-d H:i:s')
+							]);
+
+							AssistantConversation::updateLastMessage($conversationId, $aiMessageId, $fullResponse);
+							return ['finish_reason' => 'stop'];
+						}
+
+						$result = json_decode($clean);
+						if (isset($result->choices[0]->delta->content))
+						{
+							$fullResponse .= $result->choices[0]->delta->content;
+
+							// Update database periodically
+							AssistantMessage::edit((object)[
+								'id' => $aiMessageId,
+								'content' => $fullResponse,
+								'updatedAt' => date('Y-m-d H:i:s')
+							]);
+
+							// Return chunk to frontend
+							return $result;
+						}
+					}
+
+					return null;
+				}
+			);
+		});
 	}
 
 	/**
@@ -92,51 +208,6 @@ class AssistantMessageController extends ResourceController
 		}
 
 		return $filter;
-	}
-
-	/**
-	 * This will generate a reply.
-	 *
-	 * @param Request $request
-	 * @return void
-	 */
-	public function generate(Request $request): void
-	{
-		$chatId = $request->getInt('chatId');
-		if (!isset($chatId))
-		{
-			return;
-		}
-
-		eventStream(function(UpdateEvent $event) use ($chatId)
-		{
-			//add row for ai message
-
-			// call service stream and set the callack to do this
-			function($data) use ($chatId, $aiRowId)
-			{
-				$responses = explode("\n\ndata:", $data);
-				foreach ($responses as $response)
-				{
-					$clean = preg_replace("/^data: |\\n\\n$/", "", $response);
-					if (strpos($clean, "[DONE]") !== false)
-					{
-						// update message
-						AssistantMessage::edit((object)[
-							'id' => $aiRowId,
-							'content' => $text
-						]);
-						return;
-					}
-
-					$result = Json::decode($clean);
-					if (isset($result->choices[0]->delta->content))
-					{
-						$text .= $result->choices[0]->delta->content;
-					}
-				}
-			}
-		});
 	}
 
 	/**
@@ -176,6 +247,12 @@ class AssistantMessageController extends ResourceController
 			// Fetch the updated message data
 			$messageData = AssistantMessage::get($messageId);
 			if (!$messageData)
+			{
+				return null;
+			}
+
+			// Only sync user messages (AI messages are handled by streaming)
+			if ($messageData->role !== 'user')
 			{
 				return null;
 			}

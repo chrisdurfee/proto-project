@@ -81,21 +81,92 @@ export const AssistantComposer = VeilJot(
 		const data = new AssistantMessageModel({
 			userId: app.data.user.id,
 			conversationId,
-			content
+			content,
+			role: 'user'
 		});
 
+		// Save the user message
 		// @ts-ignore
 		data.xhr.add({}, (response) =>
 		{
-			if (response && response.success !== false)
+			if (!response || response.success === false)
+			{
+				return;
+			}
+
+			// Scroll to bottom after user message
+			// @ts-ignore
+			if (this.submitCallBack)
 			{
 				// @ts-ignore
-				if (this.submitCallBack)
-				{
-					// @ts-ignore
-					this.submitCallBack(this.parent);
-				}
+				this.submitCallBack(this.parent);
 			}
+
+			// Create AI response placeholder and stream
+			// @ts-ignore
+			this.streamAiResponse(conversationId);
+		});
+	},
+
+	/**
+	 * Stream AI response.
+	 *
+	 * @param {number} conversationId
+	 * @returns {void}
+	 */
+	streamAiResponse(conversationId)
+	{
+		const aiData = new AssistantMessageModel({
+			userId: app.data.user.id,
+			conversationId,
+			role: 'assistant',
+			content: '',
+			replyResponse: ''
+		});
+
+		// Get parent list component and append AI message bubble
+		// @ts-ignore
+		const messagesComponent = this.parent.messages;
+		if (messagesComponent && messagesComponent.list)
+		{
+			messagesComponent.list.append([{
+				id: 'streaming-' + Date.now(),
+				conversationId,
+				userId: app.data.user.id,
+				role: 'assistant',
+				content: '',
+				createdAt: new Date().toISOString(),
+				data: aiData
+			}]);
+		}
+
+		// Call generate endpoint to stream response
+		aiData.xhr.generate({ conversationId }, (response) =>
+		{
+			if (!response || response.success === false)
+			{
+				aiData.set('replyResponse', response?.message || 'Service Error');
+				return;
+			}
+
+			const choices = response?.choices;
+			if (!choices)
+			{
+				return;
+			}
+
+			const choice = choices[0];
+			if (!choice || !choice.delta?.content)
+			{
+				return;
+			}
+
+			if (choice.finish_reason === 'stop')
+			{
+				return;
+			}
+
+			aiData.concat('replyResponse', choice.delta.content);
 		});
 	},
 

@@ -100,20 +100,20 @@ export const AssistantMessageModel = Model.extend({
 			};
 		},
 
-        /**
-		 * Generates the response message.
+		/**
+		 * Generate AI response with streaming.
 		 *
 		 * @param {object} instanceParams
 		 * @param {function} callBack
 		 * @returns {object}
 		 */
-        generate(instanceParams, callBack)
-        {
-            const params = 'chatId=' + this.model.get('chatId');
+		generate(instanceParams, callBack)
+		{
+			const params = new URLSearchParams(instanceParams).toString();
+			const url = '/generate';
 
-            const url = '/generate';
-            return this.setupEventSource(url, params, callBack);
-        },
+			return this.setupEventSource(url, params, callBack);
+		},
 
 		/**
 		 * Synchronize messages in real-time using EventSource.

@@ -47,9 +47,8 @@ export const AssistantMessageBubble = ({ message, data }) =>
 				}`
 			}, [
 				Pre({
-					class: "whitespace-pre-wrap wrap-break-words text-sm font-sans",
-					watch: data && "[[replyResponse]]"
-				}, message.content)
+					class: "whitespace-pre-wrap wrap-break-words text-sm font-sans"
+				}, data ? [ "[[replyResponse]]", data ] : message.content)
 			]),
 
 			// Timestamp
