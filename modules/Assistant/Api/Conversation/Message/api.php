@@ -8,4 +8,5 @@ use Modules\Assistant\Controllers\AssistantMessageController;
  */
 router()
     ->get('assistant/conversation/:conversationId/message/sync', [AssistantMessageController::class, 'sync'])
+    ->get('assistant/conversation/:conversationId/message/generate', [AssistantMessageController::class, 'generate'])
     ->resource('assistant/conversation/:conversationId/message', AssistantMessageController::class);

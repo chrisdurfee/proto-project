@@ -4,6 +4,7 @@ namespace Modules\Assistant\Controllers;
 use Modules\Assistant\Auth\Policies\AssistantMessagePolicy;
 use Modules\Assistant\Models\AssistantMessage;
 use Modules\Assistant\Services\AssistantService;
+use Proto\Http\Loop\UpdateEvent;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;
 
@@ -92,6 +93,48 @@ class AssistantMessageController extends ResourceController
 
 		return $filter;
 	}
+
+    /**
+     * This will generate a reply.
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function generate(Request $request): void
+    {
+        $chatId = $request->getInt('chatId');
+        if (!isset($chatId))
+        {
+            return;
+        }
+
+        eventStream(function(UpdateEvent $event) use ($chatId)
+        {
+            $responses = explode("\n\ndata:", $data);
+            foreach ($responses as $response)
+            {
+                $clean = preg_replace("/^data: |\\n\\n$/", "", $response);
+                if (strpos($clean, "[DONE]") !== false)
+                {
+                    $result = ChatGptHistoryController::getLastId($chatId);
+                    if (empty($result->row))
+                    {
+                        return;
+                    }
+
+                    $controller = new ChatGptHistoryController();
+                    $controller->updateAi($result->row->id, $text);
+                    return;
+                }
+
+                $result = Json::decode($clean);
+                if (isset($result->choices[0]->delta->content))
+                {
+                    $text .= $result->choices[0]->delta->content;
+                }
+            }
+        });
+    }
 
 	/**
 	 * Sync messages for a conversation via Redis-based SSE.

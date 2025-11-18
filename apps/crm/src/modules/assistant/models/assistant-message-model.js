@@ -100,6 +100,21 @@ export const AssistantMessageModel = Model.extend({
 			};
 		},
 
+        /**
+		 * Generates the response message.
+		 *
+		 * @param {object} instanceParams
+		 * @param {function} callBack
+		 * @returns {object}
+		 */
+        generate(instanceParams, callBack)
+        {
+            const params = 'chatId=' + this.model.get('chatId');
+
+            const url = '/generate';
+            return this.setupEventSource(url, params, callBack);
+        },
+
 		/**
 		 * Synchronize messages in real-time using EventSource.
 		 *
