@@ -280,6 +280,45 @@ class AssistantService extends Service
 		// Get conversation history
 		$history = AssistantMessage::getConversationHistory($conversationId, 10);
 
+		// Check if OpenAI API key is configured
+		$openAiKey = env('openAi.apiKey') ?? null;
+
+		if (!$openAiKey) {
+			// Test mode - send fake streaming content
+			$testContent = "I'm a test AI assistant response. OpenAI API key is not configured yet, but the streaming infrastructure is working correctly!";
+			$words = explode(' ', $testContent);
+
+			foreach ($words as $word) {
+				$fullResponse .= $word . ' ';
+				$response->sendEvent(json_encode([
+					'content' => $fullResponse,
+					'delta' => $word . ' '
+				]));
+
+				// Small delay to simulate streaming
+				usleep(100000); // 100ms
+
+				if (connection_aborted()) {
+					break;
+				}
+			}
+
+			// Update final message
+			AssistantMessage::edit((object)[
+				'id' => $aiMessageId,
+				'isStreaming' => 0,
+				'isComplete' => 1,
+				'content' => trim($fullResponse),
+				'updatedAt' => date('Y-m-d H:i:s')
+			]);
+
+			AssistantConversation::updateLastMessage($conversationId, $aiMessageId, trim($fullResponse));
+
+			echo "data: [DONE]\n\n";
+			flush();
+			return;
+		}
+
 		try {
 			// Stream from OpenAI using ChatService
 			// ChatService->stream() uses Message class for SSE output (data is already formatted)
@@ -334,8 +373,21 @@ class AssistantService extends Service
 				}
 			);
 		} catch (\Exception $e) {
+			// Send error and mark message as complete
 			$response->sendEvent(json_encode(['error' => $e->getMessage()]));
+
+			AssistantMessage::edit((object)[
+				'id' => $aiMessageId,
+				'isStreaming' => 0,
+				'isComplete' => 1,
+				'content' => 'Error: ' . $e->getMessage(),
+				'updatedAt' => date('Y-m-d H:i:s')
+			]);
 		}
+
+		// Always send [DONE] to close the stream
+		echo "data: [DONE]\n\n";
+		flush();
 	}
 
 	/**

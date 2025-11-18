@@ -24,9 +24,22 @@ const createStreamingModel = (dynamic) =>
 	// Start streaming (conversationId is already in the URL path via [[conversationId]])
 	aiData.xhr.generate({}, (response) =>
 	{
+		// Handle different response formats
 		if (response?.content)
 		{
+			// Direct content (test mode or formatted response)
 			aiData.set({ replyResponse: response.content });
+		}
+		else if (response?.choices?.[0]?.delta?.content)
+		{
+			// OpenAI streaming format
+			const currentContent = aiData.get('replyResponse') || '';
+			aiData.set({ replyResponse: currentContent + response.choices[0].delta.content });
+		}
+		else if (response?.error)
+		{
+			// Error message
+			aiData.set({ replyResponse: 'Error: ' + response.error });
 		}
 	});
 
