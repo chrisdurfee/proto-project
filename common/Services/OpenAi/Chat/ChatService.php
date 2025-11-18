@@ -3,7 +3,6 @@ namespace Common\Services\OpenAi\Chat;
 
 use Common\Services\Service;
 use Common\Controllers\OpenAi\OpenAi;
-use Proto\Dispatch\ResponseTrait;
 use Proto\Http\Loop\Message;
 
 /**
@@ -15,8 +14,6 @@ use Proto\Http\Loop\Message;
  */
 class ChatService extends Service
 {
-	use ResponseTrait;
-
 	/**
 	 * ChatService constructor.
 	 *

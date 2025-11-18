@@ -75,7 +75,7 @@ class AssistantConversationController extends ResourceController
 	}
 
 	/**
-	 * Sync conversations via SSE.
+	 * Sync conversations via Redis-based SSE.
 	 *
 	 * @param Request $request
 	 * @return void
@@ -88,13 +88,43 @@ class AssistantConversationController extends ResourceController
 			return;
 		}
 
-		$lastSync = $request->get('lastSync');
-
-		// Use SSE to stream conversation updates
-		eventStream(function() use ($userId, $lastSync)
+		// Subscribe to user's conversation updates channel
+		$channel = "assistant_user:{$userId}:conversations";
+		redisEvent($channel, function($channel, $message) use ($userId): array|null
 		{
-			$data = AssistantConversation::sync($userId, $lastSync);
-			return $data;
+			// Message contains conversation ID from Redis publish
+			$conversationId = $message['id'] ?? $message['conversationId'] ?? null;
+			if (!$conversationId)
+			{
+				return null;
+			}
+
+			$action = $message['action'] ?? 'merge';
+			if ($action === 'delete')
+			{
+				return [
+					'merge' => [],
+					'deleted' => [$conversationId]
+				];
+			}
+
+			// Fetch the updated conversation data
+			$conversationData = AssistantConversation::get($conversationId);
+			if (!$conversationData)
+			{
+				return null;
+			}
+
+			// Verify this conversation belongs to this user
+			if ($conversationData->userId != $userId)
+			{
+				return null;
+			}
+
+			return [
+				'merge' => [$conversationData],
+				'deleted' => []
+			];
 		});
 	}
 
