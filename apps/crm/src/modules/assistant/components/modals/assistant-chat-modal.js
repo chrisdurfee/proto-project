@@ -78,23 +78,10 @@ const AssistantChatContent = Jot(
 	 */
 	render()
 	{
-		return Div({ class: "flex flex-auto flex-col w-full h-full bg-background overflow-hidden" }, [
-			// Header
-			Div({ class: "flex items-center gap-3 p-4 border-b bg-surface/50 backdrop-blur-sm" }, [
-				Div({ class: "flex items-center gap-3 flex-1" }, [
-					Div({ class: "flex items-center justify-center w-10 h-10 rounded-full bg-primary/10" }, [
-						Icons.ai({ class: "w-6 h-6 text-primary" })
-					]),
-					Div({ class: "flex flex-col" }, [
-						Div({ class: "font-semibold text-lg" }, "AI Assistant"),
-						Div({ class: "text-sm text-muted-foreground" }, "Ask me anything")
-					])
-				])
-			]),
-
+		return Div({ class: "flex flex-col h-full" }, [
 			// Messages container with scroll
 			Div({
-				class: "flex flex-auto flex-col overflow-y-auto",
+				class: "flex-1 overflow-hidden",
 				cache: 'panel'
 			}, [
 				// @ts-ignore
@@ -144,12 +131,11 @@ export const AssistantChatModal = (props = {}) =>
 
 	return new Modal({
 		data,
-		title: '',
+		title: 'AI Assistant',
+		icon: Icons.ai,
 		size: 'full',
 		type: 'right',
-		hidePrimaryButton: true,
-		hideSecondaryButton: true,
-		hideHeader: true,
+		hideFooter: true,
 		class: 'assistant-chat-modal',
 		onClose: () => props.onClose?.()
 	}, [
