@@ -47,7 +47,6 @@ export const AssistantMessages = Jot(
 	 */
 	setData()
 	{
-		// Initialize with null conversation ID - will be set later
 		return new AssistantMessageModel({
 			userId: app.data.user.id,
 			conversationId: null,
@@ -76,7 +75,6 @@ export const AssistantMessages = Jot(
 			this.list.refresh();
 		}
 
-		// Set up SSE sync
 		// @ts-ignore
 		this.setupSync();
 	},
@@ -89,19 +87,10 @@ export const AssistantMessages = Jot(
 	setupSync()
 	{
 		// @ts-ignore
-		const conversationId = this.data.get?.().conversationId;
-
+		const conversationId = this.data.conversationId ?? null;
 		if (!conversationId)
 		{
 			return;
-		}
-
-		// Close existing connection if any
-		// @ts-ignore
-		if (this.eventSource)
-		{
-			// @ts-ignore
-			this.eventSource.close();
 		}
 
 		// @ts-ignore
