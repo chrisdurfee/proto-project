@@ -70,8 +70,7 @@ export const AssistantComposer = VeilJot(
 	save(content)
 	{
 		// @ts-ignore
-		const conversationId = typeof this.getConversationId === 'function' ? this.getConversationId() : null;
-
+		const conversationId = this.conversationId;
 		if (!conversationId)
 		{
 			console.error('No conversation ID available');

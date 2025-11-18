@@ -58,28 +58,14 @@ export const AssistantMessages = Jot(
 		});
 	},
 
-	/**
-	 * Set the conversation ID and initialize data loading.
-	 *
-	 * @param {number} conversationId
-	 * @returns {void}
-	 */
-	setConversationId(conversationId)
-	{
-		// @ts-ignore
-		this.data.set({ conversationId });
-
-		// Now load the messages
-		// @ts-ignore
-		if (this.list)
-		{
-			// @ts-ignore
-			this.list.refresh();
-		}
-
-		// @ts-ignore
+    /**
+     * This will set up the sync.
+     */
+    after()
+    {
+        // @ts-ignore
 		this.setupSync();
-	},
+    },
 
 	/**
 	 * Set up Server-Sent Events for real-time message sync.
