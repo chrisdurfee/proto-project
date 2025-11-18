@@ -155,6 +155,30 @@ class AssistantService extends Service
 		);
 	}
 
+    /**
+	 * Stream the AI response and update the message.
+	 *
+	 * @param int $conversationId
+	 * @param int $aiMessageId
+	 * @return void
+	 */
+	protected function streamReply(int $conversationId): void
+	{
+		$history = AssistantMessage::getConversationHistory($conversationId, 10);
+		$fullResponse = '';
+
+		$this->chatService->stream(
+			$history,
+			'assistant',
+			null,
+			null,
+			function($chunk) use ($conversationId, &$fullResponse)
+			{
+				$this->handleStreamChunk($chunk, $conversationId, $aiMessageId, $fullResponse);
+			}
+		);
+	}
+
 	/**
 	 * Handle a single stream chunk from the AI service.
 	 *

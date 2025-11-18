@@ -11,12 +11,12 @@ import { Avatar } from "@base-framework/ui/molecules";
  *
  * @param {object} props
  * @param {object} props.message - The message object
+ * @param {object} props.data - Additional data
  * @returns {object}
  */
-export const AssistantMessageBubble = ({ message }) =>
+export const AssistantMessageBubble = ({ message, data }) =>
 {
 	const isUser = message.role === 'user';
-	const isStreaming = message.isStreaming === 1 || message.isStreaming === true;
 
 	return Div({
 		class: `flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} fadeIn`,
@@ -48,7 +48,7 @@ export const AssistantMessageBubble = ({ message }) =>
 			}, [
 				Pre({
 					class: "whitespace-pre-wrap wrap-break-words text-sm font-sans",
-					//bind: isStreaming ? ['content', null, message] : null
+					watch: data && "[[replyResponse]]"
 				}, message.content)
 			]),
 

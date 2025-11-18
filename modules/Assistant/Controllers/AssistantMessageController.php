@@ -94,47 +94,50 @@ class AssistantMessageController extends ResourceController
 		return $filter;
 	}
 
-    /**
-     * This will generate a reply.
-     *
-     * @param Request $request
-     * @return void
-     */
-    public function generate(Request $request): void
-    {
-        $chatId = $request->getInt('chatId');
-        if (!isset($chatId))
-        {
-            return;
-        }
+	/**
+	 * This will generate a reply.
+	 *
+	 * @param Request $request
+	 * @return void
+	 */
+	public function generate(Request $request): void
+	{
+		$chatId = $request->getInt('chatId');
+		if (!isset($chatId))
+		{
+			return;
+		}
 
-        eventStream(function(UpdateEvent $event) use ($chatId)
-        {
-            $responses = explode("\n\ndata:", $data);
-            foreach ($responses as $response)
-            {
-                $clean = preg_replace("/^data: |\\n\\n$/", "", $response);
-                if (strpos($clean, "[DONE]") !== false)
-                {
-                    $result = ChatGptHistoryController::getLastId($chatId);
-                    if (empty($result->row))
-                    {
-                        return;
-                    }
+		eventStream(function(UpdateEvent $event) use ($chatId)
+		{
+			//add row for ai message
 
-                    $controller = new ChatGptHistoryController();
-                    $controller->updateAi($result->row->id, $text);
-                    return;
-                }
+			// call service stream and set the callack to do this
+			function($data) use ($chatId, $aiRowId)
+			{
+				$responses = explode("\n\ndata:", $data);
+				foreach ($responses as $response)
+				{
+					$clean = preg_replace("/^data: |\\n\\n$/", "", $response);
+					if (strpos($clean, "[DONE]") !== false)
+					{
+						// update message
+						AssistantMessage::edit((object)[
+							'id' => $aiRowId,
+							'content' => $text
+						]);
+						return;
+					}
 
-                $result = Json::decode($clean);
-                if (isset($result->choices[0]->delta->content))
-                {
-                    $text .= $result->choices[0]->delta->content;
-                }
-            }
-        });
-    }
+					$result = Json::decode($clean);
+					if (isset($result->choices[0]->delta->content))
+					{
+						$text .= $result->choices[0]->delta->content;
+					}
+				}
+			}
+		});
+	}
 
 	/**
 	 * Sync messages for a conversation via Redis-based SSE.
