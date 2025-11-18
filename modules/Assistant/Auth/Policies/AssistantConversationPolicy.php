@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Assistant\Auth\Policies;
 
-use Common\Auth\Policies\Policy;
+use Proto\Http\Router\Request;
 use Modules\Assistant\Models\AssistantConversation;
 
 /**
@@ -9,70 +9,18 @@ use Modules\Assistant\Models\AssistantConversation;
  *
  * @package Modules\Assistant\Auth\Policies
  */
-class AssistantConversationPolicy extends Policy
+class AssistantConversationPolicy extends AssistantPolicy
 {
 	/**
-	 * Default policy for all actions.
-	 *
-	 * @return bool
-	 */
-	public function default(): bool
-	{
-		return $this->user()->isAuthenticated();
-	}
-
-	/**
-	 * Policy for getting a conversation.
+	 * Check if the user owns the conversation.
 	 *
 	 * @param int $conversationId
 	 * @return bool
 	 */
-	public function get(int $conversationId): bool
+	protected function ownsConversation(int $conversationId): bool
 	{
-		if (!$this->user()->isAuthenticated())
-		{
-			return false;
-		}
-
-		// Users can only access their own conversations
-		$conversation = AssistantConversation::get($conversationId);
-		if (!$conversation)
-		{
-			return false;
-		}
-
-		return (int)$conversation->userId === (int)$this->user()->id();
-	}
-
-	/**
-	 * Policy for listing conversations.
-	 *
-	 * @return bool
-	 */
-	public function list(): bool
-	{
-		return $this->user()->isAuthenticated();
-	}
-
-	/**
-	 * Policy for creating a conversation.
-	 *
-	 * @return bool
-	 */
-	public function add(): bool
-	{
-		return $this->user()->isAuthenticated();
-	}
-
-	/**
-	 * Policy for deleting a conversation.
-	 *
-	 * @param int $conversationId
-	 * @return bool
-	 */
-	public function delete(int $conversationId): bool
-	{
-		if (!$this->user()->isAuthenticated())
+		$userId = $this->getUserId();
+		if (!$userId)
 		{
 			return false;
 		}
@@ -83,6 +31,101 @@ class AssistantConversationPolicy extends Policy
 			return false;
 		}
 
-		return (int)$conversation->userId === (int)$this->user()->id();
+		return (int)$conversation->userId === $userId;
+	}
+
+	/**
+	 * Determines if the user can view a specific conversation.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function get(Request $request): bool
+	{
+		$conversationId = $this->getResourceId($request);
+		if (!$conversationId)
+		{
+			return false;
+		}
+
+		return $this->ownsConversation($conversationId);
+	}
+
+	/**
+	 * Determines if the user can get all conversations (list).
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function all(Request $request): bool
+	{
+		return $this->getUserId() !== null;
+	}
+
+	/**
+	 * Determines if the user can add a new conversation.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function add(Request $request): bool
+	{
+		return $this->getUserId() !== null;
+	}
+
+	/**
+	 * Determines if the user can get the active conversation.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function getActive(Request $request): bool
+	{
+		return $this->getUserId() !== null;
+	}
+
+	/**
+	 * Determines if the user can update a conversation.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function update(Request $request): bool
+	{
+		$conversationId = $this->getResourceId($request);
+		if (!$conversationId)
+		{
+			return false;
+		}
+
+		return $this->ownsConversation($conversationId);
+	}
+
+	/**
+	 * Determines if the user can delete a conversation.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function delete(Request $request): bool
+	{
+		$conversationId = $this->getResourceId($request);
+		if (!$conversationId)
+		{
+			return false;
+		}
+
+		return $this->ownsConversation($conversationId);
+	}
+
+	/**
+	 * Determines if the user can sync conversations.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function sync(Request $request): bool
+	{
+		return $this->getUserId() !== null;
 	}
 }

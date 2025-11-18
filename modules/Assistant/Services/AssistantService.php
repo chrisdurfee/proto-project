@@ -51,8 +51,7 @@ class AssistantService extends Service
 	 */
 	public function streamResponse(int $conversationId, int $userId, string $content): void
 	{
-		// Create the user message
-		$userMessage = AssistantMessage::add((object)[
+        $model = new AssistantMessage((object)[
 			'conversationId' => $conversationId,
 			'userId' => $userId,
 			'role' => 'user',
@@ -62,8 +61,8 @@ class AssistantService extends Service
 			'createdAt' => date('Y-m-d H:i:s'),
 			'updatedAt' => date('Y-m-d H:i:s')
 		]);
-
-		if (!$userMessage)
+		$result = $model->add();
+		if (!$result)
 		{
 			return;
 		}
@@ -71,15 +70,15 @@ class AssistantService extends Service
 		// Update conversation last message
 		AssistantConversation::updateLastMessage(
 			$conversationId,
-			(int)$userMessage->id,
+			(int)$model->id,
 			$content
 		);
 
 		// Publish user message to Redis for real-time updates
-		$this->publishMessage($conversationId, (int)$userMessage->id);
+		$this->publishMessage($conversationId, (int)$model->id);
 
 		// Create placeholder for AI response
-		$aiMessage = AssistantMessage::add((object)[
+        $aiModel = new AssistantMessage(((object)[
 			'conversationId' => $conversationId,
 			'userId' => $userId,
 			'role' => 'assistant',
@@ -89,14 +88,14 @@ class AssistantService extends Service
 			'isComplete' => 0,
 			'createdAt' => date('Y-m-d H:i:s'),
 			'updatedAt' => date('Y-m-d H:i:s')
-		]);
-
-		if (!$aiMessage)
+		]));
+		$aiResult = $aiModel->add();
+		if (!$aiResult)
 		{
 			return;
 		}
 
-		$aiMessageId = (int)$aiMessage->id;
+		$aiMessageId = (int)$aiModel->id;
 
 		// Publish AI message creation
 		$this->publishMessage($conversationId, $aiMessageId);
@@ -169,11 +168,9 @@ class AssistantService extends Service
 	 */
 	protected function publishMessage(int $conversationId, int $messageId): void
 	{
-		$channel = "assistant_conversation:{$conversationId}:messages";
-		redis()->publish($channel, json_encode([
+		events()->emit("redis:assistant_conversation:{$conversationId}:messages", [
 			'id' => $messageId,
-			'messageId' => $messageId,
 			'action' => 'merge'
-		]));
+		]);
 	}
 }

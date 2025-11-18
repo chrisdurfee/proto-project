@@ -7,13 +7,13 @@ import { AssistantComposer } from './assistant-composer.js';
 import { AssistantMessages } from './assistant-messages.js';
 
 /**
- * AssistantChatModal
+ * AssistantChatContent
  *
- * A full-screen modal for AI assistant chat.
+ * The content component for the AI assistant chat modal.
  *
  * @type {typeof Component}
  */
-export const AssistantChatModal = Jot(
+const AssistantChatContent = Jot(
 {
 	state: { loaded: false },
 
@@ -141,12 +141,14 @@ export const AssistantChatModal = Jot(
 });
 
 /**
- * Open the Assistant Chat Modal.
+ * AssistantChatModal
  *
- * @param {object} props - Optional properties
- * @returns {Modal}
+ * A full-screen modal for AI assistant chat.
+ *
+ * @param {object} props - The properties for the modal.
+ * @returns {Modal} - A new instance of the Modal component.
  */
-export const openAssistantChatModal = (props = {}) =>
+export const AssistantChatModal = (props = {}) =>
 {
 	return new Modal({
 		title: '',
@@ -158,6 +160,6 @@ export const openAssistantChatModal = (props = {}) =>
 		class: 'assistant-chat-modal',
 		onClose: () => props.onClose?.()
 	}, [
-		new AssistantChatModal()
+		new AssistantChatContent()
 	]).open();
 };

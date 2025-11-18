@@ -1,35 +1,26 @@
 <?php declare(strict_types=1);
 namespace Modules\Assistant\Auth\Policies;
 
-use Common\Auth\Policies\Policy;
-use Modules\Assistant\Models\AssistantMessag;
+use Proto\Http\Router\Request;
+use Modules\Assistant\Models\AssistantMessage;
 
 /**
  * AssistantMessagePolicy
  *
  * @package Modules\Assistant\Auth\Policies
  */
-class AssistantMessagePolicy extends Policy
+class AssistantMessagePolicy extends AssistantPolicy
 {
 	/**
-	 * Default policy for all actions.
-	 *
-	 * @return bool
-	 */
-	public function default(): bool
-	{
-		return $this->user()->isAuthenticated();
-	}
-
-	/**
-	 * Policy for getting a message.
+	 * Check if the user owns the message.
 	 *
 	 * @param int $messageId
 	 * @return bool
 	 */
-	public function get(int $messageId): bool
+	protected function ownsMessage(int $messageId): bool
 	{
-		if (!$this->user()->isAuthenticated())
+		$userId = $this->getUserId();
+		if (!$userId)
 		{
 			return false;
 		}
@@ -40,36 +31,108 @@ class AssistantMessagePolicy extends Policy
 			return false;
 		}
 
-		return (int)$message->userId === (int)$this->user()->id();
+		return (int)$message->userId === $userId;
 	}
 
 	/**
-	 * Policy for listing messages.
+	 * Determines if the user can view messages in a conversation.
 	 *
+	 * @param Request $request
 	 * @return bool
 	 */
-	public function list(): bool
+	public function get(Request $request): bool
 	{
-		return $this->user()->isAuthenticated();
+		$conversationId = (int)($request->params()->conversationId ?? null);
+		if (!$conversationId)
+		{
+			return false;
+		}
+
+		return $this->ownsConversation($conversationId);
 	}
 
 	/**
-	 * Policy for creating a message.
+	 * Determines if the user can get all messages (list).
 	 *
+	 * @param Request $request
 	 * @return bool
 	 */
-	public function add(): bool
+	public function all(Request $request): bool
 	{
-		return $this->user()->isAuthenticated();
+		$conversationId = (int)($request->params()->conversationId ?? null);
+		if (!$conversationId)
+		{
+			return false;
+		}
+
+		return $this->ownsConversation($conversationId);
 	}
 
 	/**
-	 * Policy for syncing messages.
+	 * Determines if the user can add a new message to the conversation.
 	 *
+	 * @param Request $request
 	 * @return bool
 	 */
-	public function sync(): bool
+	public function add(Request $request): bool
 	{
-		return $this->user()->isAuthenticated();
+		$conversationId = (int)($request->params()->conversationId ?? null);
+		if (!$conversationId)
+		{
+			return false;
+		}
+
+		return $this->ownsConversation($conversationId);
+	}
+
+	/**
+	 * Determines if the user can update a message.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function update(Request $request): bool
+	{
+		$messageId = $this->getResourceId($request);
+		if (!$messageId)
+		{
+			return false;
+		}
+
+		return $this->ownsMessage($messageId);
+	}
+
+	/**
+	 * Determines if the user can delete a message.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function delete(Request $request): bool
+	{
+		$messageId = $this->getResourceId($request);
+		if (!$messageId)
+		{
+			return false;
+		}
+
+		return $this->ownsMessage($messageId);
+	}
+
+	/**
+	 * Determines if the user can sync messages.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function sync(Request $request): bool
+	{
+		$conversationId = (int)($request->params()->conversationId ?? null);
+		if (!$conversationId)
+		{
+			return false;
+		}
+
+		return $this->ownsConversation($conversationId);
 	}
 }

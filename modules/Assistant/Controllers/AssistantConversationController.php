@@ -39,7 +39,7 @@ class AssistantConversationController extends ResourceController
 	 */
 	public function getActive(Request $request): object
 	{
-		$userId = (int)auth()->user->id();
+		$userId = session()->user->id ?? null;
 		if (!$userId)
 		{
 			return $this->error('Unauthorized', 401);
@@ -65,8 +65,7 @@ class AssistantConversationController extends ResourceController
 	 */
 	protected function modifyFilter(?object $filter, Request $request): ?object
 	{
-		// Only show conversations for the authenticated user
-		$userId = auth()->user->id();
+		$userId = session()->user->id ?? null;
 		if ($userId)
 		{
 			$filter->{'ac.user_id'} = $userId;
@@ -83,7 +82,7 @@ class AssistantConversationController extends ResourceController
 	 */
 	public function sync(Request $request): void
 	{
-		$userId = (int)auth()->user->id();
+		$userId = session()->user->id ?? null;
 		if (!$userId)
 		{
 			return;

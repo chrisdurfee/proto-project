@@ -3,7 +3,7 @@ import { Atom, Component, Jot } from '@base-framework/base';
 import { Icons } from '@base-framework/ui/icons';
 import { InlineNavigation } from '@base-framework/ui/organisms';
 import { Configs } from '../../configs.js';
-import { openAssistantChatModal } from '../../modules/assistant/components/modals/assistant-chat-modal.js';
+import { AssistantChatModal } from '../../modules/assistant/components/modals/assistant-chat-modal.js';
 import { ClientSearchModal } from '../../modules/clients/components/organisms/modals/client-search-modal.js';
 import { NavigationAvatar } from './avatars/navigation-avatar.js';
 import { MainHeader } from './main-header.js';
@@ -86,7 +86,7 @@ const AssistantChatButton = () => ({
 	label: 'AI Assistant',
 	icon: Icons.ai,
 	exact: true,
-	click: () => openAssistantChatModal()
+	click: () => AssistantChatModal()
 });
 
 /**
