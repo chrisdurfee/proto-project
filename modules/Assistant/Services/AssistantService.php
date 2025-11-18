@@ -5,7 +5,6 @@ use Common\Services\Service;
 use Common\Services\OpenAi\Chat\ChatService;
 use Modules\Assistant\Models\AssistantConversation;
 use Modules\Assistant\Models\AssistantMessage;
-use Proto\Dispatch\ResponseTrait;
 
 /**
  * AssistantService
@@ -16,8 +15,6 @@ use Proto\Dispatch\ResponseTrait;
  */
 class AssistantService extends Service
 {
-	use ResponseTrait;
-
 	/**
 	 * AssistantService constructor.
 	 *
