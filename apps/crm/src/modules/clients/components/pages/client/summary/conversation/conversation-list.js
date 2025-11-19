@@ -60,7 +60,7 @@ const ConversationListItem = (msg) =>
  * @param {object} param0
  * @returns {object}
  */
-export const ConversationList = ({ data }) =>
+export const ConversationList = ({ data, scrollContainer }) =>
 	UseParent((parent)=> (
 		ScrollableList({
 			scrollDirection: 'up',
@@ -72,51 +72,11 @@ export const ConversationList = ({ data }) =>
 			limit: 25,
 			divider: Divider,
 			rowItem: ConversationListItem,
-			scrollContainer: parent.listContainer,
+			scrollContainer,
 			emptyState: () => EmptyState(
 			{
 				title: 'It\'s quiet here...',
 				description: 'Let\'s start a conversation!'
-			}),
-			/**
-			 * Start SSE sync when list is ready
-			 */
-			onSetup: (component) =>
-			{
-				// Start syncing for real-time updates
-				component.eventSource = data.xhr.sync('', (response) =>
-				{
-					if (!response?.merge)
-					{
-						return;
-					}
-
-					// Merge new conversations into the list
-					if (response.merge.length > 0)
-					{
-						component.append(response.merge);
-					}
-
-					// Handle deletions if needed
-					if (response.deleted && response.deleted.length > 0)
-					{
-						response.deleted.forEach(id =>
-						{
-							component.remove(id);
-						});
-					}
-				});
-			},
-			/**
-			 * Cleanup SSE connection when list is destroyed
-			 */
-			onDestroy: (component) =>
-			{
-				if (component.eventSource)
-				{
-					component.eventSource.close();
-					component.eventSource = null;
-				}
-			}
+			})
 		})
 	));

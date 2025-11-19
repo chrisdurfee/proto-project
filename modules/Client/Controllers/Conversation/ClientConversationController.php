@@ -131,24 +131,27 @@ class ClientConversationController extends Controller
 		redisEvent($channel, function($channel, $message) use ($clientId)
 		{
 			// Message contains conversation ID from Redis publish
-			$conversationId = $message['id'] ?? $message['conversationId'] ?? null;
+			$conversationId = (int)($message['id'] ?? $message['conversationId'] ?? null);
 			if (!$conversationId)
 			{
 				return null;
 			}
 
-			// Fetch the updated conversation data
+			// Fetch the updated conversation data with all joins
 			$conversation = ClientConversation::get($conversationId);
 			if (!$conversation)
 			{
 				return null;
 			}
 
+			// Convert to array/object for JSON serialization
+			$conversationData = $conversation->getData();
+
 			// Determine action type from message
 			$action = $message['action'] ?? 'merge';
 
 			return [
-				'merge' => $action === 'merge' ? [$conversation] : [],
+				'merge' => $action === 'merge' ? [$conversationData] : [],
 				'deleted' => $action === 'delete' ? [$conversationId] : []
 			];
 		});

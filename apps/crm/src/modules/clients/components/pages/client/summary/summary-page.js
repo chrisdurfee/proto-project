@@ -50,7 +50,7 @@ export const SummaryPage = () => (
 						])
 					]),
 					Div({ class: 'hidden 2xl:flex flex-none min-w-[420px] border-l' }, [
-						ConversationSection({ client })
+						new ConversationSection({ client })
 					]),
 				])
 			]);
