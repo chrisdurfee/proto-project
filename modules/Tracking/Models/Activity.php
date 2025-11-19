@@ -89,6 +89,7 @@ class Activity extends Model
 			->table()
 			->delete()
 			->where('type = ?', 'ref_id = ?', 'user_id = ?')
+			->limit(1)
 			->execute([$type, $refId, $userId]);
 	}
 }

@@ -1,6 +1,5 @@
 import { Div } from '@base-framework/atoms';
 import { Component, Data, Jot } from '@base-framework/base';
-import { IntervalTimer } from '@base-framework/organisms';
 import { Avatar } from '@base-framework/ui/molecules';
 import { getSavedToken } from '../../../csrf-token';
 import { Env } from '../../../shell/env.js';
@@ -17,7 +16,6 @@ const STATES = {
 /**
  * Configuration constants
  */
-const INTERVAL_DURATION = 15000;
 const API_ENDPOINT = '/api/tracking/activity/type';
 
 /**
@@ -88,7 +86,7 @@ const Group = () => Div({
 /**
  * Activity Avatar Group
  *
- * Manages and displays active users viewing a resource.
+ * Manages and displays active users viewing a resource using SSE.
  *
  * @property {string} type - Resource type
  * @property {string|number} refId - Resource reference ID
@@ -105,7 +103,7 @@ export const ActivityAvatarGroup = Jot(
 	onCreated()
 	{
 		// @ts-ignore
-		this.timer = new IntervalTimer(INTERVAL_DURATION, () => this.updateUsers());
+		this.eventSource = null;
 	},
 
 	/**
@@ -211,14 +209,15 @@ export const ActivityAvatarGroup = Jot(
 	},
 
 	/**
-	 * Updates the list of active users.
+	 * Start listening to real-time activity updates via SSE.
 	 *
+	 * @param {function} onConnected - Callback when connection is established.
 	 * @returns {void}
 	 */
-	updateUsers()
+	startSync(onConnected)
 	{
 		// @ts-ignore
-		this.data.xhr.getByType('', (response) =>
+		this.eventSource = this.data.xhr.sync('', (response) =>
 		{
 			if (!response?.rows)
 			{
@@ -227,7 +226,24 @@ export const ActivityAvatarGroup = Jot(
 
 			// @ts-ignore
 			this.data.rows = response.rows;
-		});
+		}, onConnected);
+	},
+
+	/**
+	 * Stop listening to activity updates.
+	 *
+	 * @returns {void}
+	 */
+	stopSync()
+	{
+		// @ts-ignore
+		if (this.eventSource)
+		{
+			// @ts-ignore
+			this.eventSource.close();
+			// @ts-ignore
+			this.eventSource = null;
+		}
 	},
 
 	/**
@@ -243,18 +259,25 @@ export const ActivityAvatarGroup = Jot(
 	},
 
 	/**
-	 * Sets the activity to active.
+	 * Sets the activity to active and starts syncing.
+	 * First starts SSE to subscribe, then adds user so publish will be received.
 	 *
 	 * @returns {void}
 	 */
 	setActive()
 	{
+		// Start SSE sync and wait for connection to open
 		// @ts-ignore
-		this.updateStatus(STATES.ACTIVE);
+		this.startSync(() =>
+		{
+			// Connection established, now add the user
+			// @ts-ignore
+			this.updateStatus(STATES.ACTIVE);
+		});
 	},
 
 	/**
-	 * Sets the activity to inactive.
+	 * Sets the activity to inactive and stops syncing.
 	 *
 	 * @returns {void}
 	 */
@@ -262,6 +285,8 @@ export const ActivityAvatarGroup = Jot(
 	{
 		// @ts-ignore
 		this.updateStatus(STATES.INACTIVE);
+		// @ts-ignore
+		this.stopSync();
 	},
 
 	/**
@@ -272,7 +297,9 @@ export const ActivityAvatarGroup = Jot(
 	addUser()
 	{
 		// @ts-ignore
-		this.data.xhr.add('', () => this.updateUsers());
+		this.data.xhr.add('', () => {
+			// User added, SSE will push the updated list
+		});
 	},
 
 	/**
@@ -296,8 +323,6 @@ export const ActivityAvatarGroup = Jot(
 	{
 		// @ts-ignore
 		this.setActive();
-		// @ts-ignore
-		this.timer.start();
 	},
 
 	/**
@@ -317,8 +342,6 @@ export const ActivityAvatarGroup = Jot(
 	 */
 	destroy()
 	{
-		// @ts-ignore
-		this.timer.stop();
 		// @ts-ignore
 		this.setInactive();
 	}

@@ -15,4 +15,5 @@ router()
 	]))
 	->post('tracking/activity', [ActivityController::class, 'add'])
 	->get('tracking/activity/type', [ActivityController::class, 'getByType'])
+	->get('tracking/activity/sync', [ActivityController::class, 'sync'])
 	->delete('tracking/activity/type', [ActivityController::class, 'deleteUserByType']);
