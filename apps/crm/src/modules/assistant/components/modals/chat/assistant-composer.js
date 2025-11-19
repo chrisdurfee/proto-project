@@ -3,7 +3,7 @@ import { Veil, VeilJot } from "@base-framework/ui";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
-import { AssistantMessageModel } from "../../models/assistant-message-model.js";
+import { AssistantMessageModel } from "../../../models/assistant-message-model.js";
 import { AssistantTextarea } from "./assistant-textarea.js";
 
 /**
@@ -21,15 +21,17 @@ const TextCount = () => (
  * @returns {object}
  */
 const SendButton = () => (
-	Div({ class: "flex justify-between" }, [
-		Button({
-			type: "submit",
-			variant: "icon",
-			icon: Icons.airplane,
-			class: "text-foreground hover:text-accent",
-			onSet: ['empty', (empty, el) => el.disabled = empty]
-		})
-	])
+	UseParent((parent) => (
+		Div({ class: "flex justify-between" }, [
+			Button({
+				type: "submit",
+				variant: "icon",
+				icon: Icons.airplane,
+				class: "text-foreground hover:text-accent",
+				onSet: [parent.textareaComponent.state, 'empty', (empty, el) => el.disabled = empty]
+			})
+		])
+	))
 );
 
 /**

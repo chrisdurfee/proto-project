@@ -3,7 +3,7 @@ import { TimeFrame } from "@base-framework/ui";
 import { Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar } from "@base-framework/ui/molecules";
-import { AssistantMessageModel } from "../../models/assistant-message-model.js";
+import { AssistantMessageModel } from "../../../models/assistant-message-model.js";
 
 /**
  * Creates streaming data model and initiates streaming.

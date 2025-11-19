@@ -3,7 +3,7 @@ import { Component, DateTime, Jot } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
-import { AssistantMessageModel } from "../../models/assistant-message-model.js";
+import { AssistantMessageModel } from "../../../models/assistant-message-model.js";
 import { AssistantMessageBubble } from "./assistant-message-bubble.js";
 
 /**

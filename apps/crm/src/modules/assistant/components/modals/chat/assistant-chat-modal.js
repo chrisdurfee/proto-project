@@ -1,6 +1,6 @@
 import { Icons } from '@base-framework/ui/icons';
 import { Modal } from '@base-framework/ui/molecules';
-import { AssistantConversationModel } from '../../models/assistant-conversation-model.js';
+import { AssistantConversationModel } from '../../../models/assistant-conversation-model.js';
 import { AssistantChatContent } from './assistant-chat-content.js';
 
 /**

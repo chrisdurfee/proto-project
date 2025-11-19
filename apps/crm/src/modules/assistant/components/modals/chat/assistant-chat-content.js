@@ -12,7 +12,7 @@ import { AssistantMessages } from './assistant-messages.js';
  */
 export const AssistantChatContent = Jot(
 {
-	state: { loaded: false },
+	state: { loaded: false, disabled: false },
 
 	/**
 	 * Scroll the message panel to the bottom.
