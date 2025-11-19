@@ -169,8 +169,15 @@ export const ActivityAvatarGroup = Jot(
 			isVisible ? this.setActive() : this.setInactive();
 		};
 
+		const handleBeforeUnload = () =>
+		{
+			// @ts-ignore
+			this.removeUser();
+		};
+
 		const events = [
-			['visibilitychange', document, handleVisibilityChange]
+			['visibilitychange', document, handleVisibilityChange],
+			['beforeunload', window, handleBeforeUnload]
 		];
 
 		if (Env.isSafari)
