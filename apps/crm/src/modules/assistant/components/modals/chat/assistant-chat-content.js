@@ -22,7 +22,7 @@ export const AssistantChatContent = Jot(
 	scrollToBottom()
 	{
 		// @ts-ignore
-        const container = this.parent.panel;
+		const container = this.parent.panel;
 		// @ts-ignore
 		if (container)
 		{

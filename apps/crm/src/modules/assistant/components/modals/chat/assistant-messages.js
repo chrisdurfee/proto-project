@@ -49,23 +49,23 @@ export const AssistantMessages = Jot(
 	{
 		return new AssistantMessageModel({
 			userId: app.data.user.id,
-            // @ts-ignore
+			// @ts-ignore
 			conversationId: this.conversationId,
 			orderBy: {
-                id: 'desc',
+				id: 'desc',
 				createdAt: 'desc'
 			}
 		});
 	},
 
-    /**
-     * This will set up the sync.
-     */
-    after()
-    {
-        // @ts-ignore
+	/**
+	 * This will set up the sync.
+	 */
+	after()
+	{
+		// @ts-ignore
 		this.setupSync();
-    },
+	},
 
 	/**
 	 * Set up Server-Sent Events for real-time message sync.
@@ -115,7 +115,7 @@ export const AssistantMessages = Jot(
 			// @ts-ignore
 			if (isAtBottom && typeof this.scrollToBottom === 'function')
 			{
-                // @ts-ignore
+				// @ts-ignore
 				this.scrollToBottom();
 			}
 		}
@@ -155,11 +155,11 @@ export const AssistantMessages = Jot(
 	 */
 	render()
 	{
-        /**
-         * Scroll container for the messages list is the modal container.
-         */
-        // @ts-ignore
-        const scrollContainer = this.parent.parent.panel;
+		/**
+		 * Scroll container for the messages list is the modal container.
+		 */
+		// @ts-ignore
+		const scrollContainer = this.parent.parent.panel;
 
 		return Div({ class: "flex flex-col grow p-4 z-0" }, [
 			Div({ class: "flex flex-auto flex-col w-full max-w-none lg:max-w-5xl mx-auto pt-8 pb-8" }, [

@@ -30,24 +30,24 @@ const createStreamingModel = (dynamic) =>
 		if (response?.content)
 		{
 			// Direct content (test mode or formatted response)
-            // @ts-ignore
+			// @ts-ignore
 			data.replyResponse = response.content;
-            return;
+			return;
 		}
 
-        const choiceContent = response?.choices?.[0]?.delta?.content;
+		const choiceContent = response?.choices?.[0]?.delta?.content;
 		if (choiceContent)
 		{
 			// OpenAI streaming format
-            // @ts-ignore
+			// @ts-ignore
 			data.replyResponse += choiceContent;
-            return;
+			return;
 		}
 
-        if (response?.error)
+		if (response?.error)
 		{
 			// Error message
-            // @ts-ignore
+			// @ts-ignore
 			data.replyResponse = 'Error: ' + response.error;
 		}
 	});
