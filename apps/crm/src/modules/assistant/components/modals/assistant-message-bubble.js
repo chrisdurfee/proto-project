@@ -23,6 +23,8 @@ const createStreamingModel = (dynamic) =>
 
 	data.xhr.generate({}, (response) =>
 	{
+		console.log('Stream response:', response);
+		
 		// Handle different response formats
 		if (response?.content)
 		{

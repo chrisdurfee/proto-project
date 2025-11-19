@@ -170,7 +170,7 @@ class AssistantMessage extends Model
 				'am.deleted_at IS NULL',
 				"am.is_complete = 1"
 			)
-			->orderBy('am.created_at ASC')
+			->orderBy('am.created_at DESC')
 			->limit($limit)
 			->fetch();
 
