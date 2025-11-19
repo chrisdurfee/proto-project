@@ -13,4 +13,5 @@ router()
 	->middleware(([
 		CrossSiteProtectionMiddleware::class
 	]))
+	->get('client/:clientId/conversation/sync', [ClientConversationController::class, 'sync'])
 	->resource('client/:clientId/conversation', ClientConversationController::class);

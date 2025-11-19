@@ -65,14 +65,24 @@ class ClientConversationController extends Controller
 			return $result;
 		}
 
+		$conversationId = (int)$result->id;
+		$clientId = (int)($request->params()->clientId ?? null);
+
 		// Check if files were uploaded
-		if (empty($_FILES['attachments']) || empty($_FILES['attachments']['name']))
+		if (!empty($_FILES['attachments']) && !empty($_FILES['attachments']['name']))
 		{
-			return $result;
+			$userId = getSession('user')->id ?? null;
+			$result = $this->service->handleAttachments($request, $conversationId, $userId);
 		}
 
-		$userId = getSession('user')->id ?? null;
-		return $this->service->handleAttachments($request, $result->id, $userId);
+		// Publish Redis event to notify all watchers of this client's conversation
+		// Do this AFTER attachments are processed so the full record is available
+		if ($clientId && $conversationId)
+		{
+			$this->publishConversationUpdate($clientId, $conversationId, 'merge');
+		}
+
+		return $result;
 	}
 
 	/**
@@ -87,9 +97,78 @@ class ClientConversationController extends Controller
 		$clientId = $request->params()->clientId ?? null;
 		if (isset($clientId))
 		{
-			$filter->clientId = $clientId;
+			$filter->{'co.client_id'} = $clientId;
+			unset($filter->clientId);
+		}
+
+		// Support "since" parameter for fetching newer conversations
+		$since = $request->getInt('since');
+		if ($since)
+		{
+			$filter->{'co.id'} = ['>', $since];
 		}
 
 		return $filter;
+	}
+
+	/**
+	 * Stream conversation updates via Redis-based Server-Sent Events.
+	 * Listens to conversation updates published via Redis pub/sub.
+	 *
+	 * @param Request $request
+	 * @return void
+	 */
+	public function sync(Request $request): void
+	{
+		$clientId = (int)($request->params()->clientId ?? null);
+		if (!$clientId)
+		{
+			return;
+		}
+
+		// Subscribe to client's conversation updates channel
+		$channel = "client:{$clientId}:conversations";
+		redisEvent($channel, function($channel, $message) use ($clientId)
+		{
+			// Message contains conversation ID from Redis publish
+			$conversationId = $message['id'] ?? $message['conversationId'] ?? null;
+			if (!$conversationId)
+			{
+				return null;
+			}
+
+			// Fetch the updated conversation data
+			$conversation = ClientConversation::get($conversationId);
+			if (!$conversation)
+			{
+				return null;
+			}
+
+			// Determine action type from message
+			$action = $message['action'] ?? 'merge';
+
+			return [
+				'merge' => $action === 'merge' ? [$conversation] : [],
+				'deleted' => $action === 'delete' ? [$conversationId] : []
+			];
+		});
+	}
+
+	/**
+	 * Publish Redis event for conversation updates.
+	 *
+	 * @param int $clientId
+	 * @param int $conversationId
+	 * @param string $action
+	 * @return void
+	 */
+	protected function publishConversationUpdate(int $clientId, int $conversationId, string $action = 'merge'): void
+	{
+		// Emit with redis: prefix - the framework strips it for the actual Redis channel
+		events()->emit("redis:client:{$clientId}:conversations", [
+			'id' => (int)$conversationId,
+			'conversationId' => (int)$conversationId,
+			'action' => $action
+		]);
 	}
 }
