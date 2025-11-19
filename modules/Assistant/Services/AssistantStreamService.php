@@ -159,7 +159,7 @@ class AssistantStreamService extends Service
 		{
 			$this->chatService->stream(
 				$history,
-				'assistant',
+				'AssistantChat',
 				null,
 				null,
 				function($chunk) use (&$fullResponse, $aiMessageId, $conversationId)

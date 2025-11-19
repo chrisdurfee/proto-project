@@ -2,6 +2,7 @@
 namespace Common\Services\OpenAi\Chat;
 
 use Common\Services\OpenAI\Chat\Handlers\ChatHandler;
+use Proto\Utils\Strings;
 
 /**
  * HandlerFactory
@@ -24,6 +25,7 @@ final class HandlerFactory
 	 */
 	public static function get(string $type, mixed $settings): ?ChatHandler
 	{
+		$type = Strings::pascalCase($type);
 		$class = __NAMESPACE__ . '\\Handlers\\' . $type . 'Handler';
 		$path = __DIR__ . '/Handlers/' . $type . 'Handler.php';
 
