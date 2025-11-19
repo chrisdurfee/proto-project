@@ -38,15 +38,19 @@ class AssistantStreamService extends Service
 	 * @param int $userId
 	 * @return void
 	 */
-	public function generate(int $conversationId, int $userId): void
+	public function generate(int $conversationId, int $userId, ?int $aiMessageId = null): void
 	{
 		$this->setupStream();
 
-		$aiMessageId = $this->createAiMessagePlaceholder($conversationId, $userId);
+		// Use provided AI message ID or create new one
 		if (!$aiMessageId)
 		{
-			$this->sendError('Failed to create AI message');
-			return;
+			$aiMessageId = $this->createAiMessagePlaceholder($conversationId, $userId);
+			if (!$aiMessageId)
+			{
+				$this->sendError('Failed to create AI message');
+				return;
+			}
 		}
 
 		$this->sendInitialMessage($aiMessageId);

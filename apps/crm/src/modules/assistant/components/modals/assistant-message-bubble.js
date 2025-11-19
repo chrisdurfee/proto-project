@@ -21,10 +21,11 @@ const createStreamingModel = (dynamic) =>
 		replyResponse: ''
 	});
 
-	data.xhr.generate({}, (response) =>
+	// Pass the AI message ID to the generate endpoint
+	const params = dynamic.aiMessageId ? { aiMessageId: dynamic.aiMessageId } : {};
+
+	data.xhr.generate(params, (response) =>
 	{
-		console.log('Stream response:', response);
-		
 		// Handle different response formats
 		if (response?.content)
 		{

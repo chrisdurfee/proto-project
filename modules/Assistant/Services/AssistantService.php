@@ -88,11 +88,12 @@ class AssistantService extends Service
 	 *
 	 * @param int $conversationId
 	 * @param int $userId
+	 * @param int|null $aiMessageId Optional existing AI message ID
 	 * @return void
 	 */
-	public function generateWithStreaming(int $conversationId, int $userId): void
+	public function generateWithStreaming(int $conversationId, int $userId, ?int $aiMessageId = null): void
 	{
 		$streamService = new AssistantStreamService($this->chatService);
-		$streamService->generate($conversationId, $userId);
+		$streamService->generate($conversationId, $userId, $aiMessageId);
 	}
 }

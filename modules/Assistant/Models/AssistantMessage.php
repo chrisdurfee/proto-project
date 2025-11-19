@@ -183,7 +183,8 @@ class AssistantMessage extends Model
 			];
 		}
 
-		return $history;
+		// Reverse to get chronological order (oldest to newest) for OpenAI
+		return array_reverse($history);
 	}
 
 	/**

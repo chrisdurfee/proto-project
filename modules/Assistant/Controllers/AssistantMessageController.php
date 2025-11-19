@@ -7,7 +7,6 @@ use Modules\Assistant\Models\AssistantConversation;
 use Modules\Assistant\Services\AssistantService;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;
-use Proto\Http\Router\StreamResponse;
 
 /**
  * AssistantMessageController
@@ -76,8 +75,14 @@ class AssistantMessageController extends ResourceController
 		$this->updateConversationLastMessage($data->conversationId, $messageId, $data->content);
 		$this->publishMessageCreated($data->conversationId, $messageId);
 
-		// Create AI placeholder message and publish for streaming
-		$this->createAiPlaceholderMessage($data->conversationId, $data->userId ?? session()->user->id ?? null);
+		// Create AI placeholder message
+		$aiMessageId = $this->createAiPlaceholderMessage($data->conversationId, $data->userId ?? session()->user->id ?? null);
+
+		// Include AI message ID in response
+		if ($aiMessageId)
+		{
+			$result->aiMessageId = $aiMessageId;
+		}
 
 		return $result;
 	}
@@ -115,13 +120,13 @@ class AssistantMessageController extends ResourceController
 	 *
 	 * @param int $conversationId
 	 * @param int|null $userId
-	 * @return void
+	 * @return int|null The AI message ID
 	 */
-	protected function createAiPlaceholderMessage(int $conversationId, ?int $userId): void
+	protected function createAiPlaceholderMessage(int $conversationId, ?int $userId): ?int
 	{
 		if (!$userId)
 		{
-			return;
+			return null;
 		}
 
 		// Create AI placeholder message
@@ -140,7 +145,7 @@ class AssistantMessageController extends ResourceController
 		$result = $aiMessage->add();
 		if (!$result)
 		{
-			return;
+			return null;
 		}
 
 		$aiMessageId = (int)$aiMessage->id;
@@ -151,9 +156,12 @@ class AssistantMessageController extends ResourceController
 			'action' => 'merge',
 			'dynamic' => [
 				'conversationId' => $conversationId,
-				'userId' => $userId
+				'userId' => $userId,
+				'aiMessageId' => $aiMessageId
 			]
 		]);
+
+		return $aiMessageId;
 	}
 
 	/**
@@ -166,8 +174,10 @@ class AssistantMessageController extends ResourceController
 	{
 		$userId = session()->user->id ?? null;
 		$conversationId = (int)($request->params()->conversationId ?? $request->getInt('conversationId') ?? null);
+		$aiMessageId = $request->getInt('aiMessageId') ?? null;
+
 		$assistantService = new AssistantService();
-		$assistantService->generateWithStreaming($conversationId, $userId);
+		$assistantService->generateWithStreaming($conversationId, $userId, $aiMessageId);
 	}
 
 	/**
