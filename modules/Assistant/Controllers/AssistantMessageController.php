@@ -34,54 +34,77 @@ class AssistantMessageController extends ResourceController
 	}
 
 	/**
-	 * Send a new user message (no AI streaming here).
+	 * Modify the item data before adding.
+	 * Sets conversation-specific fields.
 	 *
+	 * @param object $data
 	 * @param Request $request
+	 * @return void
+	 */
+	protected function modifiyAddItem(object &$data, Request $request): void
+	{
+		$data->conversationId = (int)($request->params()->conversationId ?? $data->conversationId ?? null);
+		$data->role = 'user';
+		$data->type = 'text';
+		$data->isComplete = 1;
+
+		// Sanitize content - trim whitespace and newlines
+		if (isset($data->content))
+		{
+			$data->content = trim($data->content);
+		}
+	}
+
+	/**
+	 * Adds a model item.
+	 * Overridden to handle post-creation actions.
+	 *
+	 * @param object $data
 	 * @return object
 	 */
-	public function add(Request $request): object
+	protected function addItem(object $data): object
 	{
-		$data = $this->getRequestItem($request);
-		$conversationId = (int)($request->params()->conversationId ?? $data->conversationId ?? null);
-		$userId = session()->user->id ?? null;
-		if (!$conversationId || !$userId)
-		{
-			return $this->error('Conversation ID and user ID required', 400);
-		}
+		$result = parent::addItem($data);
 
-		$content = $data->content ?? '';
-		if (empty(trim($content)))
+		// Only proceed with post-actions if add was successful
+		if (!isset($result->id))
 		{
-			return $this->error('Message content required', 400);
-		}
-
-		// Create user message only
-		$result = $this->addItem((object)[
-			'conversationId' => $conversationId,
-			'userId' => $userId,
-			'role' => 'user',
-			'content' => $content,
-			'type' => 'text',
-			'isComplete' => 1
-		]);
-
-		if (!$result)
-		{
-			return $this->error('Failed to create message', 500);
+			return $result;
 		}
 
 		$messageId = (int)$result->id;
+		$this->updateConversationLastMessage($data->conversationId, $messageId, $data->content);
+		$this->publishMessageCreated($data->conversationId, $messageId);
 
-		// Update conversation last message
+		return $result;
+	}
+
+	/**
+	 * Update the conversation's last message.
+	 *
+	 * @param int $conversationId
+	 * @param int $messageId
+	 * @param string $content
+	 * @return void
+	 */
+	protected function updateConversationLastMessage(int $conversationId, int $messageId, string $content): void
+	{
 		AssistantConversation::updateLastMessage($conversationId, $messageId, $content);
+	}
 
-		// Publish to Redis for sync
+	/**
+	 * Publish message created event to Redis.
+	 *
+	 * @param int $conversationId
+	 * @param int $messageId
+	 * @return void
+	 */
+	protected function publishMessageCreated(int $conversationId, int $messageId): void
+	{
 		events()->emit("redis:assistant_conversation:{$conversationId}:messages", [
 			'id' => $messageId,
 			'action' => 'merge'
 		]);
-
-		return $this->response(['success' => true, 'id' => $messageId]);
 	}
 
 	/**
