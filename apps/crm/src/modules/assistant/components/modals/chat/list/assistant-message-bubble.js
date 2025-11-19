@@ -3,7 +3,7 @@ import { TimeFrame } from "@base-framework/ui";
 import { Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Avatar } from "@base-framework/ui/molecules";
-import { AssistantMessageModel } from "../../../models/assistant-message-model.js";
+import { AssistantMessageModel } from "../../../../models/assistant-message-model.js";
 
 /**
  * Creates streaming data model and initiates streaming.
@@ -61,7 +61,7 @@ const createStreamingModel = (dynamic) =>
  * @returns {object}
  */
 const UserAvatar = () => Avatar({
-	src: app.data.user.image,
+	src: `/files/users/profile/${app.data.user.image}`,
 	alt: app.data.user.displayName,
 	fallbackText: app.data.user.displayName || 'U',
 	size: 'sm'

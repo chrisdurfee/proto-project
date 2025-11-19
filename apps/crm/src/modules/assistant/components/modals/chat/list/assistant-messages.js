@@ -3,7 +3,7 @@ import { Component, DateTime, Jot } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
-import { AssistantMessageModel } from "../../../models/assistant-message-model.js";
+import { AssistantMessageModel } from "../../../../models/assistant-message-model.js";
 import { AssistantMessageBubble } from "./assistant-message-bubble.js";
 
 /**
@@ -106,6 +106,9 @@ export const AssistantMessages = Jot(
 		// Handle new and updated messages
 		if (data.merge && data.merge.length > 0)
 		{
+			/**
+			 * We need to check if the user is at the bottom before mingling new messages.
+			 */
 			// @ts-ignore
 			const isAtBottom = (typeof this.isAtBottom === 'function' && this.isAtBottom());
 			// @ts-ignore
@@ -159,7 +162,7 @@ export const AssistantMessages = Jot(
 		 * Scroll container for the messages list is the modal container.
 		 */
 		// @ts-ignore
-		const scrollContainer = this.parent.parent.panel;
+		const scrollContainer = this.scrollContainer;
 
 		return Div({ class: "flex flex-col grow p-4 z-0" }, [
 			Div({ class: "flex flex-auto flex-col w-full max-w-none lg:max-w-5xl mx-auto pt-8 pb-8" }, [

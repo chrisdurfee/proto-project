@@ -3,7 +3,7 @@ import { Veil, VeilJot } from "@base-framework/ui";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
-import { AssistantMessageModel } from "../../../models/assistant-message-model.js";
+import { AssistantMessageModel } from "../../../../models/assistant-message-model.js";
 import { AssistantTextarea } from "./assistant-textarea.js";
 
 /**

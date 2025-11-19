@@ -1,7 +1,7 @@
 import { Div, OnLoad } from '@base-framework/atoms';
 import { Component, Jot } from '@base-framework/base';
-import { AssistantComposer } from './assistant-composer.js';
-import { AssistantMessages } from './assistant-messages.js';
+import { AssistantComposer } from './composer/assistant-composer.js';
+import { AssistantMessages } from './list/assistant-messages.js';
 
 /**
  * AssistantChatContent
@@ -107,7 +107,7 @@ export const AssistantChatContent = Jot(
 							// @ts-ignore
 							scrollToBottom: () => this.scrollToBottom(),
 							// @ts-ignore
-							scrollContainer: this.panel
+							scrollContainer: this.parent.panel
 						})
 					]),
 
