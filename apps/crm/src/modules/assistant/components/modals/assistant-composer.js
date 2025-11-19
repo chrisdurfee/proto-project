@@ -85,6 +85,7 @@ export const AssistantComposer = VeilJot(
 		});
 
 		// Save the user message
+		// Server will handle creating AI placeholder and publishing via Redis
 		// @ts-ignore
 		data.xhr.add({}, (response) =>
 		{
@@ -100,43 +101,7 @@ export const AssistantComposer = VeilJot(
 				// @ts-ignore
 				this.submitCallBack(this.parent);
 			}
-
-			// Create AI response placeholder and stream
-			// @ts-ignore
-			this.streamAiResponse(conversationId);
 		});
-	},
-
-	/**
-	 * Stream AI response.
-	 *
-	 * @param {number} conversationId
-	 * @returns {void}
-	 */
-	streamAiResponse(conversationId)
-	{
-		const streamingId = 'streaming-' + Date.now();
-
-		// Get parent list component and append AI message bubble
-		// @ts-ignore
-		const messagesComponent = this.parent.messages;
-		if (messagesComponent && messagesComponent.list)
-		{
-			// Append message with dynamic property for bubble to handle streaming
-			messagesComponent.list.append([{
-				id: streamingId,
-				conversationId,
-				userId: app.data.user.id,
-				role: 'assistant',
-				content: '',
-				createdAt: new Date().toISOString(),
-				// Dynamic property with streaming configuration
-				dynamic: {
-					conversationId,
-					userId: app.data.user.id
-				}
-			}]);
-		}
 	},
 
 	/**

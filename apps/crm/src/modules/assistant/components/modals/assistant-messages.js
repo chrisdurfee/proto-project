@@ -173,7 +173,7 @@ export const AssistantMessages = Jot(
 						divider: Divider,
 						rowItem: (message) => AssistantMessageBubble({ message }),
 						// @ts-ignore
-						scrollContainer: this.parent.panel,
+						scrollContainer: this.parent.parent.panel,
 						emptyState: () => EmptyState({
 							title: 'Start a conversation',
 							description: 'Ask me anything! I\'m here to help.',

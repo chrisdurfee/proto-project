@@ -76,6 +76,9 @@ class AssistantMessageController extends ResourceController
 		$this->updateConversationLastMessage($data->conversationId, $messageId, $data->content);
 		$this->publishMessageCreated($data->conversationId, $messageId);
 
+		// Create AI placeholder message and publish for streaming
+		$this->createAiPlaceholderMessage($data->conversationId, $data->userId ?? session()->user->id ?? null);
+
 		return $result;
 	}
 
@@ -104,6 +107,52 @@ class AssistantMessageController extends ResourceController
 		events()->emit("redis:assistant_conversation:{$conversationId}:messages", [
 			'id' => $messageId,
 			'action' => 'merge'
+		]);
+	}
+
+	/**
+	 * Create AI placeholder message with dynamic property for streaming.
+	 *
+	 * @param int $conversationId
+	 * @param int|null $userId
+	 * @return void
+	 */
+	protected function createAiPlaceholderMessage(int $conversationId, ?int $userId): void
+	{
+		if (!$userId)
+		{
+			return;
+		}
+
+		// Create AI placeholder message
+		$aiMessage = new AssistantMessage((object)[
+			'conversationId' => $conversationId,
+			'userId' => $userId,
+			'role' => 'assistant',
+			'content' => '',
+			'type' => 'text',
+			'isStreaming' => 1,
+			'isComplete' => 0,
+			'createdAt' => date('Y-m-d H:i:s'),
+			'updatedAt' => date('Y-m-d H:i:s')
+		]);
+
+		$result = $aiMessage->add();
+		if (!$result)
+		{
+			return;
+		}
+
+		$aiMessageId = (int)$aiMessage->id;
+
+		// Publish with dynamic property to trigger streaming
+		events()->emit("redis:assistant_conversation:{$conversationId}:messages", [
+			'id' => $aiMessageId,
+			'action' => 'merge',
+			'dynamic' => [
+				'conversationId' => $conversationId,
+				'userId' => $userId
+			]
 		]);
 	}
 
@@ -189,15 +238,17 @@ class AssistantMessageController extends ResourceController
 
 			// Fetch the updated message data
 			$messageData = AssistantMessage::get($messageId);
-			if (!$messageData)
+			if (!$messageData && empty($message['dynamic']))
 			{
 				return null;
 			}
 
-			// Only sync user messages (AI messages are handled by streaming)
-			if ($messageData->role !== 'user')
+			// Include dynamic property if present (for AI streaming messages)
+			$messageData = $messageData->getData();
+			$dynamic = $message['dynamic'] ?? null;
+			if ($dynamic)
 			{
-				return null;
+				$messageData->dynamic = (object)$dynamic;
 			}
 
 			return [
