@@ -83,7 +83,7 @@ const SearchButton = () => ({
  * @returns {object}
  */
 const AssistantChatButton = () => ({
-	label: 'AI Assistant',
+	label: 'Assistant',
 	icon: Icons.ai,
 	exact: true,
 	click: () => AssistantChatModal()
