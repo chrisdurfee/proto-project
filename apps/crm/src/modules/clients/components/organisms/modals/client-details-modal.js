@@ -76,7 +76,7 @@ export const ClientDetailsModal = (props) =>
 					{
 						label: 'Conversation',
 						value: 'conversation',
-						component: ClientDetailsConversation({ client, clientId })
+						component: new ClientDetailsConversation({ client, clientId })
 					},
 					{
 						label: 'Notes',
