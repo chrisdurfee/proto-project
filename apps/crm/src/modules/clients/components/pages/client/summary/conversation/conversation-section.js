@@ -84,7 +84,7 @@ export const ConversationSection = Jot(
 				// @ts-ignore
 				const isAtBottom = this.isAtBottom();
 				// @ts-ignore
-				this.list.mingle(data.merge);
+				this.list.mingle(response.merge);
 
 				// If at bottom, scroll to show new messages
 				// @ts-ignore

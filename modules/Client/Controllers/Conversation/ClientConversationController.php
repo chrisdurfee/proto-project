@@ -144,14 +144,11 @@ class ClientConversationController extends Controller
 				return null;
 			}
 
-			// Convert to array/object for JSON serialization
-			$conversationData = $conversation->getData();
-
 			// Determine action type from message
 			$action = $message['action'] ?? 'merge';
 
 			return [
-				'merge' => $action === 'merge' ? [$conversationData] : [],
+				'merge' => $action === 'merge' ? [$conversation] : [],
 				'deleted' => $action === 'delete' ? [$conversationId] : []
 			];
 		});
