@@ -108,7 +108,7 @@ class AssistantStreamService extends Service
 	 */
 	protected function hasOpenAiKey(): bool
 	{
-		return !empty(env('openAi.apiKey'));
+		return !empty(env('apis')->openAi->key);
 	}
 
 	/**
