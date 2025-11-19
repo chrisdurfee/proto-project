@@ -13,12 +13,7 @@ import { ThreadComposer } from "./thread-composer.js";
 const Composer = ({ client }) => (
 	new ThreadComposer({
 		placeholder: "Add a comment...",
-		client,
-		submitCallBack: (parent) =>
-		{
-			const shouldScroll = true;
-			parent.list.fetchNew(shouldScroll);
-		}
+		client
 	})
 );
 
@@ -171,12 +166,12 @@ export const ConversationSection = Jot(
 		}, [
 			HeaderContainer(),
 			Div({ class: "flex-1 gap-y-2" }, [
-				UseParent((parent) => (
+				UseParent(({ panel }) => (
 					ConversationList({
 						// @ts-ignore
 						data: this.data,
 						// @ts-ignore
-						scrollContainer: parent.panel
+						scrollContainer: panel
 					})
 				))
 			]),
