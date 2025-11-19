@@ -12,14 +12,14 @@ export const AssistantMessageModel = Model.extend({
 
 	xhr: {
 		/**
-		 * Set up an EventSource for real-time message updates with auto-reconnection.
+		 * Set up an EventSource with auto-reconnection for sync.
 		 *
 		 * @param {string} url - The URL path relative to the model's base URL.
 		 * @param {string} params - The query parameters.
 		 * @param {function} callBack - The callback function for incoming messages.
 		 * @returns {object} Object with source and cleanup function
 		 */
-		setupEventSource(url, params, callBack)
+		setupEventSourceWithReconnect(url, params, callBack)
 		{
 			let source = null;
 			let reconnectTimer = null;
@@ -35,11 +35,6 @@ export const AssistantMessageModel = Model.extend({
 
 				const fullUrl = this.getUrl(url);
 				source = new EventSource(fullUrl + '?' + params, { withCredentials: true });
-
-				source.onopen = () =>
-				{
-
-				};
 
 				source.onerror = (event) =>
 				{
@@ -61,14 +56,6 @@ export const AssistantMessageModel = Model.extend({
 					{
 						return;
 					}
-
-                    if (event.data === '[DONE]')
-                    {
-                        intentionallyClosed = true;
-                        clearTimeout(reconnectTimer);
-                        source.close();
-                        return;
-                    }
 
 					try
 					{
@@ -101,7 +88,57 @@ export const AssistantMessageModel = Model.extend({
 		},
 
 		/**
-		 * Generate AI response using EventSource for streaming.
+		 * Set up a simple EventSource without reconnection (for one-time streams like generate).
+		 *
+		 * @param {string} url - The URL path relative to the model's base URL.
+		 * @param {string} params - The query parameters.
+		 * @param {function} callBack - The callback function for incoming messages.
+		 * @returns {object} Object with source and cleanup function
+		 */
+		setupEventSource(url, params, callBack)
+		{
+			const fullUrl = this.getUrl(url);
+			const source = new EventSource(fullUrl + '?' + params, { withCredentials: true });
+
+			source.onmessage = (event) =>
+			{
+				if (!event.data)
+				{
+					return;
+				}
+
+				if (event.data === '[DONE]')
+				{
+					source.close();
+					return;
+				}
+
+				try
+				{
+					const data = JSON.parse(event.data);
+					callBack(data);
+				}
+				catch (error)
+				{
+				}
+			};
+
+			source.onerror = (event) =>
+			{
+				source.close();
+			};
+
+			return {
+				get source() { return source; },
+				close: () =>
+				{
+					source.close();
+				}
+			};
+		},
+
+		/**
+		 * Generate AI response using EventSource for streaming (no reconnect).
 		 *
 		 * @param {object} instanceParams - Optional query parameters
 		 * @param {function} callBack
@@ -118,7 +155,7 @@ export const AssistantMessageModel = Model.extend({
 		},
 
 		/**
-		 * Synchronize messages in real-time using EventSource.
+		 * Synchronize messages in real-time using EventSource (with auto-reconnect).
 		 *
 		 * @param {object} instanceParams
 		 * @param {function} callBack
@@ -129,7 +166,7 @@ export const AssistantMessageModel = Model.extend({
 			const params = '';
 			const url = '/sync';
 
-			return this.setupEventSource(url, params, callBack);
+			return this.setupEventSourceWithReconnect(url, params, callBack);
 		}
 	}
 });
