@@ -92,37 +92,8 @@ class AssistantMessageController extends ResourceController
 	 */
 	public function generate(Request $request): void
 	{
-		// EventSource doesn't send cookies reliably, so we pass userId as query param
-		// The frontend sends it from app.data.user.id
-		$userId = (int)($request->getInt('userId') ?? null);
+		$userId = session()->user->id ?? null;
 		$conversationId = (int)($request->params()->conversationId ?? $request->getInt('conversationId') ?? null);
-
-		if (!$conversationId)
-		{
-			(new StreamResponse())
-				->sendHeaders(200)
-				->sendEvent(json_encode(['error' => 'Missing conversationId']));
-			return;
-		}
-
-		if (!$userId)
-		{
-			(new StreamResponse())
-				->sendHeaders(200)
-				->sendEvent(json_encode(['error' => 'User not authenticated']));
-			return;
-		}
-
-		// Verify user has access to this conversation for security
-		$conversation = AssistantConversation::get($conversationId);
-		if (!$conversation || (int)$conversation->userId !== $userId)
-		{
-			(new StreamResponse())
-				->sendHeaders(200)
-				->sendEvent(json_encode(['error' => 'Access denied']));
-			return;
-		}
-
 		$assistantService = new AssistantService();
 		$assistantService->generateWithStreaming($conversationId, $userId);
 	}
