@@ -159,7 +159,19 @@ export class UserLoginStatus
 				}
 			}],
 			['beforeunload', window, () => this.setOffline()],
-			['pointerenter', document, () => this.signIn()],
+			['pagehide', window, (e) =>
+			{
+				// Ensure cleanup even when page is cached (bfcache)
+				this.setOffline();
+			}],
+			['pageshow', window, (e) =>
+			{
+				// Re-sign in when page is restored from bfcache
+				if (e.persisted)
+				{
+					this.signIn();
+				}
+			}]
 		];
 
 		return events;
