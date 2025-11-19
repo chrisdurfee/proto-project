@@ -115,11 +115,8 @@ export const AssistantMessages = Jot(
 			// @ts-ignore
 			if (isAtBottom && typeof this.scrollToBottom === 'function')
 			{
-				setTimeout(() =>
-				{
-					// @ts-ignore
-					this.scrollToBottom();
-				}, 100);
+                // @ts-ignore
+				this.scrollToBottom();
 			}
 		}
 
@@ -158,6 +155,12 @@ export const AssistantMessages = Jot(
 	 */
 	render()
 	{
+        /**
+         * Scroll container for the messages list is the modal container.
+         */
+        // @ts-ignore
+        const scrollContainer = this.parent.parent.panel;
+
 		return Div({ class: "flex flex-col grow p-4 z-0" }, [
 			Div({ class: "flex flex-auto flex-col w-full max-w-none lg:max-w-5xl mx-auto pt-8 pb-8" }, [
 				UseParent((parent) => (
@@ -173,7 +176,7 @@ export const AssistantMessages = Jot(
 						divider: Divider,
 						rowItem: (message) => AssistantMessageBubble({ message }),
 						// @ts-ignore
-						scrollContainer: this.parent.parent.panel,
+						scrollContainer,
 						emptyState: () => EmptyState({
 							title: 'Start a conversation',
 							description: 'Ask me anything! I\'m here to help.',

@@ -47,10 +47,10 @@ class AssistantMessageController extends ResourceController
 		$data->type = 'text';
 		$data->isComplete = 1;
 
-		// Sanitize content - trim whitespace and newlines
+		// Sanitize content - decode HTML entities and trim whitespace
 		if (isset($data->content))
 		{
-			$data->content = trim($data->content);
+			$data->content = trim(html_entity_decode($data->content, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 		}
 	}
 
