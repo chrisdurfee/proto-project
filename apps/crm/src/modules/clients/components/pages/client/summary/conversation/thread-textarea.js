@@ -43,7 +43,7 @@ const SendButton = () => (
 			variant: "icon",
 			icon: Icons.airplane,
 			class: "text-foreground hover:text-accent",
-			onSet: ['empty', (empty, el) => el.disabled = empty]
+			onState: ['empty', (empty, el) => el.disabled = empty]
 		})
 	])
 );

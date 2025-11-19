@@ -22,15 +22,18 @@ const TextCount = () => (
  * @returns {object}
  */
 const SendButton = () => (
-	Div({ class: "flex justify-between" }, [
-		Button({
-			type: "submit",
-			variant: "icon",
-			icon: Icons.airplane,
-			class: "text-foreground hover:text-accent",
-			onSet: ['empty', (empty, el) => el.disabled = empty]
-		})
-	])
+	UseParent((parent) => (
+		Div({ class: "flex justify-between" }, [
+			Button({
+				type: "submit",
+				variant: "icon",
+				icon: Icons.airplane,
+				class: "text-foreground hover:text-accent",
+				// @ts-ignore
+				onSet: [parent.textareaComponent.state, 'empty', (empty, el) => el.disabled = empty]
+			})
+		])
+	))
 );
 
 /**
