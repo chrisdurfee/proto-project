@@ -4,7 +4,6 @@ namespace Modules\Assistant\Services;
 use Common\Services\Service;
 use Common\Services\OpenAi\Chat\ChatService;
 use Modules\Assistant\Models\AssistantConversation;
-use Modules\Assistant\Models\AssistantMessage;
 use Modules\Assistant\Services\Traits\ManagesAssistantMessages;
 
 /**
