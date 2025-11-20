@@ -79,9 +79,15 @@ class ClientContactController extends Controller
 	 */
 	protected function modifiyUpdateItem(object &$data, Request $request): void
 	{
+		// Store the ID before restricting it
+		$id = $data->id ?? null;
+
 		// Restrict fields that shouldn't be directly updated
 		$restrictedFields = ['id', 'clientId', 'createdAt', 'createdBy', 'deletedAt'];
 		$this->restrictFields($data, $restrictedFields);
+
+		// restore id
+		$data->id = $id;
 	}
 
 	/**
