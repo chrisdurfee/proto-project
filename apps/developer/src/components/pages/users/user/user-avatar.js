@@ -10,8 +10,8 @@ import { Avatar } from "@base-framework/ui/molecules";
 const UserDetails = () => [
 	Avatar({ src: '/files/users/profile/[[user.image]]', alt: '[[user.firstName]] [[user.lastName]]', watcherFallback: '[[user.firstName]] [[user.lastName]]', size: "sm" }),
 	Div({ class: "flex flex-auto flex-col" }, [
-		Span({ class: "text-sm truncate" }, '[[user.firstName]]'),
-		Span({ class: "text-xs truncate text-muted-foreground" }, '[[user.lastName]]'),
+		Span({ class: "text-sm truncate capitalize" }, '[[user.firstName]]'),
+		Span({ class: "text-xs truncate text-muted-foreground capitalize" }, '[[user.lastName]]'),
 	])
 ];
 
