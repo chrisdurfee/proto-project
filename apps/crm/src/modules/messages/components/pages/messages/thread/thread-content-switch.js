@@ -3,6 +3,7 @@ import { DockableOverlay, Panel } from "@base-framework/ui/organisms";
 import { ThreadDetail } from "./message-thread/details/thread-detail.js";
 import { NewConversationForm } from "./message-thread/new-message/new-conversation-form.js";
 import { ThreadEmptyState } from "./message-thread/thread-empty-state.js";
+import { UserRedirect } from "./user-redirect.js";
 
 /**
  * This will create the dockable thread.
@@ -19,10 +20,15 @@ const DockableThread = (props) => (
 				return ThreadEmptyState();
 			}
 
+			if (conversationId === 'user')
+			{
+				return UserRedirect();
+			}
+
 			if (conversationId === 'new')
 			{
 				return new NewConversationForm({
-					onCancel: () => app.navigate('messages/all'),
+					onCancel: () => app.navigate('messages'),
 					onSuccess: (conversation) =>
 					{
 						if (props.mingle)
@@ -70,7 +76,7 @@ export const ThreadContentSwitch = (props) =>
 		class: "flex-auto flex-col w-full h-full hidden lg:flex",
 		switch: [
 			{
-				uri: 'messages/:conversationId*',
+				uri: 'messages/:conversationId/:userId?*',
 				component: DockableThread(props)
 			},
 			{
