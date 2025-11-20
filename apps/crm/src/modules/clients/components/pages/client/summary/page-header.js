@@ -1,26 +1,26 @@
 import { Div, H2 } from "@base-framework/atoms";
-import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
+import { DropdownMenu } from "@base-framework/ui/molecules";
 import { ActivityAvatarGroup } from "@components/organisms/tracking/activity-avatar-group.js";
 import { ClientModal } from "../../../organisms/modals/client-modal.js";
 
 /**
- * This will create a permission modal.
+ * This will create a client modal.
  *
  * @param {object} parent
  * @returns {object}
  */
-const Modal = ({ context }) => (
+const openEditModal = (parent) => (
 	ClientModal({
-		item: context.data.client,
-		onSubmit: (data) => context.data.client = data.get()
+		item: parent.context.data.client,
+		onSubmit: (data) => parent.context.data.client = data.get()
 	})
 );
 
 /**
  * PageHeader
  *
- * Creates the header for the client page, including the title and edit button.
+ * Creates the header for the client page, including the title and options menu.
  *
  * @param {object} client The client data to display.
  * @returns {object}
@@ -34,12 +34,22 @@ export const PageHeader = (client) => (
 				refId: client.id,
 				userId: app.data.user.id
 			}),
-			Div({ class: 'hidden lg:inline-flex' }, [
-				Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.pencil.square, click: (e, parent) => Modal(parent) }, 'Edit'),
-			]),
-			Div({ class: 'flex lg:hidden mr-4' }, [
-				Tooltip({ content: 'Edit', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.pencil.square, click: (e, parent) => Modal(parent) }))
-			])
+			new DropdownMenu({
+				icon: Icons.ellipsis.vertical,
+				variant: 'outline',
+				groups: [
+					[
+						{ icon: Icons.pencil.square, label: 'Edit', value: 'edit' }
+					]
+				],
+				onSelect: (selected, parent) =>
+				{
+					if (selected.value === 'edit')
+					{
+						openEditModal(parent);
+					}
+				}
+			})
 		])
 	])
 );

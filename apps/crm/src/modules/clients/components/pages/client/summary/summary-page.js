@@ -49,7 +49,7 @@ export const SummaryPage = () => (
 							ClientContent({ client }),
 						])
 					]),
-					Div({ class: 'hidden 2xl:flex flex-none min-w-[420px] border-l' }, [
+					Div({ class: 'hidden 2xl:flex flex-none min-w-0 w-[420px] border-l' }, [
 						new ConversationSection({ client })
 					]),
 				])

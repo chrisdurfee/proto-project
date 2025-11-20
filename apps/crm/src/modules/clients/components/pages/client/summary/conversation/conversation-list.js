@@ -47,7 +47,7 @@ const ConversationListItem = (msg) =>
 		}),
 		Div({ class: "flex-1 gap-y-1" }, [
 			P({ class: "text-sm font-medium capitalize" }, name),
-			P({ class: "text-sm text-muted-foreground" }, msg.message),
+			P({ class: "text-sm text-muted-foreground text-wrap wrap-break-words" }, msg.message),
 			msg.attachments && msg.attachments.length > 0 &&
 				Attachments(msg.attachments)
 		])
