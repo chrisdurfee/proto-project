@@ -57,9 +57,18 @@ class ClientContactService extends Service
 			// Save or update contact
 			if ($contactId)
 			{
-				$contact = new ClientContact($data);
-				$contact->id = $contactId;
+				// Fetch existing contact to preserve clientId and other immutable fields
+				$existingContact = ClientContact::get($contactId);
+				if (!$existingContact)
+				{
+					throw new \Exception('Contact not found');
+				}
 
+				// Ensure clientId is preserved
+				$data->clientId = $existingContact->clientId;
+				$data->id = $contactId;
+
+				$contact = new ClientContact($data);
 				if (!$contact->update())
 				{
 					throw new \Exception('Failed to update contact');
@@ -154,6 +163,7 @@ class ClientContactService extends Service
 			'firstName' => $data->firstName ?? '',
 			'lastName' => $data->lastName ?? '',
 			'email' => $data->email ?? '',
+			'dob' => $data->dob ?? null,
 			'displayName' => trim(($data->firstName ?? '') . ' ' . ($data->lastName ?? '')),
 			'username' => $data->user->username ?? $data->email ?? '',
 			'password' => $data->user->password ?? $this->generateRandomPassword(),

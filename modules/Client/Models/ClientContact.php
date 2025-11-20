@@ -48,7 +48,6 @@ class ClientContact extends Model
 		'doNotContact',
 		'emailBounced',
 		'notes',
-		'birthday',
 		'assistantName',
 		'assistantPhone',
 		'createdAt',

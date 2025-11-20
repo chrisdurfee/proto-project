@@ -65,8 +65,7 @@ class ClientContact extends Migration
 			// Notes
 			$table->text('notes')->nullable();
 
-			// Birthday & Personal
-			$table->date('birthday')->nullable();
+			// Personal
 			$table->varchar('assistant_name', 100)->nullable();
 			$table->varchar('assistant_phone', 20)->nullable();
 

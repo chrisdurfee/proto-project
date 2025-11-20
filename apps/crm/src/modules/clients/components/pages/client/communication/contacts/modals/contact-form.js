@@ -211,7 +211,7 @@ const ContactInformationFieldset = (isEditing, contact) => [
 		]),
 		new FormField({ name: "birthday", label: "Birthday", description: "Contact's birthday." }, [
 			new DatePicker({
-				bind: 'birthday'
+				bind: 'dob'
 			})
 		]),
 		new FormField({ name: "assistantName", label: "Assistant Name", description: "Name of assistant." }, [
