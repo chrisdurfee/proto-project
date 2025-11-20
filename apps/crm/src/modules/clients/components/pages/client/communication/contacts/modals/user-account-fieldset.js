@@ -11,9 +11,9 @@ import { FormField } from "@base-framework/ui/molecules";
  * @param {object} props.contact - The contact data
  * @returns {Array}
  */
-export const UserAccountFieldset = ({ isEditing = false, contact }) =>
+export const UserAccountFieldset = ({ isEditing = false, contact = {} }) =>
 {
-	const hasExistingUser = contact?.userId || contact?.user?.id;
+	const hasExistingUser = !!(contact?.userId || contact?.username);
 
 	return [
 		Fieldset({ legend: "User Account" }, [
@@ -28,6 +28,7 @@ export const UserAccountFieldset = ({ isEditing = false, contact }) =>
 					bind: 'createUser',
 					disabled: hasExistingUser,
 					options: [
+                        { label: 'Already Linked', value: -1 },
 						{ label: 'No User Account', value: 0 },
 						{ label: 'Create User Account', value: 1 }
 					]
@@ -38,10 +39,10 @@ export const UserAccountFieldset = ({ isEditing = false, contact }) =>
 		// Show user fields when creating/editing user account
 		Fieldset({
 			legend: "User Credentials",
-			bind: ['createUser', (val) => val == 1 || hasExistingUser ? {} : { class: 'hidden' }]
+			onSet: ['createUser', { 'flex': 1}]
 		}, [
 			new FormField({
-				name: "user.username",
+				name: "username",
 				label: "Username",
 				description: "Username for login. Will use email if not provided.",
 				required: false
@@ -49,7 +50,7 @@ export const UserAccountFieldset = ({ isEditing = false, contact }) =>
 				Input({
 					type: "text",
 					placeholder: "username",
-					bind: 'user.username'
+					bind: 'username'
 				})
 			]),
 
@@ -85,31 +86,15 @@ export const UserAccountFieldset = ({ isEditing = false, contact }) =>
 			] : []),
 
 			new FormField({
-				name: "user.enabled",
+				name: "enabled",
 				label: "Account Status",
 				description: "Enable or disable the user account."
 			}, [
 				Select({
-					bind: 'user.enabled',
+					bind: 'enabled',
 					options: [
 						{ label: 'Disabled', value: 0 },
 						{ label: 'Enabled', value: 1 }
-					]
-				})
-			]),
-
-			new FormField({
-				name: "user.status",
-				label: "User Status",
-				description: "Set the user's online status."
-			}, [
-				Select({
-					bind: 'user.status',
-					options: [
-						{ value: "online", label: "Online" },
-						{ value: "offline", label: "Offline" },
-						{ value: "busy", label: "Busy" },
-						{ value: "away", label: "Away" }
 					]
 				})
 			])
