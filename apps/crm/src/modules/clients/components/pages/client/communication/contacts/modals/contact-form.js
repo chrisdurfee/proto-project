@@ -201,7 +201,7 @@ const ContactInformationFieldset = (isEditing, contact) => [
 	Fieldset({ legend: "Status & Personal Info" }, [
 		new FormField({ name: "status", label: "Status", description: "Contact status." }, [
 			Select({
-				bind: 'status',
+				bind: 'contactStatus',
 				options: [
 					{ label: 'Active', value: 'active' },
 					{ label: 'Inactive', value: 'inactive' },

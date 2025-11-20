@@ -1,48 +1,10 @@
-import { Div, H3, Header, Span, UseParent } from "@base-framework/atoms";
+import { A, Div, H3, Header, Span, UseParent } from "@base-framework/atoms";
 import { Model } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Skeleton } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Avatar, StaticStatusIndicator } from "@base-framework/ui/molecules";
-import { ConversationModel } from "@modules/messages/models/conversation-model.js";
 
 /**
- * Handle user selection - find existing conversation or create new one
- *
- * @param {object} follower
- * @param {object} conversationsData - The parent's conversation data (unused now - backend handles lookup)
- */
-const handleFollowerClick = (follower, conversationsData) =>
-{
-	// The follower object has followedUser which is the person the current user is following
-	const followedUser = follower.followedUser || follower;
-	const targetUserId = followedUser.id;
-	const currentUserId = app.data.user.id;
-
-	// Use backend to find existing conversation or create new one
-	const conversationModel = new ConversationModel({
-		userId: currentUserId
-	});
-
-	conversationModel.xhr.findOrCreate(
-		{ participantId: targetUserId },
-		(result) =>
-		{
-			if (result?.success && result?.id)
-			{
-				app.navigate(`messages/${result.id}`);
-				return;
-			}
-
-			app.notify({
-				type: 'error',
-				title: 'Error',
-				description: 'Failed to start conversation. Please try again.',
-				icon: Icons.circleX
-			});
-		}
-	);
-};/**
  * Sidebar row item to display the user's name and status,
  * then create/open conversation on click.
  *
@@ -57,9 +19,9 @@ const SidebarRowItem = (conversationsData) =>
 		const displayName = followedUser.displayName || `${followedUser.firstName || ''} ${followedUser.lastName || ''}`.trim() || followedUser.email;
 		const avatarSrc = followedUser.image ? `/files/users/profile/${followedUser.image}` : null;
 
-		return Div({
+		return A({
 			class: "flex items-center justify-between p-2 rounded-md hover:bg-muted/50 cursor-pointer",
-			click: () => handleFollowerClick(follower, conversationsData)
+			href: `messages/user/${followedUser.id}`
 		},
 			[
 				Div({ class: "flex items-center gap-2" }, [

@@ -310,8 +310,8 @@ const formatContactData = (contact) =>
 		marketingOptInLabel: formatBoolean(contact.marketingOptIn),
 		newsletterSubscribedLabel: formatBoolean(contact.newsletterSubscribed),
 		doNotContactLabel: formatBoolean(contact.doNotContact),
-		statusLabel: formatLabel(contact.status),
-		birthdayFormatted: contact.birthday || '-',
+		statusLabel: formatLabel(contact.contactStatus),
+		birthdayFormatted: contact.dob || '-',
 		assistantName: contact.assistantName || '-',
 		assistantPhone: contact.assistantPhone || '-',
 		notes: contact.notes || 'No notes available'
