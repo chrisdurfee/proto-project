@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.360.1",
+            "version": "3.362.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "09b2636a4afdf678b41659e3b0e507e078ca25b1"
+                "reference": "717d63914cc3e2391678c587157a30e43318d7d7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/09b2636a4afdf678b41659e3b0e507e078ca25b1",
-                "reference": "09b2636a4afdf678b41659e3b0e507e078ca25b1",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/717d63914cc3e2391678c587157a30e43318d7d7",
+                "reference": "717d63914cc3e2391678c587157a30e43318d7d7",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.360.1"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.362.0"
             },
-            "time": "2025-11-18T19:05:48+00:00"
+            "time": "2025-11-19T20:01:26+00:00"
         },
         {
             "name": "brick/math",
@@ -815,16 +815,16 @@
         },
         {
             "name": "protoframework/proto",
-            "version": "1.0.146",
+            "version": "1.0.147",
             "source": {
                 "type": "git",
                 "url": "https://github.com/chrisdurfee/proto.git",
-                "reference": "79d3bc5414e5bfbf6e5aebd8c1e4101d037d3bdb"
+                "reference": "deb5e9a0826bb49464edaa2f4f8b782c1599fa5b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/79d3bc5414e5bfbf6e5aebd8c1e4101d037d3bdb",
-                "reference": "79d3bc5414e5bfbf6e5aebd8c1e4101d037d3bdb",
+                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/deb5e9a0826bb49464edaa2f4f8b782c1599fa5b",
+                "reference": "deb5e9a0826bb49464edaa2f4f8b782c1599fa5b",
                 "shasum": ""
             },
             "require": {
@@ -874,9 +874,9 @@
             ],
             "support": {
                 "issues": "https://github.com/chrisdurfee/proto/issues",
-                "source": "https://github.com/chrisdurfee/proto/tree/1.0.146"
+                "source": "https://github.com/chrisdurfee/proto/tree/1.0.147"
             },
-            "time": "2025-11-19T00:28:53+00:00"
+            "time": "2025-11-20T09:58:25+00:00"
         },
         {
             "name": "psr/clock",

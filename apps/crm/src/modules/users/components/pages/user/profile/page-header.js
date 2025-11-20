@@ -1,15 +1,15 @@
 import { Div, H1 } from "@base-framework/atoms";
-import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
+import { DropdownMenu } from "@base-framework/ui/molecules";
 import { UserModal } from "../../users/modals/user-modal.js";
 
 /**
- * This will create a permission modal.
+ * This will create a user modal.
  *
  * @param {object} context
  * @returns {object}
  */
-const Modal = (context) => (
+const openEditModal = (context) => (
 	UserModal({
 		item: context.data.user,
 		onSubmit: (data) =>
@@ -33,24 +33,22 @@ export const PageHeader = ({ context }) => (
 			H1({ class: 'text-2xl md:text-2xl font-bold tracking-tight' }, 'Profile'),
 		]),
 		Div({ class: 'flex flex-row gap-x-2' }, [
-			Div({ class: 'hidden lg:inline-flex' }, [
-				Button({
-					variant: 'withIcon',
-					class: 'text-muted-foreground outline',
-					icon: Icons.pencil.square,
-					click: () => Modal(context)
-				}, 'Edit'),
-			]),
-			Div({ class: 'flex lg:hidden mr-4' }, [
-				Tooltip({ content: 'Edit', position: 'left' }, [
-					Button({
-						variant: 'icon',
-						class: 'outline',
-						icon: Icons.pencil.square,
-						click: () => Modal(context)
-					})
-				])
-			])
+			new DropdownMenu({
+				icon: Icons.ellipsis.vertical,
+				variant: 'outline',
+				groups: [
+					[
+						{ icon: Icons.pencil.square, label: 'Edit', value: 'edit' }
+					]
+				],
+				onSelect: (selected) =>
+				{
+					if (selected.value === 'edit')
+					{
+						openEditModal(context);
+					}
+				}
+			})
 		])
 	])
 );

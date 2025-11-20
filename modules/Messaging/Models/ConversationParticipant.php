@@ -219,67 +219,6 @@ class ConversationParticipant extends Model
 	}
 
 	/**
-	 * Get unread message count for a participant.
-	 *
-	 * @param int $conversationId
-	 * @param int $userId
-	 * @return int
-	 */
-	public static function getUnreadCount(int $conversationId, int $userId): int
-	{
-		$participant = static::getBy([
-			'cp.conversation_id' => $conversationId,
-			'cp.user_id' => $userId
-		]);
-
-		if (!$participant)
-		{
-			return 0;
-		}
-
-		$model = new Message();
-		$sql = $model->storage->table()->select([['COUNT(*)'], 'count']);
-
-		if (!$participant->lastReadMessageId)
-		{
-			$sql->where(
-				['m.conversation_id', $conversationId],
-				['m.sender_id', '!=', $userId],
-				'm.deleted_at IS NULL'
-			);
-		}
-		else
-		{
-			$sql->where(
-				['m.conversation_id', $conversationId],
-				['m.id', '>', $participant->lastReadMessageId],
-				['m.sender_id', '!=', $userId],
-				'm.deleted_at IS NULL'
-			);
-		}
-
-		$count = $sql->first();
-		return (int)($count->count ?? 0);
-	}
-
-	/**
-	 * (Optional) Sets a custom where clause.
-	 *
-	 * @param object $sql Query builder instance.
-	 * @param array|null $modifiers Modifiers.
-	 * @param array|null $params Parameter array.
-	 * @return void
-	 */
-	protected function setCustomWhere(object $sql, ?array $modifiers = null, ?array &$params = null): void
-	{
-		if (!empty($modifiers['search']))
-		{
-			$search = '%' . $modifiers['search'] . '%';
-			$sql->whereJoin('participants', ["firstName" => $search], $params);
-		}
-	}
-
-	/**
 	 * @var string $storageType
 	 */
 	protected static string $storageType = ConversationParticipantStorage::class;
