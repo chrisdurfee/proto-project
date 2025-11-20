@@ -24,7 +24,7 @@ class EmailGateway
 	{
 	}
 
-    /**
+	/**
 	 * Sends an email to the user by id.
 	 *
 	 * @param mixed $userId The user ID to send the notification to.
@@ -34,13 +34,13 @@ class EmailGateway
 	 */
 	public function sendById(mixed $userId, object $settings, ?object $data = null): ?object
 	{
-        $user = User::get($userId);
-        if (!$user)
-        {
-            return null;
-        }
+		$user = User::get($userId);
+		if (!$user)
+		{
+			return null;
+		}
 
-        return static::send($user, $settings, $data);
+		return static::send($user, $settings, $data);
 	}
 
 	/**
@@ -53,20 +53,20 @@ class EmailGateway
 	 */
 	public function send(object $user, object $settings, ?object $data = null): ?object
 	{
-        if (!$user)
-        {
-            return null;
-        }
+		if (!$user)
+		{
+			return null;
+		}
 
-        if (((bool)($user->allowEmail ?? true)) == false)
-        {
-            return null;
-        }
+		if (((bool)($user->allowEmail ?? true)) == false)
+		{
+			return null;
+		}
 
-        if (empty($settings->to) && !empty($user->email))
-        {
-            $settings->to = $user->email;
-        }
+		if (empty($settings->to) && !empty($user->email))
+		{
+			$settings->to = $user->email;
+		}
 
 		return Dispatcher::email($settings, $data);
 	}

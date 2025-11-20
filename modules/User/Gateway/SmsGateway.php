@@ -24,7 +24,7 @@ class SmsGateway
 	{
 	}
 
-    /**
+	/**
 	 * Sends an SMS to the user by id.
 	 *
 	 * @param mixed $userId The user ID to send the notification to.
@@ -34,13 +34,13 @@ class SmsGateway
 	 */
 	public function sendById(mixed $userId, object $settings, ?object $data = null): ?object
 	{
-        $user = User::get($userId);
-        if (!$user)
-        {
-            return null;
-        }
+		$user = User::get($userId);
+		if (!$user)
+		{
+			return null;
+		}
 
-        return static::send($user, $settings, $data);
+		return static::send($user, $settings, $data);
 	}
 
 	/**
@@ -53,20 +53,20 @@ class SmsGateway
 	 */
 	public function send(object $user, object $settings, ?object $data = null): ?object
 	{
-        if (!$user)
-        {
-            return null;
-        }
+		if (!$user)
+		{
+			return null;
+		}
 
-        if (((bool)($user->allowSms ?? true)) == false)
-        {
-            return null;
-        }
+		if (((bool)($user->allowSms ?? true)) == false)
+		{
+			return null;
+		}
 
-        if (empty($settings->to) && !empty($user->mobile))
-        {
-            $settings->to = $user->mobile;
-        }
+		if (empty($settings->to) && !empty($user->mobile))
+		{
+			$settings->to = $user->mobile;
+		}
 
 		return Dispatcher::sms($settings, $data);
 	}

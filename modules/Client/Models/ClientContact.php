@@ -26,10 +26,9 @@ class ClientContact extends Model
 	protected static array $fields = [
 		'id',
 		'clientId',
+		'userId',
 		'contactType',
 		'isPrimary',
-		'firstName',
-		'lastName',
 		'jobTitle',
 		'department',
 		'email',
@@ -43,7 +42,7 @@ class ClientContact extends Model
 		'twitterHandle',
 		'marketingOptIn',
 		'newsletterSubscribed',
-		'status',
+		'contactStatus',
 		'doNotContact',
 		'emailBounced',
 		'notes',
@@ -56,6 +55,36 @@ class ClientContact extends Model
 		'updatedBy',
 		'deletedAt'
 	];
+
+	/**
+	 * Define joins for the ClientContact model.
+	 *
+	 * @param object $builder The query builder object
+	 * @return void
+	 */
+	protected static function joins(object $builder): void
+	{
+		$builder->one(\Modules\User\Models\User::class, fields: [
+			'id',
+			'username',
+			'email',
+			'firstName',
+			'lastName',
+			'displayName',
+			'status',
+			'enabled'
+		])->on(['userId', 'id']);
+	}
+
+	/**
+	 * This will get the user account.
+	 *
+	 * @return \Proto\Models\Relations\HasOne
+	 */
+	public function user(): \Proto\Models\Relations\HasOne
+	{
+		return $this->hasOne(\Modules\User\Models\User::class);
+	}
 
 	/**
 	 * Get searchable fields for the model.

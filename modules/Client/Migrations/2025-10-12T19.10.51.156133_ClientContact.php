@@ -29,13 +29,14 @@ class ClientContact extends Migration
 			// Client relationship
 			$table->integer('client_id', 30);
 
+			// User account relationship (optional)
+			$table->integer('user_id', 30)->nullable();
+
 			// Contact type and priority
 			$table->enum('contact_type', 'primary','billing','technical','decision_maker','influencer','other')->default("'other'");
 			$table->tinyInteger('is_primary')->default(0);
 
 			// Contact Information
-			$table->varchar('first_name', 100);
-			$table->varchar('last_name', 100);
 			$table->varchar('job_title', 150)->nullable();
 			$table->varchar('department', 100)->nullable();
 			$table->varchar('email', 255);
@@ -57,7 +58,7 @@ class ClientContact extends Migration
 			$table->tinyInteger('newsletter_subscribed')->default(0);
 
 			// Status
-			$table->enum('status', 'active','inactive','bounced')->default("'active'");
+			$table->enum('contact_status', 'active','inactive','bounced')->default("'active'");
 			$table->tinyInteger('do_not_contact')->default(0);
 			$table->tinyInteger('email_bounced')->default(0);
 
@@ -87,6 +88,11 @@ class ClientContact extends Migration
 					->references('id')
 					->on('clients')
 					->onDelete('cascade');
+
+			$table->foreign('user_id')
+					->references('id')
+					->on('users')
+					->onDelete('set null');
 
 			$table->foreign('created_by')
 					->references('id')

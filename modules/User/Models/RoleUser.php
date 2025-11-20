@@ -56,22 +56,19 @@ class RoleUser extends Model
 	 */
 	public function deleteUserRole(mixed $userId, mixed $roleId, ?int $organizationId = null): bool
 	{
-		$params = [$userId, $roleId];
 		$where = [
-			'user_id = ?',
-			'role_id = ?'
+			['user_id', $userId],
+			['role_id', $roleId],
 		];
 
 		if ($organizationId !== null)
 		{
-			$where[] = 'organization_id = ?';
-			$params[] = $organizationId;
+			$where[] = ['organization_id', $organizationId];
 		}
 
-		return $this->storage
-			->table()
+		return static::builder()
 			->delete()
 			->where(...$where)
-			->execute($params);
+			->execute();
 	}
 }

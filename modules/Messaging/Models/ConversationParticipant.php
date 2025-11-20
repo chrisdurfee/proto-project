@@ -163,10 +163,7 @@ class ConversationParticipant extends Model
 	 */
 	public static function getForConversation(int $conversationId): array
 	{
-		$model = new static();
-		return $model
-			->storage
-			->table()
+		return static::builder()
 			->select(
 				['cp.*'],
 				[['u.first_name'], 'firstName'],

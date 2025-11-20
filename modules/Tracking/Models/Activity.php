@@ -85,11 +85,14 @@ class Activity extends Model
 			return false;
 		}
 
-		return $this->storage
-			->table()
+		return static::builder()
 			->delete()
-			->where('type = ?', 'ref_id = ?', 'user_id = ?')
+			->where(
+				['type', $type],
+				['ref_id', $refId],
+				['user_id', $userId]
+			)
 			->limit(1)
-			->execute([$type, $refId, $userId]);
+			->execute();
 	}
 }

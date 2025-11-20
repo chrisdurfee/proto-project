@@ -60,10 +60,12 @@ class PermissionRole extends Model
 	 */
 	public function deleteRolePermission(mixed $roleId, mixed $permissionId): bool
 	{
-		return $this->storage
-			->table()
+		return static::builder()
 			->delete()
-			->where('role_id = ?', 'permission_id = ?')
-			->execute([$roleId, $permissionId]);
+			->where(
+				['role_id', $roleId],
+				['permission_id', $permissionId]
+			)
+			->execute();
 	}
 }

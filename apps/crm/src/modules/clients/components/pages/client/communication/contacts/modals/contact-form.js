@@ -1,17 +1,28 @@
+import { Div } from "@base-framework/atoms";
 import { Fieldset, Input, Select, Textarea } from "@base-framework/ui/atoms";
 import { DatePicker, FormField } from "@base-framework/ui/molecules";
+import { UnderlinedButtonTab } from "@base-framework/ui/organisms";
+import { UserAccountFieldset } from "./user-account-fieldset.js";
 
 /**
- * ContactForm
- *
- * Renders a form for creating or editing a client contact.
+ * This will create a tab content wrapper.
  *
  * @param {object} props
- * @param {boolean} props.isEditing - Whether the form is in edit mode
- * @param {object} props.contact - The contact data
+ * @param {object} children
+ * @returns {object}
+ */
+const TabContent = (props, children) => (
+	Div({ class: 'py-4', ...props }, children)
+);
+
+/**
+ * ContactInformationFieldset
+ *
+ * @param {boolean} isEditing
+ * @param {object} contact
  * @returns {Array}
  */
-export const ContactForm = ({ isEditing = false, contact }) => [
+const ContactInformationFieldset = (isEditing, contact) => [
 	Fieldset({ legend: "Contact Information" }, [
 		new FormField({ name: "firstName", label: "First Name", description: "Contact's first name.", required: true }, [
 			Input({
@@ -229,3 +240,42 @@ export const ContactForm = ({ isEditing = false, contact }) => [
 		])
 	])
 ];
+
+/**
+ * ContactForm
+ *
+ * Renders a form for creating or editing a client contact.
+ *
+ * @param {object} props
+ * @param {boolean} props.isEditing - Whether the form is in edit mode
+ * @param {object} props.contact - The contact data
+ * @returns {Array}
+ */
+export const ContactForm = ({ isEditing = false, contact }) =>
+{
+	// If not editing, return the original form layout without tabs
+	if (!isEditing)
+	{
+		return ContactInformationFieldset(isEditing, contact);
+	}
+
+	// If editing, use tabs to organize the form
+	return [
+		new UnderlinedButtonTab({
+			class: 'w-full',
+			options: [
+				{
+					label: 'Contact Info',
+					value: 'contact',
+					selected: true,
+					component: TabContent(ContactInformationFieldset(isEditing, contact))
+				},
+				{
+					label: 'User Account',
+					value: 'user',
+					component: TabContent(UserAccountFieldset({ isEditing, contact }))
+				}
+			]
+		})
+	];
+};

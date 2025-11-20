@@ -26,6 +26,18 @@ class Gateway
 	}
 
 	/**
+	 * This will create the user and returns the model with id.
+	 *
+	 * @return User
+	 */
+	public function create(object $settings): User
+	{
+		$model = new User($settings);
+		$model->add();
+		return $model;
+	}
+
+	/**
 	 * This will add the user.
 	 *
 	 * @return bool
@@ -97,6 +109,16 @@ class Gateway
 			'status' => $status
 		]);
 		return $model->updateStatus();
+	}
+
+	/**
+	 * This will return the role gateway.
+	 *
+	 * @return RoleGateway
+	 */
+	public function role(): RoleGateway
+	{
+		return new RoleGateway();
 	}
 
 	/**

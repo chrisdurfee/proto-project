@@ -175,6 +175,24 @@ export const ContactModal = (props = { item: {}, clientId: '', onClose: undefine
 			const destroyCallback = () => parent.destroy();
 			const data = parent.data;
 
+			// Validate password if creating user
+			if (data.createUser == 1 && !isEditing)
+			{
+				const password = data.user?.password || '';
+				const confirmPassword = data.user?.confirmPassword || '';
+
+				if (password && password !== confirmPassword)
+				{
+					app.notify({
+						type: "destructive",
+						title: "Password Mismatch",
+						description: "Password and confirm password do not match.",
+						icon: Icons.shield
+					});
+					return false;
+				}
+			}
+
 			if (isEditing)
 			{
 				update(data, destroyCallback);
