@@ -1,4 +1,4 @@
-import { Div, H2 } from "@base-framework/atoms";
+import { Div, H2, UseParent } from "@base-framework/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu } from "@base-framework/ui/molecules";
 import { ActivityAvatarGroup } from "@components/organisms/tracking/activity-avatar-group.js";
@@ -34,22 +34,24 @@ export const PageHeader = (client) => (
 				refId: client.id,
 				userId: app.data.user.id
 			}),
-			new DropdownMenu({
-				icon: Icons.ellipsis.vertical,
-				variant: 'outline',
-				groups: [
-					[
-						{ icon: Icons.pencil.square, label: 'Edit', value: 'edit' }
-					]
-				],
-				onSelect: (selected, parent) =>
-				{
-					if (selected.value === 'edit')
+			UseParent((parent) => (
+				new DropdownMenu({
+					icon: Icons.ellipsis.vertical,
+					variant: 'outline',
+					groups: [
+						[
+							{ icon: Icons.pencil.square, label: 'Edit', value: 'edit' }
+						]
+					],
+					onSelect: (selected) =>
 					{
-						openEditModal(parent);
+						if (selected.value === 'edit')
+						{
+							openEditModal(parent);
+						}
 					}
-				}
-			})
+				})
+			))
 		])
 	])
 );
