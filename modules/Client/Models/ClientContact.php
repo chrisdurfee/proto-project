@@ -1,7 +1,9 @@
 <?php declare(strict_types=1);
 namespace Modules\Client\Models;
 
+use Modules\User\Models\User;
 use Proto\Models\Model;
+use Proto\Models\Relations\HasOne;
 
 /**
  * ClientContact
@@ -64,8 +66,7 @@ class ClientContact extends Model
 	 */
 	protected static function joins(object $builder): void
 	{
-		$builder->one(\Modules\User\Models\User::class, fields: [
-			'id',
+		$builder->one(User::class, fields: [
 			'username',
 			'email',
 			'firstName',
@@ -79,11 +80,11 @@ class ClientContact extends Model
 	/**
 	 * This will get the user account.
 	 *
-	 * @return \Proto\Models\Relations\HasOne
+	 * @return HasOne
 	 */
-	public function user(): \Proto\Models\Relations\HasOne
+	public function user(): HasOne
 	{
-		return $this->hasOne(\Modules\User\Models\User::class);
+		return $this->hasOne(User::class);
 	}
 
 	/**
