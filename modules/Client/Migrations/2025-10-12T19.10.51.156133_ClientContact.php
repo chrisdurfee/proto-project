@@ -78,9 +78,9 @@ class ClientContact extends Migration
 			// Indexes
 			$table->index('client_id')->fields('client_id', 'is_primary');
 			$table->index('email')->fields('email');
-			$table->index('first_name')->fields('first_name', 'last_name');
+			$table->index('user_id')->fields('user_id');
 			$table->index('contact_type')->fields('contact_type');
-			$table->index('status')->fields('status');
+			$table->index('contact_status')->fields('contact_status');
 
 			// Foreign Keys
 			$table->foreign('client_id')

@@ -33,7 +33,7 @@ class RoleGateway
 	 */
 	public function add(int $userId, int $roleId): bool
 	{
-        return $this->model::create([
+        return $this->model::create((object)[
 			'userId' => $userId,
 			'roleId' => $roleId,
 		]);

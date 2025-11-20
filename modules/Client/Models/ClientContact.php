@@ -33,13 +33,10 @@ class ClientContact extends Model
 		'isPrimary',
 		'jobTitle',
 		'department',
-		'email',
 		'phone',
 		'mobile',
 		'fax',
 		'preferredContactMethod',
-		'language',
-		'timezone',
 		'linkedinUrl',
 		'twitterHandle',
 		'marketingOptIn',
@@ -71,6 +68,8 @@ class ClientContact extends Model
 			'firstName',
 			'lastName',
 			'displayName',
+			'language',
+			'timezone',
 			'status',
 			'enabled'
 		])->on(['userId', 'id']);
@@ -94,9 +93,11 @@ class ClientContact extends Model
 	public function getSearchableFields(): array
 	{
 		return [
-			'id',
-			["CONCAT(cc.first_name, ' ', cc.last_name)"],
-			["CONCAT(cc.last_name, ', ', cc.first_name)"]
+			'cc.id',
+			'u.email',
+			'cc.job_title',
+			["CONCAT(u.first_name, ' ', u.last_name)"],
+			["CONCAT(u.last_name, ', ', u.first_name)"]
 		];
 	}
 }

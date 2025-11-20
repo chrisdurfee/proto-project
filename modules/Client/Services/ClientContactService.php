@@ -139,16 +139,99 @@ class ClientContactService extends Service
 			$contact = ClientContact::get($contactId);
 			if ($contact && $contact->userId)
 			{
-				// Update user if user data is provided
-				if (isset($data->user) && is_object($data->user))
-				{
-					$this->updateUserAccount((int)$contact->userId, $data->user);
-				}
+				// Update user with any provided name/dob/user fields
+				$this->updateUserFromContactData((int)$contact->userId, $data);
 				return (int)$contact->userId;
+			}
+
+			// If contact doesn't have a user but has user-related data (name, dob, etc)
+			// automatically create one
+			if ($this->hasUserData($data))
+			{
+				return $this->createUserAccount($data);
 			}
 		}
 
 		return null;
+	}
+
+	/**
+	 * Check if data contains user-related fields that should be stored in user table.
+	 *
+	 * @param object $data Contact data
+	 * @return bool
+	 */
+	protected function hasUserData(object $data): bool
+	{
+		return isset($data->firstName) || isset($data->lastName) || isset($data->dob);
+	}
+
+	/**
+	 * Update user account with data from contact update.
+	 *
+	 * @param int $userId User ID
+	 * @param object $contactData Contact data that may include user fields
+	 * @return void
+	 */
+	protected function updateUserFromContactData(int $userId, object $contactData): void
+	{
+		$userData = (object)[];
+		$hasUserData = false;
+
+		// Map contact data fields to user fields
+		if (isset($contactData->firstName))
+		{
+			$userData->firstName = $contactData->firstName;
+			$hasUserData = true;
+		}
+		if (isset($contactData->lastName))
+		{
+			$userData->lastName = $contactData->lastName;
+			$hasUserData = true;
+		}
+		if (isset($contactData->dob))
+		{
+			$userData->dob = $contactData->dob;
+			$hasUserData = true;
+		}
+		if (isset($contactData->email))
+		{
+			$userData->email = $contactData->email;
+			$hasUserData = true;
+		}
+		if (isset($contactData->language))
+		{
+			$userData->language = $contactData->language;
+			$hasUserData = true;
+		}
+		if (isset($contactData->timezone))
+		{
+			$userData->timezone = $contactData->timezone;
+			$hasUserData = true;
+		}
+
+		// Update display name if first or last name changed
+		if (isset($contactData->firstName) || isset($contactData->lastName))
+		{
+			$firstName = $contactData->firstName ?? '';
+			$lastName = $contactData->lastName ?? '';
+			$userData->displayName = trim($firstName . ' ' . $lastName);
+		}
+
+		// If user object is provided, merge it
+		if (isset($contactData->user) && is_object($contactData->user))
+		{
+			foreach ($contactData->user as $key => $value)
+			{
+				$userData->$key = $value;
+			}
+			$hasUserData = true;
+		}
+
+		if ($hasUserData)
+		{
+			$this->updateUserAccount($userId, $userData);
+		}
 	}
 
 	/**
