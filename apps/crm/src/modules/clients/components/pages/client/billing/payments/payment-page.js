@@ -1,6 +1,7 @@
-import { Div, On } from "@base-framework/atoms";
+import { On } from "@base-framework/atoms";
 import { Data } from "@base-framework/base";
 import { Page } from "@base-framework/ui/pages";
+import { ContentContainer } from "@pages/types/data/data-page.js";
 import { FakePayments } from "./fake-payments.js";
 import { PageHeader } from "./page-header.js";
 import { PaymentList } from "./payment-list.js";
@@ -70,7 +71,7 @@ export const PaymentPage = () =>
                 return PaymentSkeleton();
             }
 
-            return Div({ class: "p-6 2xl:mx-auto w-full contained" }, [
+            return ContentContainer([
                 PageHeader(),
                 PaymentList({ payments: data.payments })
             ]);

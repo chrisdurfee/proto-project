@@ -1,5 +1,4 @@
-import { Div, UseParent } from "@base-framework/atoms";
-import { BlankPage } from "@base-framework/ui";
+import DataPage, { ContentContainer } from "@pages/types/data/data-page.js";
 import { ClientCallModel } from "../../../../models/client-call-model.js";
 import { CallList } from "./call-list.js";
 import { PageHeader } from "./page-header.js";
@@ -9,7 +8,7 @@ import { PageHeader } from "./page-header.js";
  *
  * Page showing a client's call list.
  *
- * @returns {object} A Page component.
+ * @returns {object} A DataPage component.
  */
 export const CallPage = () =>
 {
@@ -20,26 +19,15 @@ export const CallPage = () =>
 		calls: []
 	});
 
-	/**
-	 * @type {object} props
-	 */
-	const props =
+	return DataPage({ data }, ({ route }) =>
 	{
-		class: 'pt-0',
-		data,
-	};
-
-	return new BlankPage(props, [
-		UseParent(({ route }) =>
-		{
-			// @ts-ignore
-			data.clientId = route.clientId;
-			return Div({ class: "p-6 2xl:mx-auto w-full contained" }, [
-				PageHeader(),
-				CallList({ data })
-			]);
-		})
-	]);
+		// @ts-ignore
+		data.clientId = route.clientId;
+		return ContentContainer([
+			PageHeader(),
+			CallList({ data })
+		]);
+	});
 };
 
 export default CallPage;

@@ -1,5 +1,4 @@
-import { Div, UseParent } from "@base-framework/atoms";
-import { BlankPage } from "@base-framework/ui";
+import DataPage, { ContentContainer } from "@pages/types/data/data-page.js";
 import { ClientContactModel } from "../../../../models/client-contact-model.js";
 import { ContactList } from "./contact-list.js";
 import { PageHeader } from "./page-header.js";
@@ -9,7 +8,7 @@ import { PageHeader } from "./page-header.js";
  *
  * Page showing a client's contact list.
  *
- * @returns {object} A Page component.
+ * @returns {object} A DataPage component.
  */
 export const ContactPage = () =>
 {
@@ -20,26 +19,15 @@ export const ContactPage = () =>
 		contacts: []
 	});
 
-	/**
-	 * @type {object} props
-	 */
-	const props =
+	return DataPage({ data }, ({ route }) =>
 	{
-		class: 'pt-0',
-		data,
-	};
-
-	return new BlankPage(props, [
-		UseParent(({ route }) =>
-		{
-			// @ts-ignore
-			data.clientId = route.clientId;
-			return Div({ class: "p-6 2xl:mx-auto w-full contained" }, [
-				PageHeader(),
-				ContactList({ data })
-			]);
-		})
-	]);
+		// @ts-ignore
+		data.clientId = route.clientId;
+		return ContentContainer([
+			PageHeader(),
+			ContactList({ data })
+		]);
+	});
 };
 
 export default ContactPage;

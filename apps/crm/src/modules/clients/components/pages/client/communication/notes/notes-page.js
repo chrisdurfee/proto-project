@@ -1,5 +1,4 @@
-import { Div, UseParent } from "@base-framework/atoms";
-import { BlankPage } from "@base-framework/ui";
+import DataPage, { ContentContainer } from "@pages/types/data/data-page.js";
 import { ClientNoteModel } from "../../../../models/client-note-model.js";
 import { NoteList } from "./note-list.js";
 import { PageHeader } from "./page-header.js";
@@ -9,7 +8,7 @@ import { PageHeader } from "./page-header.js";
  *
  * Page showing a client's notes list.
  *
- * @returns {object} A Page component.
+ * @returns {object} A DataPage component.
  */
 export const NotesPage = () =>
 {
@@ -19,26 +18,15 @@ export const NotesPage = () =>
 		loaded: false
 	});
 
-	/**
-	 * @type {object} props
-	 */
-	const props =
+	return DataPage({ data }, ({ route }) =>
 	{
-		class: 'pt-0',
-		data,
-	};
-
-	return new BlankPage(props, [
-		UseParent(({ route }) =>
-		{
-			// @ts-ignore
-			data.clientId = route.clientId;
-			return Div({ class: "p-6 2xl:mx-auto w-full contained" }, [
-				PageHeader(),
-				NoteList({ data })
-			]);
-		})
-	]);
+		// @ts-ignore
+		data.clientId = route.clientId;
+		return ContentContainer([
+			PageHeader(),
+			NoteList({ data })
+		]);
+	});
 };
 
 export default NotesPage;
