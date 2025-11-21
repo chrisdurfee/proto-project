@@ -121,7 +121,7 @@ export const ThreadDetail = Jot(
 						EmptyState({
 							title: 'No Conversation Found',
 							description: 'The conversation does not exist. Please try another.',
-							icon: Icons.user.default
+							icon: Icons.circleX
 						})
 					]);
 				}
