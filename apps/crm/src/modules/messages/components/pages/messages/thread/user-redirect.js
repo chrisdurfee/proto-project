@@ -27,10 +27,11 @@ const findConversation = (userId) =>
 				return;
 			}
 
+			app.navigate(`messages`, null, true);
 			app.notify({
-				type: 'error',
+				type: 'warning',
 				title: 'Error',
-				description: 'Failed to start conversation. Please try again.',
+				description: result?.message ?? 'Failed to start conversation. Please try again.',
 				icon: Icons.circleX
 			});
 		}

@@ -151,7 +151,7 @@ class ConversationController extends ResourceController
 		 */
 		if ($userId === $participantId)
 		{
-			return $this->error('Cannot create a conversation with yourself', 400);
+			return $this->error('Cannot create a conversation with yourself', 200);
 		}
 
 		/**
