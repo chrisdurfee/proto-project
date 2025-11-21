@@ -472,7 +472,7 @@ $user->roles()->toggle([2, 6]);
 			// Built-in Data Types
 			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Built-in Data Types"),
-				
+
 				// PointType
 				H4({ class: "text-base font-semibold mt-6" }, "PointType"),
 				P(
@@ -483,15 +483,15 @@ $user->roles()->toggle([2, 6]);
 `class UserAuthedLocation extends Model
 {
 	protected static ?string $tableName = 'user_authed_locations';
-	
+
 	protected static array $fields = [
 		'id',
 		'city',
 		'position',
-		[['X(\`position\`)'], 'latitude'],  // Extract X coordinate
-		[['Y(\`position\`)'], 'longitude'], // Extract Y coordinate
+		[\\['X(\`position\`)'], 'latitude'],  // Extract X coordinate
+		[\\['Y(\`position\`)'], 'longitude'], // Extract Y coordinate
 	];
-	
+
 	/**
 	 * Map field names to DataType handlers
 	 */
@@ -535,7 +535,7 @@ $location->update(); // Automatically handles SET position = POINT(?, ?)`
 		'settings',
 		'tags'
 	];
-	
+
 	protected static array $dataTypes = [
 		'metadata' => JsonType::class,
 		'settings' => JsonType::class,
@@ -569,7 +569,7 @@ $event->add(); // Arrays automatically encoded to JSON strings`
 		'properties',    // JSON type
 		'createdAt'
 	];
-	
+
 	protected static array $dataTypes = [
 		'coordinates' => PointType::class,
 		'metadata' => JsonType::class,
@@ -608,7 +608,7 @@ class GeometryType extends DataType
 	{
 		return 'ST_GeomFromText(?)';
 	}
-	
+
 	/**
 	 * Convert the model value to parameter array
 	 */
@@ -617,7 +617,7 @@ class GeometryType extends DataType
 		// Return WKT (Well-Known Text) format
 		return [$value]; // e.g., "POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))"
 	}
-	
+
 	/**
 	 * Optional: Customize UPDATE clause
 	 */
@@ -625,7 +625,7 @@ class GeometryType extends DataType
 	{
 		return "\`{\$column}\` = ST_GeomFromText(?)";
 	}
-	
+
 	/**
 	 * Optional: Control when to use this handler
 	 */
@@ -695,23 +695,23 @@ class GeoLocation extends Model
 			->values($params->placeholders)
 			->execute($params->params);
 	}
-	
+
 	private function buildParams(object $data, bool $forUpdate = false): object
 	{
 		$cols = [];
 		$params = [];
 		$placeholders = [];
-		
+
 		foreach ($data as $key => $val)
 		{
 			$cleanKey = '\`' . Sanitize::cleanColumn($key) . '\`';
-			
+
 			if ($key === 'position')
 			{
 				// Manual POINT handling
 				$parts = explode(' ', $val);
 				$params = array_merge($params, $parts);
-				
+
 				if ($forUpdate)
 				{
 					$cols[] = "{\$cleanKey} = POINT(?, ?)";
@@ -728,7 +728,7 @@ class GeoLocation extends Model
 				// ... standard handling
 			}
 		}
-		
+
 		return (object)['cols' => $cols, 'params' => $params, 'placeholders' => $placeholders];
 	}
 }`
