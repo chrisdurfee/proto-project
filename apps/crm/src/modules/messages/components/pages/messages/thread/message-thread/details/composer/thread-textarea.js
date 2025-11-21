@@ -20,7 +20,7 @@ const isOverLimit = (count, limit) => count > limit;
 const filterNewlines = (text) =>
 {
 	const normalizedText = text.replace(/\n/g, ' ');
-    return normalizedText.trim();
+	return normalizedText.trim();
 };
 
 /**
@@ -66,7 +66,7 @@ export const ThreadTextarea = VeilJot(
 		// @ts-ignore
 		this.resizeTextarea();
 
-        const keyCode = e.keyCode;
+		const keyCode = e.keyCode;
 		if (keyCode !== 13)
 		{
 			return;
@@ -94,41 +94,41 @@ export const ThreadTextarea = VeilJot(
 		}
 	},
 
-    /**
-     * This will validate the textarea content.
-     *
-     * @returns {boolean}
-     */
-    validate()
-    {
-        // @ts-ignore
-        if (this.state.empty === true)
-        {
-            app.notify({
-                icon: Icons.warning,
-                type: 'warning',
-                title: 'Missing Message',
-                description: 'Please enter a message.',
-            });
+	/**
+	 * This will validate the textarea content.
+	 *
+	 * @returns {boolean}
+	 */
+	validate()
+	{
+		// @ts-ignore
+		if (this.state.empty === true)
+		{
+			app.notify({
+				icon: Icons.warning,
+				type: 'warning',
+				title: 'Missing Message',
+				description: 'Please enter a message.',
+			});
 
-            return false;
-        }
+			return false;
+		}
 
-        // @ts-ignore
-        if (this.state.isOverLimit === true)
-        {
-            app.notify({
-                icon: Icons.warning,
-                type: 'warning',
-                title: 'Message Too Long',
-                description: 'Your message exceeds the character limit.',
-            });
+		// @ts-ignore
+		if (this.state.isOverLimit === true)
+		{
+			app.notify({
+				icon: Icons.warning,
+				type: 'warning',
+				title: 'Message Too Long',
+				description: 'Your message exceeds the character limit.',
+			});
 
-            return false;
-        }
+			return false;
+		}
 
-        return true;
-    },
+		return true;
+	},
 
 	/**
 	 * This will resize the textarea.
@@ -196,8 +196,8 @@ export const ThreadTextarea = VeilJot(
 		const updateCharCount = (e) =>
 		{
 			const text = e.target.value;
-            // replace newlines with spaces
-            const normalizedText = filterNewlines(text);
+			// replace newlines with spaces
+			const normalizedText = filterNewlines(text);
 
 			// @ts-ignore
 			const state = this.state;

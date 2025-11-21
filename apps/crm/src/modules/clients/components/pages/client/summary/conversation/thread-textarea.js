@@ -81,6 +81,9 @@ export const ThreadTextarea = Jot(
 	 */
 	checkSubmit(e)
 	{
+		e.preventDefault();
+		e.stopPropagation();
+
 		// @ts-ignore
 		this.resizeTextarea();
 
@@ -91,7 +94,7 @@ export const ThreadTextarea = Jot(
 		}
 
 		// Allow Ctrl+Enter to submit
-		if (e.ctrlKey !== true)
+		if (e.ctrlKey === true || e.shiftKey === true)
 		{
 			// @ts-ignore
 			this.resizeTextarea();
@@ -99,25 +102,49 @@ export const ThreadTextarea = Jot(
 		}
 
 		// @ts-ignore
-		if (this.state.empty === true || this.state.isOverLimit === true)
+		if (this.validate() === false)
 		{
-			e.preventDefault();
-			e.stopPropagation();
+			return;
+		}
 
+		// @ts-ignore
+		this.parent?.submit?.();
+	},
+
+	/**
+	 * This will validate the textarea content.
+	 *
+	 * @returns {boolean}
+	 */
+	validate()
+	{
+		// @ts-ignore
+		if (this.state.empty === true)
+		{
 			app.notify({
 				icon: Icons.warning,
 				type: 'warning',
 				title: 'Missing Message',
 				description: 'Please enter a message.',
 			});
-			return;
+
+			return false;
 		}
 
-		e.preventDefault();
-		e.stopPropagation();
-
 		// @ts-ignore
-		this.parent?.submit?.();
+		if (this.state.isOverLimit === true)
+		{
+			app.notify({
+				icon: Icons.warning,
+				type: 'warning',
+				title: 'Message Too Long',
+				description: 'Your message exceeds the character limit.',
+			});
+
+			return false;
+		}
+
+		return true;
 	},
 
 	/**
