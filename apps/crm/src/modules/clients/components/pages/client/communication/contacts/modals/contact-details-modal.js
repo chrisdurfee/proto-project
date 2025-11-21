@@ -19,6 +19,7 @@ const QuickConnectButtons = () =>
 					variant: 'icon',
 					icon: Icons.envelope.default,
 					label: 'Email',
+					disabled: '[[email]]',
 					click: (e, parent) =>
 					{
 						const email = parent.data.email;
@@ -34,6 +35,7 @@ const QuickConnectButtons = () =>
 					variant: 'icon',
 					icon: Icons.phone.default,
 					label: 'Call',
+					disabled: '[[mobile]]',
 					click: (e, parent) =>
 					{
 						const phone = parent.data.phone || parent.data.mobile;
@@ -301,9 +303,9 @@ const formatContactData = (contact) =>
 		displayName,
 		contactTypeLabel,
 		isPrimaryLabel,
-		email: contact.email || '-',
+		email: contact.email || null,
 		phone: contact.phone || '-',
-		mobile: contact.mobile || '-',
+		mobile: contact.mobile || null,
 		fax: contact.fax || '-',
 		jobTitle: contact.jobTitle || '-',
 		department: contact.department || '-',
