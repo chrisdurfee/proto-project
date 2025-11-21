@@ -1,12 +1,11 @@
 <?php declare(strict_types=1);
-
 namespace Modules\Assistant;
 
 use Proto\Module\Module;
 
 /**
  * AssistantModule
- * 
+ *
  * @package Modules\Assistant
  */
 class AssistantModule extends Module
@@ -19,6 +18,5 @@ class AssistantModule extends Module
 	 */
 	public function activate(): void
 	{
-		// do something
 	}
 }
