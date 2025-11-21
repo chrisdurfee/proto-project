@@ -48,7 +48,12 @@ const QuickConnectButtons = () =>
 				Button({
 					variant: 'icon',
 					icon: Icons.chat.text,
-					label: 'Message'
+					label: 'Message',
+					click: (e, parent) =>
+					{
+						parent.close();
+						app.navigate(`/messages/user/${parent.data.userId}`);
+					}
 				})
 			]),
 			Tooltip({ content: 'More', position: 'bottom' }, [

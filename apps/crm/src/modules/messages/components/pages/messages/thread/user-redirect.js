@@ -23,7 +23,7 @@ const findConversation = (userId) =>
 		{
 			if (result?.success && result?.id)
 			{
-				app.navigate(`messages/${result.id}`);
+				app.navigate(`messages/${result.id}`, null, true);
 				return;
 			}
 
@@ -45,26 +45,26 @@ const findConversation = (userId) =>
 export const UserRedirect = () =>
 {
 	return OnRoute('userId', (userId) =>
-    {
-        if (!userId)
-        {
-            return Div({ class: 'flex flex-auto flex-col items-center justify-center h-full' }, [
-                EmptyState({
-                    title: 'No User Found',
-                    description: 'The user does not exist. Please try another.',
-                    icon: Icons.user.default
-                })
-            ]);
-        }
+	{
+		if (!userId)
+		{
+			return Div({ class: 'flex flex-auto flex-col items-center justify-center h-full' }, [
+				EmptyState({
+					title: 'No User Found',
+					description: 'The user does not exist. Please try another.',
+					icon: Icons.user.default
+				})
+			]);
+		}
 
-        findConversation(userId);
+		findConversation(userId);
 
-        return Div({ class: 'flex flex-auto flex-col items-center justify-center h-full' }, [
-            EmptyState({
-                title: 'Redirecting Conversation',
-                description: 'We are connecting you to the users conversation.',
-                icon: Icons.user.default
-            })
-        ]);
-    })
+		return Div({ class: 'flex flex-auto flex-col items-center justify-center h-full' }, [
+			// EmptyState({
+			//     title: 'Redirecting Conversation',
+			//     description: 'We are connecting you to the users conversation.',
+			//     icon: Icons.user.default
+			// })
+		]);
+	})
 };

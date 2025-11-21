@@ -94,8 +94,8 @@ class ConversationPolicy extends MessagingPolicy
 	 */
 	public function findOrCreate(Request $request): bool
 	{
-		// Authenticated users can find or create conversations
-		return $this->getUserId() !== null;
+		// User can only find or create conversations for themselves
+		return $this->matchesAuthenticatedUser($request);
 	}
 
 	/**

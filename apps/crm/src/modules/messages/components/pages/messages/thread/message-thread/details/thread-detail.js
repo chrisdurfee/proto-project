@@ -1,5 +1,7 @@
 import { Div, OnState } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
+import { Icons } from "@base-framework/ui/icons";
+import { EmptyState } from "@base-framework/ui/molecules";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
 import { ThreadComposer } from "./composer/thread-composer.js";
 import { ConversationHeader } from "./conversation-header.js";
@@ -109,6 +111,18 @@ export const ThreadDetail = Jot(
 					return Div([
 						HeaderSkeleton(),
 						ThreadSkeleton()
+					]);
+				}
+
+				// @ts-ignore
+				if (this.data.conversation == null)
+				{
+					return Div({ class: 'flex flex-auto flex-col items-center justify-center h-full' }, [
+						EmptyState({
+							title: 'No Conversation Found',
+							description: 'The conversation does not exist. Please try another.',
+							icon: Icons.user.default
+						})
 					]);
 				}
 

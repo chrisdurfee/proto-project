@@ -118,7 +118,8 @@ class ConversationController extends ResourceController
 		return ConversationParticipant::create((object)[
 			'conversationId' => $conversationId,
 			'userId' => $userId,
-			'isActive' => 1
+			'role' => 'member',
+			'joinedAt' => date('Y-m-d H:i:s')
 		]);
 	}
 
@@ -137,10 +138,27 @@ class ConversationController extends ResourceController
 		}
 
 		/**
+		 * Get the current authenticated user.
+		 */
+		$userId = session()->user->id ?? null;
+		if (!$userId)
+		{
+			return $this->error('User not authenticated', 401);
+		}
+
+		/**
+		 * Validate that the participant user exists before attempting to create conversation.
+		 */
+		$participant = modules()->user()->get($participantId);
+		if (!$participant)
+		{
+			return $this->error('Participant user not found', 404);
+		}
+
+		/**
 		 * We want to check if we already have a conversation
 		 * between the current user and the participant.
 		 */
-		$userId = session()->user->id ?? null;
 		$conversationId = Conversation::findByUser($userId, $participantId);
 		if (is_int($conversationId))
 		{
@@ -165,6 +183,15 @@ class ConversationController extends ResourceController
 		if ($result->success)
 		{
 			$result->existing = false;
+
+			/**
+			 * Publish Redis event to notify the current user about the new conversation
+			 * so the frontend can update in real-time.
+			 */
+			events()->emit("redis:user:{$userId}:conversations", [
+				'id' => (int)$result->id,
+				'action' => 'merge'
+			]);
 		}
 
 		return $result;
