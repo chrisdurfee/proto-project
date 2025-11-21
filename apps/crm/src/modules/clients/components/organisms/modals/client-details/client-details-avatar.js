@@ -1,4 +1,4 @@
-import { Div, H2, P, Span } from "@base-framework/atoms";
+import { A, Div, H2, P, Span } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
 import { Badge } from "@base-framework/ui/atoms";
 import { Avatar } from "@base-framework/ui/molecules";
@@ -15,16 +15,18 @@ import { Format } from "@base-framework/ui/utils";
  */
 export const ClientDetailsAvatar = Atom(({ client }) =>
 	Div({ class: "flex items-center gap-x-4 pb-6" }, [
-		Avatar({
-			src: '[[client.avatar]]',
-			alt: '[[client.companyName]]',
-			watcherFallback: '[[client.companyName]]',
-			size: "lg"
-		}),
+		A({ href: '/clients/[[client.id]]', class: 'inline-flex items-center' }, [
+			Avatar({
+				src: '[[client.avatar]]',
+				alt: '[[client.companyName]]',
+				watcherFallback: '[[client.companyName]]',
+				size: "lg"
+			})
+		]),
 		Div({ class: "flex flex-col gap-y-1 flex-1" }, [
 			Div({ class: "flex items-baseline gap-x-2" }, [
 				H2({ class: "text-2xl font-semibold text-foreground" },
-					Format.default('[[client.companyName]]', "Unnamed Client")
+					A({ href: '/clients/[[client.id]]', class: 'inline-block' }, Format.default('[[client.companyName]]', "Unnamed Client"))
 				),
 				P({ class: "text-sm text-muted-foreground" }, '#[[client.id]]')
 			]),
