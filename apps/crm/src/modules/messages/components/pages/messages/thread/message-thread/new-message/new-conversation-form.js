@@ -92,7 +92,7 @@ const handleUserClick = (user, parent) =>
 		app.notify({
 			type: 'error',
 			title: 'Error',
-			description: 'Failed to start conversation. Please try again.',
+			description: result?.message ?? 'Failed to start conversation. Please try again.',
 			icon: Icons.circleX
 		});
 	});

@@ -67,6 +67,15 @@ class ConversationController extends ResourceController
 		 */
 		$userId = session()->user->id ?? null;
 		$participantIds = [$userId, $data->participantId ?? null];
+
+		/**
+		 * This will prevent creating aconversation with yourself.
+		 */
+		if($userId === $data->participantId)
+		{
+			return $this->error('Cannot create a conversation with yourself', 200);
+		}
+
 		$success = $this->addParticipants((int)$result->id, $participantIds);
 		if (!$success)
 		{
