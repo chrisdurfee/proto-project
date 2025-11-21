@@ -447,6 +447,336 @@ $user->roles()->toggle([2, 6]);
 				),
 			]),
 
+			// Custom Data Types
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Custom Data Types"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Proto supports custom data type handlers for complex SQL types like POINT, JSON, GEOMETRY, and more.
+					This system allows you to declaratively handle complex SQL placeholders and parameter binding without
+					writing custom storage classes.`
+				),
+				P(
+					{ class: "text-muted-foreground" },
+					`Benefits of using custom data types:`
+				),
+				P(
+					{ class: "text-muted-foreground" },
+					`• Declare data types directly in your model using the \`$dataTypes\` property
+					• Automatically handle complex SQL placeholders and parameter binding
+					• Eliminate boilerplate code in custom Storage classes
+					• Support for multiple input formats (string, array, object)`
+				)
+			]),
+
+			// Built-in Data Types
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Built-in Data Types"),
+				
+				// PointType
+				H4({ class: "text-base font-semibold mt-6" }, "PointType"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Handles MySQL POINT(x, y) spatial data. Supports multiple input formats:`
+				),
+				CodeBlock(
+`class UserAuthedLocation extends Model
+{
+	protected static ?string $tableName = 'user_authed_locations';
+	
+	protected static array $fields = [
+		'id',
+		'city',
+		'position',
+		[['X(\`position\`)'], 'latitude'],  // Extract X coordinate
+		[['Y(\`position\`)'], 'longitude'], // Extract Y coordinate
+	];
+	
+	/**
+	 * Map field names to DataType handlers
+	 */
+	protected static array $dataTypes = [
+		'position' => PointType::class
+	];
+}
+
+// Usage examples:
+$location = new UserAuthedLocation();
+
+// String format (space-separated lat/lon)
+$location->position = '37.7749 -122.4194';
+
+// Array format
+$location->position = [37.7749, -122.4194];
+
+// Object format
+$location->position = (object)['lat' => 37.7749, 'lon' => -122.4194];
+
+$location->add(); // Automatically converts to POINT(?, ?)
+
+// Update works the same way
+$location->position = '37.8044 -122.2712';
+$location->update(); // Automatically handles SET position = POINT(?, ?)`
+				),
+
+				// JsonType
+				H4({ class: "text-base font-semibold mt-6" }, "JsonType"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Handles automatic JSON encoding for metadata and configuration fields:`
+				),
+				CodeBlock(
+`class Event extends Model
+{
+	protected static array $fields = [
+		'id',
+		'name',
+		'metadata',
+		'settings',
+		'tags'
+	];
+	
+	protected static array $dataTypes = [
+		'metadata' => JsonType::class,
+		'settings' => JsonType::class,
+		'tags' => JsonType::class
+	];
+}
+
+// Usage:
+$event = new Event();
+$event->metadata = ['key' => 'value', 'count' => 42];
+$event->tags = ['php', 'proto', 'framework'];
+$event->add(); // Arrays automatically encoded to JSON strings`
+				)
+			]),
+
+			// Multiple Custom Types
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Multiple Custom Types"),
+				P(
+					{ class: "text-muted-foreground" },
+					`You can mix multiple custom data types in a single model:`
+				),
+				CodeBlock(
+`class Location extends Model
+{
+	protected static array $fields = [
+		'id',
+		'name',
+		'coordinates',   // POINT type
+		'metadata',      // JSON type
+		'properties',    // JSON type
+		'createdAt'
+	];
+	
+	protected static array $dataTypes = [
+		'coordinates' => PointType::class,
+		'metadata' => JsonType::class,
+		'properties' => JsonType::class
+	];
+}
+
+// Usage:
+$location = new Location();
+$location->name = 'Golden Gate Bridge';
+$location->coordinates = '37.8199 -122.4783';
+$location->metadata = ['visitors' => 10000000, 'opened' => 1937];
+$location->properties = ['type' => 'bridge', 'length' => 2737];
+$location->add();`
+				)
+			]),
+
+			// Creating Custom Data Types
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Creating Custom Data Types"),
+				P(
+					{ class: "text-muted-foreground" },
+					`You can create your own data type handlers by extending the DataType base class.
+					This is useful for specialized SQL functions or custom formatting logic.`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Proto\\Storage\\DataTypes;
+
+class GeometryType extends DataType
+{
+	/**
+	 * Return the SQL placeholder for prepared statements
+	 */
+	public function getPlaceholder(): string
+	{
+		return 'ST_GeomFromText(?)';
+	}
+	
+	/**
+	 * Convert the model value to parameter array
+	 */
+	public function toParams(mixed $value): array
+	{
+		// Return WKT (Well-Known Text) format
+		return [$value]; // e.g., "POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))"
+	}
+	
+	/**
+	 * Optional: Customize UPDATE clause
+	 */
+	public function getUpdateClause(string $column): string
+	{
+		return "\`{\$column}\` = ST_GeomFromText(?)";
+	}
+	
+	/**
+	 * Optional: Control when to use this handler
+	 */
+	public function shouldHandle(mixed $value): bool
+	{
+		return $value !== null && is_string($value);
+	}
+}
+
+// Register in your model:
+class GeoLocation extends Model
+{
+	protected static array $dataTypes = [
+		'shape' => GeometryType::class
+	];
+}`
+				),
+				P(
+					{ class: "text-muted-foreground" },
+					`Key methods to implement:`
+				),
+				P(
+					{ class: "text-muted-foreground" },
+					`• \`getPlaceholder()\` - Returns the SQL placeholder (e.g., "POINT(?, ?)", "ST_GeomFromText(?)")
+					• \`toParams()\` - Converts model value to array of parameters for binding
+					• \`getUpdateClause()\` - Optional: Custom SET clause for UPDATE statements
+					• \`shouldHandle()\` - Optional: Determines if the handler should process this value`
+				)
+			]),
+
+			// Custom Instance Configuration
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Custom Instance Configuration"),
+				P(
+					{ class: "text-muted-foreground" },
+					`You can pass configured instances instead of class names for advanced customization:`
+				),
+				CodeBlock(
+`class Document extends Model
+{
+	protected static array $dataTypes = [
+		'position' => new PointType(),
+		'metadata' => new CustomJsonType(['pretty' => true, 'depth' => 10])
+	];
+}`
+				)
+			]),
+
+			// Migration Guide
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Migration from Manual Handling"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Before custom data types, you had to manually handle complex SQL types in custom Storage classes.
+					Now you can eliminate this boilerplate entirely.`
+				),
+				P({ class: "text-muted-foreground" }, `Before (manual handling):`),
+				CodeBlock(
+`class UserAuthedLocationStorage extends Storage
+{
+	public function insert(object $data): bool
+	{
+		$params = $this->buildParams($data);
+		return $this->table()
+			->insert()
+			->fields($params->cols)
+			->values($params->placeholders)
+			->execute($params->params);
+	}
+	
+	private function buildParams(object $data, bool $forUpdate = false): object
+	{
+		$cols = [];
+		$params = [];
+		$placeholders = [];
+		
+		foreach ($data as $key => $val)
+		{
+			$cleanKey = '\`' . Sanitize::cleanColumn($key) . '\`';
+			
+			if ($key === 'position')
+			{
+				// Manual POINT handling
+				$parts = explode(' ', $val);
+				$params = array_merge($params, $parts);
+				
+				if ($forUpdate)
+				{
+					$cols[] = "{\$cleanKey} = POINT(?, ?)";
+				}
+				else
+				{
+					$cols[] = $cleanKey;
+					$placeholders[] = 'POINT(?, ?)';
+				}
+			}
+			else
+			{
+				$params[] = $val;
+				// ... standard handling
+			}
+		}
+		
+		return (object)['cols' => $cols, 'params' => $params, 'placeholders' => $placeholders];
+	}
+}`
+				),
+				P({ class: "text-muted-foreground" }, `After (declarative):`),
+				CodeBlock(
+`class UserAuthedLocation extends Model
+{
+	protected static array $dataTypes = [
+		'position' => PointType::class
+	];
+}
+
+// Storage class can now be empty or removed entirely!
+// Base Storage handles everything automatically.`
+				),
+				P(
+					{ class: "text-muted-foreground" },
+					`The custom Storage class is no longer needed unless you have other unique requirements.`
+				)
+			]),
+
+			// How It Works
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "How It Works"),
+				P(
+					{ class: "text-muted-foreground" },
+					`The custom data types system works through a simple pipeline:`
+				),
+				P(
+					{ class: "text-muted-foreground" },
+					`1. **Model Declaration**: You declare which fields use custom types in \`$dataTypes\`
+					2. **Storage Detection**: When \`insert()\` or \`update()\` is called, Storage checks if any custom types are defined
+					3. **ParamsBuilder**: If custom types exist, ParamsBuilder iterates through data and calls \`getPlaceholder()\` and \`toParams()\` for custom type fields
+					4. **Query Building**: Builds the full SQL with proper placeholders and executes with flattened params`
+				),
+				P(
+					{ class: "text-muted-foreground" },
+					`**Performance Notes:**`
+				),
+				P(
+					{ class: "text-muted-foreground" },
+					`• Zero overhead when no custom types are defined (falls back to standard insert/update)
+					• Lazy instantiation of DataType classes only when needed
+					• Type instances cached per model for reuse`
+				)
+			]),
+
 			// Storage Type and Proxy
 			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Storage Type and Proxy"),
