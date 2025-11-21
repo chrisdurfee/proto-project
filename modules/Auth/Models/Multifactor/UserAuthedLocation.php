@@ -2,6 +2,7 @@
 namespace Modules\Auth\Models\Multifactor;
 
 use Proto\Models\Model;
+use Proto\Storage\DataTypes\PointType;
 use Modules\Auth\Storage\Multifactor\UserAuthedLocationStorage;
 
 /**
@@ -45,6 +46,15 @@ class UserAuthedLocation extends Model
 		[['Y(`position`)'], 'longitude'],
 		'timezone',
 		'deletedAt'
+	];
+
+	/**
+	 * Custom data type handlers for complex fields.
+	 *
+	 * @var array
+	 */
+	protected static array $dataTypes = [
+		'position' => PointType::class
 	];
 
 	/**
