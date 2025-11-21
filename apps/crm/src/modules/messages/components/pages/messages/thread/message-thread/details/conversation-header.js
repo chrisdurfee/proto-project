@@ -25,20 +25,24 @@ export const ConversationHeader = () =>
 			]),
 
 			Div({ class: "flex items-center gap-3 flex-1" }, [
-				Div({ class: "relative" }, [
-					Avatar({
-						src: '/files/users/profile/[[otherUser.image]]',
-						alt: '[[otherUser.firstName]] [[otherUser.lastName]]',
-						watcherFallback: '[[otherUser.firstName]] [[otherUser.lastName]]',
-						size: "md"
-					}),
-					Div({ class: "absolute bottom-0 right-0" }, [
-						StatusIndicator({ propName: 'otherUser.status' })
+				A({ href: '/users/[[otherUser.userId]]', class: 'inline-flex items-center' }, [
+					Div({ class: "relative" }, [
+						Avatar({
+							src: '/files/users/profile/[[otherUser.image]]',
+							alt: '[[otherUser.firstName]] [[otherUser.lastName]]',
+							watcherFallback: '[[otherUser.firstName]] [[otherUser.lastName]]',
+							size: "md"
+						}),
+						Div({ class: "absolute bottom-0 right-0" }, [
+							StatusIndicator({ propName: 'otherUser.status' })
+						])
 					])
 				]),
 
 				Div({ class: "flex flex-col" }, [
-					Span({ class: "font-semibold text-base text-foreground capitalize" }, '[[otherUser.firstName]] [[otherUser.lastName]]'),
+					A({ href: '/users/[[otherUser.userId]]', class: "font-semibold text-base text-foreground capitalize" }, [
+						Span('[[otherUser.firstName]] [[otherUser.lastName]]')
+					])
 				])
 			]),
 
