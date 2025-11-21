@@ -61,7 +61,10 @@ export const UserHeader = ({ user }) => (
 					}})
 				]),
 				Tooltip({ content: 'Message' }, [
-					Button({ variant: 'icon', icon: Icons.chat.text, label: 'Message' })
+					Button({ variant: 'icon', icon: Icons.chat.text, label: 'Message', click: (e, { context }) =>
+					{
+						app.navigate(`/messages/user/${context?.data?.user?.id}`);
+					}})
 				]),
 				Tooltip({ content: 'More' }, [
 					Button({ variant: 'icon', icon: Icons.ellipsis.vertical, label: 'More' })

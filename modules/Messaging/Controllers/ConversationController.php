@@ -147,6 +147,14 @@ class ConversationController extends ResourceController
 		}
 
 		/**
+		 * Prevent users from starting a conversation with themselves.
+		 */
+		if ($userId === $participantId)
+		{
+			return $this->error('Cannot create a conversation with yourself', 400);
+		}
+
+		/**
 		 * Validate that the participant user exists before attempting to create conversation.
 		 */
 		$participant = modules()->user()->get($participantId);
