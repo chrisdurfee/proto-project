@@ -52,6 +52,22 @@ class ClientConversationController extends Controller
 	}
 
 	/**
+	 * Modifies the data before adding.
+	 *
+	 * @param object $data
+	 * @param Request $request
+	 * @return void
+	 */
+	protected function modifiyAddItem(object &$data, Request $request): void
+	{
+		// Decode HTML entities and URL encoding from the message
+		if (isset($data->message))
+		{
+			$data->message = trim(html_entity_decode($data->message, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+		}
+	}
+
+	/**
 	 * Override the add method to handle file attachments.
 	 *
 	 * @param Request $request The HTTP request object.
@@ -65,14 +81,26 @@ class ClientConversationController extends Controller
 			return $result;
 		}
 
-		$conversationId = (int)$result->id;
+		return $this->uploadAttachments($request, $result);
+	}
+
+	/**
+	 * Upload attachments for a conversation.
+	 *
+	 * @param Request $request The HTTP request object.
+	 * @param object $response The existing response object.
+	 * @return object
+	 */
+	protected function uploadAttachments(Request $request, object $response): object
+	{
+		$conversationId = (int)$response->id;
 		$clientId = (int)($request->params()->clientId ?? null);
 
 		// Check if files were uploaded
 		if (!empty($_FILES['attachments']) && !empty($_FILES['attachments']['name']))
 		{
 			$userId = getSession('user')->id ?? null;
-			$result = $this->service->handleAttachments($request, $conversationId, $userId);
+			$response = $this->service->handleAttachments($request, $conversationId, $userId);
 		}
 
 		// Publish Redis event to notify all watchers of this client's conversation
@@ -81,8 +109,7 @@ class ClientConversationController extends Controller
 		{
 			$this->publishConversationUpdate($clientId, $conversationId, 'merge');
 		}
-
-		return $result;
+		return $response;
 	}
 
 	/**
