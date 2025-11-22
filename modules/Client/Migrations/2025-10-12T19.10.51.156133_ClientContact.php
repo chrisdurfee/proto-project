@@ -41,7 +41,6 @@ class ClientContact extends Migration
 			$table->varchar('department', 100)->nullable();
 			$table->varchar('email', 255);
 			$table->varchar('phone', 20)->nullable();
-			$table->varchar('mobile', 20)->nullable();
 			$table->varchar('fax', 20)->nullable();
 
 			// Preferences
@@ -54,7 +53,6 @@ class ClientContact extends Migration
 			$table->varchar('twitter_handle', 100)->nullable();
 
 			// Communication preferences
-			$table->tinyInteger('marketing_opt_in')->default(0);
 			$table->tinyInteger('newsletter_subscribed')->default(0);
 
 			// Status

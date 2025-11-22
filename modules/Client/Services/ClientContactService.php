@@ -114,7 +114,6 @@ class ClientContactService extends Service
 	 */
 	protected function handleUserAccount(object $data, ?int $contactId = null): ?int
 	{
-		$createUser = $data->createUser ?? false;
 		$linkUserId = $data->linkUserId ?? null;
 
 		// If linking to existing user
@@ -128,7 +127,7 @@ class ClientContactService extends Service
 		}
 
 		// If creating new user account
-		if ($createUser)
+		if (!isset($data->userId))
 		{
 			return $this->createUserAccount($data);
 		}
