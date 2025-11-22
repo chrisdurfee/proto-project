@@ -1,4 +1,4 @@
-import { Div, On } from "@base-framework/atoms";
+import { Div, OnLoad } from "@base-framework/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { Page } from "@base-framework/ui/pages";
@@ -16,7 +16,7 @@ import UserHeader from "./user-header.js";
  */
 export const ProfilePage = () => (
 	new Page({ class: 'flex flex-auto flex-col p-4 lg:p-6' }, [
-		On("loaded", (loaded, ele, { context }) =>
+		OnLoad((loaded, ele, { context }) =>
 		{
 			if (!loaded)
 			{
