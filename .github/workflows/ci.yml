@@ -84,22 +84,31 @@ jobs:
 
       - name: Update test database configuration
         run: |
-          # Update the testing connection in .env to use root credentials matching CI
-          php -r "
-          \$config = json_decode(file_get_contents('common/Config/.env'), true);
-          \$config['env'] = 'testing';
-            $config['connections']['default']['testing'] = [
-              'username' => 'root',
-              'password' => 'root',
-              'host' => '127.0.0.1',
-              'database' => 'proto',
-              'port' => 3307
-          ];
-            $config['cache']['connection']['host'] = '127.0.0.1';
-            $config['cache']['connection']['password'] = '';
-          file_put_contents('common/Config/.env', json_encode(\$config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-          echo 'Updated testing database configuration\n';
-          "
+          node <<'NODE'
+          import fs from 'fs';
+
+          const path = 'common/Config/.env';
+          const config = JSON.parse(fs.readFileSync(path, 'utf8'));
+
+          config.env = 'testing';
+          config.connections.default.testing = {
+            username: 'root',
+            password: 'root',
+            host: '127.0.0.1',
+            database: 'proto',
+            port: 3307
+          };
+
+          if (config.cache && config.cache.connection)
+          {
+            config.cache.connection.host = '127.0.0.1';
+            config.cache.connection.password = '';
+            config.cache.connection.port = 6379;
+          }
+
+          fs.writeFileSync(path, JSON.stringify(config, null, 4));
+          console.log('Updated testing database configuration');
+          NODE
 
       - name: Run database migrations
         run: php infrastructure/scripts/run-migrations.php

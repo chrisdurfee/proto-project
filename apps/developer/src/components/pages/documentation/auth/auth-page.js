@@ -228,12 +228,30 @@ use Modules\\User\\Controllers\\UserController;
  * This file handles API routes for user accounts.
  */
 router()
-    ->resource('user/:userId/account', UserController::class);`
+    ->resource('user/:userId/account', UserController::class); // the whole resource is protected by controller policy`
 				),
 				P(
 					{ class: 'text-muted-foreground' },
 					`This resource is being secured by the UserController policy which will be called and validated to make sure the API request is allowed.`
-				)
+				),
+				P(
+					{ class: 'text-muted-foreground' },
+					`The policy is also applied when a route is directed to a controller method and the controller has a policy property set.`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Modules\\User\\Api;
+
+use Modules\\User\\Controllers\\UserController;
+
+/**
+ * User API Routes for Accounts
+ *
+ * This file handles API routes for user accounts.
+ */
+router()
+    ->get('user/:userId/account', [UserController::class, 'getAccount']); // protected by controller policy`
+				),
 			])
 		]
 	);
