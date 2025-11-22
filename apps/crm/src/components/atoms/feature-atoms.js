@@ -13,35 +13,35 @@ const getAppUser = () =>
 /**
  * Checks if the user has a specific role by slug.
  *
- * @param {object} user
+ * @param {object[]} roles
  * @param {string} roleSlug
  * @returns {boolean}
  */
-const userHasRole = (user, roleSlug) =>
+const userHasRole = (roles, roleSlug) =>
 {
-	if (!user || !user.roles || !Array.isArray(user.roles))
+	if (!roles || !Array.isArray(roles))
 	{
 		return false;
 	}
 
-	return user.roles.some(role => role.slug === roleSlug);
+	return roles.some(role => role.slug === roleSlug);
 };
 
 /**
  * Checks if the user has any of the specified roles.
  *
- * @param {object} user
+ * @param {object[]} roles
  * @param {string[]} roleSlugs
  * @returns {boolean}
  */
-const userHasAnyRole = (user, roleSlugs) =>
+const userHasAnyRole = (roles, roleSlugs) =>
 {
-	if (!user || !user.roles || !Array.isArray(user.roles))
+	if (!roles || !Array.isArray(roles))
 	{
 		return false;
 	}
 
-	return user.roles.some(role => roleSlugs.includes(role.slug));
+	return roles.some(role => roleSlugs.includes(role.slug));
 };
 
 /**
@@ -118,10 +118,10 @@ const createUserAtom = (checkFunction) =>
 			return fallback;
 		}
 
-		return On(userData, 'roles', (user) =>
+		return On(userData, 'roles', (roles) =>
 		{
-			const shouldRender = checkFunction(user);
-			return shouldRender ? callback(user) : fallback;
+			const shouldRender = checkFunction(roles);
+			return shouldRender ? callback(roles) : fallback;
 		});
 	};
 };

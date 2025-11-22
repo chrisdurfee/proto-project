@@ -1,6 +1,7 @@
 import { Div, H2, UseParent } from "@base-framework/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu } from "@base-framework/ui/molecules";
+import { IsAdmin } from "@components/atoms/feature-atoms.js";
 import { ActivityAvatarGroup } from "@components/organisms/tracking/activity-avatar-group.js";
 import { ClientModal } from "../../../organisms/modals/client-modal.js";
 
@@ -34,24 +35,26 @@ export const PageHeader = (client) => (
 				refId: client.id,
 				userId: app.data.user.id
 			}),
-			UseParent((parent) => (
-				new DropdownMenu({
-					icon: Icons.ellipsis.vertical,
-					variant: 'outline',
-					groups: [
-						[
-							{ icon: Icons.pencil.square, label: 'Edit', value: 'edit' }
-						]
-					],
-					onSelect: (selected) =>
-					{
-						if (selected.value === 'edit')
+			IsAdmin(() =>
+				UseParent((parent) => (
+					new DropdownMenu({
+						icon: Icons.ellipsis.vertical,
+						variant: 'outline',
+						groups: [
+							[
+								{ icon: Icons.pencil.square, label: 'Edit', value: 'edit' }
+							]
+						],
+						onSelect: (selected) =>
 						{
-							openEditModal(parent);
+							if (selected.value === 'edit')
+							{
+								openEditModal(parent);
+							}
 						}
-					}
-				})
-			))
+					})
+				))
+			)
 		])
 	])
 );
