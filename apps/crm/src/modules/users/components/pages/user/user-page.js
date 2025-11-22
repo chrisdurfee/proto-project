@@ -44,8 +44,23 @@ const Props =
 			}
 
 			const user = response.row || null;
+			this.updateTitle(user);
+
 			data.set({ user, loaded: true });
 		});
+	},
+
+	/**
+	 * Update the page title based on the user.
+	 *
+	 * @param {object} user
+	 */
+	updateTitle(user)
+	{
+		const displayName = (user?.firstName + ' ' + user?.lastName) || '';
+		const title = displayName.substring(0, 30) + ' - User';
+		// @ts-ignore
+		this.route.setTitle(title);
 	},
 
 	/**

@@ -49,11 +49,21 @@ const Props =
 			}
 
 			const client = response.row || null;
-			data.set({ client, loaded: true });
+			this.updateTitle(client);
 
-			const title = (client?.companyName?.substring(0, 30) || '') + ' - Client';
-			this.route.setTitle(title);
+			data.set({ client, loaded: true });
 		});
+	},
+
+	/**
+	 * Updates the page title based on the client data.
+	 *
+	 * @param {object|null} client
+	 */
+	updateTitle(client)
+	{
+		const title = (client?.companyName?.substring(0, 30) || '') + ' - Client';
+		this.route.setTitle(title);
 	},
 
 	/**
