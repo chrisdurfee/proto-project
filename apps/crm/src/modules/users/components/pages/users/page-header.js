@@ -3,6 +3,7 @@ import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Combobox } from "@base-framework/ui/molecules";
 import { SearchInput } from "@base-framework/ui/organisms";
+import { IsEditor } from "@components/atoms/feature-atoms.js";
 import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
 import { UserModal } from "./modals/user-modal.js";
 
@@ -88,11 +89,15 @@ export const PageHeader = () => (
 			Tooltip({ content: 'Refresh', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.refresh, click: refresh }))
 		]),
 		Dropdown(),
-		Div({ class: 'hidden lg:flex' }, [
-			Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add User')
-		]),
-		Div({ class: 'flex lg:hidden mr-0' }, [
-			Tooltip({ content: 'Add User', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }))
-		])
+		IsEditor(() =>
+			Div({ class: 'hidden lg:flex' }, [
+				Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add User')
+			]),
+		),
+		IsEditor(() =>
+			Div({ class: 'flex lg:hidden mr-0' }, [
+				Tooltip({ content: 'Add User', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }))
+			])
+		)
 	])
 );
