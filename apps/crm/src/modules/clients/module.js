@@ -8,7 +8,7 @@ import { Module } from '../module/module.js';
  */
 const routes = Module.convertRoutes(
 [
-	{ path: '/clients/:clientId/:page?*', import: () => import('./components/pages/client/client-page.js'), title: 'Client' },
+	{ path: '/clients/:clientId/:page?*', import: () => import('./components/pages/client/client-page.js'), title: 'Client :clientId' },
 	{ path: '/clients*', import: () => import('./components/pages/clients/client-list-page.js'), title: 'Clients' }
 ]);
 

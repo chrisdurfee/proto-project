@@ -88,11 +88,27 @@ export const ThreadDetail = Jot(
 					conversation,
 					otherUser
 				});
+
+				// @ts-ignore
+				this.updateTitle(otherUser);
 			}
 
 			// @ts-ignore
 			this.state.loaded = true;
 		});
+	},
+
+	/**
+	 * Update the page title based on the other user.
+	 *
+	 * @param {object} otherUser
+	 */
+	updateTitle(otherUser)
+	{
+		const displayName = (otherUser?.firstName + ' ' + otherUser?.lastName) || '';
+		const title = displayName.substring(0, 30) + ' - Messages';
+		// @ts-ignore
+		this.parent.route.setTitle(title);
 	},
 
 	/**

@@ -10,6 +10,7 @@ import { Div } from "@base-framework/atoms";
 const Page = (uri, importCallback) => ({
 	uri,
 	import: importCallback,
+	title: ''
 });
 
 /**

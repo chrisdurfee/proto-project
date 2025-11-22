@@ -26,7 +26,7 @@ const props =
  */
 export const SummaryPage = () => (
 	new Page(props, [
-		On("loaded", (loaded, ele, { context }) =>
+		On("loaded", (loaded, ele, { context, route }) =>
 		{
 			if (!loaded)
 			{

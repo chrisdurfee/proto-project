@@ -50,6 +50,9 @@ const Props =
 
 			const client = response.row || null;
 			data.set({ client, loaded: true });
+
+			const title = (client?.companyName?.substring(0, 30) || '') + ' - Client';
+			this.route.setTitle(title);
 		});
 	},
 
