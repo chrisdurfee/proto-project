@@ -1,4 +1,6 @@
 import { Div, On } from "@base-framework/atoms";
+import { Icons } from "@base-framework/ui/icons";
+import { EmptyState } from "@base-framework/ui/molecules";
 import { Page } from "@base-framework/ui/pages";
 import { UserSkeleton } from "../user-skeleton.js";
 import { PageHeader } from "./page-header.js";
@@ -23,7 +25,12 @@ export const ProfilePage = () => (
 
 			const user = context.data.user;
 			return (!user)
-			? Div({ class: "text-center" }, "User not found.")
+			? EmptyState({
+				title: 'User not found',
+				description: 'Please check the user ID and try again.',
+				// @ts-ignore
+				icon: Icons.user.default
+			})
 			: Div({ class: 'md:p-6 md:pt-0 2xl:mx-auto w-full 2xl:max-w-[1600px]' }, [
 				PageHeader({
 					user,
