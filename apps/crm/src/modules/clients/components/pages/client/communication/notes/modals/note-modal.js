@@ -1,6 +1,7 @@
 import { Div, UseParent } from "@base-framework/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu, Modal } from "@base-framework/ui/molecules";
+import { IsManager } from "@components/atoms/feature-atoms.js";
 import { ClientNoteModel } from "../../../../../models/client-note-model.js";
 import { NoteForm } from "./note-form.js";
 
@@ -87,50 +88,52 @@ const update = (data, destroyCallback = null) =>
 const HeaderOptions = (data, closeCallback, onSubmit) =>
 {
 	return () => [
-		UseParent((parent) => (
-			new DropdownMenu({
-				icon: Icons.ellipsis.vertical,
-				groups: [
-					[
-						{ icon: Icons.trash, label: 'Delete Note', value: 'delete-note' }
-					]
-				],
-				onSelect: (selected) =>
-				{
-					if (selected.value === 'delete-note')
+		IsManager(() =>
+			UseParent((parent) => (
+				new DropdownMenu({
+					icon: Icons.ellipsis.vertical,
+					groups: [
+						[
+							{ icon: Icons.trash, label: 'Delete Note', value: 'delete-note' }
+						]
+					],
+					onSelect: (selected) =>
 					{
-						// Handle delete
-						data.xhr.delete('', (response) =>
+						if (selected.value === 'delete-note')
 						{
-							if (!response || response.success === false)
+							// Handle delete
+							data.xhr.delete('', (response) =>
 							{
+								if (!response || response.success === false)
+								{
+									app.notify({
+										type: "destructive",
+										title: "Error",
+										description: "An error occurred while deleting the note.",
+										icon: Icons.shield
+									});
+									return;
+								}
+
+								parent.close();
+
 								app.notify({
-									type: "destructive",
-									title: "Error",
-									description: "An error occurred while deleting the note.",
-									icon: Icons.shield
+									type: "success",
+									title: "Note Deleted",
+									description: "The note has been deleted.",
+									icon: Icons.check
 								});
-								return;
-							}
 
-							parent.close();
-
-							app.notify({
-								type: "success",
-								title: "Note Deleted",
-								description: "The note has been deleted.",
-								icon: Icons.check
+								if (closeCallback)
+								{
+									closeCallback(parent);
+								}
 							});
-
-							if (closeCallback)
-							{
-								closeCallback(parent);
-							}
-						});
+						}
 					}
-				}
-			})
-		))
+				})
+			))
+		)
 	];
 };
 
