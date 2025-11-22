@@ -25,26 +25,26 @@ export const ProfilePage = () => (
 
 			const user = context.data.user;
 			return (!user)
-			? EmptyState({
-				title: 'User not found',
-				description: 'Please check the user ID and try again.',
-				// @ts-ignore
-				icon: Icons.user.default
-			})
-			: Div({ class: 'md:p-6 md:pt-0 2xl:mx-auto w-full 2xl:max-w-[1600px]' }, [
-				PageHeader({
-					user,
-					context
-				}),
-				Div({ class: 'flex flex-auto flex-col lg:flex-row lg:gap-x-8'}, [
-					Div({ class: 'w-full lg:w-1/3' }, [
-						UserHeader({ user })
-					]),
-					Div({ class: 'flex-1' }, [
-						UserContent({ user }),
+				? EmptyState({
+					title: 'User not found',
+					description: 'Please check the user ID and try again.',
+					// @ts-ignore
+					icon: Icons.user.default
+				})
+				: Div({ class: 'md:p-6 md:pt-0 2xl:mx-auto w-full 2xl:max-w-[1600px]' }, [
+					PageHeader({
+						user,
+						context
+					}),
+					Div({ class: 'flex flex-auto flex-col lg:flex-row lg:gap-x-8'}, [
+						Div({ class: 'w-full lg:w-1/3' }, [
+							UserHeader({ user })
+						]),
+						Div({ class: 'flex-1' }, [
+							UserContent({ user }),
+						])
 					])
-				])
-			]);
+				]);
 		})
 	])
 );
