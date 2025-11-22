@@ -87,6 +87,7 @@ jobs:
           # Update the testing connection in .env to use root credentials matching CI
           php -r "
           \$config = json_decode(file_get_contents('common/Config/.env'), true);
+          \$config['env'] = 'testing';
           \$config['connections']['default']['testing'] = [
               'username' => 'root',
               'password' => 'root',
@@ -100,9 +101,13 @@ jobs:
 
       - name: Run database migrations
         run: php infrastructure/scripts/run-migrations.php
+        env:
+          APP_ENV: testing
 
       - name: Run tests
         run: vendor/bin/phpunit --testdox
+        env:
+          APP_ENV: testing
 
       - name: Generate coverage report
         if: matrix.php == '8.4'
