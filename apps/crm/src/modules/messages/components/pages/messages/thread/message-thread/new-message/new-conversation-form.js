@@ -57,7 +57,7 @@ const UserSearchItem = (user, onClick) =>
 const SearchInput = (data) => (
 	BaseSearch({
 		class: 'min-w-40 lg:min-w-96 mt-2',
-		placeholder: 'Search clients...',
+		placeholder: 'Search users...',
 		bind: 'search',
 		autofocus: true,
 		keyup: (e, parent) => parent.list?.refresh(),
