@@ -8,7 +8,7 @@ import { Module } from '../module/module.js';
  */
 const routes = Module.convertRoutes(
 [
-	{ path: '/iam*', import: () => import('./components/pages/iam/iam-page.js'), title: 'IAM' }
+	{ path: '/iam*', import: () => import('./components/pages/iam/iam-page.js'), title: 'IAM', role: 'admin' }
 ]);
 
 /**
@@ -18,7 +18,7 @@ const routes = Module.convertRoutes(
  */
 const links =
 [
-	{ label: 'IAM', href: 'iam', icon: Icons.locked, mobileOrder: 2 }
+	{ label: 'IAM', href: 'iam', icon: Icons.locked, mobileOrder: 2, role: 'admin' }
 ];
 
 /**
