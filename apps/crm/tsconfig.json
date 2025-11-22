@@ -21,7 +21,6 @@
 			"@modules/*": ["./src/modules/*"],
 			"@pages/*": ["./src/components/pages/*"],
 			"@shell/*": ["./src/shell/*"],
-			"@utils/*": ["./src/utils/*"],
 			"@base-framework/base": [
 				"./node_modules/@base-framework/base/dist/types/base.d.ts",
 				"./node_modules/@base-framework/base/dist/base.js"
