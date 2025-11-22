@@ -1,6 +1,7 @@
 import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
+import { IsEditor } from "@components/atoms/feature-atoms";
 import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
 import { RoleModal } from "./modals/role-modal";
 
@@ -37,11 +38,15 @@ export const PageHeader = () => (
 		Div({ class: 'hidden lg:flex' }, [
 			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.refresh, click: refresh }, 'Refresh')
 		]),
-		Div({ class: 'hidden lg:flex' }, [
-			Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add Role')
-		]),
-		Div({ class: 'flex lg:hidden mr-0' }, [
-			Tooltip({ content: 'Add Role', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }))
-		])
+		IsEditor(() =>
+			Div({ class: 'hidden lg:flex' }, [
+				Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add Role')
+			])
+		),
+		IsEditor(() =>
+			Div({ class: 'flex lg:hidden mr-0' }, [
+				Tooltip({ content: 'Add Role', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }))
+			])
+		)
 	])
 );

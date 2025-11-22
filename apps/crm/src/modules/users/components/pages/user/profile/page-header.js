@@ -1,6 +1,7 @@
 import { Div, H1 } from "@base-framework/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu } from "@base-framework/ui/molecules";
+import { IsEditor } from "@components/atoms/feature-atoms.js";
 import { UserModal } from "../../users/modals/user-modal.js";
 
 /**
@@ -33,22 +34,24 @@ export const PageHeader = ({ context }) => (
 			H1({ class: 'text-2xl md:text-2xl font-bold tracking-tight' }, 'Profile'),
 		]),
 		Div({ class: 'flex flex-row gap-x-2' }, [
-			new DropdownMenu({
-				icon: Icons.ellipsis.vertical,
-				variant: 'outline',
-				groups: [
-					[
-						{ icon: Icons.pencil.square, label: 'Edit', value: 'edit' }
-					]
-				],
-				onSelect: (selected) =>
-				{
-					if (selected.value === 'edit')
+			IsEditor(() =>
+				new DropdownMenu({
+					icon: Icons.ellipsis.vertical,
+					variant: 'outline',
+					groups: [
+						[
+							{ icon: Icons.pencil.square, label: 'Edit', value: 'edit' }
+						]
+					],
+					onSelect: (selected) =>
 					{
-						openEditModal(context);
+						if (selected.value === 'edit')
+						{
+							openEditModal(context);
+						}
 					}
-				}
-			})
+				})
+			)
 		])
 	])
 );
