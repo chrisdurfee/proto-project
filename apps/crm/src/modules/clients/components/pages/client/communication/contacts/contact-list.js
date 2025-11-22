@@ -30,7 +30,7 @@ const ContactItem = (contact, onClick) =>
 	}, [
 		Div({ class: "flex items-center gap-x-4" }, [
 			Avatar({
-				src: contact.avatar,
+				src: `/files/users/profile/${contact.image}`,
 				alt: displayName,
 				fallbackText: displayName,
 				size: "sm"

@@ -240,7 +240,7 @@ export const IsManager = createUserAtom((roles) => userHasRole(roles, 'admin') |
  * @example
  * IsEditor(() => Div('Content Editor'))
  */
-export const IsEditor = createUserAtom((roles) => userHasRole(roles, 'editor'));
+export const IsEditor = createUserAtom((roles) => userHasRole(roles, 'admin') || userHasRole(roles, 'manager') || userHasRole(roles, 'editor'));
 
 /**
  * Renders content if the user has the User role.

@@ -3,6 +3,7 @@ import { Data, DateTime } from "@base-framework/base";
 import { Badge, Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
+import { IsOwner } from "@components/atoms/feature-atoms.js";
 import { ClientNoteModel } from "@modules/clients/components/models/client-note-model.js";
 import { NoteModal } from "./note-modal.js";
 
@@ -17,60 +18,62 @@ import { NoteModal } from "./note-modal.js";
 const HeaderOptions = (note, clientId, onUpdate) =>
 {
 	return () => [
-		UseParent((parent) => (
-			new DropdownMenu({
-				icon: Icons.ellipsis.vertical,
-				groups: [
-					[
-						{ icon: Icons.pencil.square, label: 'Edit Note', value: 'edit-note' },
-						{ icon: Icons.trash, label: 'Delete Note', value: 'delete-note' }
-					]
-				],
-				onSelect: (selected) =>
-				{
-					if (selected.value === 'edit-note')
+		IsOwner(note.createdBy, () =>
+			UseParent((parent) => (
+				new DropdownMenu({
+					icon: Icons.ellipsis.vertical,
+					groups: [
+						[
+							{ icon: Icons.pencil.square, label: 'Edit Note', value: 'edit-note' },
+							{ icon: Icons.trash, label: 'Delete Note', value: 'delete-note' }
+						]
+					],
+					onSelect: (selected) =>
 					{
-						parent.close();
-
-						NoteModal({
-							item: note,
-							clientId,
-							onSubmit: (data) =>
-							{
-								if (onUpdate)
-								{
-									onUpdate(data);
-								}
-							}
-						});
-					}
-					else if (selected.value === 'delete-note')
-					{
-						const model = new ClientNoteModel({ ...note, clientId });
-						model.xhr.delete({}, (response) =>
+						if (selected.value === 'edit-note')
 						{
-							if (!response || response.success === false)
-							{
-								app.notify({
-									type: "destructive",
-									title: "Error",
-									description: "An error occurred while deleting the note.",
-									icon: Icons.shield
-								});
-								return;
-							}
-
 							parent.close();
 
-							if (onUpdate)
+							NoteModal({
+								item: note,
+								clientId,
+								onSubmit: (data) =>
+								{
+									if (onUpdate)
+									{
+										onUpdate(data);
+									}
+								}
+							});
+						}
+						else if (selected.value === 'delete-note')
+						{
+							const model = new ClientNoteModel({ ...note, clientId });
+							model.xhr.delete({}, (response) =>
 							{
-								onUpdate(null);
-							}
-						});
+								if (!response || response.success === false)
+								{
+									app.notify({
+										type: "destructive",
+										title: "Error",
+										description: "An error occurred while deleting the note.",
+										icon: Icons.shield
+									});
+									return;
+								}
+
+								parent.close();
+
+								if (onUpdate)
+								{
+									onUpdate(null);
+								}
+							});
+						}
 					}
-				}
-			})
-		))
+				})
+			))
+		)
 	];
 };
 

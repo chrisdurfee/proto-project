@@ -68,6 +68,7 @@ class ClientContact extends Model
 			'firstName',
 			'lastName',
 			'displayName',
+			'image',
 			'language',
 			'timezone',
 			'status',

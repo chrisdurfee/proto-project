@@ -1,9 +1,11 @@
 import { Div, P, UseParent } from "@base-framework/atoms";
 import { Data } from "@base-framework/base";
+import { Avatar } from "@base-framework/ui";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { ColumnRow, DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
 import { Format } from "@base-framework/ui/utils";
+import { IsEditor } from "@components/atoms/feature-atoms.js";
 import { ContactModal } from "./contact-modal.js";
 
 /**
@@ -166,46 +168,72 @@ const StatusPersonalSection = () =>
 const HeaderOptions = (contact, clientId, onUpdate) =>
 {
 	return () => [
-		UseParent((parent) => (
-			new DropdownMenu({
-				icon: Icons.ellipsis.vertical,
-				groups: [
-					[
-						{ icon: Icons.pencil.square, label: 'Edit Contact', value: 'edit-contact' },
-						{ icon: Icons.trash, label: 'Delete Contact', value: 'delete-contact' }
-					]
-				],
-				onSelect: (selected) =>
-				{
-					if (selected.value === 'edit-contact')
+		IsEditor(() =>
+			UseParent((parent) => (
+				new DropdownMenu({
+					icon: Icons.ellipsis.vertical,
+					groups: [
+						[
+							{ icon: Icons.pencil.square, label: 'Edit Contact', value: 'edit-contact' },
+							{ icon: Icons.trash, label: 'Delete Contact', value: 'delete-contact' }
+						]
+					],
+					onSelect: (selected) =>
 					{
-						parent.close();
+						if (selected.value === 'edit-contact')
+						{
+							parent.close();
 
-						ContactModal({
-							item: contact,
-							clientId,
-							onSubmit: (data) =>
+							ContactModal({
+								item: contact,
+								clientId,
+								onSubmit: (data) =>
+								{
+									if (onUpdate)
+									{
+										onUpdate(data);
+									}
+								}
+							});
+						}
+						else if (selected.value === 'delete-contact')
+						{
+							// Use fetch to delete the contact
+							fetch(`/api/client/${clientId}/contact/${contact.id}`, {
+								method: 'DELETE',
+								headers: {
+									'Content-Type': 'application/json'
+								}
+							})
+							.then(res => res.json())
+							.then((response) =>
 							{
+								if (!response || response.success === false)
+								{
+									app.notify({
+										type: "destructive",
+										title: "Error",
+										description: "An error occurred while deleting the contact.",
+										icon: Icons.shield
+									});
+									return;
+								}
+
+								parent.destroy();
+
+								app.notify({
+									type: "success",
+									title: "Contact Deleted",
+									description: "The contact has been deleted.",
+									icon: Icons.check
+								});
+
 								if (onUpdate)
 								{
-									onUpdate(data);
+									onUpdate(null);
 								}
-							}
-						});
-					}
-					else if (selected.value === 'delete-contact')
-					{
-						// Use fetch to delete the contact
-						fetch(`/api/client/${clientId}/contact/${contact.id}`, {
-							method: 'DELETE',
-							headers: {
-								'Content-Type': 'application/json'
-							}
-						})
-						.then(res => res.json())
-						.then((response) =>
-						{
-							if (!response || response.success === false)
+							})
+							.catch(() =>
 							{
 								app.notify({
 									type: "destructive",
@@ -213,36 +241,12 @@ const HeaderOptions = (contact, clientId, onUpdate) =>
 									description: "An error occurred while deleting the contact.",
 									icon: Icons.shield
 								});
-								return;
-							}
-
-							parent.destroy();
-
-							app.notify({
-								type: "success",
-								title: "Contact Deleted",
-								description: "The contact has been deleted.",
-								icon: Icons.check
 							});
-
-							if (onUpdate)
-							{
-								onUpdate(null);
-							}
-						})
-						.catch(() =>
-						{
-							app.notify({
-								type: "destructive",
-								title: "Error",
-								description: "An error occurred while deleting the contact.",
-								icon: Icons.shield
-							});
-						});
+						}
 					}
-				}
-			})
-		))
+				})
+			))
+		)
 	];
 };
 
@@ -342,11 +346,12 @@ export const ContactDetailsModal = (props = { contact: {}, clientId: '', onUpdat
 	const contact = props.contact || {};
 	const clientId = props.clientId || contact.clientId;
 	const closeCallback = (parent) => props.onClose && props.onClose(parent);
+	const formattedContact = formatContactData(contact);
 
 	return new Modal({
-		title: formatContactData(contact).displayName,
+		title: formattedContact.displayName,
 		icon: Icons.user.default,
-		description: formatContactData(contact).contactTypeLabel,
+		description: formattedContact.contactTypeLabel,
 		size: 'md',
 		type: 'right',
 		hidePrimaryButton: true,
@@ -358,7 +363,7 @@ export const ContactDetailsModal = (props = { contact: {}, clientId: '', onUpdat
 		 */
 		setData()
 		{
-			return new Data(formatContactData(contact));
+			return new Data(formattedContact);
 		},
 
 		/**
@@ -374,6 +379,14 @@ export const ContactDetailsModal = (props = { contact: {}, clientId: '', onUpdat
 		onClose: closeCallback
 	},
 	[
+		Div({ class: 'flex flex-col items-center justify-center py-8' }, [
+			Avatar({
+				src: `/files/users/profile/[[image]]`,
+				alt: '[[displayName]]',
+				watcherFallback: '[[displayName]]',
+				size: "lg"
+			}),
+		]),
 		// Quick connect buttons
 		QuickConnectButtons(),
 
