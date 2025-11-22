@@ -47,47 +47,16 @@ class ClientContactService extends Service
 	{
 		try
 		{
-			// Handle user account creation/linking
 			$userId = $this->handleUserAccount($data, $contactId);
 			if ($userId)
 			{
 				$data->userId = $userId;
 			}
 
-			// Save or update contact
-			if ($contactId)
-			{
-				// Fetch existing contact to preserve clientId and other immutable fields
-				$existingContact = ClientContact::get($contactId);
-				if (!$existingContact)
-				{
-					throw new \Exception('Contact not found');
-				}
+			$contactId = $contactId
+				? $this->updateContact($data, $contactId)
+				: $this->createContact($data);
 
-				// Ensure clientId is preserved
-				$data->clientId = $existingContact->clientId;
-				$data->id = $contactId;
-
-				$contact = new ClientContact($data);
-				if (!$contact->update())
-				{
-					throw new \Exception('Failed to update contact');
-				}
-
-				$contactId = (int)$contact->id;
-			}
-			else
-			{
-				$contact = new ClientContact($data);
-				if (!$contact->add())
-				{
-					throw new \Exception('Failed to create contact');
-				}
-
-				$contactId = (int)$contact->id;
-			}
-
-			// Fetch fresh data with user relation
 			$contactData = ClientContact::get($contactId);
 
 			return (object)[
@@ -106,6 +75,52 @@ class ClientContactService extends Service
 	}
 
 	/**
+	 * Create a new contact.
+	 *
+	 * @param object $data Contact data
+	 * @return int Contact ID
+	 * @throws \Exception
+	 */
+	protected function createContact(object $data): int
+	{
+		$contact = new ClientContact($data);
+		if (!$contact->add())
+		{
+			throw new \Exception('Failed to create contact');
+		}
+
+		return (int)$contact->id;
+	}
+
+	/**
+	 * Update an existing contact.
+	 *
+	 * @param object $data Contact data
+	 * @param int $contactId Contact ID
+	 * @return int Contact ID
+	 * @throws \Exception
+	 */
+	protected function updateContact(object $data, int $contactId): int
+	{
+		$existingContact = ClientContact::get($contactId);
+		if (!$existingContact)
+		{
+			throw new \Exception('Contact not found');
+		}
+
+		$data->clientId = $existingContact->clientId;
+		$data->id = $contactId;
+
+		$contact = new ClientContact($data);
+		if (!$contact->update())
+		{
+			throw new \Exception('Failed to update contact');
+		}
+
+		return (int)$contact->id;
+	}
+
+	/**
 	 * Handle user account creation or linking for a contact.
 	 *
 	 * @param object $data Contact/user data
@@ -114,41 +129,60 @@ class ClientContactService extends Service
 	 */
 	protected function handleUserAccount(object $data, ?int $contactId = null): ?int
 	{
-		$linkUserId = $data->linkUserId ?? null;
-
-		// If linking to existing user
-		if ($linkUserId)
+		if ($linkUserId = $data->linkUserId ?? null)
 		{
-			$user = modules()->user()->get((int)$linkUserId);
-			if ($user)
-			{
-				return (int)$user->id;
-			}
+			return $this->linkExistingUser($linkUserId);
 		}
 
-		// If creating new user account
 		if (!isset($data->userId))
 		{
 			return $this->createUserAccount($data);
 		}
 
-		// If updating and contact already has a user
 		if ($contactId)
 		{
-			$contact = ClientContact::get($contactId);
-			if ($contact && $contact->userId)
-			{
-				// Update user with any provided name/dob/user fields
-				$this->updateUserFromContactData((int)$contact->userId, $data);
-				return (int)$contact->userId;
-			}
+			return $this->handleExistingContactUser($contactId, $data);
+		}
 
-			// If contact doesn't have a user but has user-related data (name, dob, etc)
-			// automatically create one
-			if ($this->hasUserData($data))
-			{
-				return $this->createUserAccount($data);
-			}
+		return null;
+	}
+
+	/**
+	 * Link to an existing user account.
+	 *
+	 * @param int $userId User ID to link
+	 * @return int|null User ID if found
+	 */
+	protected function linkExistingUser(int $userId): ?int
+	{
+		$user = modules()->user()->get($userId);
+		return $user ? (int)$user->id : null;
+	}
+
+	/**
+	 * Handle user account for existing contact during update.
+	 *
+	 * @param int $contactId Existing contact ID
+	 * @param object $data Contact data
+	 * @return int|null User ID
+	 */
+	protected function handleExistingContactUser(int $contactId, object $data): ?int
+	{
+		$contact = ClientContact::get($contactId);
+		if (!$contact)
+		{
+			return null;
+		}
+
+		if ($contact->userId)
+		{
+			$this->updateUserFromContactData((int)$contact->userId, $data);
+			return (int)$contact->userId;
+		}
+
+		if ($this->hasUserData($data))
+		{
+			return $this->createUserAccount($data);
 		}
 
 		return null;
@@ -226,9 +260,30 @@ class ClientContactService extends Service
 	 */
 	protected function createUserAccount(object $data): ?int
 	{
+		$userData = $this->prepareUserData($data);
+		$user = modules()->user()->create($userData);
+
+		if (!$user || !isset($user->id))
+		{
+			return null;
+		}
+
+		$userId = (int)$user->id;
+		$this->assignRoles($userId);
+
+		return $userId;
+	}
+
+	/**
+	 * Prepare user data with extracted fields and defaults.
+	 *
+	 * @param object $data Contact data
+	 * @return object User data with defaults
+	 */
+	protected function prepareUserData(object $data): object
+	{
 		$userData = $this->extractUserData($data);
 
-		// Set defaults for required user fields
 		$userData->username = $userData->username ?? $userData->email ?? '';
 		$userData->password = $userData->password ?? $this->generateRandomPassword();
 		$userData->enabled = $userData->enabled ?? 1;
@@ -236,18 +291,7 @@ class ClientContactService extends Service
 		$userData->timezone = $userData->timezone ?? 'utc';
 		$userData->language = $userData->language ?? 'en';
 
-		// Create user using the User module gateway
-		$user = modules()->user()->create($userData);
-		if (!$user || !isset($user->id))
-		{
-			return null;
-		}
-
-		$userId = (int)$user->id;
-
-		// Assign default roles
-		$this->assignRoles($userId);
-		return $userId;
+		return $userData;
 	}
 
 	/**
