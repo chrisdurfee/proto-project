@@ -1,5 +1,6 @@
-import { Div, H2, P } from "@base-framework/atoms";
+import { EmptyState } from "@base-framework/ui";
 import { Button } from "@base-framework/ui/atoms";
+import { Icons } from "@base-framework/ui/icons";
 
 /**
  * ThreadEmptyState
@@ -9,9 +10,11 @@ import { Button } from "@base-framework/ui/atoms";
  * @returns {object}
  */
 export const ThreadEmptyState = () =>
-	Div({ class: 'm-4 mt-8 p-4 border rounded-md items-center justify-center text-center' }, [
-		H2({ class: 'text-xl font-semibold text-muted-foreground text-center' }, "No Thread Selected"),
-		P('Select a message from the list to view the conversation.'),
+	EmptyState({
+		title: 'No Thread Selected',
+		description: 'Select a message from the list to view the conversation.',
+		icon: Icons.airplane,
+	}, [
 		Button({
 			variant: 'outline',
 			class: 'my-8',

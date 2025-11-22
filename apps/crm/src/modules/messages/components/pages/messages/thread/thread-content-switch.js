@@ -54,7 +54,7 @@ const DockableThread = (props) => (
  * @returns {object}
  */
 const EmptyThread = () => (
-	new Panel([
+	new Panel({ class: 'flex flex-auto flex-col' }, [
 		Div({ class: "hidden lg:flex flex-auto flex-col" }, [
 			Div({ class: "flex auto flex-col w-full h-full" }, [
 				ThreadEmptyState()
