@@ -111,7 +111,7 @@ $value = static::get('key');`
 					 For instance, if you have a user gate, you might call:`
 				),
 				CodeBlock(
-`$userGate = auth()->user;
+`$userGate = auth()->user();
 $userGate->isUser(1);`
 				),
 
@@ -128,7 +128,7 @@ $auth = auth();
 $auth->user = new UserGate();
 
 // now you can access the user gate globally in any module
-$auth->user->isUser(1);`
+$auth->user()->isUser(1);`
 				)
 			]),
 
