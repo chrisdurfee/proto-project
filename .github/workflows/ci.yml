@@ -82,25 +82,27 @@ jobs:
             sleep 2
           done
 
+      - name: Update test database configuration
+        run: |
+          # Update the testing connection in .env to use root credentials matching CI
+          php -r "
+          \$config = json_decode(file_get_contents('common/Config/.env'), true);
+          \$config['connections']['default']['testing'] = [
+              'username' => 'root',
+              'password' => 'root',
+              'host' => '127.0.0.1',
+              'database' => 'proto',
+              'port' => 3307
+          ];
+          file_put_contents('common/Config/.env', json_encode(\$config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+          echo 'Updated testing database configuration\n';
+          "
+
       - name: Run database migrations
         run: php infrastructure/scripts/run-migrations.php
-        env:
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3307
-          DB_DATABASE: proto
-          DB_USERNAME: root
-          DB_PASSWORD: root
 
       - name: Run tests
         run: vendor/bin/phpunit --testdox
-        env:
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3307
-          DB_DATABASE: proto
-          DB_USERNAME: proto_app_user
-          DB_PASSWORD: ProtoApp2025!SecureDbPass#789
-          REDIS_HOST: 127.0.0.1
-          REDIS_PORT: 6379
 
       - name: Generate coverage report
         if: matrix.php == '8.4'
