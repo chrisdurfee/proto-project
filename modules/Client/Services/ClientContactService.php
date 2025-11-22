@@ -166,6 +166,16 @@ class ClientContactService extends Service
 	}
 
 	/**
+	 * Fields that belong to the user table.
+	 *
+	 * @var array
+	 */
+	protected array $userFields = [
+		'firstName', 'lastName', 'email', 'dob', 'language', 'timezone',
+		'username', 'password', 'enabled', 'status', 'displayName'
+	];
+
+	/**
 	 * Update user account with data from contact update.
 	 *
 	 * @param int $userId User ID
@@ -174,63 +184,38 @@ class ClientContactService extends Service
 	 */
 	protected function updateUserFromContactData(int $userId, object $contactData): void
 	{
-		$userData = (object)[];
-		$hasUserData = false;
-
-		// Map contact data fields to user fields
-		if (isset($contactData->firstName))
-		{
-			$userData->firstName = $contactData->firstName;
-			$hasUserData = true;
-		}
-		if (isset($contactData->lastName))
-		{
-			$userData->lastName = $contactData->lastName;
-			$hasUserData = true;
-		}
-		if (isset($contactData->dob))
-		{
-			$userData->dob = $contactData->dob;
-			$hasUserData = true;
-		}
-		if (isset($contactData->email))
-		{
-			$userData->email = $contactData->email;
-			$hasUserData = true;
-		}
-		if (isset($contactData->language))
-		{
-			$userData->language = $contactData->language;
-			$hasUserData = true;
-		}
-		if (isset($contactData->timezone))
-		{
-			$userData->timezone = $contactData->timezone;
-			$hasUserData = true;
-		}
-
-		// Update display name if first or last name changed
-		if (isset($contactData->firstName) || isset($contactData->lastName))
-		{
-			$firstName = $contactData->firstName ?? '';
-			$lastName = $contactData->lastName ?? '';
-			$userData->displayName = trim($firstName . ' ' . $lastName);
-		}
-
-		// If user object is provided, merge it
-		if (isset($contactData->user) && is_object($contactData->user))
-		{
-			foreach ($contactData->user as $key => $value)
-			{
-				$userData->$key = $value;
-			}
-			$hasUserData = true;
-		}
-
-		if ($hasUserData)
+		$userData = $this->extractUserData($contactData);
+		if (!empty((array)$userData))
 		{
 			$this->updateUserAccount($userId, $userData);
 		}
+	}
+
+	/**
+	 * Extract user fields from contact data.
+	 *
+	 * @param object $data Contact data
+	 * @return object User data
+	 */
+	protected function extractUserData(object $data): object
+	{
+		$userData = (object)[];
+
+		foreach ($this->userFields as $field)
+		{
+			if (isset($data->$field))
+			{
+				$userData->$field = $data->$field;
+			}
+		}
+
+		// Auto-generate display name if first or last name provided
+		if (isset($data->firstName) || isset($data->lastName))
+		{
+			$userData->displayName = trim(($data->firstName ?? '') . ' ' . ($data->lastName ?? ''));
+		}
+
+		return $userData;
 	}
 
 	/**
@@ -241,23 +226,19 @@ class ClientContactService extends Service
 	 */
 	protected function createUserAccount(object $data): ?int
 	{
-		$userData = (object)[
-			'firstName' => $data->firstName ?? '',
-			'lastName' => $data->lastName ?? '',
-			'email' => $data->email ?? '',
-			'dob' => $data->dob ?? null,
-			'displayName' => trim(($data->firstName ?? '') . ' ' . ($data->lastName ?? '')),
-			'username' => $data->user->username ?? $data->email ?? '',
-			'password' => $data->user->password ?? $this->generateRandomPassword(),
-			'enabled' => $data->user->enabled ?? 1,
-			'status' => $data->user->status ?? 'offline',
-			'timezone' => $data->timezone ?? 'utc',
-			'language' => $data->language ?? 'en'
-		];
+		$userData = $this->extractUserData($data);
+
+		// Set defaults for required user fields
+		$userData->username = $userData->username ?? $userData->email ?? '';
+		$userData->password = $userData->password ?? $this->generateRandomPassword();
+		$userData->enabled = $userData->enabled ?? 1;
+		$userData->status = $userData->status ?? 'offline';
+		$userData->timezone = $userData->timezone ?? 'utc';
+		$userData->language = $userData->language ?? 'en';
 
 		// Create user using the User module gateway
 		$user = modules()->user()->create($userData);
-		if (!$user && !isset($user->id))
+		if (!$user || !isset($user->id))
 		{
 			return null;
 		}
@@ -266,7 +247,6 @@ class ClientContactService extends Service
 
 		// Assign default roles
 		$this->assignRoles($userId);
-
 		return $userId;
 	}
 
