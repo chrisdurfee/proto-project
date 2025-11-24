@@ -45,7 +45,6 @@ class PermissionFactory extends Factory
 			'slug' => strtolower($action . '-' . $resource . '-' . $uniqueId),
 			'description' => "Permission to {$action} {$resource} records",
 			'module' => $module,
-			'resource' => $resource,
 			'createdAt' => date('Y-m-d H:i:s'),
 			'updatedAt' => date('Y-m-d H:i:s')
 		];

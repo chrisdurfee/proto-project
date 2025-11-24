@@ -90,7 +90,10 @@ jobs:
           const path = 'common/Config/.env';
           const config = JSON.parse(fs.readFileSync(path, 'utf8'));
 
+          // Set environment to testing - CRITICAL for Proto to use testing connection
           config.env = 'testing';
+
+          // Configure test database connection
           config.connections.default.testing = {
             username: 'root',
             password: 'root',
@@ -99,25 +102,57 @@ jobs:
             port: 3307
           };
 
+          // Disable cache for tests (avoid Redis connection issues)
           if (config.cache)
           {
             config.cache.driver = null;
             if (config.cache.connection)
             {
+              delete config.cache.connection.password;
               config.cache.connection.host = '127.0.0.1';
-              config.cache.connection.password = '';
               config.cache.connection.port = 6379;
             }
           }
 
+          // Write updated config
           fs.writeFileSync(path, JSON.stringify(config, null, 4));
-          console.log('Updated testing database configuration');
+          console.log('✓ Updated testing database configuration');
+          console.log('  Environment:', config.env);
+          console.log('  Database config:', JSON.stringify(config.connections.default.testing, null, 2));
           NODE
+
+      - name: Verify configuration file
+        run: |
+          echo "Checking .env file..."
+          cat common/Config/.env | grep -A 8 '"testing"' || echo "Testing config not found in .env"
+
+      - name: Verify database connection
+        run: |
+          echo "Testing database connection..."
+          mysql -h127.0.0.1 -P3307 -uroot -proot -e "SELECT 'Database connection successful' as status; SHOW DATABASES;"
+          mysql -h127.0.0.1 -P3307 -uroot -proot proto -e "SHOW TABLES;" || echo "No tables yet (OK before migrations)"
+
+      - name: Test PHP database connection
+        run: |
+          php -r "
+          \$mysqli = new mysqli('127.0.0.1', 'root', 'root', 'proto', 3307);
+          if (\$mysqli->connect_error) {
+            die('Connect Error: ' . \$mysqli->connect_error);
+          }
+          echo 'PHP MySQL connection successful' . PHP_EOL;
+          \$mysqli->close();
+          "
 
       - name: Run database migrations
         run: php infrastructure/scripts/run-migrations.php
         env:
           APP_ENV: testing
+
+      - name: Verify migrations
+        run: |
+          echo "Checking migrated tables..."
+          mysql -h127.0.0.1 -P3307 -uroot -proot proto -e "SHOW TABLES;"
+          mysql -h127.0.0.1 -P3307 -uroot -proot proto -e "DESCRIBE permissions;" || echo "permissions table not found"
 
       - name: Run tests
         run: vendor/bin/phpunit --testdox
