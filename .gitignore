@@ -16,6 +16,7 @@ error.log
 .phpunit.result.cache
 infrastructure/.env
 .env
+.env.backup
 user-settings.txt
 common/files/
 

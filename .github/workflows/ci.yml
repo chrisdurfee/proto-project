@@ -99,11 +99,15 @@ jobs:
             port: 3307
           };
 
-          if (config.cache && config.cache.connection)
+          if (config.cache)
           {
-            config.cache.connection.host = '127.0.0.1';
-            config.cache.connection.password = '';
-            config.cache.connection.port = 6379;
+            config.cache.driver = null;
+            if (config.cache.connection)
+            {
+              config.cache.connection.host = '127.0.0.1';
+              config.cache.connection.password = '';
+              config.cache.connection.port = 6379;
+            }
           }
 
           fs.writeFileSync(path, JSON.stringify(config, null, 4));
