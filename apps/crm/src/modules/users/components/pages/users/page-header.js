@@ -3,7 +3,7 @@ import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Combobox } from "@base-framework/ui/molecules";
 import { SearchInput } from "@base-framework/ui/organisms";
-import { IsEditor } from "@components/atoms/feature-atoms.js";
+import { IsEditor } from "@components/atoms/gate-atoms.js";
 import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
 import { UserModal } from "./modals/user-modal.js";
 

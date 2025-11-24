@@ -60,7 +60,8 @@ export class Module
 					route.path,
 					route.import,
 					route.title,
-					route.preventScroll
+					route.preventScroll,
+					route.role
 				);
 			}
 
@@ -68,7 +69,8 @@ export class Module
 				route.path,
 				route.component,
 				route.title,
-				route.preventScroll
+				route.preventScroll,
+				route.role
 			);
 		});
 	}

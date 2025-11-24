@@ -65,6 +65,11 @@ export class ModuleRoutes
 		role = null
 	)
 	{
+		if (role && !userHasRole(role))
+		{
+			return null;
+		}
+
 		return {
 			uri,
 			component,

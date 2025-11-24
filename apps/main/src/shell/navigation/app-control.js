@@ -50,6 +50,44 @@ const AppContainer = Atom((props, children) => ({
 }));
 
 /**
+ * This will filter options based on user roles.
+ *
+ * @param {Array<object>} options
+ * @returns {Array<object>}
+ */
+const filterOptionsByRole = (options) =>
+{
+	const userData = (typeof app !== 'undefined' && app.data && app.data.user) ? app.data.user : null;
+	if (!userData)
+	{
+		return options;
+	}
+
+	const roles = userData.roles;
+	if (!roles || !Array.isArray(roles))
+	{
+		return options;
+	}
+
+	// If user is admin, return all options
+	if (roles.some(role => role.slug === 'admin'))
+	{
+		return options;
+	}
+
+	// Filter options based on role
+	return options.filter(option =>
+	{
+		if (!option.role)
+		{
+			return true;
+		}
+
+		return roles.some(role => role.slug === option.role);
+	});
+};
+
+/**
  * AppControl
  *
  * This will create the app control.
@@ -105,7 +143,8 @@ export class AppControl extends Component
 	{
 		const callBack = this.ignoreHover.bind(this);
 		// @ts-ignore
-		const mobileOptions = getMobileOptions(this.options, callBack);
+		const options = filterOptionsByRole(this.options);
+		const mobileOptions = getMobileOptions(options, callBack);
 
 		return AppContainer(
 			{
@@ -124,7 +163,7 @@ export class AppControl extends Component
 				 * This will create a navigation for the main and mobile navigation.
 				 */
 				// @ts-ignore
-				new MainNavigation({ options: this.options }),
+				new MainNavigation({ options }),
 				new MobileNavigation({ options: mobileOptions })
 			]
 		);

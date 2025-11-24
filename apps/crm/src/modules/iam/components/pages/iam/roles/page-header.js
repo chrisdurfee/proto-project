@@ -1,7 +1,7 @@
 import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
-import { IsEditor } from "@components/atoms/feature-atoms";
+import { IsEditor } from "@components/atoms/gate-atoms";
 import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
 import { RoleModal } from "./modals/role-modal";
 

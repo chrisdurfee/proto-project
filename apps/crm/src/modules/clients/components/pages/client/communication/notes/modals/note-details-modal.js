@@ -3,7 +3,7 @@ import { Data, DateTime } from "@base-framework/base";
 import { Badge, Icon } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
-import { IsOwner } from "@components/atoms/feature-atoms.js";
+import { IsOwner } from "@components/atoms/gate-atoms.js";
 import { ClientNoteModel } from "@modules/clients/components/models/client-note-model.js";
 import { NoteModal } from "./note-modal.js";
 

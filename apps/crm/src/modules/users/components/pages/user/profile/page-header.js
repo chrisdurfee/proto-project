@@ -1,7 +1,7 @@
 import { Div, H1 } from "@base-framework/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu } from "@base-framework/ui/molecules";
-import { IsEditor } from "@components/atoms/feature-atoms.js";
+import { IsEditor } from "@components/atoms/gate-atoms.js";
 import { UserModal } from "../../users/modals/user-modal.js";
 
 /**

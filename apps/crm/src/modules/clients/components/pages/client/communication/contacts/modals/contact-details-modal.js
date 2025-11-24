@@ -5,7 +5,7 @@ import { Button, Tooltip } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { ColumnRow, DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
 import { Format } from "@base-framework/ui/utils";
-import { IsEditor } from "@components/atoms/feature-atoms.js";
+import { IsEditor } from "@components/atoms/gate-atoms.js";
 import { ContactModal } from "./contact-modal.js";
 
 /**

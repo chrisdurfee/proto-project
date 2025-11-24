@@ -1,7 +1,7 @@
 import { Div, UseParent } from "@base-framework/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu, Modal } from "@base-framework/ui/molecules";
-import { IsManager } from "@components/atoms/feature-atoms.js";
+import { IsManager } from "@components/atoms/gate-atoms.js";
 import { ClientNoteModel } from "../../../../../models/client-note-model.js";
 import { NoteForm } from "./note-form.js";
 
