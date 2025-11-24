@@ -3,6 +3,7 @@ namespace Modules\Messaging\Controllers;
 
 use Modules\Messaging\Auth\Policies\MessagePolicy;
 use Modules\Messaging\Models\Message;
+use Modules\Messaging\Models\ConversationParticipant;
 use Modules\Messaging\Services\MessageService;
 use Modules\Messaging\Services\MessageReadService;
 use Modules\Messaging\Services\MessageDeleteService;
@@ -177,6 +178,75 @@ class MessageController extends ResourceController
 	}
 
 	/**
+	 * Find participants in a conversation based on messages.
+	 *
+	 * @param int $conversationId
+	 * @return array
+	 */
+	protected function findParticipants(int $conversationId): array
+	{
+		$conversation = ConversationParticipant::getBy([
+			'cp.conversationId' => $conversationId
+		]);
+
+		if (!$conversation)
+		{
+			return [];
+		}
+
+		return $this->getOtherParticipants(
+			$conversation->participants,
+			session()->user->id ?? 0
+		);
+	}
+
+	/**
+	 * Get other participants excluding the current user.
+	 *
+	 * @param array $participants
+	 * @param int $currentUserId
+	 * @return array
+	 */
+	protected function getOtherParticipants(array $participants, int $currentUserId): array
+	{
+		return array_filter($participants, function($participant) use ($currentUserId)
+		{
+			return $participant->id !== $currentUserId;
+		});
+	}
+
+	/**
+	 * Get Redis channels for conversation participants.
+	 *
+	 * @param int $conversationId
+	 * @return array
+	 */
+	protected function getParticipantChannels(int $conversationId): array
+	{
+		$participants = $this->findParticipants($conversationId);
+		if (empty($participants))
+		{
+			return [];
+		}
+
+		if (count($participants) === 1)
+		{
+			$participants = $participants[0];
+			return ["user:{$participants->id}:status"];
+		}
+		else
+		{
+			// For group conversations, return all participant channels
+			$channels = [];
+			foreach ($participants as $participant)
+			{
+				$channels[] = "user:{$participant->id}:status";
+			}
+			return $channels;
+		}
+	}
+
+	/**
 	 * Sync messages for a conversation via Redis-based Server-Sent Events.
 	 * Listens to message updates published via Redis pub/sub.
 	 *
@@ -192,16 +262,46 @@ class MessageController extends ResourceController
 		}
 
 		// Subscribe to conversation's message updates channel
-		$channel = "conversation:{$conversationId}:messages";
-		redisEvent($channel, function($channel, $message): array|null
+		$channels = [
+			"conversation:{$conversationId}:messages"
+		];
+
+		/**
+		 * Also listen to participant status channels
+		 */
+		$participantChannels = $this->getParticipantChannels($conversationId);
+		if (!empty($participantChannels))
 		{
-			// Message contains message ID from Redis publish
+			$channels = array_merge($channels, $participantChannels);
+		}
+
+		redisEvent($channels, function($channel, $message): array|null
+		{
+			/**
+			 * pass the user status update.
+			 */
+			if (strpos($channel, 'user:'))
+			{
+				return [
+					'userStatus' => [
+						[
+							'status' => $message->status,
+							'userId' => $message->id
+						]
+					]
+				];
+			}
+
+			/**
+			 * pass the newly updated or deleted message.
+			 */
 			$messageId = $message['id'] ?? $message['messageId'] ?? null;
 			if (!$messageId)
 			{
 				return null;
 			}
 
+			// Determine if it's a delete or update action
 			$action = $message['action'] ?? 'merge';
 			if ($action === 'delete')
 			{
@@ -211,11 +311,10 @@ class MessageController extends ResourceController
 				];
 			}
 
-			// Fetch the updated message data
+			// We need to fetch the full message data
 			$messageData = Message::get($messageId);
 			if (!$messageData)
 			{
-				// Message not found
 				return null;
 			}
 
