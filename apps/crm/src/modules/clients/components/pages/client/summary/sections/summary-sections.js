@@ -274,7 +274,7 @@ export const TicketsSection = Atom(({ client }) =>
  */
 const InvoiceListItem = (client) => (
 	Atom((invoice) =>
-		A({ href: `clients/client/${client.id}/billing/invoices/${invoice.id}` }, [
+		A({ href: `clients/${client.id}/invoices/${invoice.id}` }, [
 			Card({ class: "flex items-center justify-between cursor-pointer p-4", margin: "my-2", hover: true }, [
 				Div({ class: "flex items-center gap-x-4" }, [
 					Icon(Icons.document.default),
