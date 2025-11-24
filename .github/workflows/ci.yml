@@ -73,14 +73,25 @@ jobs:
 
       - name: Wait for MariaDB
         run: |
+          echo "Waiting for MariaDB to be fully ready..."
           for i in {1..30}; do
-            if mysqladmin ping -h"127.0.0.1" -P"3307" -u"root" -p"root" --silent; then
-              echo "MariaDB is ready"
-              break
+            if mysqladmin ping -h"127.0.0.1" -P"3307" -u"root" -p"root" --silent 2>/dev/null; then
+              echo "✓ MariaDB is responding to ping"
+              # Extra verification - can we actually connect?
+              if mysql -h127.0.0.1 -P3307 -uroot -proot -e "SELECT 1" &>/dev/null; then
+                echo "✓ MariaDB is accepting connections"
+                break
+              fi
             fi
-            echo "Waiting for MariaDB... ($i/30)"
+            echo "  Waiting for MariaDB... ($i/30)"
             sleep 2
           done
+
+          # Final check
+          if ! mysql -h127.0.0.1 -P3307 -uroot -proot -e "SELECT 'Final check OK' as status"; then
+            echo "ERROR: MariaDB is not ready after 60 seconds"
+            exit 1
+          fi
 
       - name: Update test database configuration
         run: |
@@ -139,9 +150,51 @@ jobs:
           if (\$mysqli->connect_error) {
             die('Connect Error: ' . \$mysqli->connect_error);
           }
-          echo 'PHP MySQL connection successful' . PHP_EOL;
+          echo '✓ PHP MySQL connection successful' . PHP_EOL;
           \$mysqli->close();
           "
+
+      - name: Test Proto framework database connection
+        run: |
+          php -r "
+          require 'vendor/autoload.php';
+
+          // Set testing environment BEFORE initializing Base
+          \$_SERVER['APP_ENV'] = 'testing';
+          \$_ENV['APP_ENV'] = 'testing';
+
+          // Initialize Proto
+          new Proto\Base();
+          setEnv('env', 'testing');
+
+          // Try to connect
+          try {
+            \$db = Proto\Database\Database::getConnection('default', true);
+            if (\$db === null) {
+              echo 'ERROR: getConnection returned null' . PHP_EOL;
+              exit(1);
+            }
+
+            // Test query
+            \$result = \$db->first('SELECT 1 as test');
+            if (\$result && isset(\$result->test) && \$result->test == 1) {
+              echo '✓ Proto framework database connection successful' . PHP_EOL;
+
+              // Show which database we connected to
+              \$dbInfo = \$db->first('SELECT DATABASE() as db, USER() as user');
+              echo '  Connected to: ' . \$dbInfo->db . ' as ' . \$dbInfo->user . PHP_EOL;
+            } else {
+              echo 'ERROR: Test query failed' . PHP_EOL;
+              exit(1);
+            }
+          } catch (Exception \$e) {
+            echo 'ERROR: ' . \$e->getMessage() . PHP_EOL;
+            echo 'Trace: ' . \$e->getTraceAsString() . PHP_EOL;
+            exit(1);
+          }
+          "
+        env:
+          APP_ENV: testing
 
       - name: Run database migrations
         run: php infrastructure/scripts/run-migrations.php
