@@ -22,7 +22,7 @@ class DebugPermissionTest extends Test
 	{
 		$db = $this->getTestDatabase();
 		$result = $db->first('SELECT 1 as test');
-		
+
 		$this->assertNotNull($result);
 		$this->assertEquals(1, $result->test);
 	}
@@ -36,7 +36,7 @@ class DebugPermissionTest extends Test
 	{
 		$db = $this->getTestDatabase();
 		$result = $db->first('SHOW TABLES LIKE "permissions"');
-		
+
 		$this->assertNotNull($result, 'Permissions table should exist');
 	}
 
@@ -48,10 +48,10 @@ class DebugPermissionTest extends Test
 	public function testManualInsertWorks(): void
 	{
 		$db = $this->getTestDatabase();
-		
-		$sql = "INSERT INTO permissions (name, slug, description, module, created_at, updated_at) 
+
+		$sql = "INSERT INTO permissions (name, slug, description, module, created_at, updated_at)
 		        VALUES (?, ?, ?, ?, ?, ?)";
-		
+
 		$params = [
 			'Test Permission',
 			'test-permission',
@@ -60,14 +60,14 @@ class DebugPermissionTest extends Test
 			date('Y-m-d H:i:s'),
 			date('Y-m-d H:i:s')
 		];
-		
+
 		$result = $db->execute($sql, $params);
 		$this->assertTrue($result, 'Manual insert should succeed');
-		
+
 		// Verify it was inserted
 		$insertedId = $db->getLastId();
 		$this->assertGreaterThan(0, $insertedId, 'Should have an insert ID');
-		
+
 		// Retrieve it
 		$retrieved = $db->first('SELECT * FROM permissions WHERE id = ?', [$insertedId]);
 		$this->assertNotNull($retrieved, 'Should be able to retrieve inserted record');
@@ -83,14 +83,14 @@ class DebugPermissionTest extends Test
 	{
 		$factory = Permission::factory();
 		$attributes = $factory->raw();
-		
+
 		$this->assertIsArray($attributes);
 		$this->assertArrayHasKey('name', $attributes);
 		$this->assertArrayHasKey('slug', $attributes);
 		$this->assertArrayHasKey('description', $attributes);
 		$this->assertArrayHasKey('module', $attributes);
 		$this->assertArrayNotHasKey('resource', $attributes, 'resource field should not exist');
-		
+
 		// All required fields should have values
 		$this->assertNotNull($attributes['name']);
 		$this->assertNotNull($attributes['slug']);
@@ -111,13 +111,13 @@ class DebugPermissionTest extends Test
 		$permission->module = 'Test';
 		$permission->createdAt = date('Y-m-d H:i:s');
 		$permission->updatedAt = date('Y-m-d H:i:s');
-		
+
 		$result = $permission->add();
 		$this->assertTrue($result, 'Model add() should return true. Error: ' . ($permission->storage->getLastError() ?? 'none'));
-		
+
 		$this->assertNotNull($permission->id, 'Permission ID should be set after add()');
 		$this->assertGreaterThan(0, $permission->id, 'Permission ID should be positive');
-		
+
 		// Verify we can retrieve it
 		$retrieved = Permission::get($permission->id);
 		$this->assertNotNull($retrieved);
@@ -132,7 +132,7 @@ class DebugPermissionTest extends Test
 	public function testFactoryMakeCreatesModelWithoutPersisting(): void
 	{
 		$permission = Permission::factory()->make();
-		
+
 		$this->assertInstanceOf(Permission::class, $permission);
 		$this->assertNull($permission->id, 'ID should be null for unpersisted model');
 		$this->assertNotNull($permission->name, 'Name should be set');

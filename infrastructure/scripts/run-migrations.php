@@ -71,21 +71,21 @@ echo "About to create Guide instance...\n";
 try {
     $guide = new \Proto\Database\Migrations\Guide();
     echo "Guide created successfully\n";
-    
+
     // Try to get new migrations to debug
     $reflection = new ReflectionClass($guide);
     $method = $reflection->getMethod('getNewMigrations');
     $method->setAccessible(true);
-    
+
     echo "About to get new migrations...\n";
     $migrations = $method->invoke($guide);
     echo "Found " . count($migrations) . " migrations\n";
-    
+
     echo "Running migrations...\n";
     $result = $guide->run();
     echo "Migration run completed...\n";
     echo "Migration result: " . var_export($result, true) . "\n";
-    
+
 } catch (Throwable $e) {
     echo "EXCEPTION: " . $e->getMessage() . "\n";
     echo "File: " . $e->getFile() . ":" . $e->getLine() . "\n";
