@@ -15,31 +15,38 @@ error_reporting(E_ALL);
 // Error::disable();
 
 /**
- * Set testing environment BEFORE initializing Base
- * This ensures migrations use the correct database connection
- */
-if (isset($_SERVER['APP_ENV']) && $_SERVER['APP_ENV'] === 'testing')
-{
-	$_ENV['APP_ENV'] = 'testing';
-	echo "Running migrations in TESTING environment\n";
-}
-
-/**
  * Initialize the Proto framework
  */
 new Base();
 
 /**
- * Ensure we're using the testing environment if APP_ENV is set
+ * Override environment from APP_ENV if set (for CI/testing)
+ * The Config class uses HTTP_HOST to detect environment, but in CLI
+ * we need to explicitly set it based on APP_ENV environment variable
  */
 if (isset($_SERVER['APP_ENV']) && $_SERVER['APP_ENV'] === 'testing')
 {
 	setEnv('env', 'testing');
-	echo "Using testing database connection\n";
+	echo "Running migrations in TESTING environment\n";
+	echo "Current env setting: " . env('env') . "\n";
+}
+else
+{
+	echo "Running migrations in " . strtoupper(env('env')) . " environment\n";
 }
 
+// Show current configuration
+echo "Configuration check:\n";
+$config = \Proto\Config::getInstance();
+$dbSettings = $config->getDBSettings('default');
+echo "  Environment: " . env('env') . "\n";
+echo "  Database host: " . ($dbSettings->host ?? 'not set') . "\n";
+echo "  Database name: " . ($dbSettings->database ?? 'not set') . "\n";
+echo "  Database port: " . ($dbSettings->port ?? 'not set') . "\n";
+echo "  Database user: " . ($dbSettings->username ?? 'not set') . "\n";
+
 // Verify database connection before running migrations
-echo "Verifying database connection...\n";
+echo "\nVerifying database connection...\n";
 try {
     $db = \Proto\Database\Database::getConnection('default', true);
     if ($db) {
