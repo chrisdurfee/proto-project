@@ -209,10 +209,18 @@ class MessageController extends ResourceController
 	 */
 	protected function getOtherParticipants(array $participants, int $currentUserId): array
 	{
-		return array_filter($participants, function($participant) use ($currentUserId)
+		$rows = [];
+		foreach ($participants as $participant)
 		{
-			return $participant->id !== $currentUserId;
-		});
+			if ($participant->userId == $currentUserId)
+			{
+				continue;
+			}
+
+			$rows[] = (object)$participant;
+		}
+
+		return $rows;
 	}
 
 	/**
@@ -231,8 +239,8 @@ class MessageController extends ResourceController
 
 		if (count($participants) === 1)
 		{
-			$participants = $participants[0];
-			return ["user:{$participants->id}:status"];
+			$participant = $participants[0];
+			return ["user:{$participant->userId}:status"];
 		}
 		else
 		{
@@ -240,7 +248,7 @@ class MessageController extends ResourceController
 			$channels = [];
 			foreach ($participants as $participant)
 			{
-				$channels[] = "user:{$participant->id}:status";
+				$channels[] = "user:{$participant->userId}:status";
 			}
 			return $channels;
 		}
@@ -272,7 +280,7 @@ class MessageController extends ResourceController
 		$participantChannels = $this->getParticipantChannels($conversationId);
 		if (!empty($participantChannels))
 		{
-			$channels = array_merge($channels, $participantChannels);
+			$channels = array_merge($participantChannels, $channels);
 		}
 
 		redisEvent($channels, function($channel, $message): array|null
@@ -280,7 +288,7 @@ class MessageController extends ResourceController
 			/**
 			 * pass the user status update.
 			 */
-			if (strpos($channel, 'user:'))
+			if (strpos($channel, 'user:') !== false)
 			{
 				return [
 					'userStatus' => [
