@@ -38,7 +38,6 @@ export const AssistantMessageModel = Model.extend({
 
 				source.onerror = (event) =>
 				{
-					console.error('[SSE] Connection error, will attempt reconnect in', RECONNECT_DELAY / 1000, 'seconds');
 					source.close();
 
 					if (!intentionallyClosed)

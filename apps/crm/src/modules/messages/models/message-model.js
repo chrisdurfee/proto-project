@@ -35,7 +35,7 @@ export const MessageModel = Model.extend({
 				}
 
 				const fullUrl = this.getUrl(url);
-				source = new EventSource(fullUrl + '?' + params);
+				source = new EventSource(fullUrl + '?' + params, { withCredentials: true });
 
 				source.onopen = () =>
 				{

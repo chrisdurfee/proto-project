@@ -36,23 +36,20 @@ export const ConversationModel = Model.extend({
 
 				const fullUrl = this.getUrl(url);
 				const queryString = params ? '?' + params : '';
-				source = new EventSource(fullUrl + queryString);
+				source = new EventSource(fullUrl + queryString, { withCredentials: true });
 
 				source.onopen = () =>
 				{
-					//console.log('[SSE] Conversation sync established');
 				};
 
 				source.onerror = (error) =>
 				{
-					//console.error('[SSE] Conversation sync error, will attempt reconnect in', RECONNECT_DELAY / 1000, 'seconds');
 					source.close();
 
 					if (!intentionallyClosed)
 					{
 						reconnectTimer = setTimeout(() =>
 						{
-							//console.log('[SSE] Attempting to reconnect conversation sync...');
 							connect();
 						}, RECONNECT_DELAY);
 					}
@@ -70,7 +67,6 @@ export const ConversationModel = Model.extend({
 					}
 					catch (error)
 					{
-						//console.error('[SSE] Error parsing conversation message:', error);
 					}
 				};
 			};

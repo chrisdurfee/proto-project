@@ -430,7 +430,7 @@ class UserController extends ResourceController
 	 */
 	protected function updateItemStatus(object $data): object
 	{
-		$response = parent::updateItem($data);
+		$response = parent::updateItemStatus($data);
 		if ($response->success)
 		{
 			// Publish Redis event for real-time status tracking

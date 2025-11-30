@@ -47,7 +47,7 @@ export const AssistantConversationModel = Model.extend({
 
 				const fullUrl = this.getUrl(url);
 				const queryString = params ? '?' + params : '';
-				source = new EventSource(fullUrl + queryString);
+				source = new EventSource(fullUrl + queryString, { withCredentials: true });
 
 				source.onerror = (error) =>
 				{

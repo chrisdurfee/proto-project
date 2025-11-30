@@ -36,11 +36,10 @@ export const ActivityModel = Model.extend({
 
 				const fullUrl = this.getUrl(url);
 				const queryString = params ? '?' + params : '';
-				source = new EventSource(fullUrl + queryString);
+				source = new EventSource(fullUrl + queryString, { withCredentials: true });
 
 				source.onopen = () =>
 				{
-					//console.log('[SSE] Activity sync established');
 					if (onOpenCallBack)
 					{
 						onOpenCallBack();
@@ -49,14 +48,12 @@ export const ActivityModel = Model.extend({
 
 				source.onerror = (error) =>
 				{
-					//console.error('[SSE] Activity sync error, will attempt reconnect in', RECONNECT_DELAY / 1000, 'seconds');
 					source.close();
 
 					if (!intentionallyClosed)
 					{
 						reconnectTimer = setTimeout(() =>
 						{
-							//console.log('[SSE] Attempting to reconnect activity sync...');
 							connect();
 						}, RECONNECT_DELAY);
 					}
@@ -74,7 +71,6 @@ export const ActivityModel = Model.extend({
 					}
 					catch (error)
 					{
-						//console.error('[SSE] Error parsing activity message:', error);
 					}
 				};
 			};
