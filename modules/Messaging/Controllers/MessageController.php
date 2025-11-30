@@ -291,11 +291,9 @@ class MessageController extends ResourceController
 			if (strpos($channel, 'user:') !== false)
 			{
 				return [
-					'userStatus' => [
-						[
-							'status' => $message->status,
-							'userId' => $message->id
-						]
+					'userStatus' => (object)[
+						'status' => $message['status'],
+						'userId' => $message['id']
 					]
 				];
 			}

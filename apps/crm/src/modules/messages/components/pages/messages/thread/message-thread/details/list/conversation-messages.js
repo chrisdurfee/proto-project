@@ -136,6 +136,12 @@ export const ConversationMessages = Jot(
 			return;
 		}
 
+		if (data.userStatus)
+		{
+			// @ts-ignore
+			return this.parent.data.otherUser.status = data.userStatus.status;
+		}
+
 		// Handle new and updated messages
 		if (data.merge && data.merge.length > 0)
 		{
