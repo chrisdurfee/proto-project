@@ -368,6 +368,89 @@ class ConversationController extends ResourceController
 	}
 
 	/**
+	 * Get channels to subscribe to for a user.
+	 *
+	 * @param int $userId
+	 * @return array
+	 */
+	protected function getSyncChannels(int $userId): array
+	{
+		$channels = ["user:{$userId}:conversations"];
+
+		$participantMap = $this->getConversationParticipantIds($userId);
+		foreach ($participantMap as $participantId => $conversationIds)
+		{
+			$channels[] = "user:{$participantId}:status";
+		}
+
+		return $channels;
+	}
+
+	/**
+	 * Extract user ID from status channel name.
+	 *
+	 * @param string $channel
+	 * @return int|null
+	 */
+	protected function extractUserIdFromChannel(string $channel): ?int
+	{
+		$parts = explode(':', $channel);
+		return isset($parts[1]) ? (int)$parts[1] : null;
+	}
+
+	/**
+	 * Handle status update message.
+	 *
+	 * @param string $channel
+	 * @param array $message
+	 * @param int $userId
+	 * @param array $participantMap
+	 * @return int|null
+	 */
+	protected function handleStatusUpdate(string $channel, array $message, int $userId, array $participantMap): ?int
+	{
+		$statusUserId = $this->extractUserIdFromChannel($channel);
+		if (!$statusUserId)
+		{
+			return null;
+		}
+
+		// Get first conversation ID where this user is a participant
+		$conversationIds = $participantMap[$statusUserId] ?? [];
+		return $conversationIds[0] ?? null;
+	}
+
+	/**
+	 * Build sync response for conversation update.
+	 *
+	 * @param int $conversationId
+	 * @param int $userId
+	 * @param string $action
+	 * @return array|null
+	 */
+	protected function buildSyncResponse(int $conversationId, int $userId, string $action = 'merge'): ?array
+	{
+		if ($action === 'delete')
+		{
+			return [
+				'merge' => [],
+				'deleted' => [$conversationId]
+			];
+		}
+
+		$conversation = $this->getConversationData($conversationId, $userId);
+		if (!$conversation)
+		{
+			return null;
+		}
+
+		return [
+			'merge' => [$conversation],
+			'deleted' => []
+		];
+	}
+
+	/**
 	 * Stream conversation updates via Redis-based Server-Sent Events.
 	 * Listens to conversation updates and participant status changes via Redis pub/sub.
 	 *
@@ -382,17 +465,9 @@ class ConversationController extends ResourceController
 			return;
 		}
 
-		// Build list of channels to listen to
-		$channels = ["user:{$userId}:conversations"];
-
-		// Get participant IDs with their conversation IDs
+		$channels = $this->getSyncChannels($userId);
 		$participantMap = $this->getConversationParticipantIds($userId);
-		foreach ($participantMap as $participantId => $conversationIds)
-		{
-			$channels[] = "user:{$participantId}:status";
-		}
 
-		// Subscribe to all channels
 		redisEvent(
 			$channels,
 			function($channel, $message) use ($userId, $participantMap)
@@ -400,39 +475,23 @@ class ConversationController extends ResourceController
 				// Handle user status updates
 				if (strpos($channel, ':status') !== false)
 				{
-					// Extract userId from channel (user:123:status)
-					$parts = explode(':', $channel);
-					$statusUserId = (int)($parts[1] ?? 0);
-
-					// Get conversation IDs where this user is a participant
-					$conversationIds = $participantMap[$statusUserId] ?? [];
-
-					$userId = $message['id'] ?? null;
-					$message['id'] = $conversationIds[0] ?? null;
+					$conversationId = $this->handleStatusUpdate($channel, $message, $userId, $participantMap);
+					if (!$conversationId)
+					{
+						return null;
+					}
+					return $this->buildSyncResponse($conversationId, $userId);
 				}
 
 				// Handle conversation updates
-				// Message contains conversation ID from Redis publish
 				$conversationId = $message['id'] ?? $message['conversationId'] ?? null;
 				if (!$conversationId)
 				{
-					return null; // Invalid message, skip
+					return null;
 				}
 
-				// Fetch the updated conversation data
-				$conversation = $this->getConversationData((int)$conversationId, (int)$userId);
-				if (!$conversation)
-				{
-					return null; // Conversation not found
-				}
-
-				// Determine action type from message
 				$action = $message['action'] ?? 'merge';
-
-				return [
-					'merge' => $action === 'merge' ? [$conversation] : [],
-					'deleted' => $action === 'delete' ? [$conversationId] : []
-				];
+				return $this->buildSyncResponse((int)$conversationId, $userId, $action);
 			}
 		);
 	}
