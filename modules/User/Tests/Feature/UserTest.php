@@ -298,13 +298,13 @@ class UserTest extends Test
 			'id' => $userId
 		]);
 
-		// Retrieve the user to verify deletedAt was set
-		$deleted = User::get($userId);
+		// Refresh the model to get latest data from database
+		$refreshed = $user->refresh();
+		$this->assertTrue($refreshed, 'User should be refreshable after soft delete');
 
-		// Framework behavior: get() still returns soft-deleted records (with deletedAt set)
+		// Framework behavior: refresh() still loads soft-deleted records (with deletedAt set)
 		// This allows checking the soft-delete timestamp
-		$this->assertNotNull($deleted, 'User should still be retrievable after soft delete');
-		$this->assertNotNull($deleted->deletedAt, 'deletedAt should be set after soft delete');
+		$this->assertNotNull($user->deletedAt, 'deletedAt should be set after soft delete');
 
 		// Verify that default queries (fetchWhere) filter out soft-deleted records
 		$rows = User::fetchWhere(['id' => $userId]);
