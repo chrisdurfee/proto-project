@@ -229,19 +229,17 @@ class UserTest extends Test
 			'email' => 'retrieve@example.com'
 		]);
 
-		// Use fetchWhere which is transaction-safe
-		$results = User::fetchWhere(['id' => $user->id]);
-		$this->assertCount(1, $results, 'User should be retrievable by ID');
-		$retrieved = $results[0];
+		// Use get() which is transaction-safe (Proto built-in method)
+		$retrieved = User::get($user->id);
 
 		$this->assertNotNull($retrieved, 'User should be retrievable by ID');
 		$this->assertEquals($user->id, $retrieved->id);
 		$this->assertEquals('retrieve@example.com', $retrieved->email);
 
-		// Also test with email
-		$emailResults = User::fetchWhere(['email' => 'retrieve@example.com']);
-		$this->assertCount(1, $emailResults, 'User should be retrievable by email');
-		$this->assertEquals($user->id, $emailResults[0]->id);
+		// Also test getBy() with email (Proto built-in method)
+		$retrievedByEmail = User::getBy(['email' => 'retrieve@example.com']);
+		$this->assertNotNull($retrievedByEmail, 'User should be retrievable by email');
+		$this->assertEquals($user->id, $retrievedByEmail->id);
 	}
 
 	/**
@@ -269,14 +267,12 @@ class UserTest extends Test
 			'last_name' => 'Name'
 		]);
 
-		// Use fetchWhere which is transaction-safe
-		$results = User::fetchWhere(['id' => $user->id]);
-		$this->assertCount(1, $results, 'User should be retrievable after update');
-		$updated = $results[0];
+		// Use refresh() to reload from database (transaction-safe)
+		$refreshed = $user->refresh();
+		$this->assertTrue($refreshed, 'User should be refreshable after update');
 
-		$this->assertNotNull($updated, 'User should be retrievable after update');
-		$this->assertEquals('Updated', $updated->firstName, 'First name should be updated');
-		$this->assertEquals('Name', $updated->lastName, 'Last name should be updated');
+		$this->assertEquals('Updated', $user->firstName, 'First name should be updated');
+		$this->assertEquals('Name', $user->lastName, 'Last name should be updated');
 	}
 
 	/**
@@ -356,13 +352,11 @@ class UserTest extends Test
 			'status' => 'away'
 		]);
 
-		// Use fetchWhere which is transaction-safe
-		$results = User::fetchWhere(['id' => $user->id]);
-		$this->assertCount(1, $results, 'User should be retrievable after status update');
-		$updated = $results[0];
+		// Use refresh() to reload from database (transaction-safe)
+		$refreshed = $user->refresh();
+		$this->assertTrue($refreshed, 'User should be refreshable after status update');
 
-		$this->assertNotNull($updated, 'User should be retrievable after status update');
-		$this->assertEquals('away', $updated->status, 'Status should be updated to away');
+		$this->assertEquals('away', $user->status, 'Status should be updated to away');
 	}
 
 	/**
