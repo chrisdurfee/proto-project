@@ -385,9 +385,9 @@ class ConversationController extends ResourceController
 		// Build list of channels to listen to
 		$channels = ["user:{$userId}:conversations"];
 
-		// Add status channels for all conversation participants
-		$participantIds = $this->getConversationParticipantIds($userId);
-		foreach ($participantIds as $participantId)
+		// Get participant IDs with their conversation IDs
+		$participantMap = $this->getConversationParticipantIds($userId);
+		foreach ($participantMap as $participantId => $conversationIds)
 		{
 			$channels[] = "user:{$participantId}:status";
 		}
@@ -395,15 +395,23 @@ class ConversationController extends ResourceController
 		// Subscribe to all channels
 		redisEvent(
 			$channels,
-			function($channel, $message) use ($userId)
+			function($channel, $message) use ($userId, $participantMap)
 			{
 				// Handle user status updates
 				if (strpos($channel, ':status') !== false)
 				{
+					// Extract userId from channel (user:123:status)
+					$parts = explode(':', $channel);
+					$statusUserId = (int)($parts[1] ?? 0);
+					
+					// Get conversation IDs where this user is a participant
+					$conversationIds = $participantMap[$statusUserId] ?? [];
+					
 					return [
 						'userStatus' => (object)[
 							'status' => $message['status'],
-							'userId' => $message['id']
+							'userId' => $message['id'],
+							'conversationIds' => $conversationIds
 						]
 					];
 				}
