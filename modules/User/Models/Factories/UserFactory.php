@@ -3,7 +3,6 @@ namespace Modules\User\Models\Factories;
 
 use Proto\Models\Factory;
 use Modules\User\Models\User;
-use Modules\User\Models\NotificationPreference;
 
 /**
  * UserFactory
@@ -17,35 +16,12 @@ class UserFactory extends Factory
 	/**
 	 * Factory constructor.
 	 *
-	 * Sets up the afterCreating hook to auto-create notification preferences.
-	 * Uses Proto 1.0.157+ fixed connection caching to ensure same transaction.
-	 *
 	 * @param int $count
 	 * @param array $attributes
 	 */
 	public function __construct(int $count = 1, array $attributes = [])
 	{
 		parent::__construct($count, $attributes);
-
-		// Set afterCreating callback to create notification preferences
-		// This ensures the User model's eager-loaded NotificationPreference join returns data
-		$this->afterCreating = function (User $user) {
-			// Use direct DB insert to ensure same transaction (more reliable than model->create())
-			try {
-				$db = \Proto\Database\Database::getConnection();
-				$db->insert('notification_preferences', (object)[
-					'user_id' => $user->id,
-					'allow_email' => 1,
-					'allow_sms' => 1,
-					'allow_push' => 1,
-					'created_at' => date('Y-m-d H:i:s'),
-					'updated_at' => date('Y-m-d H:i:s')
-				]);
-			} catch (\Exception $e) {
-				// Silently fail - preference already exists or FK constraint issue
-				// The test will fail with a better error message if this causes problems
-			}
-		};
 	}
 
 	/**
