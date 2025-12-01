@@ -403,10 +403,10 @@ class ConversationController extends ResourceController
 					// Extract userId from channel (user:123:status)
 					$parts = explode(':', $channel);
 					$statusUserId = (int)($parts[1] ?? 0);
-					
+
 					// Get conversation IDs where this user is a participant
 					$conversationIds = $participantMap[$statusUserId] ?? [];
-					
+
 					return [
 						'userStatus' => (object)[
 							'status' => $message['status'],
