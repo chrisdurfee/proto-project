@@ -1,4 +1,4 @@
-import { Div } from '@base-framework/atoms';
+import { A, Div } from '@base-framework/atoms';
 import { Component, Data, Jot } from '@base-framework/base';
 import { Avatar } from '@base-framework/ui/molecules';
 import { getSavedToken } from '../../../csrf-token';
@@ -65,12 +65,14 @@ const removeUser = (data) =>
  * @returns {object}
  */
 const UserContainer = (props) => Div({ class: 'user' }, [
-	Avatar({
-		src: `/files/users/profile/${props.image}`,
-		alt: props.displayName,
-		fallbackText: props.displayName,
-		size: 'sm'
-	})
+	A({ href: `/users/${props.id}` }, [
+		Avatar({
+			src: `/files/users/profile/${props.image}`,
+			alt: props.displayName,
+			fallbackText: props.displayName,
+			size: 'sm'
+		})
+	])
 ]);
 
 /**
@@ -182,6 +184,11 @@ export const ActivityAvatarGroup = Jot(
 		{
 			const handlePageShow = (e) =>
 			{
+				if (document.hidden)
+				{
+					return;
+				}
+
 				if (!e.persisted)
 				{
 					// @ts-ignore
