@@ -229,17 +229,19 @@ class UserTest extends Test
 			'email' => 'retrieve@example.com'
 		]);
 
-		// Use get() which is transaction-safe
-		$retrieved = User::get($user->id);
+		// Use fetchWhere which is transaction-safe
+		$results = User::fetchWhere(['id' => $user->id]);
+		$this->assertCount(1, $results, 'User should be retrievable by ID');
+		$retrieved = $results[0];
 
 		$this->assertNotNull($retrieved, 'User should be retrievable by ID');
 		$this->assertEquals($user->id, $retrieved->id);
 		$this->assertEquals('retrieve@example.com', $retrieved->email);
 
-		// Also test getBy
-		$retrievedByEmail = User::getBy(['email' => 'retrieve@example.com']);
-		$this->assertNotNull($retrievedByEmail, 'User should be retrievable by email');
-		$this->assertEquals($user->id, $retrievedByEmail->id);
+		// Also test with email
+		$emailResults = User::fetchWhere(['email' => 'retrieve@example.com']);
+		$this->assertCount(1, $emailResults, 'User should be retrievable by email');
+		$this->assertEquals($user->id, $emailResults[0]->id);
 	}
 
 	/**
@@ -267,8 +269,11 @@ class UserTest extends Test
 			'last_name' => 'Name'
 		]);
 
-		// Use Proto's get() method - transaction-safe
-		$updated = User::get($user->id);
+		// Use fetchWhere which is transaction-safe
+		$results = User::fetchWhere(['id' => $user->id]);
+		$this->assertCount(1, $results, 'User should be retrievable after update');
+		$updated = $results[0];
+
 		$this->assertNotNull($updated, 'User should be retrievable after update');
 		$this->assertEquals('Updated', $updated->firstName, 'First name should be updated');
 		$this->assertEquals('Name', $updated->lastName, 'Last name should be updated');
@@ -352,8 +357,11 @@ class UserTest extends Test
 			'status' => 'away'
 		]);
 
-		// Use Proto's get() method - transaction-safe
-		$updated = User::get($user->id);
+		// Use fetchWhere which is transaction-safe
+		$results = User::fetchWhere(['id' => $user->id]);
+		$this->assertCount(1, $results, 'User should be retrievable after status update');
+		$updated = $results[0];
+
 		$this->assertNotNull($updated, 'User should be retrievable after status update');
 		$this->assertEquals('away', $updated->status, 'Status should be updated to away');
 	}
