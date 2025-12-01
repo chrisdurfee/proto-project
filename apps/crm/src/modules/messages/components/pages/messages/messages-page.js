@@ -97,7 +97,7 @@ export const MessagesPage = () =>
 		 * @param {object} userStatus
 		 * @returns {void}
 		 */
-		updateUserStatus({ status, userId })
+		updateUserStatus({ status, userId, conversationIds })
 		{
 			// @ts-ignore
 			if (!this.list)
@@ -105,10 +105,14 @@ export const MessagesPage = () =>
 				return;
 			}
 
+			const updatedRows = [];
+			for (const conversationId of conversationIds)
+			{
+				updatedRows.push({ conversationId, participants: [{ userId, status }] });
+			}
+
 			// @ts-ignore
-			this.list.modify([
-				{ userId, status }
-			]);
+			this.list.modify(updatedRows);
 		},
 
 		/**

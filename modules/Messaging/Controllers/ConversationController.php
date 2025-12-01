@@ -407,13 +407,8 @@ class ConversationController extends ResourceController
 					// Get conversation IDs where this user is a participant
 					$conversationIds = $participantMap[$statusUserId] ?? [];
 
-					return [
-						'userStatus' => (object)[
-							'status' => $message['status'],
-							'userId' => $message['id'],
-							'conversationIds' => $conversationIds
-						]
-					];
+					$userId = $message['id'] ?? null;
+					$message['id'] = $conversationIds[0] ?? null;
 				}
 
 				// Handle conversation updates
