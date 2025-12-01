@@ -221,11 +221,25 @@ class UserTest extends Test
 			'email' => 'retrieve@example.com'
 		]);
 
-		$retrieved = User::getBy(['email' => 'retrieve@example.com']);
+		$this->assertNotNull($user->id, 'User should have an ID after creation');
 
-		$this->assertNotNull($retrieved);
+		// Verify in database first
+		$this->assertDatabaseHas('users', [
+			'id' => $user->id,
+			'email' => 'retrieve@example.com'
+		]);
+
+		// Use get() which is transaction-safe
+		$retrieved = User::get($user->id);
+
+		$this->assertNotNull($retrieved, 'User should be retrievable by ID');
 		$this->assertEquals($user->id, $retrieved->id);
 		$this->assertEquals('retrieve@example.com', $retrieved->email);
+
+		// Also test getBy
+		$retrievedByEmail = User::getBy(['email' => 'retrieve@example.com']);
+		$this->assertNotNull($retrievedByEmail, 'User should be retrievable by email');
+		$this->assertEquals($user->id, $retrievedByEmail->id);
 	}
 
 	/**
@@ -236,16 +250,28 @@ class UserTest extends Test
 	public function testUserCanBeUpdated(): void
 	{
 		$user = User::factory()->create();
+		$originalId = $user->id;
 
 		$user->firstName = 'Updated';
 		$user->lastName = 'Name';
 		$result = $user->update();
 
-		$this->assertTrue($result);
+		$this->assertTrue($result, 'Update should return true');
+		$this->assertNotNull($user->id, 'User ID should not be null after update');
+		$this->assertEquals($originalId, $user->id, 'User ID should not change after update');
 
+		// Verify directly in database (use snake_case column names)
+		$this->assertDatabaseHas('users', [
+			'id' => $user->id,
+			'first_name' => 'Updated',
+			'last_name' => 'Name'
+		]);
+
+		// Use Proto's get() method - transaction-safe
 		$updated = User::get($user->id);
-		$this->assertEquals('Updated', $updated->firstName);
-		$this->assertEquals('Name', $updated->lastName);
+		$this->assertNotNull($updated, 'User should be retrievable after update');
+		$this->assertEquals('Updated', $updated->firstName, 'First name should be updated');
+		$this->assertEquals('Name', $updated->lastName, 'Last name should be updated');
 	}
 
 	/**
@@ -260,11 +286,24 @@ class UserTest extends Test
 
 		$result = $user->delete();
 
-		$this->assertTrue($result);
+		$this->assertTrue($result, 'Delete should return true');
 
 		// User model uses soft deletes (deletedAt field)
+		$this->assertDatabaseHas('users', [
+			'id' => $userId
+		]);
+
+		// Retrieve the user to verify deletedAt was set
 		$deleted = User::get($userId);
-		$this->assertNotNull($deleted->deletedAt);
+		
+		// Framework behavior: get() still returns soft-deleted records (with deletedAt set)
+		// This allows checking the soft-delete timestamp
+		$this->assertNotNull($deleted, 'User should still be retrievable after soft delete');
+		$this->assertNotNull($deleted->deletedAt, 'deletedAt should be set after soft delete');
+		
+		// Verify that default queries (fetchWhere) filter out soft-deleted records
+		$rows = User::fetchWhere(['id' => $userId]);
+		$this->assertCount(0, $rows, 'Soft-deleted users should not be returned by fetchWhere without showDeleted modifier');
 	}
 
 	/**
@@ -303,10 +342,20 @@ class UserTest extends Test
 		$this->assertEquals('online', $user->status);
 
 		$user->status = 'away';
-		$user->update();
+		$result = $user->update();
 
+		$this->assertTrue($result, 'Update should return true');
+
+		// Verify directly in database
+		$this->assertDatabaseHas('users', [
+			'id' => $user->id,
+			'status' => 'away'
+		]);
+
+		// Use Proto's get() method - transaction-safe
 		$updated = User::get($user->id);
-		$this->assertEquals('away', $updated->status);
+		$this->assertNotNull($updated, 'User should be retrievable after status update');
+		$this->assertEquals('away', $updated->status, 'Status should be updated to away');
 	}
 
 	/**
