@@ -294,21 +294,20 @@ class UserTest extends Test
 		$this->assertTrue($result, 'Delete should return true');
 
 		// User model uses soft deletes (deletedAt field)
+		// Verify user still exists in database but with deletedAt set
 		$this->assertDatabaseHas('users', [
 			'id' => $userId
 		]);
 
-		// Refresh the model to get latest data from database
-		$refreshed = $user->refresh();
-		$this->assertTrue($refreshed, 'User should be refreshable after soft delete');
-
-		// Framework behavior: refresh() still loads soft-deleted records (with deletedAt set)
-		// This allows checking the soft-delete timestamp
-		$this->assertNotNull($user->deletedAt, 'deletedAt should be set after soft delete');
+		// Check that deleted_at was set in the database (use raw DB query to bypass soft-delete filter)
+		$db = \Proto\Database\Database::getConnection();
+		$rows = $db->fetch("SELECT id, deleted_at FROM users WHERE id = ?", [$userId]);
+		$this->assertCount(1, $rows, 'User record should still exist in database');
+		$this->assertNotNull($rows[0]->deleted_at, 'deleted_at should be set after soft delete');
 
 		// Verify that default queries (fetchWhere) filter out soft-deleted records
-		$rows = User::fetchWhere(['id' => $userId]);
-		$this->assertCount(0, $rows, 'Soft-deleted users should not be returned by fetchWhere without showDeleted modifier');
+		$fetchResults = User::fetchWhere(['id' => $userId]);
+		$this->assertCount(0, $fetchResults, 'Soft-deleted users should not be returned by fetchWhere without showDeleted modifier');
 	}
 
 	/**
