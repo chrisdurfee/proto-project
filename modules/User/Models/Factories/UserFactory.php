@@ -26,7 +26,7 @@ class UserFactory extends Factory
 	public function __construct(int $count = 1, array $attributes = [])
 	{
 		parent::__construct($count, $attributes);
-		
+
 		// Set afterCreating callback to create notification preferences
 		// This ensures the User model's eager-loaded NotificationPreference join returns data
 		$this->afterCreating = function (User $user) {
