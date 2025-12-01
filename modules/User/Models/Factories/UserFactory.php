@@ -15,6 +15,33 @@ use Modules\User\Models\NotificationPreference;
 class UserFactory extends Factory
 {
 	/**
+	 * Factory constructor.
+	 *
+	 * Sets up the afterCreating hook to auto-create notification preferences.
+	 * Uses Proto 1.0.157+ fixed connection caching to ensure same transaction.
+	 *
+	 * @param int $count
+	 * @param array $attributes
+	 */
+	public function __construct(int $count = 1, array $attributes = [])
+	{
+		parent::__construct($count, $attributes);
+		
+		// Set afterCreating callback to create notification preferences
+		// This ensures the User model's eager-loaded NotificationPreference join returns data
+		$this->afterCreating = function (User $user) {
+			$preference = new NotificationPreference();
+			$preference->userId = $user->id;
+			$preference->allowEmail = 1;
+			$preference->allowSms = 1;
+			$preference->allowPush = 1;
+			$preference->createdAt = date('Y-m-d H:i:s');
+			$preference->updatedAt = date('Y-m-d H:i:s');
+			$preference->create();
+		};
+	}
+
+	/**
 	 * The model this factory creates
 	 *
 	 * @return string
@@ -165,29 +192,5 @@ class UserFactory extends Factory
 		return [
 			'email' => $username . '@' . $domain
 		];
-	}
-
-	/**
-	 * Configure the factory
-	 *
-	 * This sets up the afterCreating hook to automatically create notification
-	 * preferences for each user, ensuring the User model's eager-loaded joins work.
-	 *
-	 * @return static
-	 */
-	protected function configure(): static
-	{
-		return $this->afterCreating(function (User $user) {
-			// Create default notification preferences for the user
-			// This ensures the NotificationPreference LEFT JOIN in User::joins() returns data
-			$preference = new NotificationPreference();
-			$preference->userId = $user->id;
-			$preference->allowEmail = 1;
-			$preference->allowSms = 1;
-			$preference->allowPush = 1;
-			$preference->createdAt = date('Y-m-d H:i:s');
-			$preference->updatedAt = date('Y-m-d H:i:s');
-			$preference->create();
-		});
 	}
 }
