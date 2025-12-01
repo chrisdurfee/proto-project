@@ -327,8 +327,49 @@ class ConversationController extends ResourceController
 	}
 
 	/**
+	 * Get all participant user IDs from user's conversations with their conversation IDs.
+	 *
+	 * @param int $userId
+	 * @return array Map of userId => [conversationIds]
+	 */
+	protected function getConversationParticipantIds(int $userId): array
+	{
+		$participants = ConversationParticipant::fetchWhere([
+			['cp.userId', $userId]
+		]);
+
+		if (empty($participants))
+		{
+			return [];
+		}
+
+		// Collect unique participant IDs with their conversation IDs
+		$participantMap = [];
+		foreach ($participants as $participant)
+		{
+			if (isset($participant->participants) && is_array($participant->participants))
+			{
+				foreach ($participant->participants as $p)
+				{
+					$pUserId = $p->userId ?? null;
+					if ($pUserId && $pUserId !== $userId)
+					{
+						if (!isset($participantMap[$pUserId]))
+						{
+							$participantMap[$pUserId] = [];
+						}
+						$participantMap[$pUserId][] = $participant->conversationId;
+					}
+				}
+			}
+		}
+
+		return $participantMap;
+	}
+
+	/**
 	 * Stream conversation updates via Redis-based Server-Sent Events.
-	 * Listens to conversation updates published via Redis pub/sub.
+	 * Listens to conversation updates and participant status changes via Redis pub/sub.
 	 *
 	 * @param Request $request
 	 * @return void
@@ -341,11 +382,33 @@ class ConversationController extends ResourceController
 			return;
 		}
 
-		// Subscribe to user's conversation updates channel
+		// Build list of channels to listen to
+		$channels = ["user:{$userId}:conversations"];
+
+		// Add status channels for all conversation participants
+		$participantIds = $this->getConversationParticipantIds($userId);
+		foreach ($participantIds as $participantId)
+		{
+			$channels[] = "user:{$participantId}:status";
+		}
+
+		// Subscribe to all channels
 		redisEvent(
-			"user:{$userId}:conversations",
+			$channels,
 			function($channel, $message) use ($userId)
 			{
+				// Handle user status updates
+				if (strpos($channel, ':status') !== false)
+				{
+					return [
+						'userStatus' => (object)[
+							'status' => $message['status'],
+							'userId' => $message['id']
+						]
+					];
+				}
+
+				// Handle conversation updates
 				// Message contains conversation ID from Redis publish
 				$conversationId = $message['id'] ?? $message['conversationId'] ?? null;
 				if (!$conversationId)

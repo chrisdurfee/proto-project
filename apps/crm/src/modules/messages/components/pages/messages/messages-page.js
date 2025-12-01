@@ -58,7 +58,21 @@ export const MessagesPage = () =>
 			// @ts-ignore
 			this.eventSource = this.data.xhr.sync({}, (response) =>
 			{
-				if (!response && !response.merge)
+				if (!response)
+				{
+					return;
+				}
+
+				// Handle user status updates
+				if (response.userStatus)
+				{
+					// @ts-ignore
+					this.updateUserStatus(response.userStatus);
+					return;
+				}
+
+				// Handle conversation updates
+				if (!response.merge)
 				{
 					return;
 				}
@@ -75,6 +89,26 @@ export const MessagesPage = () =>
 					);
 				}
 			});
+		},
+
+		/**
+		 * Update user status in all conversations.
+		 *
+		 * @param {object} userStatus
+		 * @returns {void}
+		 */
+		updateUserStatus({ status, userId })
+		{
+			// @ts-ignore
+			if (!this.list)
+			{
+				return;
+			}
+
+			// @ts-ignore
+			this.list.modify([
+				{ userId, status }
+			]);
 		},
 
 		/**
