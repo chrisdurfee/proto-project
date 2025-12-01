@@ -3,6 +3,7 @@ namespace Modules\User\Models\Factories;
 
 use Proto\Models\Factory;
 use Modules\User\Models\User;
+use Modules\User\Models\NotificationPreference;
 
 /**
  * UserFactory
@@ -164,5 +165,29 @@ class UserFactory extends Factory
 		return [
 			'email' => $username . '@' . $domain
 		];
+	}
+
+	/**
+	 * Configure the factory
+	 *
+	 * This sets up the afterCreating hook to automatically create notification
+	 * preferences for each user, ensuring the User model's eager-loaded joins work.
+	 *
+	 * @return static
+	 */
+	protected function configure(): static
+	{
+		return $this->afterCreating(function (User $user) {
+			// Create default notification preferences for the user
+			// This ensures the NotificationPreference LEFT JOIN in User::joins() returns data
+			$preference = new NotificationPreference();
+			$preference->userId = $user->id;
+			$preference->allowEmail = 1;
+			$preference->allowSms = 1;
+			$preference->allowPush = 1;
+			$preference->createdAt = date('Y-m-d H:i:s');
+			$preference->updatedAt = date('Y-m-d H:i:s');
+			$preference->create();
+		});
 	}
 }
