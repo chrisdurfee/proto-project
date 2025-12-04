@@ -75,6 +75,24 @@ export const GeneratorModal = ({ resourceType = 'Full Resource' }) =>
 );
 
 /**
+ * Handles indentation in textareas when the Tab key is pressed.
+ *
+ * @param {object} e - The keydown event.
+ */
+const indentCallback = (e) =>
+{
+	if (e.key === "Tab")
+	{
+		e.preventDefault();
+		const start = e.target.selectionStart;
+		const end = e.target.selectionEnd;
+		const value = e.target.value;
+		e.target.value = value.substring(0, start) + "\t" + value.substring(end);
+		e.target.selectionStart = e.target.selectionEnd = start + 1;
+	}
+};
+
+/**
  * Sets the default fields for the specified columns.
  *
  * @param {Array} columns - The columns to set fields from.
@@ -199,7 +217,7 @@ function getResourceForm(type, fullResource = false)
 							Textarea({ placeholder: "e.g.\nid:\ncreatedAt:\nupdatedAt:", rows: 4, required: true, bind: "model.fields" })
 						]),
 						new FormField({ name: "joins", label: "Joins", description: "Define joins for the model." }, [
-							Textarea({ placeholder: "e.g.\n$builder->left('test_table', 't')->on('id', 'client_id');", rows: 4, bind: "model.joins" })
+							Textarea({ placeholder: "e.g.\n$builder->left('test_table', 't')->on('id', 'client_id');", rows: 4, bind: "model.joins", keydown: indentCallback })
 						]),
 						new FormField({ name: "extends", label: "Extends", description: "Which class this model extends." }, [
 							Input({ type: "text", value: "Model", required: true, bind: "model.extends" })
@@ -260,7 +278,9 @@ function getResourceForm(type, fullResource = false)
 						Input({ type: "text", placeholder: "e.g. table_name", required: true, bind: "table.tableName" })
 					]),
 					new FormField({ name: "callback", label: "Call Back", description: "The table creation or modification logic." }, [
-						Textarea({ placeholder: `e.g. // fields
+						Textarea({
+							keydown: indentCallback,
+							placeholder: `e.g. // fields
 $table->id();
 $table->createdAt();
 $table->updatedAt();
@@ -290,7 +310,9 @@ $table->foreign('message_id')->references('id')->on('messages');`, required: tru
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "migration.className" })
 					]),
 					new FormField({ name: "up", label: "Up", description: "The migration up method logic." }, [
-						Textarea({ value: `$this->create('table_name', function($table)
+						Textarea({
+							keydown: indentCallback,
+							value: `$this->create('table_name', function($table)
 {
 	$table->id();
 	$table->timestamps();
@@ -314,7 +336,7 @@ $table->foreign('message_id')->references('id')->on('messages');`, required: tru
 });`, rows: 12, bind: "migration.up" })
 					]),
 					new FormField({ name: "down", label: "Down", description: "The migration down method logic." }, [
-						Textarea({ value: `$this->drop('table_name');`, rows: 3, bind: "migration.down" })
+						Textarea({ value: `$this->drop('table_name');`, rows: 3, bind: "migration.down", keydown: indentCallback })
 					])
 				])
 			];
