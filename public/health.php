@@ -32,15 +32,30 @@ if ($dbHost && $dbUser && $dbName) {
 }
 
 $redisHost = getenv('REDIS_HOST');
+$redisPort = (int)(getenv('REDIS_PORT') ?: 6379);
 if ($redisHost) {
     try {
         /**
          * @suppresswarnings PHP0413
          */
         $redis = new Redis();
-        @$redis->connect($redisHost, (int)getenv('REDIS_PORT') ?: 6379, 1.5);
+        @$redis->connect($redisHost, $redisPort, 1.5);
         $redisPass = getenv('REDIS_PASSWORD');
-        if ($redisPass) { @$redis->auth($redisPass); }
+        if ($redisPass) {
+            try {
+                @$redis->auth($redisPass);
+            } catch (Throwable $authException) {
+                $message = $authException->getMessage();
+                if (get_class($authException) === 'RedisException'
+                    && stripos($message, 'without any password configured') !== false) {
+                    // In dev we sometimes run Redis without a password; reconnect and continue.
+                    @$redis->close();
+                    @$redis->connect($redisHost, $redisPort, 1.5);
+                } else {
+                    throw $authException;
+                }
+            }
+        }
         $pong = @$redis->ping();
         $result['checks']['redis'] = ($pong === '+PONG' || $pong === 'PONG' || $pong === 1 || $pong === true) ? 'ok' : 'fail';
         if ($result['checks']['redis'] !== 'ok') { $result['status'] = 'degraded'; }
