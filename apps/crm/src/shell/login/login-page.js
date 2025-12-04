@@ -20,8 +20,8 @@ const PageProps =
 	{
 		return {
 			data: new Data({
-				username: 'testuser',
-				password: 'FirstUserAccount123!',
+				username: '',
+				password: '',
 				multiFactor: false,
 				selectedMfaOption: null,
 				options: []
