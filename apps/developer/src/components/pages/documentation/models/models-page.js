@@ -83,7 +83,12 @@ export const ModelsPage = () =>
 					For example, a model for the "example" table should be named \`Example\`.`
 				),
 				CodeBlock(
-`class Example extends Model
+`<?php declare(strict_types=1);
+namespace Modules\\Example\\Models;
+
+use Proto\\Models\\Model;
+
+class Example extends Model
 {
 
 }`
@@ -281,7 +286,12 @@ protected static function format(?object $data): ?object
 
 				// Code example: User model (with both JoinBuilder and Lazy Relationship including belongsToMany)
 				CodeBlock(
-`class User extends Model
+`<?php declare(strict_types=1);
+namespace Modules\\User\\Models;
+
+use Proto\\Models\\Model;
+
+class User extends Model
 {
 	protected static ?string $tableName = 'users';
 	protected static array $fields = ['id', 'name', 'email'];
@@ -333,7 +343,12 @@ protected static function format(?object $data): ?object
 
 				// Code example: Role model (with inverse many-to-many)
 				CodeBlock(
-`class Role extends Model
+`<?php declare(strict_types=1);
+namespace Modules\\User\\Models;
+
+use Proto\\Models\\Model;
+
+class Role extends Model
 {
 	protected static ?string $tableName = 'roles';
 	protected static array $fields = ['id', 'name', 'slug', 'description'];
@@ -358,7 +373,12 @@ protected static function format(?object $data): ?object
 
 				// Code example: Post model
 				CodeBlock(
-`class Post extends Model
+`<?php declare(strict_types=1);
+namespace Modules\\Blog\\Models;
+
+use Proto\\Models\\Model;
+
+class Post extends Model
 {
 	protected static ?string $tableName = 'posts';
 	protected static array $fields = ['id', 'user_id', 'title', 'body'];
@@ -385,7 +405,12 @@ protected static function format(?object $data): ?object
 
 				// Code example: Profile model
 				CodeBlock(
-`class Profile extends Model
+`<?php declare(strict_types=1);
+namespace Modules\\User\\Models;
+
+use Proto\\Models\\Model;
+
+class Profile extends Model
 {
 	protected static ?string $tableName = 'profiles';
 	protected static array $fields = ['id', 'user_id', 'bio', 'twitter_handle'];
@@ -480,7 +505,12 @@ $user->roles()->toggle([2, 6]);
 					`Handles MySQL POINT(x, y) spatial data. Supports multiple input formats:`
 				),
 				CodeBlock(
-`class UserAuthedLocation extends Model
+`<?php declare(strict_types=1);
+namespace Modules\\Auth\\Models;
+
+use Proto\\Models\\Model;
+
+class UserAuthedLocation extends Model
 {
 	protected static ?string $tableName = 'user_authed_locations';
 
@@ -526,7 +556,12 @@ $location->update(); // Automatically handles SET position = POINT(?, ?)`
 					`Handles automatic JSON encoding for metadata and configuration fields:`
 				),
 				CodeBlock(
-`class Event extends Model
+`<?php declare(strict_types=1);
+namespace Modules\\Events\\Models;
+
+use Proto\\Models\\Model;
+
+class Event extends Model
 {
 	protected static array $fields = [
 		'id',
@@ -559,7 +594,12 @@ $event->add(); // Arrays automatically encoded to JSON strings`
 					`You can mix multiple custom data types in a single model:`
 				),
 				CodeBlock(
-`class Location extends Model
+`<?php declare(strict_types=1);
+namespace Modules\\Events\\Models;
+
+use Proto\\Models\\Model;
+
+class Location extends Model
 {
 	protected static array $fields = [
 		'id',
@@ -664,7 +704,12 @@ class GeoLocation extends Model
 					`You can pass configured instances instead of class names for advanced customization:`
 				),
 				CodeBlock(
-`class Document extends Model
+`<?php declare(strict_types=1);
+namespace Modules\\Documents\\Models;
+
+use Proto\\Models\\Model;
+
+class Document extends Model
 {
 	protected static array $dataTypes = [
 		'position' => new PointType(),
@@ -684,7 +729,12 @@ class GeoLocation extends Model
 				),
 				P({ class: "text-muted-foreground" }, `Before (manual handling):`),
 				CodeBlock(
-`class UserAuthedLocationStorage extends Storage
+`<?php declare(strict_types=1);
+namespace Modules\\Auth\\Storage;
+
+use Proto\\Storage\\Storage;
+
+class UserAuthedLocationStorage extends Storage
 {
 	public function insert(object $data): bool
 	{
@@ -735,7 +785,12 @@ class GeoLocation extends Model
 				),
 				P({ class: "text-muted-foreground" }, `After (declarative):`),
 				CodeBlock(
-`class UserAuthedLocation extends Model
+`<?php declare(strict_types=1);
+namespace Modules\\Auth\\Models;
+
+use Proto\\Models\\Model;
+
+class UserAuthedLocation extends Model
 {
 	protected static array $dataTypes = [
 		'position' => PointType::class

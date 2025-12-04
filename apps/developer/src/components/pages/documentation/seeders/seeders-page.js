@@ -397,7 +397,7 @@ class UserTest extends Test
         $this->assertDatabaseCount('roles', 2); // Admin + User roles
 
         // Test with seeded data
-        $adminUser = User::where('role', 'admin')->first();
+        $adminUser = User::where(['role', 'admin'])->first();
         $this->assertNotNull($adminUser);
         $this->assertEquals('Admin User', $adminUser->name);
     }
@@ -405,7 +405,7 @@ class UserTest extends Test
     public function testUserAuthentication(): void
     {
         // Use seeded data for testing
-        $user = User::where('email', 'user@example.com')->first();
+        $user = User::where(['email', 'user@example.com'])->first();
 
         $this->assertNotNull($user);
         $this->assertTrue(password_verify('user123', $user->password));
@@ -465,13 +465,13 @@ class UserStatusTest extends Test
 
     public function testActiveUserCanLogin(): void
     {
-        $user = User::where('email', 'test@example.com')->first();
+        $user = User::where(['email', 'test@example.com'])->first();
         $this->assertEquals('active', $user->status);
     }
 
     public function testInactiveUserCannotLogin(): void
     {
-        $user = User::where('email', 'inactive@example.com')->first();
+        $user = User::where(['email', 'inactive@example.com'])->first();
         $this->assertEquals('inactive', $user->status);
     }
 }`
@@ -491,7 +491,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $environment = $_ENV['APP_ENV'] ?? 'production';
+        $environment = env('env') ?? 'production';
 
         if ($environment === 'testing') {
             $this->seedTestUsers();
