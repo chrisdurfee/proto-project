@@ -8,13 +8,13 @@ import { ClientModal } from "../../../organisms/modals/client-modal.js";
 /**
  * This will create a client modal.
  *
- * @param {object} parent
+ * @param {object} parent The parent context.
  * @returns {object}
  */
-const openEditModal = (parent) => (
+const openEditModal = ({ context: { data } }) => (
 	ClientModal({
-		item: parent.context.data.client,
-		onSubmit: (data) => parent.context.data.client = data.get()
+		item: data.client,
+		onSubmit: (data) => data.client = data.get()
 	})
 );
 
