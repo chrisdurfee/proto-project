@@ -12,9 +12,7 @@ import { BlankPage } from "@base-framework/ui/pages";
  * @returns {object}
  */
 export const SummaryContainer = (children) => (
-	Div({ class: 'flex flex-auto flex-col gap-y-4 lg:gap-y-2' }, [
-		children
-	])
+	Div({ class: 'flex flex-none flex-col gap-y-4 lg:gap-y-4' }, children)
 );
 
 /**
@@ -43,7 +41,7 @@ export const SummaryTablePage = Atom((props, children) => (
 	new BlankPage({
 		...props
 	}, [
-		Div({ class: 'grid grid-cols-1 p-4 md:p-6' }, [
+		Div({ class: 'grid grid-cols-1 p-4 md:p-6 h-full' }, [
 			Div({ class: 'flex flex-auto flex-col pt-0 lg:gap-y-12 w-full mx-auto 2xl:max-w-[1600px]' }, children)
 		])
 	])

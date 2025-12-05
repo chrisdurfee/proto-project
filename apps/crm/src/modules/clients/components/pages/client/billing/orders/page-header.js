@@ -8,7 +8,7 @@ import { Icons } from "@base-framework/ui/icons";
  * @returns {object}
  */
 export const PageHeader = () => (
-	Header({ class: 'flex flex-auto flex-col pt-0 sm:pt-2 md:pt-0' }, [
+	Header({ class: 'flex flex-none flex-col pt-0 sm:pt-2 md:pt-0' }, [
 		Div({ class: 'flex flex-auto items-center justify-between w-full' }, [
 			H1({ class: 'text-3xl font-bold' }, 'Orders'),
 			Div({ class: 'flex items-center gap-2' }, [

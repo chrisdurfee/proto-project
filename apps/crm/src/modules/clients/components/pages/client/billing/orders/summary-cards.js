@@ -82,7 +82,7 @@ export const SummaryCards = ({ orders }) =>
 {
 	const stats = calculateSummaryStats(orders);
 
-	return Div({ class: 'hidden md:flex flex-auto overflow-x-auto -mx-6 px-6 pb-2' }, [
+	return Div({ class: 'hidden md:flex flex-auto overflow-x-auto -mx-6 px-6' }, [
 		Div({ class: 'inline-flex flex-auto gap-x-4 ml-[-24px] pl-6' }, [
 			SummaryCard({
 				title: 'Total Orders',

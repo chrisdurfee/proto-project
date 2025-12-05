@@ -12,7 +12,7 @@ import { SummaryCards } from "./summary-cards.js";
  * @returns {object} A SummaryTablePage component.
  */
 export const InvoicePage = () =>
-	SummaryTablePage({}, [
+	SummaryTablePage({ class: 'flex flex-auto flex-col' }, [
 		PageHeader(),
 		SummaryContainer([
 			SummaryCards({ invoices: INVOICES }),
