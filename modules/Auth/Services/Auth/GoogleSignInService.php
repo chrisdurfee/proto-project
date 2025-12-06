@@ -40,9 +40,10 @@ class GoogleSignInService
 	 * Handle the callback from Google.
 	 *
 	 * @param string $code
+	 * @param bool $createIfMissing
 	 * @return User|null
 	 */
-	public function handleCallback(string $code): ?User
+	public function handleCallback(string $code, bool $createIfMissing = true): ?User
 	{
 		$tokenData = $this->googleService->getAccessToken($code);
 		if (!$tokenData || !isset($tokenData->access_token))
@@ -54,6 +55,11 @@ class GoogleSignInService
 		if (!$profile || !isset($profile->email))
 		{
 			return null;
+		}
+
+		if ($createIfMissing === false)
+		{
+			return modules()->user()->getByEmail($profile->email);
 		}
 
 		return $this->findOrCreateUser($profile);

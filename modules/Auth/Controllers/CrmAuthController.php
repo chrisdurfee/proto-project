@@ -3,6 +3,7 @@ namespace Modules\Auth\Controllers;
 
 use Modules\User\Models\User;
 use Modules\Auth\Controllers\UserStatus;
+use Proto\Http\Router\Request;
 
 /**
  * CrmAuthController
@@ -13,6 +14,30 @@ use Modules\Auth\Controllers\UserStatus;
  */
 class CrmAuthController extends AuthController
 {
+	/**
+	 * Handle the Google callback for CRM.
+	 *
+	 * @param Request $req
+	 * @return object
+	 */
+	public function googleCallback(Request $req): object
+	{
+		$code = $req->input('code');
+		if (!$code)
+		{
+			return $this->error('No code provided.', HttpStatus::BAD_REQUEST->value);
+		}
+
+		// Do not create new users for CRM login
+		$user = $this->googleService->handleCallback($code, false);
+		if (!$user)
+		{
+			return $this->error('User not found or access denied.', HttpStatus::UNAUTHORIZED->value);
+		}
+
+		return $this->permit($user, $req->ip());
+	}
+
 	/**
 	 * This will permit a user access to sign in.
 	 *

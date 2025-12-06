@@ -168,7 +168,7 @@ class AuthMiddleware
     private function validateToken(string $token): bool
     {
         // Token validation logic
-        return auth()->token()->validate($token);
+        return auth()->token->validate($token);
     }
 }
 
@@ -216,7 +216,7 @@ class UserController extends ApiController
 		}
 
 		// Check permissions
-		if (!auth()->permission()->can('user.view'))
+		if (!auth()->permission->can('user.view'))
 		{
 			return $this->error('Insufficient permissions');
 		}
@@ -283,7 +283,7 @@ class UserController extends ApiController
             return $this->notFound('User not found');
         }
 
-        if (!auth()->user()->can('user.delete')) {
+        if (!auth()->user->can('user.delete')) {
             return $this->error('Cannot delete this user');
         }
 

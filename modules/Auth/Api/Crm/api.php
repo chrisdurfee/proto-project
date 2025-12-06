@@ -36,6 +36,10 @@ router()
 		$router->post('resume', [$controller, 'resume']);
 		$router->post('pulse', [$controller, 'pulse']);
 
+		// Google Auth
+		$router->post('google/login', [$controller, 'googleLogin']);
+		$router->post('google/callback', [$controller, 'googleCallback']);
+
 		// MFA: send & verify one‑time codes
 		$router->post('mfa/code', [$controller, 'getAuthCode']);
 		$router->post('mfa/verify', [$controller, 'verifyAuthCode']);
