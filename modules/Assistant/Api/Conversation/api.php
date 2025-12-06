@@ -8,9 +8,9 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * This will register the Conversation API routes.
  */
 router()
-    ->middleware(([
+	->middleware(([
 		CrossSiteProtectionMiddleware::class
 	]))
-    ->get('assistant/conversation/active', [AssistantConversationController::class, 'getActive'])
-    ->get('assistant/conversation/sync', [AssistantConversationController::class, 'sync'])
-    ->resource('assistant/conversation', AssistantConversationController::class);
+	->get('assistant/conversation/active', [AssistantConversationController::class, 'getActive'])
+	->get('assistant/conversation/sync', [AssistantConversationController::class, 'sync'])
+	->resource('assistant/conversation', AssistantConversationController::class);

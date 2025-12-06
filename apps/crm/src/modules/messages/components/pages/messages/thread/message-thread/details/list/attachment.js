@@ -1,4 +1,4 @@
-import { Div, Img, P, Span } from "@base-framework/atoms";
+import { Div, Img, Span } from "@base-framework/atoms";
 
 /**
  * Format bytes to human readable size
@@ -95,9 +95,9 @@ const ImagePreview = (filePath, fileName) =>
  * @returns {object}
  */
 const FileInfo = (att, ext) =>
-	Div({ class: "flex-1 min-w-0" }, [
-		P({
-			class: "text-sm font-medium truncate group-hover:text-primary transition-colors"
+	Div({ class: "flex flex-1 min-w-0 flex-col" }, [
+		Div({
+			class: "text-sm font-medium flex-1 min-w-0 truncate group-hover:text-primary transition-colors"
 		}, att.displayName || att.fileName),
 		Div({ class: "flex items-center gap-x-2 mt-1" }, [
 			Span({
@@ -140,7 +140,7 @@ export const Attachment = (att) =>
 	const filePath = `/files/messages/${att.fileUrl}`;
 
 	return Div({
-		class: "group relative flex items-center gap-x-3 p-3 border border-border rounded-lg hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer bg-card",
+		class: "group relative flex w-full max-w-md items-center gap-x-3 p-3 border border-border rounded-lg hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer bg-card min-w-0",
 		click: () => window.open(filePath, '_blank')
 	}, [
 		isImage ? ImagePreview(filePath, att.fileName) : AttachmentIcon(ext),

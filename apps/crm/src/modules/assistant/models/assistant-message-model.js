@@ -12,81 +12,6 @@ export const AssistantMessageModel = Model.extend({
 
 	xhr: {
 		/**
-		 * Set up an EventSource with auto-reconnection for sync.
-		 *
-		 * @param {string} url - The URL path relative to the model's base URL.
-		 * @param {string} params - The query parameters.
-		 * @param {function} callBack - The callback function for incoming messages.
-		 * @returns {object} Object with source and cleanup function
-		 */
-		setupEventSourceWithReconnect(url, params, callBack)
-		{
-			let source = null;
-			let reconnectTimer = null;
-			let intentionallyClosed = false;
-			const RECONNECT_DELAY = 3000;
-
-			const connect = () =>
-			{
-				if (intentionallyClosed)
-				{
-					return;
-				}
-
-				const fullUrl = this.getUrl(url);
-				source = new EventSource(fullUrl + '?' + params, { withCredentials: true });
-
-				source.onerror = (event) =>
-				{
-					source.close();
-
-					if (!intentionallyClosed)
-					{
-						reconnectTimer = setTimeout(() =>
-						{
-							connect();
-						}, RECONNECT_DELAY);
-					}
-				};
-
-				source.onmessage = (event) =>
-				{
-					if (!event.data)
-					{
-						return;
-					}
-
-					try
-					{
-						const data = JSON.parse(event.data);
-						callBack(data);
-					}
-					catch (error)
-					{
-					}
-				};
-			};
-
-			connect();
-
-			return {
-				get source() { return source; },
-				close: () =>
-				{
-					intentionallyClosed = true;
-					if (reconnectTimer)
-					{
-						clearTimeout(reconnectTimer);
-					}
-					if (source)
-					{
-						source.close();
-					}
-				}
-			};
-		},
-
-		/**
 		 * Set up a simple EventSource without reconnection (for one-time streams like generate).
 		 *
 		 * @param {string} url - The URL path relative to the model's base URL.
@@ -94,7 +19,7 @@ export const AssistantMessageModel = Model.extend({
 		 * @param {function} callBack - The callback function for incoming messages.
 		 * @returns {object} Object with source and cleanup function
 		 */
-		setupEventSource(url, params, callBack)
+		setupChatEventSource(url, params, callBack)
 		{
 			const fullUrl = this.getUrl(url);
 			const source = new EventSource(fullUrl + '?' + params, { withCredentials: true });
@@ -150,7 +75,7 @@ export const AssistantMessageModel = Model.extend({
 				: '';
 			const url = '/generate';
 
-			return this.setupEventSource(url, params, callBack);
+			return this.setupChatEventSource(url, params, callBack);
 		},
 
 		/**
@@ -165,7 +90,7 @@ export const AssistantMessageModel = Model.extend({
 			const params = '';
 			const url = '/sync';
 
-			return this.setupEventSourceWithReconnect(url, params, callBack);
+			return this.setupEventSource(url, params, callBack);
 		}
 	}
 });
