@@ -20,6 +20,29 @@ export const GoogleModel = Model.extend({
 		login(instanceParams, callBack)
 		{
 			return this._get('login', {}, instanceParams, callBack);
+		},
+
+		/**
+		 * Signup the user.
+		 *
+		 * @param {object} instanceParams - The instance parameters.
+		 * @param {function} callBack - The callback function.
+		 */
+		signup(instanceParams, callBack)
+		{
+			return this._get('signup', {}, instanceParams, callBack);
+		},
+
+		/**
+		 * Handle the callback.
+		 *
+		 * @param {object} instanceParams - The instance parameters.
+		 * @param {function} callBack - The callback function.
+		 */
+		callback(instanceParams, callBack)
+		{
+			const data = this.model.get();
+			return this._post('callback', data, instanceParams, callBack);
 		}
 	}
 });

@@ -382,10 +382,52 @@ class AuthController extends Controller
 			return $this->error('No code provided.', HttpStatus::BAD_REQUEST->value);
 		}
 
-		$user = $this->googleService->handleCallback($code);
+		// Only allow login for existing users
+		$user = $this->googleService->handleCallback($code, false);
 		if (!$user)
 		{
-			return $this->error('Google authentication failed.', HttpStatus::UNAUTHORIZED->value);
+			return $this->error('User not found. Please sign up first.', HttpStatus::UNAUTHORIZED->value);
+		}
+
+		return $this->permit($user, $req->ip());
+	}
+
+	/**
+	 * Redirect to Google for registration.
+	 *
+	 * @return object
+	 */
+	public function googleSignup(): object
+	{
+		$settings = env('apis')->google;
+		$signupUrl = str_replace('/callback', '/signup/callback', $settings->redirectUrl);
+
+		$url = $this->googleService->getAuthorizationUrl($signupUrl);
+		return $this->response(['url' => $url]);
+	}
+
+	/**
+	 * Handle the Google callback for registration.
+	 *
+	 * @param Request $req
+	 * @return object
+	 */
+	public function googleSignupCallback(Request $req): object
+	{
+		$code = $req->input('code');
+		if (!$code)
+		{
+			return $this->error('No code provided.', HttpStatus::BAD_REQUEST->value);
+		}
+
+		$settings = env('apis')->google;
+		$signupUrl = str_replace('/callback', '/signup/callback', $settings->redirectUrl);
+
+		// Create new user if missing
+		$user = $this->googleService->handleCallback($code, true, $signupUrl);
+		if (!$user)
+		{
+			return $this->error('Google registration failed.', HttpStatus::BAD_REQUEST->value);
 		}
 
 		return $this->permit($user, $req->ip());

@@ -8,7 +8,7 @@ import { Model } from "@base-framework/base";
  * @type {typeof Model}
  */
 export const GoogleModel = Model.extend({
-	url: '/api/auth/google',
+	url: '/api/auth/crm/google',
 
 	xhr: {
 		/**
@@ -20,6 +20,18 @@ export const GoogleModel = Model.extend({
 		login(instanceParams, callBack)
 		{
 			return this._get('login', {}, instanceParams, callBack);
+		},
+
+		/**
+		 * Handle the callback.
+		 *
+		 * @param {object} instanceParams - The instance parameters.
+		 * @param {function} callBack - The callback function.
+		 */
+		callback(instanceParams, callBack)
+		{
+			const data = this.model.get();
+			return this._post('callback', data, instanceParams, callBack);
 		}
 	}
 });

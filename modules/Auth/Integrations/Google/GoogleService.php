@@ -51,13 +51,14 @@ class GoogleService extends Oauth2Service
 	/**
 	 * Get the authorization URL.
 	 *
+	 * @param string|null $redirectUrl
 	 * @return string
 	 */
-	public function getAuthorizationUrl(): string
+	public function getAuthorizationUrl(?string $redirectUrl = null): string
 	{
 		$params = [
 			'client_id' => $this->clientId,
-			'redirect_uri' => $this->redirectUrl,
+			'redirect_uri' => $redirectUrl ?? $this->redirectUrl,
 			'response_type' => 'code',
 			'scope' => 'email profile openid',
 			'access_type' => 'offline',
@@ -71,14 +72,15 @@ class GoogleService extends Oauth2Service
 	 * Get the access token from the code.
 	 *
 	 * @param string $code
+	 * @param string|null $redirectUrl
 	 * @return object|null
 	 */
-	public function getAccessToken(string $code): ?object
+	public function getAccessToken(string $code, ?string $redirectUrl = null): ?object
 	{
 		$params = [
 			'client_id' => $this->clientId,
 			'client_secret' => $this->clientSecret,
-			'redirect_uri' => $this->redirectUrl,
+			'redirect_uri' => $redirectUrl ?? $this->redirectUrl,
 			'grant_type' => 'authorization_code',
 			'code' => $code
 		];

@@ -29,11 +29,12 @@ class GoogleSignInService
 	/**
 	 * Get the authorization URL.
 	 *
+	 * @param string|null $redirectUrl
 	 * @return string
 	 */
-	public function getAuthorizationUrl(): string
+	public function getAuthorizationUrl(?string $redirectUrl = null): string
 	{
-		return $this->googleService->getAuthorizationUrl();
+		return $this->googleService->getAuthorizationUrl($redirectUrl);
 	}
 
 	/**
@@ -41,11 +42,12 @@ class GoogleSignInService
 	 *
 	 * @param string $code
 	 * @param bool $createIfMissing
+	 * @param string|null $redirectUrl
 	 * @return User|null
 	 */
-	public function handleCallback(string $code, bool $createIfMissing = true): ?User
+	public function handleCallback(string $code, bool $createIfMissing = true, ?string $redirectUrl = null): ?User
 	{
-		$tokenData = $this->googleService->getAccessToken($code);
+		$tokenData = $this->googleService->getAccessToken($code, $redirectUrl);
 		if (!$tokenData || !isset($tokenData->access_token))
 		{
 			return null;

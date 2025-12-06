@@ -27,7 +27,8 @@ const PageProps =
 	setupStates()
 	{
 		return {
-			step: STEPS.WELCOME
+			step: STEPS.WELCOME,
+			loading: false
 		};
 	},
 

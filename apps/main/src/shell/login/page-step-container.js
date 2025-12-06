@@ -15,6 +15,10 @@ export const PageStepContainer = () => (
 		class: 'flex flex-auto flex-col',
 		switch: [
 			{
+				uri: '/login/google/callback',
+				import: () => import('../../google-callback.js')
+			},
+			{
 				uri: '/change-password*',
 				import: () => import('./change-password-container.js'),
 			},

@@ -64,7 +64,7 @@ const SignInWIthGoogleButton = () => (
 			click: () =>
 			{
 				const model = new GoogleModel();
-				model.xhr.login((response) =>
+				model.xhr.login('', (response) =>
 				{
 					if (response && response.url)
 					{

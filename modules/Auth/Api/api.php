@@ -43,6 +43,8 @@ router()
 		// Google Auth
 		$router->get('google/login', [$controller, 'googleLogin']);
 		$router->post('google/callback', [$controller, 'googleCallback']);
+		$router->get('google/signup', [$controller, 'googleSignup']);
+		$router->post('google/signup/callback', [$controller, 'googleSignupCallback']);
 
 		// Password reset: request & verify reset codes
 		$controller = new PasswordController();
