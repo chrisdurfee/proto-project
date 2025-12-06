@@ -19,7 +19,8 @@ export const GoogleModel = Model.extend({
 		 */
 		login(instanceParams, callBack)
 		{
-			return this._get('login', {}, instanceParams, callBack);
+			const redirectUrl = window.location.origin + '/login/google/callback';
+			return this._get('login', { redirectUrl }, instanceParams, callBack);
 		},
 
 		/**
@@ -42,7 +43,8 @@ export const GoogleModel = Model.extend({
 		callback(instanceParams, callBack)
 		{
 			const data = this.model.get();
-			return this._post('callback', data, instanceParams, callBack);
+			const redirectUrl = window.location.origin + '/login/google/callback';
+			return this._post('callback', { ...data, redirectUrl }, instanceParams, callBack);
 		}
 	}
 });
