@@ -112,6 +112,17 @@ class Gateway
 	}
 
 	/**
+	 * This will check if the username is taken.
+	 *
+	 * @param string $username
+	 * @return bool
+	 */
+	public function isUsernameTaken(string $username): bool
+	{
+		return User::isUsernameTaken($username);
+	}
+
+	/**
 	 * This will return the role gateway.
 	 *
 	 * @return RoleGateway

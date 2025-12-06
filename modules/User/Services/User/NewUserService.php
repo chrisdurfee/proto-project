@@ -36,6 +36,12 @@ class NewUserService
 	 */
 	public function createUser(object $data): User
 	{
+		$username = $data->username ?? '';
+		if ($this->isUsernameTaken($username))
+		{
+			throw new \Exception('Username already taken.');
+		}
+
 		$user = $this->addUser($data);
 		if (!$user)
 		{
@@ -53,6 +59,17 @@ class NewUserService
 		}
 
 		return $user;
+	}
+
+	/**
+	 * Check if the username is already taken.
+	 *
+	 * @param string $username
+	 * @return bool
+	 */
+	protected function isUsernameTaken(string $username): bool
+	{
+		return User::isUsernameTaken($username);
 	}
 
 	/**

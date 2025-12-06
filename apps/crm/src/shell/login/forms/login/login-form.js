@@ -1,6 +1,7 @@
 import { Div, Span } from '@base-framework/atoms';
 import { Button, Input } from '@base-framework/ui/atoms';
 import { Form } from '@base-framework/ui/molecules';
+import { GoogleModel } from '../../../models/google-model.js';
 import { STEPS } from '../../steps.js';
 import { SignInButton } from './sign-in-button.js';
 import { submit } from './submit.js';
@@ -60,14 +61,16 @@ const SignInWIthGoogleButton = () => (
 		Button({
 			variant: 'outline',
 			'aria-label': 'Login with Google',
-			click: async () =>
+			click: () =>
 			{
-				const response = await fetch('/api/auth/google/login');
-				const data = await response.json();
-				if (data.url)
+				const model = new GoogleModel();
+				model.xhr.login((response) =>
 				{
-					window.location.href = data.url;
-				}
+					if (response && response.url)
+					{
+						window.location.href = response.url;
+					}
+				});
 			}
 		}, 'Login with Google')
 	])

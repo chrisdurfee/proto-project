@@ -1,10 +1,8 @@
 <?php declare(strict_types=1);
-
 namespace Modules\Auth\Services\Auth;
 
 use Modules\Auth\Integrations\Google\GoogleService;
 use Modules\User\Models\User;
-use Proto\Utils\Strings;
 
 /**
  * Class GoogleSignInService
@@ -70,8 +68,7 @@ class GoogleSignInService
 	protected function findOrCreateUser(object $profile): User
 	{
 		$email = $profile->email;
-		$user = User::getBy(['email' => $email]);
-
+		$user = modules()->user()->getByEmail($email);
 		if ($user)
 		{
 			return $user;
@@ -90,11 +87,12 @@ class GoogleSignInService
 		];
 
 		// Generate a random password since they are using Google Auth
-		$userData['password'] = bin2hex(random_bytes(16));
+		// Password must be at least 12 characters long and include uppercase, lowercase, number, and special character.
+		$userData['password'] = 'A1!' . bin2hex(random_bytes(16));
 
-		$user = User::create((object)$userData);
-
-		// Reload to get the full object
-		return User::getBy(['email' => $email]);
+		/**
+		 * This will register the user via the User module's gateway.
+		 */
+		return modules()->user()->register((object)$userData);
 	}
 }
