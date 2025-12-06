@@ -40,6 +40,10 @@ router()
 		$router->post('mfa/code', [$controller, 'getAuthCode']);
 		$router->post('mfa/verify', [$controller, 'verifyAuthCode']);
 
+		// Google Auth
+		$router->get('google/login', [$controller, 'googleLogin']);
+		$router->post('google/callback', [$controller, 'googleCallback']);
+
 		// Password reset: request & verify reset codes
 		$controller = new PasswordController();
 		$router->post('password/request', [$controller, 'requestPasswordReset']);

@@ -52,14 +52,6 @@ export const AppShell = Jot(
 				},
 				switch: [
 					{
-						uri: '/sign-up*',
-						import: () => import('./sign-up/sign-up-page.js')
-					},
-					{
-						uri: '/onboarding*',
-						import: () => import('./onboarding/onboarding-page.js')
-					},
-					{
 						uri: '/email-unsubscribe*',
 						import: () => import('./email-unsubscribe/email-unsubscribe-page.js')
 					},

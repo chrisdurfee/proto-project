@@ -57,7 +57,19 @@ const CredentialsContainer = () => (
  */
 const SignInWIthGoogleButton = () => (
 	Div({ class: 'grid gap-4' }, [
-		Button({ variant: 'outline', 'aria-label': 'Login with Google' }, 'Login with Google')
+		Button({
+			variant: 'outline',
+			'aria-label': 'Login with Google',
+			click: async () =>
+			{
+				const response = await fetch('/api/auth/google/login');
+				const data = await response.json();
+				if (data.url)
+				{
+					window.location.href = data.url;
+				}
+			}
+		}, 'Login with Google')
 	])
 );
 

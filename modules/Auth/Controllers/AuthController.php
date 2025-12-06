@@ -5,6 +5,7 @@ use Modules\User\Models\User;
 use Modules\Auth\Controllers\LoginAttemptController;
 use Modules\Auth\Controllers\UserStatus;
 use Modules\Auth\Services\Auth\MultiFactorAuthService;
+use Modules\Auth\Services\Auth\GoogleSignInService;
 use Modules\Auth\Controllers\Multifactor\MultiFactorHelper;
 use Proto\Controllers\Controller;
 use Proto\Http\Router\Request;
@@ -32,10 +33,12 @@ class AuthController extends Controller
 	 * Constructor.
 	 *
 	 * @param MultiFactorAuthService $mfaService
+	 * @param GoogleSignInService $googleService
 	 * @return void
 	 */
 	public function __construct(
 		protected MultiFactorAuthService $mfaService = new MultiFactorAuthService(),
+		protected GoogleSignInService $googleService = new GoogleSignInService()
 	)
 	{
 		parent::__construct();
@@ -352,6 +355,40 @@ class AuthController extends Controller
 	{
 		$token = (new CrossSiteRequestForgeryGate())->setToken();
 		return $this->response(['token' => $token]);
+	}
+
+	/**
+	 * Redirect to Google for authentication.
+	 *
+	 * @return object
+	 */
+	public function googleLogin(): object
+	{
+		$url = $this->googleService->getAuthorizationUrl();
+		return $this->response(['url' => $url]);
+	}
+
+	/**
+	 * Handle the Google callback.
+	 *
+	 * @param Request $req
+	 * @return object
+	 */
+	public function googleCallback(Request $req): object
+	{
+		$code = $req->input('code');
+		if (!$code)
+		{
+			return $this->error('No code provided.', HttpStatus::BAD_REQUEST->value);
+		}
+
+		$user = $this->googleService->handleCallback($code);
+		if (!$user)
+		{
+			return $this->error('Google authentication failed.', HttpStatus::UNAUTHORIZED->value);
+		}
+
+		return $this->permit($user, $req->ip());
 	}
 
 	/**
