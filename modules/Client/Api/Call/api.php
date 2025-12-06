@@ -10,7 +10,7 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * This file contains the API routes for the Client Call Controller.
  */
 router()
-    ->middleware(([
+	->middleware(([
 		CrossSiteProtectionMiddleware::class
 	]))
 	->resource('client/:clientId/call', ClientCallController::class);
