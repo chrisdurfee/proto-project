@@ -1,6 +1,7 @@
 import { Div, Span } from '@base-framework/atoms';
 import { Button, Input } from '@base-framework/ui/atoms';
 import { Form } from '@base-framework/ui/molecules';
+import { GoogleModel } from '../../../models/google-model.js';
 import { STEPS } from '../../steps.js';
 import { SignInButton } from './sign-in-button.js';
 import { submit } from './submit.js';
@@ -57,7 +58,21 @@ const CredentialsContainer = () => (
  */
 const SignInWIthGoogleButton = () => (
 	Div({ class: 'grid gap-4' }, [
-		Button({ variant: 'outline', 'aria-label': 'Login with Google' }, 'Login with Google')
+		Button({
+			variant: 'outline',
+			'aria-label': 'Login with Google',
+			click: () =>
+			{
+				const model = new GoogleModel();
+				model.xhr.login((response) =>
+				{
+					if (response && response.url)
+					{
+						window.location.href = response.url;
+					}
+				});
+			}
+		}, 'Login with Google')
 	])
 );
 
