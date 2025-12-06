@@ -360,11 +360,13 @@ class AuthController extends Controller
 	/**
 	 * Redirect to Google for authentication.
 	 *
+	 * @param Request $req
 	 * @return object
 	 */
-	public function googleLogin(): object
+	public function googleLogin(Request $req): object
 	{
-		$url = $this->googleService->getAuthorizationUrl();
+		$redirectUrl = $req->input('redirectUrl');
+		$url = $this->googleService->getAuthorizationUrl($redirectUrl);
 		return $this->response(['url' => $url]);
 	}
 
@@ -382,8 +384,10 @@ class AuthController extends Controller
 			return $this->error('No code provided.', HttpStatus::BAD_REQUEST->value);
 		}
 
+		$redirectUrl = $req->input('redirectUrl');
+
 		// Only allow login for existing users
-		$user = $this->googleService->handleCallback($code, false);
+		$user = $this->googleService->handleCallback($code, false, $redirectUrl);
 		if (!$user)
 		{
 			return $this->error('User not found. Please sign up first.', HttpStatus::UNAUTHORIZED->value);

@@ -28,8 +28,10 @@ class CrmAuthController extends AuthController
 			return $this->error('No code provided.', HttpStatus::BAD_REQUEST->value);
 		}
 
+		$redirectUrl = $req->input('redirectUrl');
+
 		// Do not create new users for CRM login
-		$user = $this->googleService->handleCallback($code, false);
+		$user = $this->googleService->handleCallback($code, false, $redirectUrl);
 		if (!$user)
 		{
 			return $this->error('User not found or access denied.', HttpStatus::UNAUTHORIZED->value);
