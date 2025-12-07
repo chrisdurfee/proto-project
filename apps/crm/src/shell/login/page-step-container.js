@@ -16,7 +16,7 @@ export const PageStepContainer = () => (
 		switch: [
 			{
 				uri: '/login/google/callback',
-				import: () => import('../../google-callback.js'))
+				import: () => import('../google-callback.js')
 			},
 			{
 				uri: '/change-password*',
