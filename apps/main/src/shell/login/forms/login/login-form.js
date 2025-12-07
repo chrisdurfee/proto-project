@@ -1,5 +1,5 @@
-import { Div, Span } from '@base-framework/atoms';
-import { Button, Input } from '@base-framework/ui/atoms';
+import { Div, OnState, Span } from '@base-framework/atoms';
+import { Button, Input, LoadingButton } from '@base-framework/ui/atoms';
 import { Form } from '@base-framework/ui/molecules';
 import { GoogleModel } from '../../../models/google-model.js';
 import { STEPS } from '../../steps.js';
@@ -58,21 +58,26 @@ const CredentialsContainer = () => (
  */
 const SignInWIthGoogleButton = () => (
 	Div({ class: 'grid gap-4' }, [
-		Button({
-			variant: 'outline',
-			'aria-label': 'Login with Google',
-			click: () =>
-			{
-				const model = new GoogleModel();
-				model.xhr.login('', (response) =>
+		OnState('googleLoading', (state) => (state)
+			? LoadingButton({ disabled: true })
+			: Button({
+				variant: 'outline',
+				'aria-label': 'Login with Google',
+				click: (e, parent) =>
 				{
-					if (response && response.url)
+					parent.state.googleLoading = true;
+					const model = new GoogleModel();
+					model.xhr.login('', (response) =>
 					{
-						window.location.href = response.url;
-					}
-				});
-			}
-		}, 'Login with Google')
+						parent.state.googleLoading = false;
+						if (response && response.url)
+						{
+							window.location.href = response.url;
+						}
+					});
+				}
+			}, 'Login with Google')
+		)
 	])
 );
 

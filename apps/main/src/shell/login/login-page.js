@@ -36,6 +36,7 @@ const PageProps =
 	{
 		return {
 			loading: false,
+			googleLoading: false,
 			step: STEPS.LOGIN
 		};
 	},
