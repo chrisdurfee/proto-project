@@ -85,7 +85,7 @@ class GoogleService extends Oauth2Service
 			'code' => $code
 		];
 
-		$response = $this->request('POST', $this->tokenUrl, $params);
+		$response = $this->request('POST', $this->tokenUrl, http_build_query($params));
 		return $response->data ?? null;
 	}
 
@@ -101,7 +101,7 @@ class GoogleService extends Oauth2Service
 			'Authorization' => 'Bearer ' . $accessToken
 		];
 
-		$response = $this->request('GET', $this->userInfoUrl, [], $headers);
+		$response = $this->request('GET', $this->userInfoUrl, '', $headers);
 		return $response->data ?? null;
 	}
 }
