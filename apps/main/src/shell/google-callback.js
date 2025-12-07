@@ -1,5 +1,5 @@
-import { Div, H1, P } from '@base-framework/atoms';
-import { Atom } from '@base-framework/base';
+import { A, Div, H1, OnState, P } from '@base-framework/atoms';
+import { Component, Jot } from '@base-framework/base';
 import { Icons } from '@base-framework/ui/icons';
 import { GoogleModel } from './models/google-model.js';
 
@@ -30,11 +30,9 @@ const ErrorScreen = (message) => (
 			Div({ class: 'text-destructive' }, Icons.warning),
 			H1({ class: 'text-xl font-semibold text-destructive' }, 'Authentication Failed'),
 			P({ class: 'text-muted-foreground' }, message),
-			Div({
-				class: 'mt-4',
-				tag: 'a',
+			A({
 				href: '/',
-				class: 'text-primary hover:underline'
+				class: 'mt-4 text-primary hover:underline'
 			}, 'Return to Login')
 		])
 	])
@@ -45,25 +43,27 @@ const ErrorScreen = (message) => (
  *
  * This component handles the Google OAuth callback.
  *
- * @type {typeof Atom}
+ * @type {typeof Component}
  */
-export const GoogleCallback = Atom({
+export const GoogleCallback = Jot(
+{
 	/**
 	 * This will handle the component creation.
 	 *
 	 * @returns {void}
 	 */
-	onCreated()
+	before()
 	{
 		const params = new URLSearchParams(window.location.search);
 		const code = params.get('code');
-
 		if (!code)
 		{
-			this.setState({ error: 'No authentication code received.' });
+			// @ts-ignore
+			this.state.error = 'No authorization code provided by Google.';
 			return;
 		}
 
+		// @ts-ignore
 		this.exchangeCode(code);
 	},
 
@@ -75,25 +75,35 @@ export const GoogleCallback = Atom({
 	 */
 	exchangeCode(code)
 	{
-		const model = new GoogleModel();
-		// We need to pass the code to the backend
-		// The backend expects 'code' in the body
-		model.set({ code });
+		const model = new GoogleModel({
+			code
+		});
 
 		model.xhr.callback((response) =>
 		{
 			if (response && response.allowAccess)
 			{
 				app.signIn(response.user);
-				// Redirect to home/dashboard
+				// Redirect to home
 				app.navigate('/');
 				return;
 			}
 
-			this.setState({
-				error: response.message || 'Failed to authenticate with Google.'
-			});
+			// @ts-ignore
+			this.state.error = response.message || 'Failed to authenticate with Google.';
 		});
+	},
+
+	/**
+	 * This will define the component state.
+	 *
+	 * @returns {object}
+	 */
+	state()
+	{
+		return {
+			error: null
+		};
 	},
 
 	/**
@@ -103,12 +113,15 @@ export const GoogleCallback = Atom({
 	 */
 	render()
 	{
-		if (this.state.error)
+		return OnState('error', (error) =>
 		{
-			return ErrorScreen(this.state.error);
-		}
+			if (error)
+			{
+				return ErrorScreen(error);
+			}
 
-		return LoadingScreen();
+			return LoadingScreen();
+		});
 	}
 });
 
