@@ -385,15 +385,31 @@ class AuthController extends Controller
 		}
 
 		$redirectUrl = $req->input('redirectUrl');
+		$createIfMissing = false;
 
-		// Only allow login for existing users
-		$user = $this->googleService->handleCallback($code, false, $redirectUrl);
+		// Check if the redirect URL matches the main app URL to allow creation
+		$mainAppUrl = env('apis')->google->redirectUrl ?? '';
+		if ($redirectUrl && $mainAppUrl && str_starts_with($redirectUrl, $mainAppUrl))
+		{
+			$createIfMissing = true;
+		}
+
+		// Only allow login for existing users unless createIfMissing is true
+		$user = $this->googleService->handleCallback($code, $createIfMissing, $redirectUrl);
 		if (!$user)
 		{
 			return $this->error('User not found. Please sign up first.', HttpStatus::UNAUTHORIZED->value);
 		}
 
-		return $this->permit($user, $req->ip());
+		$response = $this->permit($user, $req->ip());
+
+		// Check if user is new (created within last 10 seconds)
+		if ($user->createdAt && strtotime($user->createdAt) > time() - 10)
+		{
+			$response->isNew = true;
+		}
+
+		return $response;
 	}
 
 	/**

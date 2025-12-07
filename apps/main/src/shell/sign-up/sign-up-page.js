@@ -26,8 +26,11 @@ const PageProps =
 	 */
 	setupStates()
 	{
+		const params = new URLSearchParams(window.location.search);
+		const step = params.get('step') || STEPS.WELCOME;
+
 		return {
-			step: STEPS.WELCOME,
+			step,
 			loading: false
 		};
 	},

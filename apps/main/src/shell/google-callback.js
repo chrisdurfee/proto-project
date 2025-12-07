@@ -84,6 +84,13 @@ export const GoogleCallback = Jot(
 			if (response && response.allowAccess)
 			{
 				app.signIn(response.user);
+
+				if (response.isNew)
+				{
+					app.navigate('/sign-up?step=user_details');
+					return;
+				}
+
 				// Redirect to home
 				app.navigate('/');
 				return;
