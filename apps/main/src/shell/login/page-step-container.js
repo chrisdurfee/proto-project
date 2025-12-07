@@ -15,7 +15,7 @@ export const PageStepContainer = () => (
 		class: 'flex flex-auto flex-col',
 		switch: [
 			{
-				uri: '/login/google/callback',
+				uri: '/login/google/callback*',
 				import: () => import('../google-callback.js')
 			},
 			{
