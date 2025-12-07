@@ -18,11 +18,21 @@ router()
 	->middleware(([
 		CrossSiteProtectionMiddleware::class
 	]))
-	->post('auth/pulse', [AuthController::class, 'pulse'])
-	->post('auth/register', [AuthController::class, 'register'])
-	->get('auth/csrf-token', [AuthController::class, 'getToken'], [
-		DomainMiddleware::class
-	]);
+	->group('auth', function(Router $router)
+	{
+		$controller = new AuthController();
+		$router->post('pulse', [$controller, 'pulse']);
+		$router->post('register', [$controller, 'register']);
+
+		// Google Auth
+		$router->post('google/callback', [$controller, 'googleCallback']);
+		$router->post('google/signup/callback', [$controller, 'googleSignupCallback']);
+
+		// CSRF Token
+		$router->get('csrf-token', [$controller, 'getToken'], [
+			DomainMiddleware::class
+		]);
+	});
 
 router()
 	->middleware(([
@@ -42,9 +52,7 @@ router()
 
 		// Google Auth
 		$router->get('google/login', [$controller, 'googleLogin']);
-		$router->post('google/callback', [$controller, 'googleCallback']);
 		$router->get('google/signup', [$controller, 'googleSignup']);
-		$router->post('google/signup/callback', [$controller, 'googleSignupCallback']);
 
 		// Password reset: request & verify reset codes
 		$controller = new PasswordController();

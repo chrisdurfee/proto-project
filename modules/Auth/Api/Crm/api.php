@@ -19,6 +19,11 @@ router()
 		CrossSiteProtectionMiddleware::class
 	]))
 	->post('auth/crm/pulse', [CrmAuthController::class, 'pulse'])
+
+	// Google Auth
+	->post('google/callback', [CrmAuthController::class, 'googleCallback'])
+
+	// CSRF Token
 	->get('auth/crm/csrf-token', [CrmAuthController::class, 'getToken'], [
 		DomainMiddleware::class
 	]);
@@ -38,7 +43,6 @@ router()
 
 		// Google Auth
 		$router->get('google/login', [$controller, 'googleLogin']);
-		$router->post('google/callback', [$controller, 'googleCallback']);
 
 		// MFA: send & verify one‑time codes
 		$router->post('mfa/code', [$controller, 'getAuthCode']);
