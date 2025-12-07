@@ -4,3 +4,5 @@
  * e.g. import "./main/module.js";
  */
 import "./home/module.js";
+import "./messages/module.js";
+import "./settings/module.js";
