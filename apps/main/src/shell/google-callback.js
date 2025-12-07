@@ -79,18 +79,17 @@ export const GoogleCallback = Jot(
 			code
 		});
 
-		model.xhr.callback((response) =>
+		model.xhr.callback('', (response) =>
 		{
 			if (response && response.allowAccess)
 			{
-				app.signIn(response.user);
-
 				if (response.isNew)
 				{
 					app.navigate('/sign-up?step=user_details', null, true);
 					return;
 				}
 
+				app.signIn(response.user);
 				// Redirect to home
 				app.navigate('/', null, true);
 				return;

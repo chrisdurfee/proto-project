@@ -62,7 +62,7 @@ const SignInWIthGoogleButton = () => (
 			? LoadingButton({ disabled: true })
 			: Button({
 				variant: 'outline',
-				'aria-label': 'Login with Google',
+				'aria-label': 'Sign in with Google',
 				click: (e, parent) =>
 				{
 					parent.state.googleLoading = true;
@@ -76,7 +76,7 @@ const SignInWIthGoogleButton = () => (
 						}
 					});
 				}
-			}, 'Login with Google')
+			}, 'Google')
 		)
 	])
 );
@@ -91,6 +91,16 @@ export const LoginForm = () => (
 		Div({ class: 'grid gap-4' }, [
 			CredentialsContainer(),
 			SignInButton(),
+
+			// Divider for "OR SIGN IN WITH"
+			Div({ class: "relative py-4" }, [
+				Div({ class: "absolute inset-0 flex items-center" }, [
+					Span({ class: "grow border-t" })
+				]),
+				Div({ class: 'relative flex justify-center text-xs uppercase' }, [
+					Span({ class: 'bg-card px-2 text-muted-foreground' }, "or sign in with")
+				]),
+			]),
 			SignInWIthGoogleButton(),
 			SignUpLink(),
 		]),

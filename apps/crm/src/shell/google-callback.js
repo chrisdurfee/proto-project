@@ -79,7 +79,7 @@ export const GoogleCallback = Jot(
 			code
 		});
 
-		model.xhr.callback((response) =>
+		model.xhr.callback('', (response) =>
 		{
 			if (response && response.allowAccess)
 			{
