@@ -1,5 +1,4 @@
 <?php declare(strict_types=1);
-
 namespace Modules\Auth\Integrations\Google;
 
 use Proto\Integrations\Oauth2Service;
@@ -85,8 +84,7 @@ class GoogleService extends Oauth2Service
 			'code' => $code
 		];
 
-		$response = $this->request('POST', $this->tokenUrl, http_build_query($params));
-		return $response->data ?? null;
+		return $this->fetch('POST', $this->tokenUrl, http_build_query($params));
 	}
 
 	/**
@@ -98,10 +96,10 @@ class GoogleService extends Oauth2Service
 	public function getUserProfile(string $accessToken): ?object
 	{
 		$headers = [
+			'Content-Type' => 'application/x-www-form-urlencoded',
 			'Authorization' => 'Bearer ' . $accessToken
 		];
 
-		$response = $this->request('GET', $this->userInfoUrl, '', $headers);
-		return $response->data ?? null;
+		return $this->fetch('GET', $this->userInfoUrl, '', $headers);
 	}
 }

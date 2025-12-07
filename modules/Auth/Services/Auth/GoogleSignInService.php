@@ -59,6 +59,14 @@ class GoogleSignInService
 			return null;
 		}
 
+		// Security check: Ensure the email is verified by Google.
+		// This prevents account takeover if someone creates a Google account with an unverified email
+		// that matches a system user's email.
+		if (empty($profile->email_verified))
+		{
+			return null;
+		}
+
 		if ($createIfMissing === false)
 		{
 			return modules()->user()->getByEmail($profile->email);
@@ -87,9 +95,11 @@ class GoogleSignInService
 			'email' => $email,
 			'firstName' => $profile->given_name ?? '',
 			'lastName' => $profile->family_name ?? '',
+			'displayName' => $profile->name ?? ($profile->given_name ?? '' . ' ' . ($profile->family_name ?? '')),
 			'username' => $email, // Fallback username
 			'image' => $profile->picture ?? null,
 			'emailVerifiedAt' => date('Y-m-d H:i:s'),
+			'createdAt' => date('Y-m-d H:i:s'),
 			'enabled' => 1,
 			'status' => 'online'
 		];
