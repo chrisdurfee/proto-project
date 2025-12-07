@@ -1,17 +1,6 @@
 import { Div, Img, Span } from "@base-framework/atoms";
 
 /**
- * Get file extension from filename
- *
- * @param {string} fileName
- * @returns {string}
- */
-const getFileExtension = (fileName) =>
-{
-	return fileName ? fileName.split('.').pop() : '';
-};
-
-/**
  * Check if file is an image based on extension
  *
  * @param {string} ext
