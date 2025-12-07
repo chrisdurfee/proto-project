@@ -96,8 +96,7 @@ class NewUserService
 		$success = true;
 		$roles = [
 			'user',
-			'guest',
-			'contributor'
+			'guest'
 		];
 
 		foreach ($roles as $role)
