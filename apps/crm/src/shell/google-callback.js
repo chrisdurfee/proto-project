@@ -85,7 +85,7 @@ export const GoogleCallback = Jot(
 			{
 				app.signIn(response.user);
 				// Redirect to home/dashboard
-				app.navigate('/');
+				app.navigate('/', null, true);
 				return;
 			}
 

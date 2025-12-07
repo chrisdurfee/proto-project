@@ -87,12 +87,12 @@ export const GoogleCallback = Jot(
 
 				if (response.isNew)
 				{
-					app.navigate('/sign-up?step=user_details');
+					app.navigate('/sign-up?step=user_details', null, true);
 					return;
 				}
 
 				// Redirect to home
-				app.navigate('/');
+				app.navigate('/', null, true);
 				return;
 			}
 
