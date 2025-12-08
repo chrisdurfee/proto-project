@@ -2,6 +2,7 @@ import { Div, Form, H2, Header, OnState, P, Span } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
 import { Button, Icon, Input, LoadingButton } from '@base-framework/ui/atoms';
 import { Icons } from "@base-framework/ui/icons";
+import { AuthModel } from '@shell/models/auth-model.js';
 import { GoogleModel } from '@shell/models/google-model';
 import { STEPS } from '../steps.js';
 
@@ -18,6 +19,7 @@ const CredentialsContainer = Atom(() =>
         Div({ class: 'grid gap-4' }, [
             Input({
                 type: 'email',
+				bind: 'email',
                 placeholder: 'name@example.com',
                 required: true,
                 'aria-required': true
@@ -128,15 +130,23 @@ export const SignUpForm = Atom(() =>
 			role: 'form',
 			submit: (e, parent) =>
 			{
+				parent.state.loading = true;
 				e.preventDefault();
 
-				const model = new GoogleModel();
-				model.xhr.signUp('', (response) =>
+				const model = new AuthModel({
+					username: parent.context.data.email
+				});
+
+				model.xhr.register('', (response) =>
 				{
+					parent.state.loading = false;
 					if (!response || response.success !== true)
 					{
-						app.noftify({
-
+						app.notify({
+							type: "destructive",
+							title: "Error",
+							description: response?.message || "Failed to sign up.",
+							icon: Icons.warning
 						});
 						return;
 					}

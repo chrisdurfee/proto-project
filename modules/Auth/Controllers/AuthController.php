@@ -287,23 +287,22 @@ class AuthController extends Controller
 	 */
 	public function getSessionUser(Request $req): object
 	{
-		$session = getSession('user');
-		$userId = $session->id ?? null;
+		$sessionUser = getSession('user');
+		$userId = $sessionUser->id ?? null;
 		if (!$userId)
 		{
 			return $this->error(
-				'The user is not authenticated.',
-				HttpStatus::UNAUTHORIZED->value
+				'The user is not in the session.'
 			);
 		}
 
 		$user = $this->user->get($userId);
 		if (!$user)
 		{
-			return $this->error(
-				'The user is not found.',
-				HttpStatus::NOT_FOUND->value
-			);
+			return $this->response([
+				'user' => $sessionUser,
+				'message' => 'partial user data from session.'
+			]);
 		}
 
 		if ($user->enabled === 0)
@@ -377,6 +376,50 @@ class AuthController extends Controller
 		{
 			return $this->error(
 				'The registration has failed.',
+				HttpStatus::BAD_REQUEST->value
+			);
+		}
+
+		// Store user in session
+		setSession('user', $user->getData());
+		return $this->response(['user' => $user]);
+	}
+
+	/**
+	 * Update the new user profile.
+	 *
+	 * @param Request $req
+	 * @return object
+	 */
+	public function updateProfile(Request $req): object
+	{
+		$data = $req->json('user');
+		if (!$data)
+		{
+			return $this->error(
+				'The data is invalid for updating profile.',
+				HttpStatus::BAD_REQUEST->value
+			);
+		}
+
+		/**
+		 * we will use the session user to update the profile.
+		 */
+		$sessionUser = session()->user ?? null;
+		if (!$sessionUser || !isset($sessionUser->id))
+		{
+			return $this->error(
+				'The user is not authenticated.',
+				HttpStatus::UNAUTHORIZED->value
+			);
+		}
+
+		$data->id = $sessionUser->id;
+		$user = $this->user->updateProfile( $data);
+		if (!$user)
+		{
+			return $this->error(
+				'The profile update has failed.',
 				HttpStatus::BAD_REQUEST->value
 			);
 		}
