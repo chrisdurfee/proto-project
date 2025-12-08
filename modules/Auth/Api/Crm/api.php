@@ -21,7 +21,7 @@ router()
 	->post('auth/crm/pulse', [CrmAuthController::class, 'pulse'])
 
 	// Google Auth
-	->post('google/callback', [CrmAuthController::class, 'googleCallback'])
+	->post('auth/crm/google/callback', [CrmAuthController::class, 'googleCallback'])
 
 	// CSRF Token
 	->get('auth/crm/csrf-token', [CrmAuthController::class, 'getToken'], [

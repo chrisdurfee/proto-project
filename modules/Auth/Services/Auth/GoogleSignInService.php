@@ -69,10 +69,31 @@ class GoogleSignInService
 
 		if ($createIfMissing === false)
 		{
-			return modules()->user()->getByEmail($profile->email);
+			return $this->getUserByEmail($profile);
 		}
 
 		return $this->findOrCreateUser($profile);
+	}
+
+	/**
+	 * Get user by email.
+	 *
+	 * @param object $profile
+	 * @return User|null
+	 */
+	protected function getUserByEmail(object $profile): ?User
+	{
+		$user = modules()->user()->getByEmail($profile->email);
+		if ($user)
+		{
+			if ($user->emailVerifiedAt === null)
+			{
+				// Mark email as verified
+				$user->emailVerifiedAt = date('Y-m-d H:i:s');
+				modules()->user()->update($user);
+			}
+			return $user;
+		}
 	}
 
 	/**
@@ -84,7 +105,7 @@ class GoogleSignInService
 	protected function findOrCreateUser(object $profile): User
 	{
 		$email = $profile->email;
-		$user = modules()->user()->getByEmail($email);
+		$user = $this->getUserByEmail($profile);
 		if ($user)
 		{
 			return $user;
