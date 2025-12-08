@@ -1,8 +1,8 @@
-import { Div, Form, H2, Header, P, Span } from '@base-framework/atoms';
+import { Div, Form, H2, Header, OnState, P, Span } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { Icon } from '@base-framework/ui';
-import { Button, Input } from '@base-framework/ui/atoms';
+import { Button, Icon, Input, LoadingButton } from '@base-framework/ui/atoms';
 import { Icons } from "@base-framework/ui/icons";
+import { GoogleModel } from '@shell/models/google-model';
 import { STEPS } from '../steps';
 
 /**
@@ -35,9 +35,12 @@ const CredentialsContainer = Atom(() =>
  */
 const SignUpButton = Atom(() =>
 (
-    Div({ class: 'grid gap-4' }, [
-        Button({ type: 'submit' }, 'Sign Up')
-    ])
+	OnState('loading', (state) => (state)
+		? LoadingButton({ disabled: true })
+		: Div({ class: 'grid gap-4' }, [
+			Button({ type: 'submit' }, 'Sign Up')
+		])
+	)
 ));
 
 /**
@@ -50,9 +53,9 @@ const SignUpButton = Atom(() =>
 const SignUpWithGoogleButton = Atom(() =>
 (
     Button({
+		type: 'submit',
 		variant: 'outline',
 		class: "gap-2 w-full",
-		click: () => console.log("Sign in with Google"),
 		"aria-label": "Sign in with Google"
 	}, [
 		Icon(Icons.companies.google || ''),
@@ -101,7 +104,20 @@ export const SignUpForm = Atom(() =>
 			submit: (e, parent) =>
 			{
 				e.preventDefault();
-				parent.showStep(STEPS.USER_DETAILS);
+
+				const model = new GoogleModel();
+				model.xhr.signUp('', (response) =>
+				{
+					if (!response || response.success !== true)
+					{
+						app.noftify({
+
+						});
+						return;
+					}
+
+					parent.showStep(STEPS.USER_DETAILS);
+				});
 			}
 		}, [
 			Div({ class: 'grid gap-4' }, [
@@ -113,7 +129,7 @@ export const SignUpForm = Atom(() =>
 					Div({ class: "absolute inset-0 flex items-center" }, [
 						Span({ class: "grow border-t" })
 					]),
-					Div({ class: 'relative flex justify-center text-xs uppercase' }, [
+					Div({ class: 'relative flex justify-center text-xs uppercase py-4' }, [
 						Span({ class: 'bg-background px-2 text-muted-foreground' }, "or continue with")
 					]),
 				]),

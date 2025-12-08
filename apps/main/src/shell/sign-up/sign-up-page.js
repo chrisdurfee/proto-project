@@ -3,6 +3,19 @@ import { PageStepContainer } from './page-step-container.js';
 import { STEPS } from './steps.js';
 
 /**
+ * @function getSearchStep
+ * @description
+ *  Retrieves the current "step" from the URL search parameters.
+ *
+ * @returns {string|null} The value of the "step" parameter or null if not present.
+ */
+const getSearchStep = () =>
+{
+	const params = new URLSearchParams(window.location.search);
+	return params.get('step');
+};
+
+/**
  * @typedef {object} PageSettings
  * @property {Function} setupStates - Defines initial state.
  * @property {Function} showStep    - Updates the "step" state.
@@ -26,8 +39,7 @@ const PageProps =
 	 */
 	setupStates()
 	{
-		const params = new URLSearchParams(window.location.search);
-		const step = params.get('step') || STEPS.WELCOME;
+		const step = getSearchStep() || STEPS.WELCOME;
 
 		return {
 			step,
@@ -55,7 +67,7 @@ const PageProps =
  *  Constructs a FullscreenPage using our page settings and
  *  the PageStepContainer, which renders all step UI.
  *
- * @returns {object} A FullscreenPage instance.
+ * @returns {FullscreenPage} A FullscreenPage instance.
  */
 export const SignUpPage = () =>
 (
