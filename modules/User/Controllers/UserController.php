@@ -2,6 +2,7 @@
 namespace Modules\User\Controllers;
 
 use Modules\User\Auth\Gates\EmailVerificationGate;
+use Modules\User\Controllers\Helpers\UserHelper;
 use Modules\User\Models\User;
 use Modules\User\Auth\Policies\UserPolicy;
 use Modules\User\Services\User\PasswordUpdateService;
@@ -77,32 +78,8 @@ class UserController extends ResourceController
 			return $this->error('Username is already taken.');
 		}
 
-		$this->restrictData($data);
+		UserHelper::restrictData($data);
 		return parent::addItem($data);
-	}
-
-	/**
-	 * Restricts the data that can be updated.
-	 *
-	 * @param object $data The data to restrict.
-	 * @return void
-	 */
-	protected function restrictCredentials(object &$data): void
-	{
-		$fields = ['username', 'password'];
-		$this->restrictFields($data, $fields);
-	}
-
-	/**
-	 * Restricts the data that can be updated.
-	 *
-	 * @param object $data The data to restrict.
-	 * @return void
-	 */
-	protected function restrictData(object &$data): void
-	{
-		$fields = ['emailVerifiedAt', 'acceptedTermsAt', 'trialMode', 'trialDaysLeft', 'followerCount', 'deletedAt'];
-		$this->restrictFields($data, $fields);
 	}
 
 	/**
@@ -129,8 +106,8 @@ class UserController extends ResourceController
 		 * Restrict the username, password, and other sensitive fields from being updated. This
 		 * should be done elsewhere to prevent unauthorized changes.
 		 */
-		$this->restrictCredentials($data);
-		$this->restrictData($data);
+		UserHelper::restrictCredentials($data);
+		UserHelper::restrictData($data);
 
 		/**
 		 * This will update the user's notification preferences.

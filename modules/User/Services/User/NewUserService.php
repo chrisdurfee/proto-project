@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Services\User;
 
+use Modules\User\Controllers\Helpers\UserHelper;
 use Modules\User\Email\Welcome\WelcomeVerificationEmail;
 use Modules\User\Models\User;
 use Modules\User\Models\Role;
@@ -63,13 +64,13 @@ class NewUserService
 	 */
 	public function updateProfile(object $data): User
 	{
-		$username = $data->username ?? '';
-		if ($this->isUsernameTaken($username))
-		{
-			throw new \Exception('Username already taken.');
-		}
+		// restrict non-updatable fields
+		UserHelper::restrictData($data);
 
-		$user = $this->addUser($data);
+		// Ensure the user is enabled
+		$data->enabled = 1;
+
+		$user = $this->updateUser($data);
 		if (!$user)
 		{
 			return $user;
@@ -109,6 +110,19 @@ class NewUserService
 	{
 		$model = new User($data);
 		$model->add();
+		return $model;
+	}
+
+	/**
+	 * This will update the user.
+	 *
+	 * @param object $data
+	 * @return User
+	 */
+	protected function updateUser(object $data): User
+	{
+		$model = new User($data);
+		$model->update();
 		return $model;
 	}
 
