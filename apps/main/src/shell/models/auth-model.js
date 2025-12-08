@@ -136,6 +136,19 @@ export const AuthModel = Model.extend({
 		},
 
 		/**
+		 * Get the current session user.
+		 *
+		 * @param {object} instanceParams - The instance parameters.
+		 * @param {function} callBack - The callback function.
+		 */
+		getSessionUser(instanceParams, callBack)
+		{
+			let params = "guid=" + GUID;
+
+			return this._get('session-user', params, instanceParams, callBack);
+		},
+
+		/**
 		 * Pulse the user's session.
 		 *
 		 * @param {object} instanceParams - The instance parameters.

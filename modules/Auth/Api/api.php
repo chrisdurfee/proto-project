@@ -28,6 +28,9 @@ router()
 		$router->post('google/callback', [$controller, 'googleCallback']);
 		$router->post('google/signup/callback', [$controller, 'googleSignupCallback']);
 
+		// Session User
+		$router->get('session-user', [$controller, 'getSessionUser']);
+
 		// CSRF Token
 		$router->get('csrf-token', [$controller, 'getToken'], [
 			DomainMiddleware::class
