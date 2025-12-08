@@ -1,5 +1,6 @@
 import { Div } from '@base-framework/atoms';
 import { FullscreenPage } from '@base-framework/ui/pages';
+import { AuthModel } from '@shell/models/auth-model.js';
 import { PageStepContainer } from './page-step-container.js';
 import { STEPS } from './steps.js';
 
@@ -18,6 +19,7 @@ const getSearchStep = () =>
 
 /**
  * @typedef {object} PageSettings
+ * @property {Function} setContext  - Sets the context for the page.
  * @property {Function} setupStates - Defines initial state.
  * @property {Function} showStep    - Updates the "step" state.
  */
@@ -32,6 +34,20 @@ const getSearchStep = () =>
 const PageProps =
 {
 	/**
+	 * @function setContext
+	 * @description
+	 *  Sets the context for the sign-up page, providing
+	 *  a new instance of AuthModel.
+	 *
+	 * @param {object|null} context - The existing context (if any).	 *
+	 * @returns {object} The context object with data property.
+	 */
+	setContext(context)
+	{
+		return { data: new AuthModel() };
+	},
+
+	/**
 	 * @function setupStates
 	 * @description
 	 *  Defines the initial state values for the sign-up page.
@@ -41,7 +57,6 @@ const PageProps =
 	setupStates()
 	{
 		const step = getSearchStep() ?? STEPS.WELCOME;
-		console.log(step)
 
 		return {
 			step,

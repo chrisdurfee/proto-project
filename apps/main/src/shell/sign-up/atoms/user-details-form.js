@@ -4,7 +4,6 @@ import { DatePicker, FormField } from '@base-framework/ui';
 import { Button, Fieldset, Input, LoadingButton } from "@base-framework/ui/atoms";
 import { Icons } from '@base-framework/ui/icons';
 import { AuthModel } from '../../models/auth-model.js';
-import { GoogleModel } from '../../models/google-model.js';
 import { STEPS } from '../steps.js';
 
 /**
@@ -37,15 +36,9 @@ const submit = (e, parent) =>
 	e.preventDefault();
 	parent.state.loading = true;
 
+	const data = parent.context.data;
 	const model = new AuthModel({
-		user: {
-			email: parent.state.email,
-			firstName: parent.state.fullname?.split(' ')[0] ?? '',
-			lastName: parent.state.fullname?.split(' ').slice(1).join(' ') ?? '',
-			username: parent.state.email,
-			password: parent.state.password,
-			dob: parent.state.birthday
-		}
+		user: { ...data }
 	});
 
 	model.xhr.register((response) =>
@@ -65,23 +58,6 @@ const submit = (e, parent) =>
 			Icons.warning,
 			'destructive'
 		);
-	});
-};
-
-/**
- * This will handle the Google signup.
- *
- * @returns {void}
- */
-const googleSignup = () =>
-{
-	const model = new GoogleModel();
-	model.xhr.signup((response) =>
-	{
-		if (response && response.url)
-		{
-			window.location.href = response.url;
-		}
 	});
 };
 
