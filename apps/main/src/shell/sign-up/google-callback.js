@@ -89,7 +89,7 @@ export const GoogleCallback = Jot(
 			code
 		});
 
-		model.xhr.callback('', (response) =>
+		model.xhr.signupCallback('', (response) =>
 		{
 			if (response && response.allowAccess)
 			{
@@ -99,7 +99,20 @@ export const GoogleCallback = Jot(
 					return;
 				}
 
-				app.signIn(response.user);
+				app.notify({
+					type: 'success',
+					title: 'Already signed up',
+					description: 'The account is already registered. Signing you in...',
+					icon: Icons.circleCheck
+				});
+
+				/**
+				 * we want to set the user data to show
+				 * the user is signed in and then redirect to home
+				 * which will resume their login.
+				 */
+				app.setUserData(response.user);
+
 				// Redirect to home
 				app.navigate('/', null, true);
 				return;

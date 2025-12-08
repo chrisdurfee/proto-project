@@ -45,6 +45,18 @@ export const GoogleModel = Model.extend({
 			const data = this.model.get();
 			const redirectUrl = window.location.origin + '/login/google/callback';
 			return this._post('callback', { ...data, redirectUrl }, instanceParams, callBack);
+		},
+
+		/**
+		 * Handle the signup callback.
+		 *
+		 * @param {object} instanceParams - The instance parameters.
+		 * @param {function} callBack - The callback function.
+		 */
+		signupCallback(instanceParams, callBack)
+		{
+			const data = this.model.get();
+			return this._post('signup/callback', data, instanceParams, callBack);
 		}
 	}
 });
