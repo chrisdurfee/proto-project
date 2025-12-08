@@ -78,7 +78,7 @@ export const SignUpPage = () =>
 			class: 'flex flex-auto flex-col',
 			switch: [
 				{
-					uri: '/login/google/signup/callback*',
+					uri: '/sign-up/google/callback*',
 					import: () => import('./google-callback.js')
 				},
 				{

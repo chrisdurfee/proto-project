@@ -411,11 +411,22 @@ class AuthController extends Controller
 	 */
 	public function googleSignup(): object
 	{
-		$settings = env('apis')->google;
-		$signupUrl = str_replace('/callback', '/signup/callback', $settings->redirectUrl);
+		$signupUrl = $this->getSignupUrl();
 
 		$url = $this->googleService->getAuthorizationUrl($signupUrl);
 		return $this->response(['url' => $url]);
+	}
+
+	/**
+	 * Get the signup URL for Google OAuth.
+	 *
+	 * @return string
+	 */
+	protected function getSignupUrl(): string
+	{
+		$settings = env('apis')->google;
+		$signupUrl = str_replace('/login', '/sign-up', $settings->redirectUrl);
+		return str_replace('/callback', '/callback', $signupUrl);
 	}
 
 	/**
@@ -432,8 +443,7 @@ class AuthController extends Controller
 			return $this->error('No code provided.', HttpStatus::BAD_REQUEST->value);
 		}
 
-		$settings = env('apis')->google;
-		$signupUrl = str_replace('/callback', '/signup/callback', $settings->redirectUrl);
+		$signupUrl = $this->getSignupUrl();
 
 		// Create new user if missing
 		$user = $this->googleService->handleCallback($code, true, $signupUrl);
