@@ -43,7 +43,8 @@ const PageProps =
 
 		return {
 			step,
-			loading: false
+			loading: false,
+			googleLoading: false
 		};
 	},
 

@@ -3,7 +3,7 @@ import { Atom } from '@base-framework/base';
 import { Button, Icon, Input, LoadingButton } from '@base-framework/ui/atoms';
 import { Icons } from "@base-framework/ui/icons";
 import { GoogleModel } from '@shell/models/google-model';
-import { STEPS } from '../steps';
+import { STEPS } from '../steps.js';
 
 /**
  * @function CredentialsContainer
@@ -52,15 +52,40 @@ const SignUpButton = Atom(() =>
  */
 const SignUpWithGoogleButton = Atom(() =>
 (
-    Button({
-		type: 'submit',
-		variant: 'outline',
-		class: "gap-2 w-full",
-		"aria-label": "Sign in with Google"
-	}, [
-		Icon(Icons.companies.google || ''),
-		Span("Google")
-	])
+	OnState('googleLoading', (state) => (state)
+		? LoadingButton({ disabled: true })
+		: Button({
+			variant: 'outline',
+			class: "gap-2 w-full",
+			"aria-label": "Sign in with Google",
+			click: (e, parent) =>
+			{
+				parent.state.googleLoading = true;
+
+				const model = new GoogleModel();
+				model.xhr.signup('', (response) =>
+				{
+					parent.state.googleLoading = false;
+
+					if (!response || response.success !== true)
+					{
+						app.notify({
+							type: "destructive",
+							title: "Error",
+							description: response?.message || "Failed to sign up with Google.",
+							icon: Icons.warning
+						});
+						return;
+					}
+
+					window.location.href = response.url;
+				});
+			}
+		}, [
+			Icon(Icons.companies.google || ''),
+			Span("Google")
+		])
+	)
 ));
 
 /**
