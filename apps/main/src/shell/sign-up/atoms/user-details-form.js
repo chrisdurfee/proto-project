@@ -47,7 +47,7 @@ const submit = (e, parent) =>
 
 		if (response && response.allowAccess)
 		{
-			app.signIn(response.user);
+			app.setUserData(response.user);
 			parent.showStep(STEPS.CONGRATULATIONS);
 			return;
 		}
