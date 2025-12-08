@@ -95,6 +95,7 @@ export const AuthModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		login(instanceParams, callBack)
 		{
@@ -114,6 +115,7 @@ export const AuthModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		logout(instanceParams, callBack)
 		{
@@ -127,6 +129,7 @@ export const AuthModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		resume(instanceParams, callBack)
 		{
@@ -140,6 +143,7 @@ export const AuthModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		getSessionUser(instanceParams, callBack)
 		{
@@ -153,6 +157,7 @@ export const AuthModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		pulse(instanceParams, callBack)
 		{
@@ -166,6 +171,7 @@ export const AuthModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		getCsrfToken(instanceParams, callBack)
 		{
@@ -179,6 +185,7 @@ export const AuthModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		register(instanceParams, callBack)
 		{
@@ -192,10 +199,29 @@ export const AuthModel = Model.extend({
 		},
 
 		/**
+		 * Update user profile.
+		 *
+		 * @param {object} instanceParams - The instance parameters.
+		 * @param {function} callBack - The callback function.
+		 * @return {object}
+		 */
+		updateProfile(instanceParams, callBack)
+		{
+			const data = this.model.get();
+			let params = {
+				...data,
+				guid: GUID
+			};
+
+			return this._post('update-profile', params, instanceParams, callBack);
+		},
+
+		/**
 		 * Get MFA authentication code.
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		getAuthCode(instanceParams, callBack)
 		{
@@ -213,6 +239,7 @@ export const AuthModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		verifyAuthCode(instanceParams, callBack)
 		{
@@ -230,6 +257,7 @@ export const AuthModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		requestPasswordReset(instanceParams, callBack)
 		{
@@ -247,6 +275,7 @@ export const AuthModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		validatePasswordRequest(instanceParams, callBack)
 		{
@@ -265,6 +294,7 @@ export const AuthModel = Model.extend({
 		 *
 		 * @param {object} instanceParams - The instance parameters.
 		 * @param {function} callBack - The callback function.
+		 * @return {object}
 		 */
 		resetPassword(instanceParams, callBack)
 		{

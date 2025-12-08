@@ -84,6 +84,18 @@ class Gateway
 	}
 
 	/**
+	 * This will update the new user profile.
+	 *
+	 * @param object $data
+	 * @return User|null
+	 */
+	public function updateProfile(object $data): ?User
+	{
+		$service = new NewUserService();
+		return $service->updateProfile($data);
+	}
+
+	/**
 	 * This will get the user by email.
 	 *
 	 * @param string $email

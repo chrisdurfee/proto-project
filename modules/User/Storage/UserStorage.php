@@ -85,7 +85,8 @@ class UserStorage extends Storage
 
 		$rows = $this->select('id', 'password')
 			->where(
-				'username = ?'
+				'username = ?',
+				'enabled = 1'
 			)
 			->fetch($params);
 

@@ -42,6 +42,33 @@ class NewUserService
 			throw new \Exception('Username already taken.');
 		}
 
+		// set a random password
+		$data->password = bin2hex(random_bytes(20)) . 'Aa1!';
+		$data->enabled = 0;
+
+		$user = $this->addUser($data);
+		if (!$user)
+		{
+			return $user;
+		}
+
+		return $user;
+	}
+
+	/**
+	 * This will update the user profile and send verification email.
+	 *
+	 * @param object $data
+	 * @return User
+	 */
+	public function updateProfile(object $data): User
+	{
+		$username = $data->username ?? '';
+		if ($this->isUsernameTaken($username))
+		{
+			throw new \Exception('Username already taken.');
+		}
+
 		$user = $this->addUser($data);
 		if (!$user)
 		{

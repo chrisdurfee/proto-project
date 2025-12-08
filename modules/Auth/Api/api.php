@@ -23,6 +23,7 @@ router()
 		$controller = new AuthController();
 		$router->post('pulse', [$controller, 'pulse']);
 		$router->post('register', [$controller, 'register']);
+		$router->post('update-profile', [$controller, 'updateProfile']);
 
 		// Google Auth
 		$router->post('google/callback', [$controller, 'googleCallback']);
