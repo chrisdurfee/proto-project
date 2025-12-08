@@ -1,3 +1,4 @@
+import { Div } from '@base-framework/atoms';
 import { FullscreenPage } from '@base-framework/ui/pages';
 import { PageStepContainer } from './page-step-container.js';
 import { STEPS } from './steps.js';
@@ -73,7 +74,18 @@ const PageProps =
 export const SignUpPage = () =>
 (
 	new FullscreenPage(PageProps, [
-		PageStepContainer()
+		Div({
+			class: 'flex flex-auto flex-col',
+			switch: [
+				{
+					uri: '/login/google/signup/callback*',
+					import: () => import('./google-callback.js')
+				},
+				{
+					component: PageStepContainer()
+				}
+			]
+		})
 	])
 );
 
