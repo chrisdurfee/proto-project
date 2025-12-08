@@ -93,7 +93,7 @@ export const GoogleCallback = Jot(
 		{
 			if (response && response.allowAccess)
 			{
-				if (response.isNew)
+				if (1 || response.isNew)
 				{
 					app.navigate('/sign-up?step=user_details', null, true);
 					return;

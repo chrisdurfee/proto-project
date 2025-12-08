@@ -40,7 +40,8 @@ const PageProps =
 	 */
 	setupStates()
 	{
-		const step = getSearchStep() || STEPS.WELCOME;
+		const step = getSearchStep() ?? STEPS.WELCOME;
+		console.log(step)
 
 		return {
 			step,

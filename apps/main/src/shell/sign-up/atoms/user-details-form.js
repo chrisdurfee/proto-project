@@ -100,14 +100,6 @@ export const UserDetailsForm = Atom(() =>
 		}, [
 		Fieldset({ legend: 'Profile', class: 'flex flex-col gap-4' }, [
 			new FormField({
-				name: "email",
-				label: "Email",
-				description: "We'll never share your email with anyone else."
-			}, [
-				Input({ type: "email", placeholder: "name@example.com", required: true, bind: 'email' })
-			]),
-
-			new FormField({
 				name: "fullname",
 				label: "Full Name",
 				description: "This is your public display name."
