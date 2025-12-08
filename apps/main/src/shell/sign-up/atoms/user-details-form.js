@@ -1,8 +1,8 @@
 import { Form, OnState } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { DatePicker, FormField } from '@base-framework/ui';
 import { Button, Fieldset, Input, LoadingButton } from "@base-framework/ui/atoms";
 import { Icons } from '@base-framework/ui/icons';
+import { DatePicker, FormField } from '@base-framework/ui/molecules';
 import { AuthModel } from '../../models/auth-model.js';
 import { STEPS } from '../steps.js';
 
@@ -71,6 +71,17 @@ const submit = (e, parent) =>
 export const UserDetailsForm = Atom(() =>
 (
 	Form({
+			onCreated(ele, parent)
+			{
+				const data = parent.context.data;
+				data.xhr.getSessionUser('', (response) =>
+				{
+					if (response && response.user)
+					{
+						data.set(response.user);
+					}
+				});
+			},
 			class: 'flex flex-col gap-4',
 			submit
 		}, [
