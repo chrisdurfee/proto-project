@@ -100,11 +100,27 @@ export const UserDetailsForm = Atom(() =>
 		}, [
 		Fieldset({ legend: 'Profile', class: 'flex flex-col gap-4' }, [
 			new FormField({
-				name: "fullname",
-				label: "Full Name",
+				name: "firstName",
+				label: "First Name",
+				description: "This is your given name."
+			}, [
+				Input({ placeholder: "e.g. Jane", required: true, bind: 'firstName' })
+			]),
+
+			new FormField({
+				name: "lastName",
+				label: "Last Name",
+				description: "This is your family name."
+			}, [
+				Input({ placeholder: "e.g. Doe", required: true, bind: 'lastName' })
+			]),
+
+			new FormField({
+				name: "displayName",
+				label: "Display Name",
 				description: "This is your public display name."
 			}, [
-				Input({ placeholder: "e.g. Jane Doe", required: true, bind: 'fullname' })
+				Input({ placeholder: "e.g. Jane Doe", required: true, bind: 'displayName' })
 			]),
 
 			new FormField({
@@ -112,7 +128,7 @@ export const UserDetailsForm = Atom(() =>
 				label: "Birthday",
 				description: "Please enter your date of birth."
 			}, [
-				new DatePicker({ required: true, bind: 'birthday' })
+				new DatePicker({ required: true, bind: 'dob' })
 			]),
 
 			new FormField({
@@ -122,7 +138,7 @@ export const UserDetailsForm = Atom(() =>
 			}, [
 				Input({
 					type: "password",
-					placeholder: "********",
+					placeholder: "******************",
 					required: true,
 					bind: 'password',
 					pattern: '^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*\\W).{12,}$',
@@ -133,14 +149,7 @@ export const UserDetailsForm = Atom(() =>
 			OnState('loading', (loading) => (loading)
 				? LoadingButton({ class: 'w-full', disabled: true }, "Creating Account...")
 				: Button({ type: "submit", class: 'w-full' }, "Create Account")
-			),
-
-			Button({
-				type: "button",
-				variant: 'outline',
-				class: 'w-full',
-				click: googleSignup
-			}, "Sign up with Google")
+			)
 		])
 	])
 ));
