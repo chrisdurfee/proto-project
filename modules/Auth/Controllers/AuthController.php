@@ -299,10 +299,9 @@ class AuthController extends Controller
 		$user = $this->user->get($userId);
 		if (!$user)
 		{
-			return $this->response([
-				'user' => $sessionUser,
-				'message' => 'partial user data from session.'
-			]);
+			return $this->error(
+				'The user is not found.'
+			);
 		}
 
 		return $this->response(['user' => $user]);
@@ -466,15 +465,13 @@ class AuthController extends Controller
 			return $this->error("User not found. Please sign up first.", HttpStatus::UNAUTHORIZED->value);
 		}
 
-		$response = $this->permit($user, $req->ip());
-
 		// Check if user is new (created within last 10 seconds)
 		if ($user->createdAt && strtotime($user->createdAt) > time() - 10)
 		{
-			$response->isNew = true;
+			$user->isNew = true;
 		}
 
-		return $response;
+		return $this->permit($user, $req->ip());
 	}
 
 	/**
@@ -519,13 +516,20 @@ class AuthController extends Controller
 		$signupUrl = $this->getSignupUrl();
 
 		// Create new user if missing
-		$user = $this->googleService->handleCallback($code, true, $signupUrl);
-		if (!$user)
+		$result = $this->googleService->handleCallback($code, true, $signupUrl);
+		if (!$result->user)
 		{
 			return $this->error('Google registration failed.', HttpStatus::BAD_REQUEST->value);
 		}
 
-		return $this->permit($user, $req->ip());
+		$user = $result->user;
+		$response = $this->permit($user, $req->ip());
+
+		return $this->response([
+			'allowAccess' => $response->allowAccess,
+			'user' => $user,
+			'isNew' => $result->isNew
+		]);
 	}
 
 	/**

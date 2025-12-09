@@ -42,9 +42,9 @@ class GoogleSignInService
 	 * @param string $code
 	 * @param bool $createIfMissing
 	 * @param string|null $redirectUrl
-	 * @return User|null
+	 * @return object|null
 	 */
-	public function handleCallback(string $code, bool $createIfMissing = true, ?string $redirectUrl = null): ?User
+	public function handleCallback(string $code, bool $createIfMissing = true, ?string $redirectUrl = null): ?object
 	{
 		$tokenData = $this->googleService->getAccessToken($code, $redirectUrl);
 		if (!$tokenData || !isset($tokenData->access_token))
@@ -121,26 +121,20 @@ class GoogleSignInService
 		}
 		catch (\Exception $e)
 		{
-			// Log error but do not fail the entire process
+
 		}
 		return null;
 	}
 
 	/**
-	 * Find or create a user based on the Google profile.
+	 * Create a new user based on Google profile.
 	 *
 	 * @param object $profile
 	 * @return User|null
 	 */
-	protected function findOrCreateUser(object $profile): ?User
+	protected function createNewUser(object $profile): ?User
 	{
 		$email = $profile->email;
-		$user = $this->getUserByEmail($profile);
-		if ($user)
-		{
-			return $user;
-		}
-
 		// Create new user
 		$userData = [
 			'email' => $email,
@@ -170,11 +164,37 @@ class GoogleSignInService
 			$uploadedImagePath = $this->uploadProfileImage($profile->picture, $newUser->id);
 			if ($uploadedImagePath)
 			{
+				/**
+				 * We need to add the new image path to the user.
+				 */
 				$newUser->image = $uploadedImagePath;
 				modules()->user()->update($newUser);
 			}
 		}
-
 		return $newUser;
+	}
+
+	/**
+	 * Find or create a user based on the Google profile.
+	 *
+	 * @param object $profile
+	 * @return object
+	 */
+	protected function findOrCreateUser(object $profile): object
+	{
+		$user = $this->getUserByEmail($profile);
+		if ($user)
+		{
+			return (object)[
+				'user' => $user,
+				'isNew' => false
+			];
+		}
+
+		$user = $this->createNewUser($profile);
+		return (object)[
+			'user' => $user,
+			'isNew' => true
+		];
 	}
 }
