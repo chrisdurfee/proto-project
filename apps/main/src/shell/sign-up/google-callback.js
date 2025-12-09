@@ -92,7 +92,7 @@ export const GoogleCallback = Jot(
 
 		model.xhr.signupCallback('', (response) =>
 		{
-			if (response && response.allowAccess)
+			if (response && response.user)
 			{
 				if (response.isNew === true)
 				{
