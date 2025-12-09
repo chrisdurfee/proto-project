@@ -46,7 +46,7 @@ class NewUserService
 		$data->email = $username;
 		// set a random password
 		$data->password = bin2hex(random_bytes(20)) . 'Aa1!';
-		$data->enabled = 0;
+		$data->enabled = $data->enabled ?? 0;
 
 		$user = $this->addUser($data);
 		if (!$user)
@@ -83,9 +83,12 @@ class NewUserService
 			return $user;
 		}
 
-		if (!$this->sendVerification($user))
+		if (empty($user->emailVerifiedAt))
 		{
-			return $user;
+			if (!$this->sendVerification($user))
+			{
+				return $user;
+			}
 		}
 
 		return $user;

@@ -84,16 +84,18 @@ class GoogleSignInService
 	protected function getUserByEmail(object $profile): ?User
 	{
 		$user = modules()->user()->getByEmail($profile->email);
-		if ($user)
+		if (!$user)
 		{
-			if ($user->emailVerifiedAt === null)
-			{
-				// Mark email as verified
-				$user->emailVerifiedAt = date('Y-m-d H:i:s');
-				modules()->user()->update($user);
-			}
-			return $user;
+			return null;
 		}
+
+		if ($user->emailVerifiedAt === null)
+		{
+			// Mark email as verified
+			$user->emailVerifiedAt = date('Y-m-d H:i:s');
+			modules()->user()->update($user);
+		}
+		return $user;
 	}
 
 	/**
