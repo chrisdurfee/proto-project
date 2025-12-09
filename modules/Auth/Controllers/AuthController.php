@@ -523,6 +523,7 @@ class AuthController extends Controller
 		}
 
 		$user = $result->user;
+		setSession('user', $user->getData());
 		return $this->response([
 			'user' => $user,
 			'isNew' => $result->isNew

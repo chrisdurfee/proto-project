@@ -3,6 +3,7 @@ import { Component, Jot } from '@base-framework/base';
 import { Icon } from '@base-framework/ui/atoms';
 import { Icons } from '@base-framework/ui/icons';
 import { GoogleModel } from '../models/google-model.js';
+import { STEPS } from './steps.js';
 
 /**
  * This will create the loading screen.
@@ -96,7 +97,9 @@ export const GoogleCallback = Jot(
 			{
 				if (response.isNew === true)
 				{
-					app.navigate('/sign-up?step=user_details', null, true);
+					app.navigate('/sign-up', null, true);
+					// @ts-ignore
+					this.parent.showStep(STEPS.USER_DETAILS);
 					return;
 				}
 
