@@ -4,6 +4,7 @@ namespace Modules\User\Services\User;
 use Modules\User\Models\User;
 use Proto\Controllers\Response;
 use Proto\Http\UploadFile;
+use Proto\Utils\Files\File;
 
 /**
  * UserImageService
@@ -140,5 +141,71 @@ class UserImageService
 		}
 
 		return $storedFileName;
+	}
+
+	/**
+	 * Imports a user image from a URL (e.g. Google Profile).
+	 *
+	 * @param string $url The image URL.
+	 * @param int $userId The user ID.
+	 * @return object Returns Response object.
+	 */
+	public function importFromUrl(string $url, int $userId): object
+	{
+		try
+		{
+			// Download the image content
+			$content = File::get($url, true);
+			if ($content === false)
+			{
+				return Response::invalid('Failed to download image from URL.');
+			}
+
+			// Create a temporary file
+			$tmpPath = File::createTmpName('google_');
+			if ($tmpPath === false)
+			{
+				return Response::invalid('Failed to create temporary file.');
+			}
+
+			if (!File::put($tmpPath, $content))
+			{
+				return Response::invalid('Failed to write temporary image file.');
+			}
+
+			// Determine mime type to set correct extension if possible, or default to jpg
+			$mime = File::getMimeType($tmpPath);
+			$ext = 'jpg'; // Default
+			$map = [
+				'image/jpeg' => 'jpg',
+				'image/png' => 'png',
+				'image/gif' => 'gif',
+				'image/webp' => 'webp',
+			];
+			if ($mime && isset($map[$mime]))
+			{
+				$ext = $map[$mime];
+			}
+
+			// Mock the $_FILES array
+			$tmpName = basename($tmpPath);
+			$tmpFile = [
+				'name' => "{$tmpName}.{$ext}",
+				'tmp_name' => $tmpPath,
+				'type' => $mime ?: 'application/octet-stream',
+				'size' => strlen($content),
+				'error' => 0
+			];
+
+			// Create UploadFile instance
+			$uploadFile = new UploadFile($tmpFile);
+
+			// Process the upload
+			return $this->uploadUserImage($uploadFile, $userId);
+		}
+		catch (\Exception $e)
+		{
+			return Response::invalid('Image import failed: ' . $e->getMessage());
+		}
 	}
 }

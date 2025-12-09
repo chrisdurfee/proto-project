@@ -3,6 +3,7 @@ namespace Modules\Auth\Services\Auth;
 
 use Modules\Auth\Integrations\Google\GoogleService;
 use Modules\User\Models\User;
+use Modules\User\Services\User\UserImageService;
 
 /**
  * Class GoogleSignInService
@@ -99,6 +100,31 @@ class GoogleSignInService
 	}
 
 	/**
+	 * Upload profile image from URL.
+	 *
+	 * @param string $imageUrl
+	 * @param int $userId
+	 * @return string|null
+	 */
+	protected function uploadProfileImage(string $imageUrl, int $userId): ?string
+	{
+		try
+		{
+			$imageService = new UserImageService();
+			$response = $imageService->importFromUrl($imageUrl, $userId);
+			if ($response->isSuccess())
+			{
+				return $response->data->path ?? null;
+			}
+		}
+		catch (\Exception $e)
+		{
+			// Log error but do not fail the entire process
+		}
+		return null;
+	}
+
+	/**
 	 * Find or create a user based on the Google profile.
 	 *
 	 * @param object $profile
@@ -134,6 +160,19 @@ class GoogleSignInService
 		/**
 		 * This will register the user via the User module's gateway.
 		 */
-		return modules()->user()->register((object)$userData);
+		$newUser = modules()->user()->register((object)$userData);
+
+		// Import Google profile picture if available
+		if ($newUser && !empty($profile->picture))
+		{
+			$uploadedImagePath = $this->uploadProfileImage($profile->picture, $newUser->id);
+			if ($uploadedImagePath)
+			{
+				$newUser->image = $uploadedImagePath;
+				modules()->user()->update($newUser);
+			}
+		}
+
+		return $newUser;
 	}
 }
