@@ -5,6 +5,19 @@ import { PageStepContainer } from './page-step-container.js';
 import { STEPS } from './steps.js';
 
 /**
+ * @function getSearchStep
+ * @description
+ *  Retrieves the current "step" from the URL search parameters.
+ *
+ * @returns {string|null} The value of the "step" parameter or null if not present.
+ */
+const getSearchStep = () =>
+{
+	const params = new URLSearchParams(window.location.search);
+	return params.get('step');
+};
+
+/**
  * @typedef {object} PageSettings
  * @property {Function} setContext  - Sets the context for the page.
  * @property {Function} setupStates - Defines initial state.
@@ -26,7 +39,7 @@ const PageProps =
 	 *  Sets the context for the sign-up page, providing
 	 *  a new instance of AuthModel.
 	 *
-	 * @param {object|null} context - The existing context (if any).	 *
+	 * @param {object|null} context - The existing context (if any).
 	 * @returns {object} The context object with data property.
 	 */
 	setContext(context)
@@ -43,7 +56,7 @@ const PageProps =
 	 */
 	setupStates()
 	{
-		const step = STEPS.WELCOME;
+		const step = getSearchStep() ?? STEPS.WELCOME;
 
 		return {
 			step,

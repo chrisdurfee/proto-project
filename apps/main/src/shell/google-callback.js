@@ -87,10 +87,8 @@ export const GoogleCallback = Jot(
 			{
 				if (response.isNew)
 				{
-					app.navigate('/sign-up?step=user_details', null, true);
-
 					// @ts-ignore
-					this.parent.showStep(STEPS.USER_DETAILS);
+					app.navigate('/sign-up?step=congratulations', null, true);
 					return;
 				}
 
