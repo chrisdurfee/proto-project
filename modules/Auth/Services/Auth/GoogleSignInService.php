@@ -17,13 +17,12 @@ class GoogleSignInService
 	/**
 	 * Constructor.
 	 *
-	 * @param GoogleService|null $googleService
+	 * @param GoogleService $googleService
 	 */
 	public function __construct(
-		protected ?GoogleService $googleService = null
+		protected ?GoogleService $googleService = new GoogleService()
 	)
 	{
-		$this->googleService = $googleService ?? new GoogleService();
 	}
 
 	/**
