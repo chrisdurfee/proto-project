@@ -95,11 +95,17 @@ export const GoogleCallback = Jot(
 		{
 			if (response && response.user)
 			{
+				/**
+				 * we want to set the user data to show
+				 * the user is signed in.
+				 */
+				app.setUserData(response.user);
+
 				if (response.isNew === true)
 				{
-					app.navigate('/sign-up', null, true);
 					// @ts-ignore
-					this.parent.showStep(STEPS.USER_DETAILS);
+					this.parent.showStep(STEPS.CONGRATULATIONS);
+					app.navigate('/sign-up', null, true);
 					return;
 				}
 
@@ -109,13 +115,6 @@ export const GoogleCallback = Jot(
 					description: 'The account is already registered. Signing you in...',
 					icon: Icons.circleCheck
 				});
-
-				/**
-				 * we want to set the user data to show
-				 * the user is signed in and then redirect to home
-				 * which will resume their login.
-				 */
-				app.setUserData(response.user);
 
 				// Redirect to home
 				app.navigate('/', null, true);
