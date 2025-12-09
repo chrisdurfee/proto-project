@@ -209,7 +209,7 @@ export const AuthModel = Model.extend({
 		{
 			const data = this.model.get();
 			let params = {
-				user: Encode.prepareJsonUrl(data),
+				user: Encode.prepareJsonUrl(data.user),
 				guid: GUID
 			};
 

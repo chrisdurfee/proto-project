@@ -65,6 +65,7 @@ class NewUserService
 	 */
 	public function updateProfile(object $data): ?User
 	{
+		unset($data->username);
 		// restrict non-updatable fields
 		UserHelper::restrictData($data);
 
@@ -122,15 +123,29 @@ class NewUserService
 	 */
 	protected function updateUser(object $data): ?User
 	{
-		// Check if user exists before updating
-		if (!User::get($data->id))
+		$user = User::get($data->id);
+
+		/**
+		 * We want to block any already created profiles.
+		 */
+		if ($user->enabled === 1 || $user->updatedAt !== null)
 		{
 			return null;
 		}
 
-		$model = new User($data);
-		$model->update();
-		return $model;
+		if (!$user)
+		{
+			return null;
+		}
+
+		$user->set($data);
+		$result = $user->update();
+		if (!$result)
+		{
+			return null;
+		}
+
+		return $user;
 	}
 
 	/**
@@ -235,7 +250,7 @@ class NewUserService
 	 */
 	protected function dispatchEmail(object $settings, ?object $data = null): object
 	{
-		//$settings->queue = true;
+		$settings->queue = true;
 		return Dispatcher::email($settings, $data);
 	}
 }

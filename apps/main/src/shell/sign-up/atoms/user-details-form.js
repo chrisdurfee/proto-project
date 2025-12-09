@@ -1,10 +1,10 @@
 import { Form, OnState } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
+import { HiddenInput } from '@base-framework/ui';
 import { Button, Fieldset, Input, LoadingButton } from "@base-framework/ui/atoms";
 import { Icons } from '@base-framework/ui/icons';
 import { DatePicker, FormField } from '@base-framework/ui/molecules';
 import { AuthModel } from '../../models/auth-model.js';
-import { STEPS } from '../steps.js';
 
 /**
  * This will create the notification.
@@ -34,30 +34,33 @@ const notify = (title, description, icon, type) => (
 const submit = (e, parent) =>
 {
 	e.preventDefault();
-	parent.state.loading = true;
+	//parent.state.loading = true;
 
 	const data = parent.context.data.get();
 	const model = new AuthModel({
 		user: data
 	});
 
-	model.xhr.updateProfile((response) =>
+	model.xhr.updateProfile('', (response) =>
 	{
-		parent.state.loading = false;
+		//parent.state.loading = false;
 
-		if (response && response.allowAccess)
+		if (!response || response.allowAccess !== true)
 		{
-			app.setUserData(response.user);
-			parent.showStep(STEPS.CONGRATULATIONS);
+			notify(
+				'Error!',
+				response.message ?? 'Registration failed.',
+				Icons.warning,
+				'destructive'
+			);
 			return;
 		}
 
-		notify(
-			'Error!',
-			response.message ?? 'Registration failed.',
-			Icons.warning,
-			'destructive'
-		);
+		/**
+		 * Set the user data tothe app and show the congratulations step.
+		 */
+		// app.setUserData(response.user);
+		// parent.showStep(STEPS.CONGRATULATIONS);
 	});
 };
 
@@ -86,6 +89,7 @@ export const UserDetailsForm = Atom(() =>
 			submit
 		}, [
 		Fieldset({ legend: 'Profile', class: 'flex flex-col gap-4' }, [
+			HiddenInput({ name: 'username', bind: 'username' }),
 			new FormField({
 				name: "firstName",
 				label: "First Name",
