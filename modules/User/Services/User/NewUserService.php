@@ -43,6 +43,7 @@ class NewUserService
 			throw new \Exception('Username already taken.');
 		}
 
+		$data->email = $username;
 		// set a random password
 		$data->password = bin2hex(random_bytes(20)) . 'Aa1!';
 		$data->enabled = 0;
@@ -62,7 +63,7 @@ class NewUserService
 	 * @param object $data
 	 * @return User
 	 */
-	public function updateProfile(object $data): User
+	public function updateProfile(object $data): ?User
 	{
 		// restrict non-updatable fields
 		UserHelper::restrictData($data);
@@ -73,7 +74,7 @@ class NewUserService
 		$user = $this->updateUser($data);
 		if (!$user)
 		{
-			return $user;
+			return null;
 		}
 
 		if (!$this->addRoles($user))
@@ -119,8 +120,14 @@ class NewUserService
 	 * @param object $data
 	 * @return User
 	 */
-	protected function updateUser(object $data): User
+	protected function updateUser(object $data): ?User
 	{
+		// Check if user exists before updating
+		if (!User::get($data->id))
+		{
+			return null;
+		}
+
 		$model = new User($data);
 		$model->update();
 		return $model;
@@ -228,7 +235,7 @@ class NewUserService
 	 */
 	protected function dispatchEmail(object $settings, ?object $data = null): object
 	{
-		$settings->queue = true;
+		//$settings->queue = true;
 		return Dispatcher::email($settings, $data);
 	}
 }

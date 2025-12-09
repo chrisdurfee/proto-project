@@ -305,14 +305,6 @@ class AuthController extends Controller
 			]);
 		}
 
-		if ($user->enabled === 0)
-		{
-			return $this->error(
-				'The user is not enabled.',
-				HttpStatus::FORBIDDEN->value
-			);
-		}
-
 		return $this->response(['user' => $user]);
 	}
 
