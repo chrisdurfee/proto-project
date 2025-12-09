@@ -104,13 +104,17 @@ class GoogleSignInService
 	 *
 	 * @param string $imageUrl
 	 * @param int $userId
+	 * @param UserImageService $imageService
 	 * @return string|null
 	 */
-	protected function uploadProfileImage(string $imageUrl, int $userId): ?string
+	protected function uploadProfileImage(
+		string $imageUrl,
+		int $userId,
+		UserImageService $imageService = new UserImageService()
+	): ?string
 	{
 		try
 		{
-			$imageService = new UserImageService();
 			$response = $imageService->importFromUrl($imageUrl, $userId);
 			if ($response->isSuccess())
 			{
