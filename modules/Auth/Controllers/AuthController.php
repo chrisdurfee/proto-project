@@ -459,19 +459,23 @@ class AuthController extends Controller
 		$redirectUrl = $req->input('redirectUrl');
 		$createIfMissing = true;
 
-		$user = $this->googleService->handleCallback($code, $createIfMissing, $redirectUrl);
-		if (!$user)
+		$result = $this->googleService->handleCallback($code, $createIfMissing, $redirectUrl);
+		if (!$result->user)
 		{
 			return $this->error("User not found. Please sign up first.", HttpStatus::UNAUTHORIZED->value);
 		}
 
 		// Check if user is new (created within last 10 seconds)
-		if ($user->createdAt && strtotime($user->createdAt) > time() - 10)
-		{
-			$user->isNew = true;
-		}
+		$user = $result->user;
+		$isNew = ($user->createdAt && strtotime($user->createdAt) > time() - 10);
 
-		return $this->permit($user, $req->ip());
+		$response = $this->permit($user, $req->ip());
+
+		return $this->response([
+			'allowAccess' => $response->allowAccess,
+			'user' => $user,
+			'isNew' => $isNew
+		]);
 	}
 
 	/**
