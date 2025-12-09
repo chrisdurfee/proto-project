@@ -36,12 +36,12 @@ const submit = (e, parent) =>
 	e.preventDefault();
 	parent.state.loading = true;
 
-	const data = parent.context.data;
+	const data = parent.context.data.get();
 	const model = new AuthModel({
-		user: { ...data }
+		user: data
 	});
 
-	model.xhr.register((response) =>
+	model.xhr.updateProfile((response) =>
 	{
 		parent.state.loading = false;
 
