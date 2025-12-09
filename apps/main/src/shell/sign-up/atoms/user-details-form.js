@@ -5,6 +5,7 @@ import { Button, Fieldset, Input, LoadingButton } from "@base-framework/ui/atoms
 import { Icons } from '@base-framework/ui/icons';
 import { DatePicker, FormField } from '@base-framework/ui/molecules';
 import { AuthModel } from '../../models/auth-model.js';
+import { STEPS } from '../steps.js';
 
 /**
  * This will create the notification.
@@ -34,7 +35,7 @@ const notify = (title, description, icon, type) => (
 const submit = (e, parent) =>
 {
 	e.preventDefault();
-	//parent.state.loading = true;
+	parent.state.loading = true;
 
 	const data = parent.context.data.get();
 	const model = new AuthModel({
@@ -43,7 +44,7 @@ const submit = (e, parent) =>
 
 	model.xhr.updateProfile('', (response) =>
 	{
-		//parent.state.loading = false;
+		parent.state.loading = false;
 
 		if (!response || response.allowAccess !== true)
 		{
@@ -59,8 +60,8 @@ const submit = (e, parent) =>
 		/**
 		 * Set the user data tothe app and show the congratulations step.
 		 */
-		// app.setUserData(response.user);
-		// parent.showStep(STEPS.CONGRATULATIONS);
+		app.setUserData(response.user);
+		parent.showStep(STEPS.CONGRATULATIONS);
 	});
 };
 
@@ -79,10 +80,24 @@ export const UserDetailsForm = Atom(() =>
 				const data = parent.context.data;
 				data.xhr.getSessionUser('', (response) =>
 				{
-					if (response && response.user)
+					if (!response || !response.user)
 					{
-						data.set(response.user);
+						return;
 					}
+
+					const user = response.user;
+					if (user.enabled === 1)
+					{
+						/**
+						 * Set the user data to the app and redirect to home
+						 * to let the login system check to login the user.
+						 */
+						app.setUserData(response.user);
+						app.navigate('/', null, true);
+						return;
+					}
+
+					data.set(response.user);
 				});
 			},
 			class: 'flex flex-col gap-4',
