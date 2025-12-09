@@ -15,16 +15,15 @@ use Modules\User\Services\User\UserImageService;
 class GoogleSignInService
 {
 	/**
-	 * @var GoogleService
-	 */
-	protected GoogleService $googleService;
-
-	/**
 	 * Constructor.
+	 *
+	 * @param GoogleService|null $googleService
 	 */
-	public function __construct()
+	public function __construct(
+		protected ?GoogleService $googleService = null
+	)
 	{
-		$this->googleService = new GoogleService();
+		$this->googleService = $googleService ?? new GoogleService();
 	}
 
 	/**
@@ -116,9 +115,9 @@ class GoogleSignInService
 		try
 		{
 			$response = $imageService->importFromUrl($imageUrl, $userId);
-			if ($response->isSuccess())
+			if (isset($response->success) && $response->success)
 			{
-				return $response->data->path ?? null;
+				return $response->image ?? null;
 			}
 		}
 		catch (\Exception $e)
