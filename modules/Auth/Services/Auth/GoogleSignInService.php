@@ -130,9 +130,9 @@ class GoogleSignInService
 	 * Find or create a user based on the Google profile.
 	 *
 	 * @param object $profile
-	 * @return User
+	 * @return User|null
 	 */
-	protected function findOrCreateUser(object $profile): User
+	protected function findOrCreateUser(object $profile): ?User
 	{
 		$email = $profile->email;
 		$user = $this->getUserByEmail($profile);
