@@ -22,6 +22,9 @@ router()
 	{
 		$controller = new AuthController();
 		$router->post('pulse', [$controller, 'pulse']);
+		$router->post('resume', [$controller, 'resume']);
+
+		// Registration and profile management
 		$router->post('register', [$controller, 'register']);
 		$router->post('set-password', [$controller, 'setPassword']);
 		$router->post('update-profile', [$controller, 'updateProfile']);
@@ -49,7 +52,6 @@ router()
 		// standard login / logout / register
 		$router->post('login', [$controller, 'login']);
 		$router->post('logout', [$controller, 'logout']);
-		$router->post('resume', [$controller, 'resume']);
 
 		// MFA: send & verify one‑time codes
 		$router->post('mfa/code', [$controller, 'getAuthCode']);

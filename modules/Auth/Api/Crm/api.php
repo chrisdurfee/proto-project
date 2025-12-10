@@ -19,9 +19,13 @@ router()
 		CrossSiteProtectionMiddleware::class
 	]))
 	->post('auth/crm/pulse', [CrmAuthController::class, 'pulse'])
+	->post('auth/crm/resume', [CrmAuthController::class, 'resume'])
 
 	// Google Auth
 	->post('auth/crm/google/callback', [CrmAuthController::class, 'googleCallback'])
+
+	// Session User
+	->get('auth/crm/session-user', [CrmAuthController::class, 'getSessionUser'])
 
 	// CSRF Token
 	->get('auth/crm/csrf-token', [CrmAuthController::class, 'getToken'], [
@@ -38,7 +42,6 @@ router()
 		// standard login / logout / register
 		$router->post('login', [$controller, 'login']);
 		$router->post('logout', [$controller, 'logout']);
-		$router->post('resume', [$controller, 'resume']);
 		$router->post('pulse', [$controller, 'pulse']);
 
 		// Google Auth
