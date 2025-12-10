@@ -8,8 +8,7 @@ use Proto\Utils\Strings;
 /**
  * BasicEmail
  *
- * This basic template is used to style the application emails. It should be used
- * for all child emails.
+ * Basic email template class for standard email layouts.
  *
  * @package Common\Email
  */
@@ -42,14 +41,14 @@ class BasicEmail extends Email
 	protected string $bannerImg = '';
 
 	/**
-	 * This can be used to add a class to the banner image
+	 * This is the header class for the banner image.
 	 *
 	 * @param string
 	 */
 	protected string $headerClass = '';
 
 	/**
-	 * This will setup the template.
+	 * Constructs the BasicEmail instance.
 	 *
 	 * @param object|array|null $props
 	 */
@@ -60,7 +59,7 @@ class BasicEmail extends Email
 	}
 
 	/**
-	 * This will get the email style.
+	 * Gets the inline CSS style for the email.
 	 *
 	 * @return string
 	 */
@@ -70,7 +69,7 @@ class BasicEmail extends Email
 	}
 
 	/**
-	 * This will get the env url.
+	 * Gets the environment URL.
 	 *
 	 * @return string
 	 */
@@ -80,7 +79,7 @@ class BasicEmail extends Email
 	}
 
 	/**
-	 * This will get the body of the email
+	 * Gets the complete HTML body of the email.
 	 *
 	 * @return string
 	 */

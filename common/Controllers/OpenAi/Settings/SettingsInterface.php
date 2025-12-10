@@ -11,10 +11,10 @@ namespace Common\Controllers\OpenAi\Settings;
  */
 interface SettingsInterface
 {
-    /**
-     * Retrieves the settings as an array.
-     *
-     * @return array Settings configuration for API requests
-     */
-    public function get(): array;
+	/**
+	 * Retrieves the settings as an array.
+	 *
+	 * @return array Settings configuration for API requests
+	 */
+	public function get(): array;
 }
