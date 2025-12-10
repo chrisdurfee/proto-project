@@ -140,7 +140,7 @@ export const Attachment = (att) =>
 	const filePath = `/files/messages/${att.fileUrl}`;
 
 	return Div({
-		class: "group relative flex w-full max-w-md items-center gap-x-3 p-3 border border-border rounded-lg hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer bg-card min-w-0",
+		class: "group relative flex w-full max-w-xs md:max-w-md items-center gap-x-3 p-3 border border-border rounded-lg hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer bg-card min-w-0",
 		click: () => window.open(filePath, '_blank')
 	}, [
 		isImage ? ImagePreview(filePath, att.fileName) : AttachmentIcon(ext),
