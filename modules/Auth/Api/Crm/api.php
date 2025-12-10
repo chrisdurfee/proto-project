@@ -20,6 +20,7 @@ router()
 	]))
 	->post('auth/crm/pulse', [CrmAuthController::class, 'pulse'])
 	->post('auth/crm/resume', [CrmAuthController::class, 'resume'])
+	->post('auth/crm/logout', [CrmAuthController::class, 'logout'])
 
 	// Google Auth
 	->post('auth/crm/google/callback', [CrmAuthController::class, 'googleCallback'])
@@ -39,10 +40,8 @@ router()
 	->group('auth/crm', function(Router $router)
 	{
 		$controller = new CrmAuthController();
-		// standard login / logout / register
+		// standard login
 		$router->post('login', [$controller, 'login']);
-		$router->post('logout', [$controller, 'logout']);
-		$router->post('pulse', [$controller, 'pulse']);
 
 		// Google Auth
 		$router->get('google/login', [$controller, 'googleLogin']);
