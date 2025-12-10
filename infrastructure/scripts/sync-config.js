@@ -30,6 +30,11 @@ function generateDockerEnv(protoConfig) {
     envVars.push('# Do not edit manually - run: ./infrastructure/scripts/run.sh sync-config');
     envVars.push('');
 
+    // Container Prefix
+    envVars.push('# Container Prefix');
+    envVars.push(`CONTAINER_PREFIX=${protoConfig.containerPrefix || 'proto'}`);
+    envVars.push('');
+
     // Redis configuration from Proto config
     if (protoConfig.cache && protoConfig.cache.connection) {
         const redis = protoConfig.cache.connection;
@@ -139,6 +144,9 @@ function syncConfiguration() {
 
     // Show what was configured
     console.log('\n📋 Configuration Summary:');
+    if (protoConfig.containerPrefix) {
+        console.log(`   Container Prefix: ${protoConfig.containerPrefix}`);
+    }
     if (protoConfig.cache?.connection) {
         console.log(`   Redis: ${protoConfig.cache.connection.host}:${protoConfig.cache.connection.port}`);
         console.log(`   Redis Password: ${protoConfig.cache.connection.password ? '[SET]' : '[EMPTY]'}`);

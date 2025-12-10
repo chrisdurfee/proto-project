@@ -6,7 +6,7 @@ services:
   # MariaDB Database
   mariadb:
     image: mariadb:11.7.2
-    container_name: proto-mariadb
+    container_name: ${CONTAINER_PREFIX:-proto}-mariadb
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Please set DB_ROOT_PASSWORD in infrastructure/.env file}
@@ -35,7 +35,7 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: proto-redis
+    container_name: ${CONTAINER_PREFIX:-proto}-redis
     restart: unless-stopped
     # ports:
     #   - "6380:6379"  # Removed: Redis should only be accessible within Docker network
@@ -58,7 +58,7 @@ services:
     build:
       context: ..
       dockerfile: infrastructure/docker/Dockerfile
-    container_name: proto-web
+    container_name: ${CONTAINER_PREFIX:-proto}-web
     restart: unless-stopped
     ports:
       - "8080:80"    # HTTP
@@ -124,7 +124,7 @@ services:
   # Default password matches infrastructure/.env.example - customize DB_ROOT_PASSWORD in infrastructure/.env if needed
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
-    container_name: proto-phpmyadmin
+    container_name: ${CONTAINER_PREFIX:-proto}-phpmyadmin
     restart: unless-stopped
     ports:
       - "8081:80"
