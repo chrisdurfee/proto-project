@@ -569,10 +569,9 @@ class AuthController extends Controller
 		}
 
 		$user = $result->user;
-		$response = $this->permit($user, $req->ip());
+		setSession('user', $user->getData());
 
 		return $this->response([
-			'allowAccess' => $response->allowAccess,
 			'user' => $user,
 			'isNew' => $result->isNew
 		]);

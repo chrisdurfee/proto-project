@@ -71,6 +71,11 @@ class NewUserService
 			return null;
 		}
 
+		if (empty($data->password))
+		{
+			return null;
+		}
+
 		return $model->updatePassword($data->password) ? $model : null;
 	}
 
@@ -148,7 +153,7 @@ class NewUserService
 		/**
 		 * We want to block any already created profiles.
 		 */
-		if ($user->enabled === 1 || $user->updatedAt !== null)
+		if ($user->enabled === 1)
 		{
 			return null;
 		}

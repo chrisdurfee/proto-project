@@ -58,7 +58,7 @@ const setPassword = (parent) =>
 	parent.state.loading = true;
 
 	const model = new AuthModel({
-		username: parent.context.data.password
+		password: parent.context.data.password
 	});
 
 	model.xhr.setPassword('', (response) =>
