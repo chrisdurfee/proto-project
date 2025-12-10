@@ -6,7 +6,7 @@ use Proto\Patterns\Structural\Registry;
 /**
  * Data
  *
- * This will allow data to be stored in a registry.
+ * Singleton registry class for managing shared data.
  *
  * @package Common
  */

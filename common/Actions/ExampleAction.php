@@ -13,7 +13,7 @@ namespace Common\Actions;
 class ExampleAction
 {
     /**
-     * This will run the action.
+     * Executes the action with the given data.
      *
      * @param mixed $data
      * @return mixed

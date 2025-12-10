@@ -4,7 +4,7 @@ namespace Common\Text;
 /**
  * Class Text
  *
- * This is the base text template class.
+ * Abstract class for handling text messages.
  *
  * @package Common\Text
  * @abstract

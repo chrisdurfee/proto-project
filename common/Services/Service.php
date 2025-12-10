@@ -6,7 +6,7 @@ use Common\Services\Traits\ResponseTrait;
 /**
  * Service
  *
- * This is a base class for services.
+ * Abstract service class providing common functionalities for services.
  *
  * @package Common\Services
  */

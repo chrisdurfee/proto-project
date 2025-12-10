@@ -7,7 +7,7 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 /**
  * Permission Routes
  *
- * This will handle the API routes for the Permissions.
+ * Defines the API routes for managing user permissions.
  */
 router()
 	->middleware(([

@@ -11,14 +11,14 @@ use Proto\Module\Module;
 /**
  * UserModule
  *
- * This module handles user-related functionality.
+ * User management module for handling user-related functionalities.
  *
  * @package Modules\User
  */
 class UserModule extends Module
 {
 	/**
-	 * This will activate the module.
+	 * Activates the module and sets up authentication gates.
 	 *
 	 * @return void
 	 */
@@ -28,7 +28,7 @@ class UserModule extends Module
 	}
 
 	/**
-	 * This will set the authentication gates.
+	 * Sets up authentication gates for the module.
 	 *
 	 * @return void
 	 */

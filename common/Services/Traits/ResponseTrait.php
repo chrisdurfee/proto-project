@@ -6,7 +6,7 @@ use Proto\Controllers\Response;
 /**
  * ResponseTrait
  *
- * This trait can be used for controller response methods.
+ * Trait providing standardized methods for creating API responses.
  *
  * @package Common\Services\Traits
  */

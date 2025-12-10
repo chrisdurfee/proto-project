@@ -4,21 +4,21 @@ namespace Common\Jobs;
 /**
  * ExampleJob
  *
- * This is an example job.
+ * An example job class demonstrating the job structure.
  *
  * @package Common\Jobs
  */
 class ExampleJob
 {
 	/**
-	 * This will run the job.
+	 * Handles the job processing.
 	 *
 	 * @param mixed $data
 	 * @return mixed
 	 */
 	public function handle(mixed $data): mixed
 	{
-		// do something
+		// Job processing logic goes here
 		return false;
 	}
 }

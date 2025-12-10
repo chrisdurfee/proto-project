@@ -8,7 +8,7 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 /**
  * User Organization Routes
  *
- * This will handle the API routes for the User Organizations.
+ * Defines the API routes for managing user organizations.
  */
 router()
 	->middleware(([
@@ -19,7 +19,7 @@ router()
 /**
  * Organization Routes
  *
- * This will handle the API routes for Organizations.
+ * Defines the API routes for managing organizations.
  */
 router()
 	->resource('user/organization', OrganizationController::class);

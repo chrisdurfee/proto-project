@@ -8,7 +8,7 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 /**
  * User Role Routes
  *
- * This will handle the API routes for the User Roles.
+ * Defines the API routes for managing user roles and their assignments.
  */
 router()
 	->middleware(([
@@ -19,7 +19,7 @@ router()
 /**
  * Role Routes
  *
- * This will handle the API routes for the Roles.
+ * Defines the API routes for managing user roles.
  */
 router()
 	->resource('user/role', RoleController::class);

@@ -4,14 +4,14 @@ namespace Common\Text;
 /**
  * ExampleMessage
  *
- * This is an example message.
+ * Example implementation of the Text message class.
  *
  * @package Common\Text
  */
 class ExampleMessage extends Text
 {
 	/**
-	 * This should be overriden to return the message body.
+	 * Sets up the body for the text message.
 	 *
 	 * @abstract
 	 * @return string

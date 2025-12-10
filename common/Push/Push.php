@@ -4,7 +4,7 @@ namespace Common\Push;
 /**
  * Class Push
  *
- * Base abstract class for push notifications.
+ * Base class for push notification handling.
  *
  * @package Common\Push
  * @abstract

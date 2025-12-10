@@ -8,7 +8,7 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 /**
  * User Following Routes
  *
- * This will handle the API routes for the User following.
+ * Defines the API routes for managing user followings.
  */
 router()
 	->middleware(([

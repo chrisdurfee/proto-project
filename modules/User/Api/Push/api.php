@@ -8,7 +8,7 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 /**
  * Push Routes
  *
- * This file contains the API routes for the push notifications.
+ * Defines the API routes for managing web push subscriptions for users.
  */
 router()
 	->middleware(([

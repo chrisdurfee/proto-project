@@ -7,7 +7,7 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 /**
  * Role Permission Routes
  *
- * This file contains the API routes for the permission module.
+ * Defines the API routes for managing permissions associated with user roles.
  */
 router()
 	->middleware(([

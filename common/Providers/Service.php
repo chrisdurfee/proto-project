@@ -6,7 +6,7 @@ use Proto\Providers\ServiceProvider;
 /**
  * Service
  *
- * This is a base class for service providers.
+ * Abstract service provider class extending the base service provider functionality.
  *
  * @package Common\Providers
  */

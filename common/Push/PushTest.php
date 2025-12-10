@@ -4,14 +4,14 @@ namespace Common\Push;
 /**
  * Class PushTest
  *
- * This class is used for testing push notifications.
+ * Test implementation of the Push notification class.
  *
  * @package Common\Push
  */
 class PushTest extends Push
 {
 	/**
-	 * This should be overridden to return the message body.
+	 * Sets up the body for the push notification.
 	 *
 	 * @abstract
 	 * @return string|array
@@ -27,7 +27,7 @@ class PushTest extends Push
 	}
 
 	/**
-	 * This will get the message.
+	 * Gets the message for the push notification.
 	 *
 	 * @return string
 	 */

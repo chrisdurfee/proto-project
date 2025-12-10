@@ -7,7 +7,7 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 /**
  * User API Routes
  *
- * This file contains the API routes for the User module.
+ * Defines the API routes for user-related operations.
  *
  * NON CSRF endpoints
  */
@@ -23,6 +23,7 @@ router()
 	->middleware(([
 		CrossSiteProtectionMiddleware::class
 	]))
+
 	/**
 	 * Status routes
 	 */

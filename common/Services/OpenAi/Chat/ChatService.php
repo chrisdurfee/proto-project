@@ -8,7 +8,7 @@ use Proto\Http\Loop\Message;
 /**
  * ChatService
  *
- * This will handle the chat service.
+ * Service class for handling OpenAI chat interactions.
  *
  * @package Common\Services\OpenAi\Chat
  */
@@ -27,7 +27,7 @@ class ChatService extends Service
 	}
 
 	/**
-	 * This will get the choice message.
+	 * Retrieves the message from the first choice in the chat response.
 	 *
 	 * @param object $result
 	 */
@@ -43,7 +43,7 @@ class ChatService extends Service
 	}
 
 	/**
-	 * This will stream the content.
+	 * Streams a chat response.
 	 *
 	 * @param string|array $content
 	 * @param string $type
@@ -81,7 +81,7 @@ class ChatService extends Service
 		}
 
 		/**
-		 * This will stream the content.
+		 * Stream the chat response.
 		 */
 		$this->openAi->chat()->stream(
 			$content,
@@ -127,7 +127,7 @@ class ChatService extends Service
 	}
 
 	/**
-	 * This will generate the content.
+	 * Generates a chat response.
 	 *
 	 * @param string|array $content
 	 * @param string $type
