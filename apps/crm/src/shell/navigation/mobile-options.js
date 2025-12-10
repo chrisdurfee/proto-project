@@ -27,7 +27,8 @@ const mapMobileOptions = (options, mobileOptions, callBack) =>
 		option.callBack = callBack;
 		if (option.mobileOrder !== undefined)
 		{
-			mobileOptions.push(option);
+			// we want to clone the option to avoid mutating the original object
+			mobileOptions.push(JSON.parse(JSON.stringify(option)));
 		}
 	});
 };

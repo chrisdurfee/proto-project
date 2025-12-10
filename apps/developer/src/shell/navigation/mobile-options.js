@@ -8,28 +8,29 @@
  */
 const mapMobileOptions = (options, mobileOptions, callBack) =>
 {
-    if (!options || !options.length)
-    {
-        return;
-    }
+	if (!options || !options.length)
+	{
+		return;
+	}
 
-    options.forEach(option =>
-    {
-        if (option.options)
-        {
-            mapMobileOptions(option.options, mobileOptions, callBack);
-            return;
-        }
+	options.forEach(option =>
+	{
+		if (option.options)
+		{
+			mapMobileOptions(option.options, mobileOptions, callBack);
+			return;
+		}
 
-        /**
-         * We also want to add a callBack to ignore the hover to the main options.
-         */
-        option.callBack = callBack;
-        if (option.mobileOrder !== undefined)
-        {
-            mobileOptions.push(option);
-        }
-    });
+		/**
+		 * We also want to add a callBack to ignore the hover to the main options.
+		 */
+		option.callBack = callBack;
+		if (option.mobileOrder !== undefined)
+		{
+			// we want to clone the option to avoid mutating the original object
+			mobileOptions.push(JSON.parse(JSON.stringify(option)));
+		}
+	});
 };
 
 /**
@@ -49,11 +50,11 @@ const sortMobileOptions = (options) => options.sort((a, b) => a.mobileOrder - b.
  */
 export const getMobileOptions = (options, callBack) =>
 {
-    const mobileOptions = [];
-    mapMobileOptions(options, mobileOptions, callBack);
+	const mobileOptions = [];
+	mapMobileOptions(options, mobileOptions, callBack);
 
-    /**
-     * This will sort the options by the mobile order.
-     */
-    return sortMobileOptions(mobileOptions);
+	/**
+	 * This will sort the options by the mobile order.
+	 */
+	return sortMobileOptions(mobileOptions);
 };
