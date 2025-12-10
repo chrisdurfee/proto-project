@@ -1,7 +1,9 @@
-import { A, Div, Img } from '@base-framework/atoms';
+import { A, Div, Img, OnState } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
 import { Button } from '@base-framework/ui/atoms';
+import { PasswordForm } from './password-form.js';
 import { SignUpForm } from './sign-up-form.js';
+import { WELCOME_MODES } from './welcome-modes.js';
 
 /**
  * This will create a logo.
@@ -71,10 +73,27 @@ export const RightPane = Atom(() => (
 
 		// Main sign-up card
 		Div({
-			class: 'flex flex-auto flex-col'
+			class: 'flex flex-auto flex-col',
+
+			/**
+			 * Adds a state to chnage the mode of the welcome section.
+			 *
+			 * @returns {object}
+			 */
+			addState()
+			{
+				return {
+					mode: WELCOME_MODES.SIGN_UP,
+				};
+			}
 		}, [
 			Div({ class: 'flex flex-auto flex-col justify-center items-center' }, [
-				SignUpForm()
+				OnState('mode', (mode) =>
+				{
+					return (mode === WELCOME_MODES.SIGN_UP)
+						? SignUpForm()
+						: PasswordForm();
+				})
 			])
 		])
 	])

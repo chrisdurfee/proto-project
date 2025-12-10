@@ -1,10 +1,11 @@
-import { Div, Form, H2, Header, OnState, P, Span } from '@base-framework/atoms';
+import { Div, Form, OnState, Span } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
 import { Button, Icon, Input, LoadingButton } from '@base-framework/ui/atoms';
 import { Icons } from "@base-framework/ui/icons";
 import { AuthModel } from '@shell/models/auth-model.js';
 import { GoogleModel } from '@shell/models/google-model';
-import { STEPS } from '../steps.js';
+import { CardHeader, FormWrapper } from './form-atoms.js';
+import { WELCOME_MODES } from './welcome-modes.js';
 
 /**
  * @function CredentialsContainer
@@ -15,17 +16,17 @@ import { STEPS } from '../steps.js';
  */
 const CredentialsContainer = Atom(() =>
 (
-    Div({ class: 'grid gap-4' }, [
-        Div({ class: 'grid gap-4' }, [
-            Input({
-                type: 'email',
-				bind: 'email',
-                placeholder: 'name@example.com',
-                required: true,
-                'aria-required': true
-            })
-        ])
-    ])
+	Div({ class: 'grid gap-4' }, [
+		Div({ class: 'grid gap-4' }, [
+			Input({
+				type: 'email',
+				bind: 'username',
+				placeholder: 'name@example.com',
+				required: true,
+				'aria-required': true
+			})
+		])
+	])
 ));
 
 /**
@@ -91,28 +92,36 @@ const SignUpWithGoogleButton = Atom(() =>
 ));
 
 /**
- * This will create the card header.
+ * This will handle the sign-up process.
  *
- * @param {object} props
- * @returns {object}
+ * @param {object} parent - The parent component.
+ * @returns {void}
  */
-export const CardHeader = ({ title, description }) => (
-	Header({ class: 'text-center py-6 flex flex-auto flex-col gap-y-1' }, [
-		H2({ class: "font-semibold tracking-tight text-2xl" }, title),
-		P({ class: "text-sm text-muted-foreground" }, description)
-	])
-);
+const signUp = (parent) =>
+{
+	parent.state.loading = true;
 
-/**
- * This will create a form wrapper.
- *
- * @param {object} props
- * @param {array} children
- * @returns {object}
- */
-const FormWrapper = Atom((props, children) => (
-	Div({ class: 'w-full mx-auto max-w-sm p-6' }, children)
-));
+	const model = new AuthModel({
+		username: parent.context.data.username
+	});
+
+	model.xhr.register('', (response) =>
+	{
+		parent.state.loading = false;
+		if (!response || response.success !== true)
+		{
+			app.notify({
+				type: "destructive",
+				title: "Error",
+				description: response?.message || "Failed to sign up.",
+				icon: Icons.warning
+			});
+			return;
+		}
+
+		parent.state.mode = WELCOME_MODES.PASSWORD;
+	});
+};
 
 /**
  * @function SignUpForm
@@ -124,35 +133,21 @@ const FormWrapper = Atom((props, children) => (
 export const SignUpForm = Atom(() =>
 (
 	FormWrapper([
-		CardHeader({ title: "Create an account", description: "Enter your email below to create your account" }),
+		CardHeader({ title: "Create an account", description: "Enter your email below to create your account." }),
 		Form({
 			class: 'flex flex-col',
 			role: 'form',
+
+			/**
+			 * Adds the submit handler to the form.
+			 *
+			 * @param {Event} e
+			 * @param {object} parent
+			 */
 			submit: (e, parent) =>
 			{
-				parent.state.loading = true;
 				e.preventDefault();
-
-				const model = new AuthModel({
-					username: parent.context.data.email
-				});
-
-				model.xhr.register('', (response) =>
-				{
-					parent.state.loading = false;
-					if (!response || response.success !== true)
-					{
-						app.notify({
-							type: "destructive",
-							title: "Error",
-							description: response?.message || "Failed to sign up.",
-							icon: Icons.warning
-						});
-						return;
-					}
-
-					parent.showStep(STEPS.USER_DETAILS);
-				});
+				signUp(parent);
 			}
 		}, [
 			Div({ class: 'grid gap-4' }, [

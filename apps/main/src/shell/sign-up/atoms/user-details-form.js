@@ -1,6 +1,5 @@
 import { Form, OnState } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { HiddenInput } from '@base-framework/ui';
 import { Button, Fieldset, Input, LoadingButton } from "@base-framework/ui/atoms";
 import { Icons } from '@base-framework/ui/icons';
 import { DatePicker, FormField } from '@base-framework/ui/molecules';
@@ -104,7 +103,6 @@ export const UserDetailsForm = Atom(() =>
 			submit
 		}, [
 		Fieldset({ legend: 'Profile', class: 'flex flex-col gap-4' }, [
-			HiddenInput({ name: 'username', bind: 'username' }),
 			new FormField({
 				name: "firstName",
 				label: "First Name",
@@ -135,21 +133,6 @@ export const UserDetailsForm = Atom(() =>
 				description: "Please enter your date of birth."
 			}, [
 				new DatePicker({ required: true, bind: 'dob' })
-			]),
-
-			new FormField({
-				name: "password",
-				label: "Password",
-				description: "Keep it secret, keep it safe."
-			}, [
-				Input({
-					type: "password",
-					placeholder: "******************",
-					required: true,
-					bind: 'password',
-					pattern: '^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*\\W).{12,}$',
-					title: 'Password must be at least 12 characters long and include uppercase, lowercase, number, and special character.'
-				})
 			]),
 
 			OnState('loading', (loading) => (loading)

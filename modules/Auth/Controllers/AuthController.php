@@ -377,6 +377,48 @@ class AuthController extends Controller
 	}
 
 	/**
+	 * Update the new user password.
+	 *
+	 * @param Request $req
+	 * @return object
+	 */
+	public function setPassword(Request $req): object
+	{
+		$data = $req->json('user');
+		if (!$data)
+		{
+			return $this->error(
+				'The data is invalid for updating password.',
+				HttpStatus::BAD_REQUEST->value
+			);
+		}
+
+		/**
+		 * we will use the session user to update the password.
+		 */
+		$sessionUser = session()->user ?? null;
+		if (!$sessionUser || !isset($sessionUser->id) || $sessionUser->enabled === 1)
+		{
+			return $this->error(
+				'The user is not authenticated.',
+				HttpStatus::UNAUTHORIZED->value
+			);
+		}
+
+		$data->id = $sessionUser->id;
+		$user = $this->user->setPassword( $data);
+		if (!$user)
+		{
+			return $this->error(
+				'The password update has failed.',
+				HttpStatus::BAD_REQUEST->value
+			);
+		}
+
+		return $this->response(['user' => $user]);
+	}
+
+	/**
 	 * Update the new user profile.
 	 *
 	 * @param Request $req

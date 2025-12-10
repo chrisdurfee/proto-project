@@ -145,7 +145,7 @@ class GoogleSignInService
 			'image' => $profile->picture ?? null,
 			'emailVerifiedAt' => date('Y-m-d H:i:s'),
 			'createdAt' => date('Y-m-d H:i:s'),
-			'enabled' => 1,
+			'enabled' => 0,
 			'status' => 'online'
 		];
 

@@ -58,6 +58,23 @@ class NewUserService
 	}
 
 	/**
+	 * This will update the user password.
+	 *
+	 * @param object $data
+	 * @return User
+	 */
+	public function setPassword(object $data): ?User
+	{
+		$model = User::get($data->id);
+		if (!$model)
+		{
+			return null;
+		}
+
+		return $model->updatePassword($data->password) ? $model : null;
+	}
+
+	/**
 	 * This will update the user profile and send verification email.
 	 *
 	 * @param object $data
@@ -65,9 +82,9 @@ class NewUserService
 	 */
 	public function updateProfile(object $data): ?User
 	{
-		unset($data->username);
 		// restrict non-updatable fields
 		UserHelper::restrictData($data);
+		UserHelper::restrictCredentials($data);
 
 		// Ensure the user is enabled
 		$data->enabled = 1;

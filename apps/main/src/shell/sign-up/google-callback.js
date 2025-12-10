@@ -104,7 +104,7 @@ export const GoogleCallback = Jot(
 				if (response.isNew === true)
 				{
 					// @ts-ignore
-					this.parent.showStep(STEPS.CONGRATULATIONS);
+					this.parent.showStep(STEPS.USER_DETAILS);
 					app.navigate('/sign-up', null, true);
 					return;
 				}

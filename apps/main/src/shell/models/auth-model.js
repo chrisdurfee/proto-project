@@ -199,6 +199,24 @@ export const AuthModel = Model.extend({
 		},
 
 		/**
+		 * Set a new password for the user.
+		 *
+		 * @param {object} instanceParams - The instance parameters.
+		 * @param {function} callBack - The callback function.
+		 * @return {object}
+		 */
+		setPassword(instanceParams, callBack)
+		{
+			const data = this.model.get();
+			let params = {
+				user: Encode.prepareJsonUrl(data),
+				guid: GUID
+			};
+
+			return this._post('set-password', params, instanceParams, callBack);
+		},
+
+		/**
 		 * Update user profile.
 		 *
 		 * @param {object} instanceParams - The instance parameters.

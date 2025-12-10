@@ -84,6 +84,18 @@ class Gateway
 	}
 
 	/**
+	 * This will update the new user password.
+	 *
+	 * @param object $data
+	 * @return User|null
+	 */
+	public function setPassword(object $data): ?User
+	{
+		$service = new NewUserService();
+		return $service->setPassword($data);
+	}
+
+	/**
 	 * This will update the new user profile.
 	 *
 	 * @param object $data
