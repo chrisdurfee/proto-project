@@ -32,9 +32,59 @@ class ManualSignUpTest extends Test
 		$this->assertNotNull($user);
 		$this->assertEquals('manual_test@example.com', $user->email);
 		$this->assertEquals('manual_test@example.com', $user->username); // Email is used as username
+		$this->assertEquals(0, $user->enabled); // Should be disabled initially
 
 		// Verify user is in DB
 		$this->assertDatabaseHas('users', ['email' => 'manual_test@example.com']);
+	}
+
+	/**
+	 * Test setting password for new user.
+	 */
+	public function testSetPassword(): void
+	{
+		$service = new NewUserService();
+		$data = (object)[
+			'username' => 'set_password@example.com',
+			'password' => 'InitialPass1!'
+		];
+		$user = $service->createUser($data);
+		$this->assertNotNull($user);
+
+		$newPassData = (object)[
+			'id' => $user->id,
+			'password' => 'NewSecurePass1!'
+		];
+
+		$updatedUser = $service->setPassword($newPassData);
+		$this->assertNotNull($updatedUser);
+
+		$this->assertEquals(0, $updatedUser->enabled); // Should still be disabled
+	}
+
+	/**
+	 * Test that profile update fails for already enabled users.
+	 */
+	public function testProfileUpdateFailsForEnabledUser(): void
+	{
+		$service = new NewUserService();
+		$data = (object)[
+			'username' => 'already_enabled@example.com',
+			'password' => 'Password123!'
+		];
+		$user = $service->createUser($data);
+
+		// Manually enable user
+		$user->enabled = 1;
+		$user->update();
+
+		$updateData = (object)[
+			'id' => $user->id,
+			'firstName' => 'TryUpdate'
+		];
+
+		$result = $service->updateProfile($updateData);
+		$this->assertNull($result, 'Should return null when trying to update an enabled user via NewUserService');
 	}
 
 	/**

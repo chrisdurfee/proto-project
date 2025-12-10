@@ -44,6 +44,7 @@ class GoogleSignUpTest extends Test
 		$this->assertEquals('Google', $user->firstName);
 		$this->assertEquals('User', $user->lastName);
 		$this->assertNotNull($user->emailVerifiedAt);
+		$this->assertEquals(0, $user->enabled); // Should be disabled initially
 
 		// Verify user is in DB
 		$this->assertDatabaseHas('users', ['email' => 'google_test@example.com']);
