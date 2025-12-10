@@ -68,7 +68,8 @@ export const Row = (row, onSelect) => (
 		Td({ class: 'p-4 hidden md:table-cell' }, [
 			new ResultButtons({
 				id: row.id,
-				resolved: row.resolved
+				resolved: row.resolved,
+				row
 			})
 		])
 	])

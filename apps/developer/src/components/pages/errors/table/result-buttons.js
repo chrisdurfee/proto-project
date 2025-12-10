@@ -41,6 +41,7 @@ const ResolveButton = (props) => (
 
 			updateResolveStatus(props.id, 1);
 			parent.state.resolved = 1;
+			props.row.resolved = 1;
 		}
 	}, 'Resolve')
 );
@@ -63,6 +64,7 @@ const UnresolveButton = (props) => (
 
 			updateResolveStatus(props.id, 0);
 			parent.state.resolved = 0;
+			props.row.resolved = 0;
 		}
 	}, 'Unresolve')
 );
@@ -97,6 +99,8 @@ export const ResultButtons = Jot(
 		const props = {
 			// @ts-ignore
 			id: this.id,
+			// @ts-ignore
+			row: this.row
 		};
 
 		return OnState('resolved', (resolved) => (resolved === 1 ? UnresolveButton(props) : ResolveButton(props)));

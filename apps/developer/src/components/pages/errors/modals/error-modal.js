@@ -96,7 +96,8 @@ export const ErrorModal = (props) => new Modal(
 			Button({ variant: 'outline', click: () => this.destroy() }, 'Cancel'),
 			new ResultButtons({
 				id: error.id,
-				resolved: error.resolved
+				resolved: error.resolved,
+				row: error
 			})
 		];
 	}
