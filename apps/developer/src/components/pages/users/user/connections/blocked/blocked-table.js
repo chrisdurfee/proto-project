@@ -25,7 +25,7 @@ const BlockedUserAvatar = (row) => (
 		]),
 		Div({ class: 'min-w-0 flex-auto' }, [
 			Div({ class: 'flex items-center gap-2' }, [
-				Span({ class: 'text-base font-semibold leading-6' }, `${row.firstName} ${row.lastName}`),
+				Span({ class: 'text-base font-semibold leading-6 capitalize' }, `${row.firstName} ${row.lastName}`),
 			]),
 			P({ class: 'truncate text-sm leading-5 text-muted-foreground m-0' }, row.username)
 		])
