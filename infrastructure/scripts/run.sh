@@ -29,6 +29,10 @@ case "$SCRIPT_NAME" in
             "$SCRIPTS_DIR/setup-ssl.sh" "$@"
         fi
         ;;
+    "generate-certs")
+        echo "🔐 Generating development certificates..."
+        "$SCRIPTS_DIR/generate-dev-certs.sh" "$@"
+        ;;
     "setup-dev")
         echo "🛠️ Setting up development environment..."
         if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
@@ -54,6 +58,7 @@ case "$SCRIPT_NAME" in
         echo "  sync-config     Sync Proto config to Docker environment"
         echo "  build           Run production build for all apps"
         echo "  setup-ssl       Set up SSL certificates with Let's Encrypt"
+        echo "  generate-certs  Generate self-signed certificates for development"
         echo "  setup-dev       Set up development environment"
         echo "  migrations      Run database migrations"
         echo "  switch-env      Switch between environments"
