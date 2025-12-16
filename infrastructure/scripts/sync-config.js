@@ -33,6 +33,7 @@ function generateDockerEnv(protoConfig) {
     // Container Prefix
     envVars.push('# Container Prefix');
     envVars.push(`CONTAINER_PREFIX=${protoConfig.containerPrefix || 'proto'}`);
+    envVars.push(`COMPOSE_PROJECT_NAME=${protoConfig.containerPrefix || 'proto'}`);
     envVars.push('');
 
     // Redis configuration from Proto config
