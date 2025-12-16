@@ -129,9 +129,9 @@ npm run dev
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| 🌐 Main App | http://localhost:3000 | Main application (Vite dev server) |
-| 🌐 CRM App | http://localhost:3001 | CRM interface (Vite dev server) |
-| 🌐 Developer Tools | http://localhost:3002 | Developer UI with scaffolding tools (Vite dev server) |
+| 🌐 Main App | https://localhost:3000 | Main application (Vite dev server) |
+| 🌐 CRM App | https://localhost:3001 | CRM interface (Vite dev server) |
+| 🌐 Developer Tools | https://localhost:3002 | Developer UI with scaffolding tools (Vite dev server) |
 | 🚀 HTTPS API Server | https://localhost:8443 | PHP backend API (containerized) |
 | 🚀 API Server | http://localhost:8080 | PHP backend API (containerized) |
 | 🗄️ PHPMyAdmin | http://localhost:8081 | Database management interface |
