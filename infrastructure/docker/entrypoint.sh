@@ -36,7 +36,7 @@ if [ -n "$REDIS_HOST" ] && [ "$REDIS_HOST" != "localhost" ]; then
 fi
 
 # Runtime initialization (safe operations only)
-echo "� Running startup initialization..."
+echo "🚀 Running startup initialization..."
 
 # Wait for important app files to appear (helps when host bind-mounts may take a
 # short while to become available). This prevents running composer/migrations
@@ -44,7 +44,7 @@ echo "� Running startup initialization..."
 WAIT_FOR_SECONDS=${WAIT_FOR_SECONDS:-30}
 count=0
 echo "⏳ Waiting up to ${WAIT_FOR_SECONDS}s for application files..."
-while [ $count -lt $WAIT_FOR_SECONDS ] && ( [ ! -f "/var/www/html/composer.json" ] || [ ! -f "/var/www/html/infrastructure/scripts/run-migrations.php" ] ); do
+while [ $count -lt $WAIT_FOR_SECONDS ] && ( [ ! -f "/var/www/html/composer.json" ] || [ ! -f "/var/www/html/infrastructure/scripts/run-migrations.php" ] || [ ! -f "/var/www/html/common/Data.php" ] ); do
     sleep 1
     count=$((count+1))
     if [ $((count % 5)) -eq 0 ]; then
@@ -52,11 +52,12 @@ while [ $count -lt $WAIT_FOR_SECONDS ] && ( [ ! -f "/var/www/html/composer.json"
     fi
 done
 
-if [ ! -f "/var/www/html/composer.json" ] || [ ! -f "/var/www/html/infrastructure/scripts/run-migrations.php" ]; then
+if [ ! -f "/var/www/html/composer.json" ] || [ ! -f "/var/www/html/infrastructure/scripts/run-migrations.php" ] || [ ! -f "/var/www/html/common/Data.php" ]; then
     echo "⚠️ Required application files still missing after ${count}s."
     echo "   Present:"
     [ -f "/var/www/html/composer.json" ] && echo "    - composer.json: yes" || echo "    - composer.json: MISSING"
     [ -f "/var/www/html/infrastructure/scripts/run-migrations.php" ] && echo "    - run-migrations.php: yes" || echo "    - run-migrations.php: MISSING"
+    [ -f "/var/www/html/common/Data.php" ] && echo "    - common/Data.php: yes" || echo "    - common/Data.php: MISSING"
     echo "   Proceeding but migrations may fail."
 fi
 
@@ -79,7 +80,7 @@ else
 fi
 
 # Create file storage directories if they don't exist
-echo "📁 Ensuring file storage directories exist..."
+echo "�� Ensuring file storage directories exist..."
 mkdir -p /var/www/html/public/files/users/profile 2>/dev/null || true
 mkdir -p /var/www/html/common/files/attachments 2>/dev/null || true
 
