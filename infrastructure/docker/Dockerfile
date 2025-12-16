@@ -5,6 +5,7 @@ FROM php:${PHP_VERSION}-fpm
 RUN apt-get update && apt-get install -y \
     apache2 \
     apache2-utils \
+    openssl \
     libapache2-mod-fcgid \
     zip \
     unzip \
@@ -73,12 +74,25 @@ COPY infrastructure/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY infrastructure/docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
 COPY infrastructure/docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
-# Copy mkcert-generated trusted SSL certificates for local development
-# These should be generated with: mkcert localhost 127.0.0.1 ::1
-COPY infrastructure/docker/ssl/localhost.crt /etc/ssl/certs/localhost.crt
-COPY infrastructure/docker/ssl/localhost.key /etc/ssl/private/localhost.key
-RUN chmod 644 /etc/ssl/certs/localhost.crt && \
-    chmod 600 /etc/ssl/private/localhost.key
+# Setup SSL certificates (use provided or generate self-signed)
+# We copy the whole docker directory to check for ssl certs, as the ssl dir might not exist in git
+COPY infrastructure/docker/ /tmp/docker-context/
+RUN mkdir -p /etc/ssl/private && mkdir -p /etc/ssl/certs && \
+    if [ -f /tmp/docker-context/ssl/localhost.crt ] && [ -f /tmp/docker-context/ssl/localhost.key ]; then \
+        echo "Using provided SSL certificates"; \
+        mv /tmp/docker-context/ssl/localhost.crt /etc/ssl/certs/localhost.crt && \
+        mv /tmp/docker-context/ssl/localhost.key /etc/ssl/private/localhost.key; \
+    else \
+        echo "Generating self-signed SSL certificates"; \
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/ssl/private/localhost.key \
+        -out /etc/ssl/certs/localhost.crt \
+        -subj "/C=US/ST=Development/L=Local/O=ProtoProject/OU=Dev/CN=localhost" \
+        -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:::1"; \
+    fi && \
+    chmod 644 /etc/ssl/certs/localhost.crt && \
+    chmod 600 /etc/ssl/private/localhost.key && \
+    rm -rf /tmp/docker-context
 
 # Disable prefork MPM and enable event MPM for HTTP/2 support
 RUN a2dismod mpm_prefork && \
