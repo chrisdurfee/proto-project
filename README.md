@@ -96,6 +96,17 @@ docker compose -f infrastructure/docker-compose.yaml up -d      # Start developm
 > - Database migrations run automatically (disable with `AUTO_MIGRATE=false`)
 > - Bind mounts provide live code editing while keeping container benefits
 
+### 🔐 Trusting the Local Certificate (Remote Development)
+
+**If you are accessing this workspace remotely (e.g., via SSH or a cloud IDE) but viewing the site on your local Windows or Mac computer:**
+
+1. **Download the certificate file:** `infrastructure/docker/ssl/localhost.crt`
+2. **Install it on your computer:**
+   - **Windows:** Double-click the `.crt` file -> "Install Certificate" -> "Current User" -> "Place all certificates in the following store" -> **"Trusted Root Certification Authorities"**.
+   - **Mac:** Double-click the `.crt` file to open Keychain Access. Find the "localhost" cert, double-click it, expand "Trust", and set "When using this certificate" to "Always Trust".
+   - **Chrome (Browser Store):** Go to `chrome://certificate-manager`, click "Local certificates", and look for an "Import" option (often under "Custom" or "Your certificates") to add the `.crt` file directly.
+3. **Restart Chrome.**
+
 **2. Start Frontend Apps** (in separate terminals):
 ```bash
 # Main App
