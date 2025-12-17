@@ -138,7 +138,7 @@ export const NewConversationForm = Jot(
 					Button({
 						variant: 'ghost',
 						icon: Icons.x,
-						click: () => app.navigate('messages/all')
+						click: () => app.navigate('messages')
 					})
 				]),
 			]),
@@ -171,7 +171,7 @@ export const NewConversationForm = Jot(
 			Div({ class: "border-t p-4" }, [
 				Button({
 					variant: 'outline',
-					click: () => app.navigate('messages/all')
+					click: () => app.navigate('messages')
 				}, 'Cancel')
 			])
 		]);

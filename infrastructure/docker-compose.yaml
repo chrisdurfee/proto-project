@@ -42,13 +42,13 @@ services:
     volumes:
       - redis_data:/data
       - ./infrastructure/config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    command: ["redis-server","/usr/local/etc/redis/redis.conf"]
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--requirepass", "${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}"]
     networks:
       - proto-network
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG || exit 1"]
+      test: ["CMD-SHELL", "redis-cli -a $${REDIS_PASSWORD} ping | grep PONG || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5

@@ -50,7 +50,7 @@ services:
     volumes:
       - redis_data:/data
       - ./infrastructure/config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--requirepass", "${REDIS_PASSWORD}"]
     networks:
       - proto-network
     environment:
