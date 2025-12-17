@@ -63,7 +63,7 @@ export const VideoChatPage = () =>
 				window.history.back();
 				return;
 			}
-			app.navigate('/messages/all');
+			app.navigate('/messages');
 		},
 
 		/**
