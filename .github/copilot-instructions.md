@@ -103,48 +103,63 @@ Key files to orient quickly:
 - Frontend proxy: each `apps/*/vite.config.js` + `infrastructure/config/domain.config.js`
 
 ## Base Framework (frontend) patterns
-- Atoms (building blocks)
-  - Create with functions or `Atom((props, children)=>({...}))`; compose by nesting children.
-  - Events receive `(event, parentComponent)`; e.g., `click: (e, parent)=>{ /* use parent */ }`.
-  - Usage overloads: `Div(props)`, `Div('text')`, `Div([child1, child2])`, or `Div(props, children)`.
-  - Typical pattern (copy-to-clipboard): `Code({ click:()=>{ navigator.clipboard.writeText(...); app.notify({ title:'Code copied', icon: Icons.clipboard.checked }); } }, children)`.
-- Components (containers)
-  - Class-based components define `render()` and can use lifecycle hooks like `afterSetup()`.
-  - Scoped: atoms inherit parent component scope (state, data, directives). Routed components get `this.route` injected.
-- Data (aka jots/bindables)
-  - Bindable data via `new Data({...})` (deep) or `new SimpleData({...})` (shallow). Get/set with proxy or methods (`data.name`, `data.set({...})`).
-  - Helpers: `increment`, `decrement`, `toggle`, `scope(path)`, array ops (`push`, `splice`, `unshift`, `shift`, `pop`), `refresh`, `revert`.
-  - Local storage: `data.setKey('KEY'); data.resume(defaults); data.store();`
-- Directives (power-ups)
-  - Binding: `bind: 'prop'` or `bind: ['prop', filterOrFn]`; bind attribute: `bind: 'href:prop'`.
-  - Watchers: string placeholders `[[prop]]` in attributes or `{ watch: {...} }` for custom attr/callback.
-  - Reactive: `onSet: ['prop', fn]` and `onState: ['state', fn]` to update layout/classes.
-  - Routing: `route: { uri, component|import, title, persist? }` or an array; `switch: [...]` renders first match.
-  - Cache elements: `{ cache: 'propertyName' }` then use `this.propertyName` in parent after render.
-  - Lifecycle callbacks: `{ onCreated(ele, parent){...}, onDestroyed(ele){...}, debug:true }`.
-  - Context: `{ context: (ctx)=>({ text: ctx.data.name }) }` to pass data down without props.
-  - Mapping: `{ map: [items, (item,i)=> new Item(item)] }` or `for: ['prop', (item,i,scoped)=> ... ]` for bindable arrays.
-  - Dataset/ARIA/ID: `{ dataSet:[...], aria:{...}, getId:'prop' }`.
-  - Custom directives: `Directives.add('name', (ele, data, parent)=>{ /* ... */ })`.
-- Special atoms
-  - Conditional children: `On('prop', (v)=> v? ViewA(): ViewB())`, `OnState('state', fn)`, `OnRoute('prop', fn)`.
-  - Access parent: `UseParent((parent)=> Div({ class: parent.state.loaded? 'loaded':'loading' }))`.
-- Smart atoms (conditional/render helpers)
-  - On/OnState/OnRoute: reactive child rendering when a bindable value changes. Two overloads:
-    - `On('prop', (value, ele, parent)=> Layout)` watches component data → context → state in order.
-    - `On(source, 'prop', (value, ele, parent)=> Layout)` watches a custom source (e.g., `this.route`).
-  - If/IfState: exact-match conditional rendering.
-    - `If('prop', 'expected', (val, ele, parent)=> Layout)` or `IfState('stateKey','expected', cb)`.
-    - With custom source: `If(parent.weatherData, 'condition','sunny', cb)`.
-  - OnLoad/OnStateLoad: shorthand of `On('loaded', ...)` and state-only variant for loading UX.
-  - OnOpen/OnStateOpen: shorthand of `On('open', ...)` and state-only variant for modals/menus.
-  - Callback signature for all: `(value, element, parent)=> mixed`.
-- Icons and notifications
-  - `Icons` from `@base-framework/ui/icons`; global notify via `app.notify({ title, description, icon: Icons.circleCheck })`.
-- Project wiring
-  - Aliases in `vite.config.js`: `@components`, `@pages`, `@modules`, `@shell`. Dev servers proxy `/api` using `generateUrls(isDev)`.
-  - Environment: use relative `/api/...`; Developer app exposes `process.env.VITE_API_URL`.
-  - Styling: Tailwind v4 via `@tailwindcss/vite`; pass class strings directly via `class` prop.
+
+### Core Architecture (CRITICAL)
+- **No JSX/Templates**: Use plain JS objects (`{ tag: 'div', class: 'foo' }`).
+- **Atoms return Objects**: They return `{ tag, ... }`, NOT DOM elements. Never call `.appendChild()` on an atom result.
+- **Instantiation**:
+  - Components: `new MyComponent()` (Always use `new`).
+  - Atoms: `Div()` (Never use `new`).
+- **State**: Use `this.state.set('key', val)` or `this.data.prop = val`. NEVER `this.setState()`.
+- **Props**: Read-only. Do not mutate.
+
+### Atoms & Layouts
+- **Signature**: `Atom((props, children) => ({ tag: 'div', ...props, children }))`.
+- **Usage**:
+  - Props only: `Div({ class: 'red' })`
+  - Children only: `Div([ Span('text') ])` (Always wrap multiple children in Array).
+  - Both: `Div({ class: 'red' }, [ Span('text') ])` (Children is 2nd arg).
+- **Events**: `click(event, parent) { ... }`. Always receive `parent` component as 2nd arg.
+- **Conditionals**:
+  - `On('prop', (val) => val ? Div() : null)` (Must return Atom object or null).
+  - `If('prop', 'value', () => Div())`.
+
+### Components
+- Extend `Component`. Implement `render() { return Div(...); }`.
+- **Data**: Initialize in `setData()`. Use `Data` (deep) or `SimpleData` (shallow).
+- **State**: Initialize in `setupStates()`. Access via `this.state`.
+- **Lifecycle**: `onCreated`, `beforeSetup`, `afterSetup` (DOM ready), `beforeDestroy`.
+
+### Directives
+- **Bind**: `bind: 'prop'` (two-way).
+- **Map**: `map: ['[[items]]', (item) => Div(item.name)]` (Efficient list rendering).
+- **Route**: `route: { uri: '/path', component: MyComponent }`.
+- **Switch**: `switch: [ { uri: ... }, ... ]` (Renders first match).
+- **Watch**: `[[prop]]` in strings updates automatically.
+
+### UI Library & Icons (CRITICAL)
+- **Imports**:
+  - Core: `import { Atom, Component, Data } from '@base-framework/base';`
+  - DOM Atoms: `import { Div, Button } from '@base-framework/atoms';`
+  - UI Components: `import { Button as UiButton } from '@base-framework/ui/atoms';`
+  - Icons: `import { Icons } from '@base-framework/ui/icons';`
+  - Icon Atom: `import { Icon } from '@base-framework/ui/atoms';`
+- **Icon Usage**:
+  - ✅ `Icon({ size: 'sm', class: 'text-red' }, Icons.home)`
+  - ❌ `Icon(Icons.home)` (Wrong)
+  - ❌ `Icon({ icon: Icons.home })` (Wrong)
+- **Tailwind**: Use standard utility classes.
+
+### Common Mistakes to Avoid
+1. **Forgetting Children Array**: `Div(Span(), Span())` ❌ -> `Div([Span(), Span()])` ✅
+2. **Wrong Event Signature**: `click(e) {}` ❌ -> `click(e, parent) {}` ✅
+3. **Mutating Props**: Use `this.data` or `this.state` instead.
+4. **Importing from wrong package**: Check imports carefully against the list above.
+
+### Project wiring
+- Aliases in `vite.config.js`: `@components`, `@pages`, `@modules`, `@shell`. Dev servers proxy `/api` using `generateUrls(isDev)`.
+- Environment: use relative `/api/...`; Developer app exposes `process.env.VITE_API_URL`.
+- Styling: Tailwind v4 via `@tailwindcss/vite`; pass class strings directly via `class` prop.
 
   ## More from Developer docs (quick refs)
   - Modules & API: Each module registers routes in `modules/*/Api/api.php` and exposes controllers under `modules/*/Controllers/*`. See the Developer docs “Modules” and “API”.
