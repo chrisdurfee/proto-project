@@ -1,4 +1,4 @@
-import { State } from "@base-framework/base";
+import { Store as State } from "@base-framework/base";
 import { Configs } from "./configs.js";
 
 /**

@@ -1,4 +1,4 @@
-import { Data, Events, State } from "@base-framework/base";
+import { Data, Events, Store as State } from "@base-framework/base";
 import { getSavedToken } from "../../csrf-token.js";
 import { ActionTimer } from "./action-timer.js";
 import { APP_STATE, STATES, STATE_ATTR } from "./state.js";
