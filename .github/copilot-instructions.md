@@ -696,10 +696,27 @@ const Toggle = Jot((checked, setChecked) => (
 ```
 
 ### Tailwind & Theming
-- Tailwind v4 scans `src/**/*.{js,ts,jsx,tsx}`
-- Use semantic tokens: `primary`, `secondary`, `destructive`, `warning`, `muted`, `accent`, `popover`, `card`, `border`, `foreground`
-- Dark mode is `media` based
-- Use existing design tokens: `text-muted-foreground`, `bg-muted/10`, `border`, `ring`
+- **Tailwind v4** is used throughout the project. It scans `src/**/*.{js,ts,jsx,tsx}` automatically.
+- **Shadcn-based Theme**: The platform uses a theme based on shadcn for colors. Use semantic tokens: `primary`, `secondary`, `destructive`, `warning`, `muted`, `accent`, `popover`, `card`, `border`, `foreground`.
+- **Dark Mode**: Dark mode is `media` based.
+- **Design Tokens**: Use existing tokens like `text-muted-foreground`, `bg-muted/10`, `border`, `ring`.
+
+### Base UI Library (Pre-built Components)
+**STOP! Do not build these from scratch.** The `@base-framework/ui` package already contains components for all these categories. Import and use them:
+
+- **Atoms**: `Button`, `Badge`, `Avatar`, `Skeleton`, `Tooltip`, `Icon`
+- **Inputs**: `Input`, `Select`, `Checkbox`, `Switch`, `Textarea`, `Combobox`
+- **Feedback**: `Alert`, `Progress`, `Spinner`, `Toast` (Notifications)
+- **Overlay**: `Modal`, `Dialog`, `Drawer`, `Popover`, `DropdownMenu`
+- **Navigation**: `Tabs`, `Breadcrumb`, `Pagination`, `Sidebar`
+- **Data Display**: `Card`, `Table` (DataTable), `List`, `Calendar`, `EmptyState`
+
+Example imports:
+```javascript
+import { Button, Badge, Input } from '@base-framework/ui/atoms';
+import { Card, Modal, Drawer } from '@base-framework/ui/molecules';
+import { DataTable, Calendar } from '@base-framework/ui/organisms';
+```
 
 ### Common UI Patterns
 
