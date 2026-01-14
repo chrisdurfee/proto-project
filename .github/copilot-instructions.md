@@ -27,8 +27,60 @@ Use these repo-specific rules to be productive immediately.
 - Routes live in module API registries. Example (`modules/YourFeature/Api/api.php`):
   - `router()->resource('feature', Modules\YourFeature\Controllers\FeatureController::class);`
 - Services extend `Common\Services\Service`. Use `Common\Data` (a `Proto\Patterns\Structural\Registry` singleton) for shared app state when needed.
+- Modules live under `modules/*` and require a main module class.
+  - **CRITICAL Module Structure**:
+    * Use `Proto\Module\Module` NOT `Proto\Modules\Module` (note: singular "Module")
+    * Module class must have `activate()` method NOT `boot()`
+    * Place module class at `modules/YourModule/YourModuleModule.php`
+    * Module system automatically loads API routes from `modules/*/Api/api.php` - no need to load them manually
+    * Module structure:
+      ```php
+      <?php declare(strict_types=1);
+
+      namespace Modules\YourModule;
+
+      use Proto\Module\Module;
+
+      class YourModuleModule extends Module
+      {
+          public function activate(): void
+          {
+
+          }
+      }
+      ```
 - Migrations are PHP classes under `common/Migrations` or `modules/*/Migrations`. They're executed by `infrastructure/scripts/run-migrations.php` (entrypoint runs them when `AUTO_MIGRATE=true`).
 - Files: writable volumes are mounted at `public/files` and `common/files` (see `infrastructure/docker-compose.yaml`).
+- **CRITICAL PHP Code Style**:
+  * Opening braces ALWAYS on new line (methods, classes, if/else, loops, etc.)
+  * NO blank lines between variable assignment and immediate condition check
+  * Example:
+    ```php
+    // ✅ CORRECT
+    $carProfile = CarProfile::get($carProfileId);
+    if (!$carProfile)
+    {
+        return false;
+    }
+
+    // ❌ WRONG - blank line between variable and check
+    $carProfile = CarProfile::get($carProfileId);
+
+    if (!$carProfile) {
+        return false;
+    }
+
+    // ✅ CORRECT - opening brace on new line
+    public function getUserCars(int $userId): array
+    {
+        return CarProfile::fetchWhere(['userId' => $userId]);
+    }
+
+    // ❌ WRONG - opening brace on same line
+    public function getUserCars(int $userId): array {
+        return CarProfile::fetchWhere(['userId' => $userId]);
+    }
+    ```
 
 ## Proto coding patterns (AI quick recipes)
 - Controllers
@@ -37,9 +89,39 @@ Use these repo-specific rules to be productive immediately.
   - Helpers: `$this->getRequestItem(Request)`, `$this->getResourceId(Request)`, `$this->response($data)`, `$this->error($message)`.
   - Validation: implement `protected function validate(): array` or call `$this->validateRules($data, ['name' => 'string:255|required'])` or `$request->validate([...])`.
   - Pass-through: public methods on the model (and its storage) are auto-wrapped in a Response when invoked via the controller.
+  - **IMPORTANT**: Controllers should NOT access storage classes directly. Use the model to access the storage layer: `$car = CarProfile::get($id)` not `$storage->get($id)`.
+- Services
+  - Extend `Common\Services\Service` for business logic.
+  - **CRITICAL**: Services should NEVER instantiate storage classes directly. Always use model methods to access data.
+  - **WRONG**: `$storage = new UserStorage(); $storage->getUsers();`
+  - **CORRECT**: `User::fetchWhere([...])` or add custom static methods to the model that delegate to storage.
+  - For complex queries, add static methods to the model: `User::getActiveUsers()` which internally calls `static::storage()->getActiveUsers()`.
+  - Services coordinate business logic, models handle data access.
 - Routing
   - Register in `modules/*/Api/api.php`: `router()->resource('users', Modules\User\Controllers\UserController::class);`
-  - Add custom routes to controller methods as needed via the module router.
+  - **CRITICAL Routing Patterns**:
+    * Module API paths MUST start with the module name. Garage module routes: `'garage/...'` NOT `'user/:id/garage/...'`
+    * Controller method syntax: ALWAYS wrap in array `[Controller::class, 'method']` NOT `Controller::class, 'method'`
+    * Use fluent interface for chaining: `router()->resource(...)->get(...)->post(...)`
+    * **WRONG**: `router()->get('path', Controller::class, 'method');`
+    * **CORRECT**: `router()->get('path', [Controller::class, 'method']);`
+    * **WRONG**: Separate router() calls for related routes
+    * **CORRECT**: Chain with fluent interface:
+      ```php
+      router()
+          ->resource('garage', GarageVehicleController::class)
+          ->get('garage/portfolio', [GarageVehicleController::class, 'portfolio'])
+          ->post('garage/reorder', [GarageVehicleController::class, 'reorder']);
+      ```
+    * Use groups for shared path prefixes:
+      ```php
+      router()->group('auth/crm', function(Router $router)
+      {
+          $router->post('login', [AuthController::class, 'login']);
+          $router->post('mfa/verify', [AuthController::class, 'verifyAuthCode']);
+      });
+      ```
+    * Apply middleware to groups: `router()->middleware([ThrottleMiddleware::class])->group(...)`
 - Query patterns
   - Simple: `User::getBy(['name' => $name])`, `User::fetchWhere(['status' => 'active'])`.
   - Builder: `User::where(['name' => $name])->orderBy('id DESC')->groupBy('id')->fetch();`
@@ -49,23 +131,182 @@ Use these repo-specific rules to be productive immediately.
   - Common types: `int,float,string,email,ip,phone,mac,bool,url,domain`.
 - Migrations
   - Place classes under `common/Migrations` or `modules/*/Migrations`; executed by the migration runner.
-  - From docs: `Proto\Database\Migrations\Guide` supports `run()` and `revert()` when invoked from scripts.
+  - **CRITICAL Migration Structure**:
+    * Extend `Proto\Database\Migrations\Migration` NOT `Guide`
+    * Use regular named classes, NOT anonymous classes with `return new class`
+    * Methods are `up()` and `down()` NOT `run()` and `revert()`
+    * File structure:
+      ```php
+      <?php declare(strict_types=1);
+
+      use Proto\Database\Migrations\Migration;
+
+      /**
+       * Migration description
+       */
+      class TableName extends Migration
+      {
+          public function up(): void
+          {
+              $this->create('table_name', function($table) {
+                  // Define table schema
+              });
+          }
+
+          public function down(): void
+          {
+              $this->drop('table_name');
+          }
+      }
+      ```
+  - **CRITICAL Field Definition Patterns**:
+    * Primary key: `$table->id();` (auto-incrementing bigint)
+    * UUID: `$table->uuid();` (not uuid('fieldname'))
+    * Integers: `$table->integer('field_name', length);` (e.g., `$table->integer('user_id', 30);`)
+    * Strings: `$table->varchar('field_name', length);` (e.g., `$table->varchar('name', 100);`)
+    * Text: `$table->text('field_name')->nullable();`
+    * Decimals: `$table->decimal('amount', precision, scale);` (e.g., `$table->decimal('price', 10, 2);`)
+    * Dates: `$table->date('field_name');`
+    * Timestamps: `$table->timestamp('field_name');`
+    * Booleans/TinyInt: `$table->tinyInteger('field_name')->default(0);`
+    * Enums: `$table->enum('field_name', 'value1', 'value2', 'value3')->default("'value1'");` (note: default value needs quotes inside quotes)
+  - **CRITICAL Audit Field Shortcuts**:
+    * `$table->createdAt();` - creates created_at timestamp with useCurrent
+    * `$table->updatedAt();` - creates updated_at timestamp with useCurrentOnUpdate
+    * `$table->deletedAt();` - creates deleted_at timestamp nullable for soft deletes
+    * `$table->timestamps();` - creates the created_at and updated_at fields together
+    * Created/updated by: `$table->integer('created_by', 30)->nullable();`
+  - **CRITICAL Index Patterns**:
+    * Single field: `$table->index('index_name')->fields('field_name');`
+    * Multiple fields: `$table->index('index_name')->fields('field1', 'field2', 'field3');`
+    * Unique constraint: `$table->unique('constraint_name')->fields('field1', 'field2');`
+  - **CRITICAL Foreign Key Rules**:
+    * Syntax: `$table->foreign('local_column')->references('remote_column')->on('remote_table')->onDelete('CASCADE');`
+    * DO NOT use `foreignKey()` - that method does not exist
+    * Use `foreign()` method, NOT `foreignId()` or `foreignKey()`
+    * Common onDelete actions: 'CASCADE', 'SET NULL' (requires nullable column)
+    * DO NOT specify connection in migrations unless using non-default DB: omit `protected string $connection = 'default';`
+  - **Complete Migration Example**:
+    ```php
+    <?php declare(strict_types=1);
+
+    use Proto\Database\Migrations\Migration;
+
+    class CarMaintenanceRecord extends Migration
+    {
+        public function up(): void
+        {
+            $this->create('car_maintenance_records', function($table)
+            {
+                // Primary key
+                $table->id();
+                $table->uuid();
+
+                // Foreign keys
+                $table->integer('car_profile_id', 30);
+                $table->integer('user_id', 30);
+
+                // Fields
+                $table->varchar('title', 200);
+                $table->text('description')->nullable();
+                $table->enum('type', 'routine', 'repair', 'inspection')->default("'routine'");
+                $table->date('service_date');
+                $table->decimal('cost', 10, 2)->nullable();
+
+                // Audit fields
+                $table->createdAt();
+                $table->integer('created_by', 30)->nullable();
+                $table->updatedAt();
+                $table->integer('updated_by', 30)->nullable();
+                $table->deletedAt();
+
+                // Indexes
+                $table->index('car_profile_idx')->fields('car_profile_id', 'service_date');
+                $table->index('user_idx')->fields('user_id');
+
+                // Foreign keys
+                $table->foreign('car_profile_id')->references('id')->on('car_profiles')->onDelete('CASCADE');
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('CASCADE');
+            });
+        }
+
+        public function down(): void
+        {
+            $this->drop('car_maintenance_records');
+        }
+    }
+    ```
 - File storage
   - Use `Proto\Utils\Files\Vault` (see Developer app docs) for storing/retrieving files; buckets map to `public/files` or remote drivers.
 
 ## Models & Storage (backend)
 - Models
   - Extend `Proto\Models\Model`; set `protected static ?string $tableName`, `protected static array $fields`, optional `protected static array $fieldsBlacklist`, `protected static string $idKeyName = 'id'`.
-  - Pre/post hooks: `augment(mixed $data): mixed` to sanitize before persist, `format(?object $data): ?object` to shape API output.
+  - Pre/post hooks: `protected static function augment(mixed $data = null): mixed` to sanitize before persist, `protected static function format(?object $data): ?object` to shape API output.
   - Relations (lazy): `$this->hasMany(Post::class)`, `$this->hasOne(Profile::class)`, `$this->belongsTo(User::class)`, `$this->belongsToMany(Role::class, 'pivot', 'fk', 'rk')`.
   - Eager joins (builder): define `protected static function joins($builder): void { Role::one($builder)->on(['id','userId'])->fields('role'); }`.
   - Pass-through: undeclared model/storage public methods auto-wrap in Response via controllers; bypass via `static::$storageType::methodName()`.
+  - **CRITICAL Model CRUD Methods**:
+    * **Static methods** (operate on class): `create()`, `edit()`, `remove()`, `put()`, `get()`, `all()`
+    * **Instance methods** (operate on object): `add()`, `update()`, `delete()`, `setup()`
+    * `create()` takes OBJECT, returns BOOL: `User::create((object)['name' => 'John']);`
+    * `remove()` accepts object|int|string|null: `User::remove(5)` or `User::remove($user)` or `User::remove($userId)`
+    * `delete()` is instance method, NOT static: `$user = User::get(1); $user->delete();`
+    * **WRONG**: `User::delete(5)` - delete() is not static!
+    * **CORRECT**: `User::remove(5)` or `$user = User::get(5); $user->delete();`
+  - **CRITICAL Model Usage**:
+    * Model `create()` takes an OBJECT not array: `Model::create((object)['field' => 'value']);`
+    * `create()` returns a BOOL not object. To track the model instance, create instance and use `add()`: `$model = new Model(); $model->field = 'value'; $model->add();`
+    * For tests: Use instance approach to get the created model: `$car = new CarProfile(); $car->year = 2020; $car->add(); // now $car->id is available`
+  - **CRITICAL Eager Join Patterns**:
+    * Use named parameters for fields: `fields: []` not positional `[]`
+    * In belongsTo joins, DO NOT include 'id' field (would override child table's id)
+    * Example:
+      ```php
+      protected static function joins(object $builder): void
+      {
+          $builder->belongsTo(CarProfile::class, fields: ['nickname', 'year', 'make', 'model']);
+          $builder->belongsTo(User::class, fields: ['firstName', 'lastName', 'displayName']);
+      }
+      ```
+    * **WRONG**: `->belongsTo(User::class, ['id', 'name'])` - positional params
+    * **WRONG**: `->belongsTo(CarProfile::class, fields: ['id', 'year'])` - includes 'id'
+    * **CORRECT**: `->belongsTo(CarProfile::class, fields: ['year', 'make', 'model'])`
 - Storage
-  - Extend `Proto\Storage\Storage` (name ends with `Storage`); optional `protected string $connection = 'default'`.
-  - Query builder: `$sql = $this->table()->select()->where("status = 'active'"); $rows = $this->fetch($sql);`
+  - Extend `Proto\Storage\Storage` (name ends with `Storage`).
+  - **DO NOT** specify tableName - storage gets table info from the model that instantiates it
+  - **DO NOT** specify connection unless using non-default DB. Omit: `protected string $connection = 'default';` (it's already default)
+  - **CRITICAL Query Builder Patterns**:
+    * Use SQL builder's `fetch()` directly, NOT storage's `fetch()`: `return $this->table()->select()->where(...)->fetch($params);`
+    * Chain multiple where conditions in single call: `->where('field1 = ?', 'field2 IS NOT NULL', 'field3 > ?')`
+    * DO NOT chain multiple `->where()` calls separately
+    * Use `first()` not `fetchOne()`: `->first([$params])` (adds LIMIT 1 automatically)
+    * **ALWAYS use builder methods** - DO NOT write raw SQL with table names. There is NO `getTableName()` method.
+    * For updates: `$this->table()->update()->set(['field' => $value])->where('id = ?')->execute([$id]);`
+    * **WRONG**: `$tableName = $this->table()->getTableName(); $sql = "UPDATE {$tableName}...";`
+    * **CORRECT**: `$this->table()->update()->set([...])->where(...)->execute([...]);`
+    * **WRONG**: `$sql = $this->table()->select()->where('id = ?'); return $this->fetch($sql, [$id]);`
+    * **CORRECT**: `return $this->table()->select()->where('id = ?')->fetch([$id]);`
+  - Query builder: `$sql = $this->table()->select()->where("status = 'active'"); $rows = $sql->fetch($params);`
   - Filters: mixed formats supported, e.g., `["a.id = '1'"], ["a.id", $id], ["a.id", ">", $id], ["created_at BETWEEN ? AND ?", [$d1,$d2]]`.
   - Ad-hoc queries: `findAll(fn($sql,&$p)=>($p[]='active',$sql->where('status = ?')->orderBy('status DESC')));` and `find(fn($sql,&$p)=>($p[]='active',$sql->where('status = ?')->limit(1)));`.
   - Direct adapter: `$this->db->fetch('SELECT * FROM users')`; transactions via `beginTransaction/commit/rollback`.
+  - Only create and declare a storage class if you need custom queries; otherwise use model methods and add custom methods to the model that delegate to storage using the model static builder method.
+```php
+class PermissionRole extends Model
+{
+	public function deleteRolePermission(mixed $roleId, mixed $permissionId): bool
+	{
+		return static::builder()
+			->delete()
+			->where(
+				['role_id', $roleId],
+				['permission_id', $permissionId]
+			)
+			->execute();
+	}
+}
+```
 
 ## Auth & Policies (backend)
 - Gates
@@ -85,7 +326,7 @@ Use these repo-specific rules to be productive immediately.
 ## Adding features (fast path)
 - Backend API:
   - Create controller in `modules/Feature/Controllers/...`
-  - Register routes in `modules/Feature/Api/api.php` (use `router()->resource(...)` or custom routes)
+  - Register routes in `modules/Feature/Api/api.php` (use `router()->resource(...)` or custom routes). The API folder supports nested subfolders. e.g. `modules/Feature/Api/Subfeature/api.php`. This would have the path prefix `api/feature/subfeature/...`.
   - Add migrations in `modules/Feature/Migrations/*`
   - Tests in `modules/Feature/Tests/{Unit,Feature}/*Test.php`
 - Frontend:
@@ -101,6 +342,201 @@ Key files to orient quickly:
 - Backend boot: `public/api/index.php`, `infrastructure/docker/Dockerfile`, `infrastructure/docker/entrypoint.sh`
 - Config flow: `common/Config/.env` (JSON) → `infrastructure/scripts/sync-config.js` → root `.env` used by `infrastructure/docker-compose.yaml`
 - Frontend proxy: each `apps/*/vite.config.js` + `infrastructure/config/domain.config.js`
+
+## PHP Code Style & Best Practices
+
+### Formatting Rules
+1. **Opening braces on next line** - Always place opening braces on a new line for methods, classes, if/else, loops:
+   ```php
+   // ✅ CORRECT
+   public function methodName()
+   {
+       if ($condition)
+       {
+           // code
+       }
+   }
+
+   // ❌ WRONG - Don't use same-line braces
+   public function methodName() {
+       if ($condition) {
+           // code
+       }
+   }
+   ```
+
+2. **No blank lines between related code** - Keep variable declarations and their immediate usage together:
+   ```php
+   // ✅ CORRECT
+   $carProfile = CarProfile::get($carProfileId);
+   if (!$carProfile)
+   {
+       return false;
+   }
+
+   // ❌ WRONG - Don't add blank line
+   $carProfile = CarProfile::get($carProfileId);
+
+   if (!$carProfile)
+   {
+       return false;
+   }
+   ```
+
+### Creating Model Instances
+
+**✅ CORRECT - Use constructor with object**:
+```php
+// Service layer converting array to object
+public function createRecord(array $data): ?object
+{
+    $model = new Model((object)$data);
+    $model->add();
+    return $model;
+}
+```
+
+**❌ WRONG - Don't use foreach loop**:
+```php
+// Don't do this - unnecessary verbosity
+$model = new Model();
+foreach ($data as $key => $value)
+{
+    $model->$key = $value;
+}
+$model->add();
+```
+
+### Migration Best Practices
+
+1. **Foreign key method is `foreign()` not `foreignKey()`**:
+   ```php
+   // ✅ CORRECT
+   $table->foreign('organization_id')
+       ->references('id')
+       ->on('organizations')
+       ->onDelete('cascade');
+
+   // ❌ WRONG - method doesn't exist
+   $table->foreignKey('organization_id')
+       ->references('id')
+       ->on('organizations');
+   ```
+
+2. **Only specify `$connection` if non-default**:
+   ```php
+   // ✅ CORRECT - Omit when using default connection
+   class CarProfileStorage extends Storage
+   {
+       // No $connection property needed
+   }
+
+   // ❌ WRONG - Unnecessary boilerplate
+   class CarProfileStorage extends Storage
+   {
+       protected string $connection = 'default';
+   }
+   ```
+
+### Storage Query Patterns
+
+1. **Use builder methods directly, not storage wrappers**:
+   ```php
+   // ✅ CORRECT - Call fetch() on builder
+   public function getRecords(int $id, ?string $type = null): array
+   {
+       $sql = $this->table()
+           ->select()
+           ->where('parent_id = ?', 'deleted_at IS NULL');
+
+       $params = [$id];
+       if ($type)
+       {
+           $sql->where('type = ?');
+           $params[] = $type;
+       }
+
+       return $sql->fetch($params);
+   }
+
+   // ❌ WRONG - Don't call $this->fetch()
+   return $this->fetch($sql, $params);
+   ```
+
+2. **Chain multiple where conditions**:
+   ```php
+   // ✅ CORRECT - Single where() call with multiple conditions
+   return $this->table()
+       ->select()
+       ->where(
+           'parent_id = ?',
+           'field IS NOT NULL',
+           'field <= DATE_ADD(CURDATE(), INTERVAL ? DAY)',
+           'deleted_at IS NULL'
+       )
+       ->orderBy('created_at ASC')
+       ->fetch([$id, $days]);
+
+   // ❌ WRONG - Multiple chained where() calls
+   ->where('parent_id = ?')
+   ->where('field IS NOT NULL')
+   ->where('field <= DATE_ADD(CURDATE(), INTERVAL ? DAY)')
+   ```
+
+3. **Use `first()` not `fetchOne()` for single record**:
+   ```php
+   // ✅ CORRECT - first() adds LIMIT 1 automatically
+   return $this->table()
+       ->select()
+       ->where('user_id = ?', 'is_primary = 1')
+       ->first([$userId]);
+
+   // ❌ WRONG - fetchOne() doesn't exist
+   return $this->table()->select()->fetchOne([$userId]);
+   ```
+
+### Model Joins & Relationships
+
+**Use named parameters for `fields` in joins**:
+```php
+// ✅ CORRECT - Named parameter, exclude 'id' in belongsTo
+protected static function joins(object $builder): void
+{
+    $builder
+        ->belongsTo(Parent::class, fields: ['name', 'status'])
+        ->belongsTo(User::class, fields: ['firstName', 'lastName']);
+}
+
+// ❌ WRONG - Don't include 'id' in belongsTo (would override child ID)
+->belongsTo(Parent::class, fields: ['id', 'name', 'status'])
+```
+
+### Controller Patterns
+
+**Controllers use models, not storage directly**:
+```php
+// ✅ CORRECT - Use model methods
+public function getData(Request $request): object
+{
+    $id = $request->input('id');
+    if (!$id)
+    {
+        return $this->error('ID is required');
+    }
+
+    $record = Model::get($id);
+    if (!$record)
+    {
+        return $this->error('Record not found');
+    }
+
+    return $this->response($record);
+}
+
+// ❌ WRONG - Don't instantiate storage directly
+$storage = new ModelStorage();
+$record = $storage->get($id);
+```
 
 ## Base Framework (frontend) - Complete Guide
 
