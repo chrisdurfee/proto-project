@@ -51,7 +51,27 @@ docker-compose -f infrastructure/docker-compose.yaml up -d
 
 ### Factories
 - **Location**: `modules/*/Factories` or `common/Factories`
-- **Purpose**: Generate test data for models using the Proto Simple Faker class. Check Proto composer package in `\src\Tests\SimpleFaker.php` for available methods.
+- **Purpose**: Generate test data for models using the Proto Simple Faker class. Check Proto composer package in `protoframework\proto\src\Tests\SimpleFaker.php` for available methods.
+
+**CRITICAL Faker Usage**:
+- ALWAYS use `$this->faker()` as a METHOD call, NOT `$this->faker` as a property
+- Proto SimpleFaker has LIMITED methods compared to FakerPHP/Faker
+- **Available Methods**:
+  - Basic: `name()`, `firstName()`, `lastName()`, `username()`, `email()`
+  - Address: `streetAddress()`, `city()`, `state()`, `stateAbbr()`, `postcode()`
+  - Text: `word()`, `words()`, `sentence()`, `paragraph()`, `text()`
+  - Numbers: `numberBetween()`, `floatBetween()`, `boolean()`
+  - Dates: `dateTimeBetween()`, `date()`, `time()`
+  - Utility: `randomElement()`, `uuid()`, `url()`, `slug()`
+- **NOT Available**: `latitude()`, `longitude()`, `imageUrl()`, `optional()`, `randomFloat()`, `paragraphs()`, `dateTimeThisMonth()`
+- **Replacements**:
+  - `latitude()` → `floatBetween(25.0, 50.0, 6)`
+  - `longitude()` → `floatBetween(-125.0, -65.0, 6)`
+  - `randomFloat(2, 10, 100)` → `floatBetween(10.0, 100.0, 2)`
+  - `optional(0.7)->value` → `boolean(70) ? value : null`
+  - `paragraphs(3, true)` → `paragraph(3)`
+  - `dateTimeThisMonth()` → `dateTimeBetween('-1 month', 'now')`
+
 - **Usage**:
 ```php
 // Create and persist
@@ -80,16 +100,25 @@ use Modules\User\Models\User;
 
 class UserFactory extends Factory
 {
-    protected static ?string $model = User::class;
+    /**
+	 * Get the model class name
+	 *
+     * @abstract
+	 * @return string
+	 */
+	protected function model(): string
+	{
+		return User::class;
+	}
 
-    protected function definition(): array
+    public function definition(): array
     {
         return [
-            'username' => $this->faker->userName(),
-            'email' => $this->faker->email(),
+            'username' => $this->faker()->userName(), // METHOD call
+            'email' => $this->faker()->email(),
             'password' => password_hash('password', PASSWORD_DEFAULT),
-            'firstName' => $this->faker->firstName(),
-            'lastName' => $this->faker->lastName()
+            'firstName' => $this->faker()->firstName(),
+            'lastName' => $this->faker()->lastName()
         ];
     }
 
@@ -98,6 +127,33 @@ class UserFactory extends Factory
     {
         return $this->state(['role' => 'admin']);
     }
+}
+```
+
+Add a @method comment to factory model class help the intellisense:
+```php
+/**
+ * User model
+ * @method static UserFactory factory(int $count = 1, array $attributes = [])
+*/
+class User extends Model
+{
+    // ...
+    /**
+	 * @var array $fields the fields should be in camelCase format but get converted to snake_case for the database in the storage layer
+	 */
+	protected static array $fields = [
+		'id',
+        'createdAt',
+		'updatedAt',
+		'firstName',
+		'lastName',
+		'username',
+		'password',
+        'email',
+		'status',
+		'emailVerifiedAt'
+	];
 }
 ```
 
@@ -235,9 +291,11 @@ Use the "use" statement for class references, NOT fully qualified names inline.
 use Modules\User\Models\User;
 
 $user = User::get($userId);
+$class = User::class;
 
 // ❌ WRONG
 $user = \Modules\User\Models\User::get($userId);
+$class = \Modules\User\Models\User::class;
 ```
 
 #### Spacing
@@ -350,7 +408,8 @@ class UserController extends ResourceController
     {
         return [
             'name' => 'string:255|required',
-            'email' => 'email|required'
+            'email' => 'email|required',
+            'firstName' => 'string:100'
         ];
     }
 }
@@ -495,7 +554,7 @@ public function all(Request $request): object
 - `modifyFilter(?object $filter, Request $request)` - called in `all()` to customize filter
 
 **Access Route Parameters**:
-Use Request object methods to access route parameters. Available methods:
+Use Request object methods to access route input parameters. Available methods by type:
 - `input($key)` - Get string parameter
 - `getInt($key)` - Get integer parameter
 - `getBool($key)` - Get boolean parameter
@@ -503,6 +562,7 @@ Use Request object methods to access route parameters. Available methods:
 - `raw($key)` - Get raw parameter
 
 **CRITICAL**: `route()` method does NOT exist. Use the methods above.
+- The case should be camelCase for parameters in the route path and data keys in the resource objects.
 
 ```php
 // ✅ CORRECT
@@ -514,7 +574,7 @@ $isActive = $request->getBool('active');
 $communityId = $request->route('communityId');
 ```
 **Params in the url**
-The route parameters are available in the request object using the params method. This will return an object with the route parameters as properties.
+The route parameters that are found in the request uri are available in the request object using the params method. This will return an object with the route parameters as properties.
 
 ```php
 // ✅ CORRECT
@@ -961,6 +1021,157 @@ public function posts(): \Proto\Models\Relations\HasMany
 - In eager `belongsTo`: ALWAYS use named parameter `fields: [...]` and EXCLUDE 'id' field
 - In eager joins: `on()` order is `[parent_key, foreign_key]`
 
+### Custom Data Types (Geo Points, JSON, etc.)
+
+**Overview**: Proto supports custom data type handlers for complex SQL types like POINT, JSON, GEOMETRY, and more. This eliminates the need for custom Storage classes to handle special SQL placeholders and parameter binding.
+
+**Benefits**:
+- Declaratively handle complex SQL types using `$dataTypes` property
+- Automatic placeholder generation and parameter binding
+- Support for multiple input formats (string, array, object)
+- Zero boilerplate in Storage classes
+
+#### Geographic Data (POINT)
+
+**WHEN TO USE**: Storing latitude/longitude coordinates using MySQL's POINT spatial type.
+
+**Model Configuration**:
+```php
+<?php declare(strict_types=1);
+namespace Modules\Auth\Models;
+
+use Proto\Models\Model;
+use Proto\Storage\DataTypes\PointType;
+
+class UserAuthedLocation extends Model
+{
+    protected static ?string $tableName = 'user_authed_locations';
+
+    protected static array $fields = [
+        'id',
+        'city',
+        'position',
+        [['X(`position`)'], 'latitude'],  // Extract X coordinate
+        [['Y(`position`)'], 'longitude'], // Extract Y coordinate
+    ];
+
+    /**
+     * Map field names to DataType handlers
+     */
+    protected static array $dataTypes = [
+        'position' => PointType::class
+    ];
+}
+```
+
+**Usage Examples**:
+```php
+$location = new UserAuthedLocation();
+
+// String format (space-separated lat/lon)
+$location->position = '37.7749 -122.4194';
+$location->city = 'San Francisco';
+$location->add(); // Automatically converts to POINT(?, ?)
+
+// Array format
+$location->position = [37.7749, -122.4194];
+$location->add();
+
+// Object format
+$location->position = (object)['lat' => 37.7749, 'lon' => -122.4194];
+$location->add();
+
+// Update works the same way
+$location = UserAuthedLocation::get(1);
+$location->position = '37.8044 -122.2712'; // Berkeley
+$location->update(); // Automatically handles SET position = POINT(?, ?)
+
+// Querying by location (if needed, in custom Storage)
+$nearbyLocations = UserAuthedLocation::fetchWhere([
+    ["ST_Distance_Sphere(position, POINT(?, ?)) < ?", [-122.4194, 37.7749, 10000]]
+]);
+```
+
+#### JSON Data
+
+**WHEN TO USE**: Storing metadata, settings, or configuration as JSON.
+
+**Model Configuration**:
+```php
+<?php declare(strict_types=1);
+namespace Modules\Events\Models;
+
+use Proto\Models\Model;
+use Proto\Storage\DataTypes\JsonType;
+
+class Event extends Model
+{
+    protected static array $fields = [
+        'id',
+        'name',
+        'metadata',
+        'settings',
+        'tags'
+    ];
+
+    protected static array $dataTypes = [
+        'metadata' => JsonType::class,
+        'settings' => JsonType::class,
+        'tags' => JsonType::class
+    ];
+}
+```
+
+**Usage**:
+```php
+$event = new Event();
+$event->name = 'Conference 2026';
+$event->metadata = ['speakers' => ['John', 'Jane'], 'capacity' => 500];
+$event->tags = ['tech', 'conference', 'ai'];
+$event->add(); // Arrays automatically encoded to JSON strings
+```
+
+#### Multiple Custom Types
+
+You can mix multiple custom data types in a single model:
+
+```php
+<?php declare(strict_types=1);
+namespace Modules\Events\Models;
+
+use Proto\Models\Model;
+use Proto\Storage\DataTypes\PointType;
+use Proto\Storage\DataTypes\JsonType;
+
+class Location extends Model
+{
+    protected static array $fields = [
+        'id',
+        'name',
+        'coordinates',   // POINT type
+        'metadata',      // JSON type
+        'properties',    // JSON type
+        [['X(`coordinates`)'], 'latitude'],
+        [['Y(`coordinates`)'], 'longitude']
+    ];
+
+    protected static array $dataTypes = [
+        'coordinates' => PointType::class,
+        'metadata' => JsonType::class,
+        'properties' => JsonType::class
+    ];
+}
+```
+
+**CRITICAL**:
+- Declare custom types in `protected static array $dataTypes = [...]`
+- Use `PointType::class` for geographic coordinates (POINT type)
+- Use `JsonType::class` for JSON fields (auto-encodes arrays/objects)
+- POINT fields accept string `'lat lon'`, array `[lat, lon]`, or object formats
+- JSON fields accept arrays or objects (auto-encoded during insert/update)
+- Extract coordinates using SQL functions: `[['X(`field`)'], 'latitude']`
+- NO custom Storage class needed - base Storage handles everything automatically
+
 ### Storage
 
 **Base**: `Proto\Storage\Storage`
@@ -1060,6 +1271,19 @@ $users = User::storage()->findAll(
 
 **Location**: `common/Migrations` or `modules/*/Migrations`
 
+**CRITICAL Naming Convention**:
+Migration files MUST follow this exact pattern:
+- **Filename**: `YYYY-MM-DDTHH.MM.SS.MICROSECONDS_ClassName.php`
+- **Class Name**: Must match the portion AFTER the underscore in the filename
+- **Example**: File `2026-01-21T04.14.30.800125_Event.php` → class name `Event`
+- **NOT Laravel Style**: Don't use `CreateEventsTable.php` or `Create_events_table.php`
+
+To generate correct timestamp:
+```bash
+date +"%Y-%m-%dT%H.%M.%S.%6N"
+# Example output: 2026-01-21T04.14.30.800125
+```
+
 **Structure**:
 ```php
 <?php declare(strict_types=1);
@@ -1088,16 +1312,61 @@ class CreateUsersTable extends Migration
 ```
 
 **Field Types**:
-- Primary key: `$table->id();`
-- UUID: `$table->uuid();`
-- Integer: `$table->integer('field', length);`
-- String: `$table->varchar('field', length);`
-- Text: `$table->text('field')->nullable();`
-- Decimal: `$table->decimal('amount', precision, scale);`
-- Date: `$table->date('field');`
-- Timestamp: `$table->timestamp('field');`
-- Boolean: `$table->tinyInteger('field')->default(0);`
-- Enum: `$table->enum('field', 'val1', 'val2')->default("'val1'");`
+
+**Primary Keys & IDs**:
+- `$table->id(length = 30)` - INT primary key with auto increment
+- `$table->uuid(length = 36)` - VARCHAR UUID field with unique index
+
+**Integer Types**:
+- `$table->tinyInteger(length = 1)` - TINYINT (1 byte, -128 to 127)
+- `$table->boolean()` - Alias for tinyInteger, use for true/false values
+- `$table->smallInteger(length)` - SMALLINT (2 bytes, -32768 to 32767)
+- `$table->mediumInteger(length)` - MEDIUMINT (3 bytes)
+- `$table->integer(length)` or `$table->int(length)` - INT (4 bytes)
+- `$table->bigInteger(length)` - BIGINT (8 bytes)
+
+**Decimal & Float Types**:
+- `$table->decimal(length)` - DECIMAL (exact precision for currency/financial)
+- `$table->floatType(length)` - FLOAT (approximate, 4 bytes)
+- `$table->doubleType(length)` - DOUBLE (approximate, 8 bytes)
+
+**String Types**:
+- `$table->char(length)` - CHAR (fixed-length string)
+- `$table->varchar(length)` - VARCHAR (variable-length string, max 65535)
+
+**Text Types**:
+- `$table->tinyText()` - TINYTEXT (max 255 chars)
+- `$table->text()` - TEXT (max 65,535 chars)
+- `$table->mediumText()` - MEDIUMTEXT (max 16MB)
+- `$table->longText()` - LONGTEXT (max 4GB)
+
+**Binary Types**:
+- `$table->binary(length)` - BINARY (fixed-length binary)
+- `$table->bit()` - BIT (default length 1)
+- `$table->tinyBlob()` - TINYBLOB (max 255 bytes)
+- `$table->blob(length)` - BLOB (max 65KB)
+- `$table->mediumBlob(length)` - MEDIUMBLOB (max 16MB)
+- `$table->longBlob(length)` - LONGBLOB (max 4GB)
+
+**Date & Time Types**:
+- `$table->date()` - DATE (YYYY-MM-DD)
+- `$table->datetime()` - DATETIME (YYYY-MM-DD HH:MM:SS)
+- `$table->timestamp()` - TIMESTAMP (auto-updates on change)
+
+**Special Types**:
+- `$table->enum('field', 'val1', 'val2', 'val3')` - ENUM (predefined values list)
+- `$table->json()` - JSON (native JSON column type)
+- `$table->point()` - POINT (spatial data for geo coordinates)
+
+**Field Modifiers**:
+- `->nullable()` - Allow NULL values
+- `->default(value)` - Set default value
+- `->currentTimestamp()` - Default to CURRENT_TIMESTAMP
+- `->utcTimestamp()` - Default to UTC_TIMESTAMP
+- `->primary()` - Set as primary key
+- `->autoIncrement()` - Enable auto increment
+- `->after('field')` - Position after specified field
+- `->rename('newName')` - Rename field
 
 **Audit Fields**:
 - `$table->timestamps();` - created_at, updated_at
@@ -1363,6 +1632,7 @@ check if the user is authorized to perform the action by the typer and request a
 Module policies extend the Common policy and define per-action methods as needed.
 
 ```php
+use Proto\Http\Router\Request;
 // Create in Modules/ModuleName/Auth/Policies extending Common\Auth\Policies\Policy
 class UserPolicy extends Policy
 {
@@ -1374,20 +1644,25 @@ class UserPolicy extends Policy
 	protected ?string $type = 'user';
 
     // Runs before all methods
-    protected function before(): bool
+    // override to add a before check that applies to all actions
+    public function before(Request $request): bool
     {
         return (auth()->user->isAdmin());
+
+        // or to check if they use ris signed in
+        // return $this->isSignedIn();
     }
 
-    // ovreride this to add a default policy for all actions if no per-action method exists
-    protected function default(): bool
+    // override this to add a default policy for all actions if no per-action method exists
+    public function default(Request $request): bool
     {
         return false;
     }
 
     // Per-action methods
-    public function get(int $id): bool
+    public function get(Request $request): bool
     {
+        $id = $this->getRequestId($request);
         return auth()->user->isUser($id);
     }
 
@@ -1404,8 +1679,9 @@ class UserPolicy extends Policy
         return ($result->id === $userId);
     }
 
-    public function update(int $id): bool
+    public function update(Request $request): bool
     {
+        $id = $this->getRequestId($request);
         return auth()->user->isUser($id);
     }
 }
@@ -1726,6 +2002,18 @@ Import('./file.js')
 | `$builder->belongsTo(Org::class, fields: ['id', 'name'])` | Exclude 'id': `fields: ['name']` |
 | `return $this->hasMany(Post::class)` in `joins()` | Use JoinBuilder methods in `joins()` |
 | `Post::one($this)->fields('title')` outside `joins()` | Use lazy relationships: `hasMany()` |
+| `CreateEventsTable.php` migration filename | `2026-01-21T04.14.30.800125_Event.php` |
+| `class CreateEventsTable extends Migration` | Class name must match filename after underscore: `class Event` |
+| `$this->faker->email()` in factory | `$this->faker()->email()` (method call not property) |
+| `$this->faker->latitude(25, 50)` | `$this->faker()->floatBetween(25.0, 50.0, 6)` |
+| `$this->faker->longitude(-125, -65)` | `$this->faker()->floatBetween(-125.0, -65.0, 6)` |
+| `$this->faker->optional(0.7)->value` | `$this->faker()->boolean(70) ? value : null` |
+| `$this->faker->randomFloat(2, 10, 100)` | `$this->faker()->floatBetween(10.0, 100.0, 2)` |
+| `$this->faker->paragraphs(3, true)` | `$this->faker()->paragraph(3)` |
+| `$this->faker->dateTimeThisMonth()` | `$this->faker()->dateTimeBetween('-1 month', 'now')` |
+| Manual POINT handling in Storage | Use `$dataTypes = ['position' => PointType::class]` in model |
+| Custom Storage for JSON encoding | Use `$dataTypes = ['metadata' => JsonType::class]` in model |
+| `$location->position = 'lat,lon'` (comma) | `$location->position = 'lat lon'` (space) or array `[lat, lon]` |
 
 ### Frontend (Base)
 
