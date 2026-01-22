@@ -143,7 +143,7 @@ $auth->user->isUser(1);`
 					 followed by "Policy" (e.g., ExamplePolicy).`
 				),
 				CodeBlock(
-`<?php
+`<?php declare(strict_types=1);
 namespace Common\\Auth\\Policies;
 
 use Proto\\Auth\\Policies\\Policy;
@@ -151,43 +151,175 @@ use Proto\\Http\\Router\\Request;
 
 class ExamplePolicy extends Policy
 {
-    public function default(Request $request): bool
-    {
-        // Return true to allow all non-standard methods, or false to deny
-        return true;
-    }
+    /**
+     * The type of the policy.
+     * Used to identify and group related policies.
+     *
+     * @var string|null
+     */
+    protected ?string $type = 'example';
 
-    public function get(Request $request): bool
-    {
-        // Check if a user can get a resource
-        return true;
-    }
-
+    /**
+     * Check if user is authenticated.
+     * Runs before all other policy methods.
+     */
     public function before(Request $request): bool
     {
-        // Called before the policy method
-        return true;
+        // Use isSignedIn() helper to check authentication
+        return $this->isSignedIn();
+
+        // Or check for admin access
+        // return auth()->user->isAdmin();
     }
 
-    public function after(mixed $result): bool
+    /**
+     * Default policy for methods without specific checks.
+     * Called when no matching method exists (e.g., customAction).
+     */
+    public function default(Request $request): bool
     {
-        // Called after the policy method
-        return $result;
+        return false; // Deny by default for security
     }
 
+    /**
+     * Check if user can get this resource.
+     */
+    public function get(Request $request): bool
+    {
+        $id = $this->getRequestId($request);
+        return auth()->user->isOwner($id);
+    }
+
+    /**
+     * Check if user can update this resource.
+     */
+    public function update(Request $request): bool
+    {
+        $id = $this->getRequestId($request);
+        return auth()->user->isOwner($id);
+    }
+
+    /**
+     * Post-check after get() completes.
+     * Can verify the fetched resource belongs to user.
+     */
     public function afterGet(mixed $result): bool
     {
-        // Called after the get() method
-        return $result;
+        $userId = session()->user->id ?? null;
+        if (!$userId)
+        {
+            return false;
+        }
+        return ($result->userId === $userId);
     }
 }`
 				),
 				P(
 					{ class: 'text-muted-foreground' },
-					`The default() method applies to any controller method that doesn't have an explicit policy method.
-					 The before() method runs before the specific policy method,
-					 while after() runs after. If you need a specific post-check for a method named get,
-					 you can implement afterGet().`
+					`The type property identifies the policy type. The default() method applies to any controller method
+					 that doesn't have an explicit policy method. The before() method runs before the specific policy method,
+					 while after() runs after. Use isSignedIn() to check if a user is authenticated.`
+				)
+			]),
+
+			// Authentication Pattern
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'Authentication Pattern'),
+				P(
+					{ class: 'text-muted-foreground font-semibold' },
+					`CRITICAL: Policies handle authentication. Controllers should assume users are authenticated after policy passes.`
+				),
+				P(
+					{ class: 'text-muted-foreground' },
+					`This pattern reduces redundant authentication checks and keeps controllers focused on business logic:`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Modules\\Group\\Auth\\Policies;
+
+use Common\\Auth\\Policies\\Policy;
+use Proto\\Http\\Router\\Request;
+
+class GroupPolicy extends Policy
+{
+    protected ?string $type = 'group';
+
+    /**
+     * Enforce authentication for all methods.
+     */
+    public function before(Request $request): bool
+    {
+        return $this->isSignedIn();
+    }
+
+    public function join(Request $request): bool
+    {
+        // User already authenticated via before()
+        $groupId = $request->getInt('groupId');
+        return auth()->group->canJoin(session()->user->id, $groupId);
+    }
+}`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Modules\\Group\\Controllers;
+
+use Modules\\Group\\Auth\\Policies\\GroupPolicy;
+use Modules\\Group\\Models\\Group;
+use Proto\\Controllers\\ResourceController;
+use Proto\\Http\\Router\\Request;
+
+class GroupController extends ResourceController
+{
+    // Policy enforces authentication
+    protected ?string $policy = GroupPolicy::class;
+
+    public function __construct(
+        protected ?string $model = Group::class
+    )
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Join a group.
+     * Policy already verified user is authenticated.
+     */
+    public function join(Request $request): object
+    {
+        $groupId = $request->getInt('groupId');
+
+        // SAFE: session()->user->id is available after policy check
+        // No need for: if (!$userId) return $this->error('Not authenticated');
+        $userId = session()->user->id;
+
+        $result = $this->service->joinGroup($userId, $groupId);
+        return $this->response($result);
+    }
+}`
+				),
+				P(
+					{ class: 'text-muted-foreground' },
+					`Avoid authentication checks in controllers when policies handle auth:`
+				),
+				CodeBlock(
+`// ❌ WRONG - Redundant auth check after policy
+public function join(Request $request): object
+{
+    $userId = session()->user->id ?? null;
+    if (!$userId)
+    {
+        return $this->error('User not authenticated'); // Never reached
+    }
+    // ...
+}
+
+// ✅ CORRECT - Trust the policy
+public function join(Request $request): object
+{
+    $userId = session()->user->id; // Safe after policy check
+    // ...
+}`
 				)
 			]),
 

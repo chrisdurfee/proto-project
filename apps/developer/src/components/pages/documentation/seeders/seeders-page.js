@@ -663,6 +663,70 @@ modules/
 				)
 			]),
 
+			// Using Factories in Seeders
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Using Factories in Seeders"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Factories provide a cleaner way to generate test data within seeders. Use them instead of building data arrays manually:`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Modules\\User\\Seeders;
+
+use Proto\\Database\\Seeders\\Seeder;
+use Modules\\User\\Models\\User;
+use Modules\\Group\\Models\\Group;
+
+class UserSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Create multiple users with factories
+        User::factory()->count(10)->create();
+
+        // Create with specific attributes
+        User::factory()->create([
+            'email' => 'admin@example.com',
+            'role' => 'admin'
+        ]);
+
+        // Create with factory states
+        User::factory()->admin()->create();
+        User::factory()->inactive()->count(5)->create();
+
+        // Create related data
+        $group = Group::factory()->create();
+        User::factory()->count(5)->create([
+            'groupId' => $group->id
+        ]);
+    }
+}`
+				),
+				P(
+					{ class: "text-muted-foreground font-semibold" },
+					`CRITICAL: When using SimpleFaker directly in seeders, use $this->faker() as a METHOD call, NOT a property:`
+				),
+				CodeBlock(
+`// ✅ CORRECT - Method call
+$faker = $this->faker();
+$name = $faker->name();
+
+// ❌ WRONG - Property access (will fail)
+$name = $this->faker->name(); // Error!
+
+// Direct usage in data generation
+$posts = [];
+for ($i = 0; $i < 10; $i++) {
+    $posts[] = [
+        'title' => $this->faker()->sentence(6),
+        'content' => $this->faker()->paragraph(3),
+        'authorId' => $this->faker()->numberBetween(1, 10)
+    ];
+}`
+				)
+			]),
+
 			// Best Practices
 			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Best Practices"),

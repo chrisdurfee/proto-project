@@ -113,6 +113,41 @@ class UserFactory extends Factory
 				)
 			]),
 
+			// Model Factory Annotation
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Model Factory Configuration"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Add a @method PHPDoc comment to your model class to enable IDE intellisense for the factory()
+					method, and define the factory class property:`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Modules\\User\\Models;
+
+use Proto\\Models\\Model;
+use Modules\\User\\Factories\\UserFactory;
+
+/**
+ * User model
+ *
+ * @method static UserFactory factory(int $count = 1, array $attributes = [])
+ */
+class User extends Model
+{
+    /**
+     * The factory class name for this model
+     *
+     * @var string|null
+     */
+    protected static ?string $factory = UserFactory::class;
+
+    protected static ?string $tableName = 'users';
+    protected static array $fields = ['id', 'name', 'email', 'status'];
+}`
+				)
+			]),
+
 			// Basic Usage
 			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Basic Usage"),
@@ -397,55 +432,80 @@ public function testUserWithSpecificEmail(): void
 
 			// Faker Methods
 			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
-				H4({ class: "text-lg font-bold" }, "Common Faker Methods"),
+				H4({ class: "text-lg font-bold" }, "Proto SimpleFaker Methods"),
 				P(
 					{ class: "text-muted-foreground" },
-					`The Faker library provides many methods for generating realistic test data:`
+					`Proto uses its own SimpleFaker class which has LIMITED methods compared to FakerPHP/Faker.
+					CRITICAL: Always use $this->faker() as a METHOD call, NOT $this->faker as a property.`
+				),
+				CodeBlock(
+`// ✅ CORRECT - Method call
+$this->faker()->name()
+$this->faker()->email()
+
+// ❌ WRONG - Property access
+$this->faker->name()
+$this->faker->email()`
+				),
+				P(
+					{ class: "text-muted-foreground mt-4" },
+					`Available SimpleFaker methods:`
 				),
 				CodeBlock(
 `// Names
-$faker->name()                      // Full name: "John Doe"
-$faker->firstName()                 // First name: "John"
-$faker->lastName()                  // Last name: "Doe"
-$faker->title()                     // Title: "Mr.", "Mrs.", "Dr."
+$this->faker()->name()          // Full name: "John Doe"
+$this->faker()->firstName()     // First name: "John"
+$this->faker()->lastName()      // Last name: "Doe"
+$this->faker()->username()      // Username: "john.doe"
 
 // Contact Info
-$faker->email()                     // Email: "john@example.com"
-$faker->unique()->email()           // Unique email
-$faker->phoneNumber()               // Phone: "(555) 123-4567"
-$faker->address()                   // Full address
-$faker->city()                      // City: "New York"
-$faker->country()                   // Country: "United States"
-$faker->postcode()                  // Postal code: "12345"
+$this->faker()->email()         // Email: "john@example.com"
+$this->faker()->unique()->email() // Unique email
+
+// Address
+$this->faker()->streetAddress() // Street: "123 Main St"
+$this->faker()->city()          // City: "New York"
+$this->faker()->state()         // State: "California"
+$this->faker()->stateAbbr()     // State abbr: "CA"
+$this->faker()->postcode()      // Postal code: "12345"
 
 // Text
-$faker->word()                      // Single word
-$faker->text(10)                    // 10 words of text
-$faker->sentence(6)                 // Sentence with 6 words
-$faker->paragraph(3)                // Paragraph with 3 sentences
+$this->faker()->word()          // Single word
+$this->faker()->words(5)        // 5 words as array
+$this->faker()->sentence(6)     // Sentence with 6 words
+$this->faker()->paragraph(3)    // Paragraph with 3 sentences
+$this->faker()->text(200)       // Text up to 200 chars
 
 // Numbers
-$faker->numberBetween(1, 100)       // Random integer
-$faker->randomDigit()               // 0-9
-$faker->randomFloat(2, 0, 100)      // Float with 2 decimals
+$this->faker()->numberBetween(1, 100)  // Random integer
+$this->faker()->floatBetween(0.0, 100.0, 2) // Float with 2 decimals
+$this->faker()->boolean(50)     // Boolean (50% true)
 
 // Dates
-$faker->dateTimeBetween('-1 year')  // Random date in past year
-$faker->date('Y-m-d')               // Date string
-$faker->dateTimeThisMonth()         // DateTime this month
+$this->faker()->dateTimeBetween('-1 year', 'now') // DateTime
+$this->faker()->date('Y-m-d')   // Date string
+$this->faker()->time('H:i:s')   // Time string
 
-// Internet
-$faker->url()                       // URL: "https://example.com"
-$faker->userName()                  // Username: "john.doe"
-$faker->password()                  // Random password
-$faker->ipv4()                      // IP address
-$faker->userAgent()                 // Browser user agent
-
-// Other
-$faker->uuid()                      // UUID string
-$faker->boolean(50)                 // Boolean (50% true)
-$faker->randomElement(['a','b','c']) // Random from array
-$faker->company()                   // Company name`
+// Utility
+$this->faker()->randomElement(['a', 'b', 'c']) // Random from array
+$this->faker()->uuid()          // UUID string
+$this->faker()->url()           // URL: "https://example.com"
+$this->faker()->slug()          // Slug: "lorem-ipsum"`
+				),
+				P(
+					{ class: "text-muted-foreground mt-4 font-semibold" },
+					`NOT Available in SimpleFaker (use replacements):`
+				),
+				CodeBlock(
+`// ❌ NOT AVAILABLE → ✅ REPLACEMENT
+$this->faker->latitude()         → $this->faker()->floatBetween(25.0, 50.0, 6)
+$this->faker->longitude()        → $this->faker()->floatBetween(-125.0, -65.0, 6)
+$this->faker->randomFloat(2,10,100) → $this->faker()->floatBetween(10.0, 100.0, 2)
+$this->faker->optional(0.7)->val → $this->faker()->boolean(70) ? $val : null
+$this->faker->paragraphs(3, true) → $this->faker()->paragraph(3)
+$this->faker->dateTimeThisMonth() → $this->faker()->dateTimeBetween('-1 month', 'now')
+$this->faker->imageUrl()         → Use static placeholder URL
+$this->faker->phoneNumber()      → Use a string format directly`
 				)
 			]),
 

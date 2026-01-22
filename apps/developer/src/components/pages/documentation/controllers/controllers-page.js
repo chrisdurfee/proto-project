@@ -249,6 +249,266 @@ class UserController extends ResourceController
 				)
 			]),
 
+			// ResourceController Hook Methods
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'ResourceController Hook Methods'),
+				P({ class: 'text-muted-foreground' },
+					`The ResourceController provides hook methods that allow you to modify data before it's processed by the default CRUD operations. These hooks receive the Request object, allowing access to route parameters and request data.`
+				),
+				P({ class: 'text-muted-foreground font-semibold' },
+					`Note: The hook method names contain a typo ("modifiy" instead of "modify") that must be preserved for compatibility.`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Modules\\Group\\Controllers;
+
+use Modules\\Group\\Models\\Group;
+use Proto\\Controllers\\ResourceController;
+use Proto\\Http\\Router\\Request;
+
+class GroupController extends ResourceController
+{
+    public function __construct(
+        protected ?string $model = Group::class
+    )
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Modify data before add operation.
+     * Called by add() BEFORE addItem().
+     *
+     * @param object $data Data passed by reference
+     * @param Request $request The request object
+     * @return void
+     */
+    protected function modifiyAddItem(object &$data, Request $request): void
+    {
+        // Access route parameters from URI
+        $params = $request->params();
+        $communityId = (int)($params->communityId ?? 0);
+        if ($communityId)
+        {
+            $data->communityId = $communityId;
+        }
+
+        // Inject session user
+        $data->createdBy = session()->user->id;
+
+        // Sanitize content
+        if (isset($data->content))
+        {
+            $data->content = trim(html_entity_decode($data->content, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        }
+    }
+
+    /**
+     * Modify data before update operation.
+     * Called by update() BEFORE updateItem().
+     *
+     * @param object $data Data passed by reference
+     * @param Request $request The request object
+     * @return void
+     */
+    protected function modifiyUpdateItem(object &$data, Request $request): void
+    {
+        // Preserve ID before restricting fields
+        $id = $data->id ?? null;
+
+        // Prevent modification of protected fields
+        $restrictedFields = ['id', 'communityId', 'createdAt', 'createdBy'];
+        $this->restrictFields($data, $restrictedFields);
+
+        // Restore ID after restriction
+        $data->id = $id;
+
+        // Track who updated
+        $data->updatedBy = session()->user->id;
+    }
+
+    /**
+     * Modify filter for all() queries.
+     * Called by all() to customize the query filter.
+     *
+     * @param object|null $filter The current filter
+     * @param Request $request The request object
+     * @return object|null Modified filter
+     */
+    protected function modifyFilter(?object $filter, Request $request): ?object
+    {
+        // Add route parameters to filter
+        $params = $request->params();
+        $communityId = (int)($params->communityId ?? 0);
+        if ($communityId)
+        {
+            $filter = $filter ?? (object)[];
+            $filter->communityId = $communityId;
+        }
+
+        return $filter;
+    }
+}`
+				),
+				P({ class: 'text-muted-foreground' },
+					`The public methods receive Request, call hooks, then delegate to protected methods:`
+				),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li('add(Request) → modifiyAddItem() → addItem(object)'),
+					Li('update(Request) → modifiyUpdateItem() → updateItem(object)'),
+					Li('delete(Request) → deleteItem(object)'),
+					Li('all(Request) → modifyFilter() → model query')
+				])
+			]),
+
+			// Request Parameters
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'Request Parameters'),
+				P({ class: 'text-muted-foreground' },
+					`The Request object provides different methods for accessing parameters from the URL path vs query/body data. Use the appropriate method based on where your data originates.`
+				),
+				CodeBlock(
+`// Route: /communities/:communityId/groups/:id
+
+public function get(Request $request): object
+{
+    // Access route parameters from URI path
+    $params = $request->params();
+    $communityId = (int)($params->communityId ?? 0);
+    $id = (int)($params->id ?? 0);
+
+    // Access query/body parameters by type
+    $name = $request->input('name');        // String parameter
+    $limit = $request->getInt('limit');     // Integer parameter
+    $active = $request->getBool('active');  // Boolean parameter
+    $data = $request->json('item');         // JSON parameter
+    $raw = $request->raw('content');        // Raw parameter
+
+    // Get the item from request body
+    $item = $this->getRequestItem($request);
+
+    // WRONG: route() method does not exist
+    // $id = $request->route('id'); // ❌ Will not work
+}`
+				),
+				P({ class: 'text-muted-foreground' },
+					`Available Request methods:`
+				),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li('params() - Returns object with route parameters from URI path'),
+					Li('input($key) - Get string parameter from query/body'),
+					Li('getInt($key) - Get integer parameter'),
+					Li('getBool($key) - Get boolean parameter'),
+					Li('json($key) - Get JSON parameter'),
+					Li('raw($key) - Get raw parameter'),
+					Li('file($key) - Get uploaded file')
+				])
+			]),
+
+			// Error Handling
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'Error Handling'),
+				P({ class: 'text-muted-foreground' },
+					`Controllers should fail gracefully without throwing exceptions. Use different error methods depending on context:`
+				),
+				CodeBlock(
+`// In hook methods (modifiyAddItem, modifiyUpdateItem, etc.)
+// Use $this->setError() - sets error state and returns
+protected function modifiyAddItem(object &$data, Request $request): void
+{
+    $params = $request->params();
+    $communityId = (int)($params->communityId ?? 0);
+    if (!$communityId)
+    {
+        $this->setError('Community ID is required');
+        return; // Exit hook - parent method will handle error response
+    }
+
+    $group = Group::get($data->id ?? 0);
+    if (!$group)
+    {
+        $this->setError('Group not found');
+        return;
+    }
+
+    // Only reached if no errors
+    $data->communityId = $communityId;
+}
+
+// In public methods
+// Use $this->error() - returns error response object
+public function customAction(Request $request): object
+{
+    $id = $request->getInt('id');
+    if (!$id)
+    {
+        return $this->error('ID is required');
+    }
+
+    $item = $this->model::get($id);
+    if (!$item)
+    {
+        return $this->error('Item not found');
+    }
+
+    return $this->response($item);
+}
+
+// WRONG: Don't throw exceptions in controllers
+protected function modifiyAddItem(object &$data, Request $request): void
+{
+    if (!$data->name)
+    {
+        throw new \\Exception('Name required'); // ❌ Don't do this
+    }
+}`
+				)
+			]),
+
+			// Authentication Pattern
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'Authentication Pattern'),
+				P({ class: 'text-muted-foreground' },
+					`Policies handle authentication checks. After policy validation passes, controllers can safely assume the user is authenticated and access session data directly without null checks.`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Modules\\Group\\Controllers;
+
+use Modules\\Group\\Auth\\Policies\\GroupPolicy;
+use Modules\\Group\\Models\\Group;
+use Proto\\Controllers\\ResourceController;
+use Proto\\Http\\Router\\Request;
+
+class GroupController extends ResourceController
+{
+    // Policy enforces authentication
+    protected ?string $policy = GroupPolicy::class;
+
+    public function __construct(
+        protected ?string $model = Group::class
+    )
+    {
+        parent::__construct();
+    }
+
+    // After policy passes, user is authenticated
+    public function join(Request $request): object
+    {
+        $groupId = $request->getInt('groupId');
+
+        // Safe to access session->user->id after policy check
+        $userId = session()->user->id;
+
+        // No need for: if (!$userId) return $this->error('Not authenticated');
+        // Policy already handled this
+
+        return $this->service->joinGroup($userId, $groupId);
+    }
+}`
+				)
+			]),
+
 			// Pass-Through Responses
 			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Pass-Through Responses'),

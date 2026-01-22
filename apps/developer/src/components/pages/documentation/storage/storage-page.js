@@ -105,8 +105,15 @@ class ExampleStorage extends Storage
 				H4({ class: 'font-semibold' }, 'Available Builder Methods'),
 				Ul({ class: 'list-disc pl-6 text-muted-foreground' }, [
 					Li("select(), insert(), update(), delete()"),
-					Li("join(), leftJoin(), rightJoin(), outerJoin(), union()"),
-					Li("where(), in(), orderBy(), groupBy(), having(), distinct(), limit()")
+					Li("join(), leftJoin(), rightJoin(), outerJoin()"),
+					Li("where(), in(), orderBy(), groupBy(), having(), distinct(), limit()"),
+					Li("union() - Combine queries")
+				]),
+				H4({ class: 'font-semibold' }, 'Execution Methods'),
+				Ul({ class: 'list-disc pl-6 text-muted-foreground' }, [
+					Li("fetch($params) - Execute and return all rows"),
+					Li("first($params) - Execute and return first row"),
+					Li("execute($params) - Execute statement (returns bool)")
 				]),
 				H4({ class: 'font-semibold' }, 'Example: Simple Select Query'),
 				CodeBlock(
@@ -114,7 +121,30 @@ class ExampleStorage extends Storage
 	->select()
 	->where("status = 'active'");
 
-$rows = $this->fetch($sql);`
+$rows = $sql->fetch();  // Direct execution on builder
+// OR
+$rows = $this->fetch($sql); // Pass to storage method`
+				),
+				H4({ class: 'font-semibold' }, 'Example: Chained Conditions'),
+				P({ class: 'text-muted-foreground' },
+					`Chain multiple conditions in a single where() call rather than multiple calls:`
+				),
+				CodeBlock(
+`// ✅ CORRECT - Single where() with multiple conditions
+$sql = $this->table()
+	->select()
+	->where('status = ?', 'deleted_at IS NULL', 'type = ?')
+	->orderBy('created_at DESC')
+	->limit($limit);
+
+$rows = $sql->fetch(['active', 'premium']);
+
+// ❌ AVOID - Multiple where() calls (less efficient)
+$sql = $this->table()
+	->select()
+	->where('status = ?')
+	->where('deleted_at IS NULL')
+	->where('type = ?');`
 				)
 			]),
 

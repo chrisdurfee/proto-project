@@ -872,25 +872,59 @@ $value = $model->key;
 // Set a property
 $model->key = $value;
 
-// Batch set properties
+// Batch set properties using set()
 $model->set((object)[
 	'key' => $value,
 	'name' => $name
-]);`
+]);
+
+// Preferred: Pass data to constructor
+$model = new Example((object)[
+	'name' => 'John',
+	'email' => 'john@example.com'
+]);
+$model->add();`
 				),
 				P(
-					{ class: "text-muted-foreground" },
-					`The model also provides built-in CRUD methods. For instance, to add a new row:`
+					{ class: "text-muted-foreground font-semibold" },
+					`CRITICAL: Understand the difference between static and instance methods:`
 				),
 				CodeBlock(
-`$model = new Example();
-$model->name = 'save';
-$model->add();
+`// STATIC METHODS (operate on class, don't track instance)
+User::create((object)['name' => 'John']); // Returns BOOL, not object
+User::get($id);                            // Returns object|null
+User::remove($id);                         // Returns bool
+User::fetchWhere(['status' => 'active']);  // Returns array
 
-// Or use static shortcut methods:
-$result = Example::create((object)[
-	'name' => 'save'
-]);`
+// INSTANCE METHODS (operate on object)
+$user = new User((object)['name' => 'John']);
+$user->add();    // Persists new instance, $user->id now available
+$user->update(); // Updates existing
+$user->delete(); // Removes instance
+
+// COMMON MISTAKE: create() returns BOOL, not the object!
+// ❌ WRONG
+$user = User::create((object)['name' => 'John']);
+echo $user->id; // Error: $user is a boolean
+
+// ✅ CORRECT - Use instance approach to track ID
+$user = new User((object)['name' => 'John']);
+$user->add();
+echo $user->id; // ID is now available
+
+// ✅ CORRECT - Or use create() when you don't need the ID
+$success = User::create((object)['name' => 'John']);
+if ($success) { /* row was inserted */ }
+
+// COMMON MISTAKE: delete() is instance method, not static
+// ❌ WRONG
+User::delete(5); // Method doesn't exist
+
+// ✅ CORRECT
+User::remove(5); // Static method
+// OR
+$user = User::get(5);
+$user->delete(); // Instance method`
 				)
 			]),
 

@@ -68,15 +68,35 @@ export const MigrationsPage = () =>
 
 			// Naming
 			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
-				H4({ class: 'text-lg font-bold' }, 'Naming'),
+				H4({ class: 'text-lg font-bold' }, 'File Naming Convention'),
+				P({ class: 'text-muted-foreground font-semibold text-yellow-600' },
+					`CRITICAL: Migration files must follow a specific naming pattern. This is NOT the same as Laravel.`
+				),
 				P({ class: 'text-muted-foreground' },
-					`The name of a migration should always be singular and followed by "Migration". For example:`
+					`Migration filename format: YYYY-MM-DDTHH.MM.SS.MICROSECONDS_ClassName.php`
+				),
+				P({ class: 'text-muted-foreground' },
+					`The class name must match the portion AFTER the underscore in the filename.`
 				),
 				CodeBlock(
-`<?php
+`# Generate timestamp for migration filename
+date +"%Y-%m-%dT%H.%M.%S.%6N"
+# Output example: 2026-01-21T04.14.30.800125
+
+# Correct filename example:
+# 2026-01-21T04.14.30.800125_Event.php → class Event
+
+# WRONG (Laravel style):
+# CreateEventsTable.php → Will not be recognized
+# 2024_01_21_000000_create_events_table.php → Wrong format`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+// File: 2026-01-21T04.14.30.800125_Event.php
 use Proto\\Database\\Migrations\\Migration;
 
-class ExampleMigration extends Migration
+// Class name must match portion after underscore
+class Event extends Migration
 {
     protected string $connection = 'default';
 
@@ -85,9 +105,9 @@ class ExampleMigration extends Migration
         // Code to update the database.
     }
 
-	public function seed(): void
+    public function seed(): void
     {
-        // Code to ssed the database.
+        // Code to seed the database.
     }
 
     public function down(): void
@@ -141,6 +161,108 @@ class ExampleMigration extends Migration
 
     // Foreign keys
     // $table->foreign('message_id')->references('id')->on('messages');
+});`
+				)
+			]),
+
+			// Field Types
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'Field Types'),
+				P({ class: 'text-muted-foreground' },
+					`The following field types are available in the schema builder:`
+				),
+				H4({ class: 'text-md font-semibold mt-4' }, 'Primary Keys & IDs'),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li("id(length = 30) - INT primary key with auto increment"),
+					Li("uuid(length = 36) - VARCHAR UUID field with unique index")
+				]),
+				H4({ class: 'text-md font-semibold mt-4' }, 'Integer Types'),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li("tinyInteger(length = 1) - TINYINT (1 byte, -128 to 127)"),
+					Li("boolean() - Alias for tinyInteger, use for true/false"),
+					Li("smallInteger(length) - SMALLINT (2 bytes)"),
+					Li("mediumInteger(length) - MEDIUMINT (3 bytes)"),
+					Li("integer(length) or int(length) - INT (4 bytes)"),
+					Li("bigInteger(length) - BIGINT (8 bytes)")
+				]),
+				H4({ class: 'text-md font-semibold mt-4' }, 'Decimal & Float Types'),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li("decimal(precision, scale) - DECIMAL (exact precision for currency)"),
+					Li("floatType(length) - FLOAT (approximate, 4 bytes)"),
+					Li("doubleType(length) - DOUBLE (approximate, 8 bytes)")
+				]),
+				H4({ class: 'text-md font-semibold mt-4' }, 'String Types'),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li("char(length) - CHAR (fixed-length string)"),
+					Li("varchar(length) - VARCHAR (variable-length, max 65535)")
+				]),
+				H4({ class: 'text-md font-semibold mt-4' }, 'Text Types'),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li("tinyText() - TINYTEXT (max 255 chars)"),
+					Li("text() - TEXT (max 65,535 chars)"),
+					Li("mediumText() - MEDIUMTEXT (max 16MB)"),
+					Li("longText() - LONGTEXT (max 4GB)")
+				]),
+				H4({ class: 'text-md font-semibold mt-4' }, 'Binary Types'),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li("binary(length) - BINARY (fixed-length binary)"),
+					Li("bit() - BIT (default length 1)"),
+					Li("tinyBlob() - TINYBLOB (max 255 bytes)"),
+					Li("blob(length) - BLOB (max 65KB)"),
+					Li("mediumBlob(length) - MEDIUMBLOB (max 16MB)"),
+					Li("longBlob(length) - LONGBLOB (max 4GB)")
+				]),
+				H4({ class: 'text-md font-semibold mt-4' }, 'Date & Time Types'),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li("date() - DATE (YYYY-MM-DD)"),
+					Li("datetime() - DATETIME (YYYY-MM-DD HH:MM:SS)"),
+					Li("timestamp() - TIMESTAMP (auto-updates on change)")
+				]),
+				H4({ class: 'text-md font-semibold mt-4' }, 'Special Types'),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li("enum('field', 'val1', 'val2', 'val3') - ENUM (predefined values)"),
+					Li("json() - JSON (native JSON column type)"),
+					Li("point() - POINT (spatial data for geo coordinates)")
+				])
+			]),
+
+			// Field Modifiers
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'Field Modifiers'),
+				P({ class: 'text-muted-foreground' },
+					`Chain these modifiers after field type declarations:`
+				),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li("->nullable() - Allow NULL values"),
+					Li("->default(value) - Set default value"),
+					Li("->currentTimestamp() - Default to CURRENT_TIMESTAMP"),
+					Li("->utcTimestamp() - Default to UTC_TIMESTAMP"),
+					Li("->primary() - Set as primary key"),
+					Li("->autoIncrement() - Enable auto increment"),
+					Li("->after('field') - Position after specified field"),
+					Li("->rename('newName') - Rename field")
+				]),
+				CodeBlock(
+`$this->create('events', function($table) {
+    $table->id();
+    $table->uuid();
+    $table->varchar('name', 200);
+    $table->text('description')->nullable();
+    $table->enum('status', 'draft', 'published', 'archived')->default("'draft'");
+    $table->date('event_date');
+    $table->point('location');  // For geo coordinates
+    $table->json('metadata');   // For JSON data
+    $table->decimal('price', 10, 2)->nullable();
+    $table->boolean('is_featured')->default(0);
+    $table->timestamps();       // created_at and updated_at
+    $table->deletedAt();        // For soft deletes
+
+    // Indexes
+    $table->index('event_date_idx')->fields('event_date');
+    $table->unique('name_unique')->fields('name');
+
+    // Foreign keys
+    $table->foreign('user_id')->references('id')->on('users')->onDelete('CASCADE');
 });`
 				)
 			]),
