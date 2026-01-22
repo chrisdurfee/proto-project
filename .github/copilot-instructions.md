@@ -50,7 +50,7 @@ docker-compose -f infrastructure/docker-compose.yaml up -d
 - Tests auto-wrap in transactions; changes rollback automatically.
 
 ### Factories
-- **Location**: `modules/*/Factories` or `common/Factories`
+- **Location**: `modules/*/Models/Factories` or `common/Models/Factories`
 - **Purpose**: Generate test data for models using the Proto Simple Faker class. Check Proto composer package in `protoframework\proto\src\Tests\SimpleFaker.php` for available methods.
 
 **CRITICAL Faker Usage**:
@@ -138,22 +138,12 @@ Add a @method comment to factory model class help the intellisense:
 */
 class User extends Model
 {
-    // ...
     /**
-	 * @var array $fields the fields should be in camelCase format but get converted to snake_case for the database in the storage layer
-	 */
-	protected static array $fields = [
-		'id',
-        'createdAt',
-		'updatedAt',
-		'firstName',
-		'lastName',
-		'username',
-		'password',
-        'email',
-		'status',
-		'emailVerifiedAt'
-	];
+     * @var string|null $factory the factory class name
+     */
+    protected static ?string $factory = UserFactory::class;
+
+    // ...
 }
 ```
 
@@ -737,11 +727,14 @@ protected function modifyFilter(?object $filter, Request $request): ?object
 class User extends Model
 {
     protected static ?string $tableName = 'users';
+    protected static ?string $alias = 'u';
+
+    // camelCase fields that get converted to snake_case in storage layer
     protected static array $fields = ['id', 'name', 'email', 'status'];
-    protected static array $fieldsBlacklist = ['password']; // Exclude from JSON output
+    protected static array $fieldsBlacklist = ['password']; // Exclude from JSON output (optional)
     protected static string $idKeyName = 'id'; // Default, only set if different
 
-    // Pre-persist hook - sanitize/transform before save
+    // Pre-persist hook - sanitize/transform before save (optional)
     protected static function augment(mixed $data = null): mixed
     {
         if ($data && isset($data->email))
@@ -751,7 +744,7 @@ class User extends Model
         return $data;
     }
 
-    // Post-fetch hook - shape API output
+    // Post-fetch hook - shape API output (optional)
     protected static function format(?object $data): ?object
     {
         if ($data)
@@ -1196,6 +1189,12 @@ $row = User::getBy($filter);   // one
 $rows = User::fetchWhere($filter);   // many`
 ```
 
+**Query Builder Methods**:
+- `select()`, `insert()`, `update()`, `delete()`
+- `join()`, `leftJoin()`, `rightJoin()`, `outerJoin()`
+- `where()`, `in()`, `orderBy()`, `groupBy()`, `having()`, `distinct()`, `limit()`
+- `union()` - combine queries
+
 **Query Builder**:
 ```php
 class UserStorage extends Storage
@@ -1235,6 +1234,44 @@ class UserStorage extends Storage
             ->set(['status' => $status, 'updated_at' => 'NOW()'])
             ->where('id = ?')
             ->execute([$id]);
+    }
+}
+```
+
+**Debugging Queries**:
+```php
+// Print the SQL string
+echo $sql;
+
+// Debug with parameters
+$sql->debug();
+```
+
+**Helper Methods**:
+- `table()` - model's query builder
+- `builder(table, alias)` - custom table builder
+- `select()` - selects default columns
+- `where()` - creates filtered queries
+
+**searchByJoin() Method**:
+Automatically generates EXISTS subqueries for searching within nested join data:
+```php
+// OLD WAY - Manual EXISTS subquery
+$sql->where("EXISTS (
+    SELECT 1 FROM conversation_participants cpp
+    INNER JOIN users u ON cpp.user_id = u.id
+    WHERE cpp.conversation_id = cp.conversation_id
+    AND (u.first_name LIKE ? OR u.last_name LIKE ?)
+)");
+
+// NEW WAY - Automatic subquery generation
+protected function setCustomWhere($sql, &$params, $options)
+{
+    if (!empty($options['search']))
+    {
+        $sql->where(
+            $this->searchByJoin('participants', ['firstName', 'lastName'], $options['search'], $params)
+        );
     }
 }
 ```
@@ -1594,6 +1631,18 @@ protected function incrementCommunityGroupCount(int $communityId): void
 **Format**: `'type[:max]|required'`
 
 **Types**: `int`, `float`, `string`, `email`, `ip`, `phone`, `mac`, `bool`, `url`, `domain`
+
+**Image Validation**:
+```php
+// In validation rules
+'image' => 'image:1024|required|mimes:jpeg,png'
+
+// Direct validation
+use Proto\Utils\Validation\ImageValidator;
+$result = ImageValidator::validate($uploadFile, $maxSizeKB, $mimeTypes);
+```
+
+**Supported image MIME types**: jpeg, jpg, png, gif, webp, bmp, tiff
 
 **Examples**:
 - `'string:255|required'`
@@ -2153,14 +2202,159 @@ if (!empty($users))
 
 **Docker Sync**: `./infrastructure/scripts/run.sh sync-config`
 
-## 8. Integration Points
+## 8. Events & Dispatch System
+
+### Events
+
+Proto provides a powerful event system for decoupled communication between application components.
+
+**Event Types**:
+- **Local Events**: In-process events using PubSub pattern
+- **Redis Events**: Distributed events across multiple instances via Redis pub/sub
+- **Storage Events**: Automatically triggered by model CRUD operations
+- **Custom Events**: Manually triggered for application-specific logic
+
+**Basic Usage**:
+```php
+use Proto\Events\Events;
+
+// Subscribe to an event
+Events::on('user.created', function($payload) {
+    // Handle the event
+    EmailService::sendWelcome($payload->email);
+});
+
+// Publish an event
+Events::update('user.created', (object)[
+    'id' => $userId,
+    'email' => $email
+]);
+
+// Helper function syntax
+events()->subscribe('user.created', $callback);
+events()->emit('user.created', $data);
+```
+
+**Redis Events (Distributed)**:
+Prefix event names with `redis:` to broadcast across all application instances:
+```php
+// Subscribe on ALL instances
+Events::on('redis:cache.cleared', function($data) {
+    Logger::info('Cache cleared globally');
+});
+
+// Publish to ALL instances
+Events::update('redis:cache.cleared', ['timestamp' => time()]);
+```
+
+**Storage Events**:
+The storage layer automatically publishes events for CRUD operations:
+```php
+// Listen for model add operations
+Events::on('User:add', function($payload) {
+    // $payload contains: args, data
+});
+
+// Listen to ALL storage events
+Events::on('Storage', function($payload) {
+    // $payload contains: target (model name), method, data
+});
+```
+
+**Server-Sent Events (SSE)**:
+For real-time streaming to clients:
+```php
+public function stream(Request $request): void
+{
+    $channel = "conversation:{$conversationId}:messages";
+    redisEvent($channel, function($channel, $message): array|null
+    {
+        $messageId = $message['id'] ?? null;
+        if (!$messageId) return null;
+
+        $messageData = Message::get($messageId);
+        return ['merge' => [$messageData], 'deleted' => []];
+    });
+}
+```
+
+### Dispatch (Email, SMS, Push Notifications)
+
+**Location**: `Proto\Dispatch\Dispatcher` and `Proto\Dispatch\Enqueuer`
+
+**Email**:
+```php
+use Proto\Dispatch\Dispatcher;
+use Proto\Dispatch\Enqueuer;
+
+$settings = (object)[
+    'to' => 'email@example.com',
+    'subject' => 'Welcome',
+    'fromName' => 'App Name',
+    'template' => 'Common\\Email\\WelcomeEmail',
+    'attachments' => ['/path/to/file.pdf']
+];
+
+$data = (object)['name' => 'John'];
+
+// Send immediately
+Dispatcher::email($settings, $data);
+
+// Enqueue for later
+Enqueuer::email($settings, $data);
+
+// Or use queue flag
+$settings->queue = true;
+Dispatcher::email($settings, $data);
+```
+
+**SMS (Twilio)**:
+```php
+$settings = (object)[
+    'to' => '1112221111',
+    'template' => 'Common\\Text\\NotificationSms'
+];
+
+Dispatcher::sms($settings, $data);
+Enqueuer::sms($settings, $data);
+```
+
+**Web Push (VAPID)**:
+```php
+$settings = (object)[
+    'subscriptions' => [
+        [
+            'endpoint' => 'https://...',
+            'keys' => ['auth' => '...', 'p256dh' => '...']
+        ]
+    ],
+    'template' => 'Common\\Push\\NotificationPush'
+];
+
+Dispatcher::push($settings, $data);
+```
+
+**User Module Gateways** (recommended for user notifications):
+```php
+// Email to user
+modules()->user()->email()->sendById($userId, $settings, $data);
+modules()->user()->email()->send($user, $settings, $data);
+
+// SMS to user
+modules()->user()->sms()->sendById($userId, $settings, $data);
+
+// Push to user
+modules()->user()->push()->send($userId, $settings, $data);
+```
+
+## 9. Integration Points
 
 - **Database**: MariaDB (port 3307 on host)
 - **Cache**: Redis (port 6380 on host)
 - **Email**: SMTP settings from `common/Config/.env`
 - **Frontend**: Proxies `/api` to backend via Vite config
 
-## 9. Quick References
+## 10. Quick References
 
 ### Add New Feature
 
