@@ -69,7 +69,7 @@ export const MigrationsPage = () =>
 			// Naming
 			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'File Naming Convention'),
-				P({ class: 'text-muted-foreground font-semibold text-yellow-600' },
+				P({ class: 'text-muted-foreground font-semibold' },
 					`CRITICAL: Migration files must follow a specific naming pattern. This is NOT the same as Laravel.`
 				),
 				P({ class: 'text-muted-foreground' },

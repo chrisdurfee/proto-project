@@ -2161,38 +2161,38 @@ $this->assertNotNull($value);
 $this->assertIsArray($value);
 ```
 
-### Transaction Limitations
+### Test Transactions
 
-**CRITICAL**:
-- Tests auto-wrap in transactions (rollback automatically)
-- `Model::get($id)` and `Model::getBy([...])` may return null for data created in same transaction
-- Use `Model::fetchWhere([...])` and convert to model: `new Model($data)` for transaction-safe queries although we have pushed updates to handle this better, if you have issues still use this pattern.
-- Prefer `assertDatabaseHas()` over re-fetching models when verifying data
-- Don't disable foreign key checks
-- Don't call custom static methods in tests (may create new connections)
+**How It Works**:
+- Tests auto-wrap in transactions and rollback automatically
+- Connection caching ensures all operations share the same connection/transaction
+- Proto framework automatically uses `Database::getConnection($connection, true)` to cache connections
+- All model methods (`Model::get()`, `Model::getBy()`, `Model::fetchWhere()`) work correctly within test transactions
 
-**Example Transaction-Safe Pattern**:
+**Best Practices**:
 ```php
-// ✅ CORRECT - Direct assertion
+// ✅ All these patterns work correctly
 $user = User::factory()->create();
+
+// Direct assertion (preferred for verification)
 $this->assertDatabaseHas('users', ['id' => $user->id, 'email' => $user->email]);
 
-// ✅ CORRECT - Use returned object
-$user = User::factory()->create();
+// Re-fetch with Model::get() (works correctly)
+$fetched = User::get($user->id);
+$this->assertNotNull($fetched);
+
+// Re-fetch with Model::getBy() (works correctly)
+$fetched = User::getBy(['id' => $user->id]);
+$this->assertNotNull($fetched);
+
+// Use returned object directly
 $this->assertEquals('test@example.com', $user->email);
-
-// ⚠️ MAY FAIL - Re-fetching in transaction
-$user = User::factory()->create();
-$fetched = User::get($user->id); // May return null
-$this->assertNotNull($fetched); // May fail
-
-// ✅ CORRECT - fetchWhere alternative
-$users = User::fetchWhere(['id' => $user->id]);
-if (!empty($users))
-{
-    $fetched = new User($users[0]);
-}
 ```
+
+**Important Notes**:
+- Connection caching is enabled automatically in tests (`dbCaching=true`)
+- Don't disable foreign key checks unless absolutely necessary
+- Don't manually create separate database connections (use Proto's connection methods)
 
 ## 7. Configuration
 
