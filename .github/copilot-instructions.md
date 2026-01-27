@@ -2194,6 +2194,114 @@ $this->assertEquals('test@example.com', $user->email);
 - Don't disable foreign key checks unless absolutely necessary
 - Don't manually create separate database connections (use Proto's connection methods)
 
+### Models with Eager Joins - Testing Considerations
+
+**CRITICAL**: Models that use eager joins (via `joins()` method with `belongsTo()`, `belongsToMany()`, etc.) have a known limitation when re-fetching data within the same test transaction. The joins create separate queries that may not see uncommitted data.
+
+**Affected Models**: Any model with a `joins()` method that uses JoinBuilder (e.g., Partner, PartnerBooking, PartnerLead with User/Partner joins)
+
+**Testing Patterns for Models with Eager Joins**:
+
+```php
+// ✅ CORRECT - Use original object returned by factory
+$booking = PartnerBooking::factory()->create(['confirmationCode' => 'ABC123']);
+$this->assertNotNull($booking->id);
+$this->assertEquals('ABC123', $booking->confirmationCode);
+
+// ✅ CORRECT - Verify via database assertion
+$this->assertDatabaseHas('partner_bookings', [
+    'id' => $booking->id,
+    'confirmationCode' => 'ABC123'
+]);
+
+// ❌ WRONG - Re-fetching may return null for models with eager joins
+$fetched = PartnerBooking::get($booking->id); // May be null!
+$this->assertNotNull($fetched); // May fail
+
+// ❌ WRONG - Custom query methods may also fail
+$fetched = PartnerBooking::getByConfirmationCode('ABC123'); // May be null!
+```
+
+**Writing Update Methods for Models with Eager Joins**:
+
+```php
+// ❌ WRONG - Fetch-then-update pattern fails in tests
+public static function markResponded(int $leadId): bool
+{
+    $lead = static::get($leadId); // Returns null in test!
+    if (!$lead) return false;
+
+    $lead->status = 'contacted';
+    return $lead->update();
+}
+
+// ✅ CORRECT - Use query builder directly
+public static function markResponded(int $leadId): bool
+{
+    return static::builder()
+        ->update()
+        ->set(['status' => 'contacted', 'responded_at' => date('Y-m-d H:i:s')])
+        ->where('id = ?')
+        ->execute([$leadId]);
+}
+```
+
+**Service Methods and Testing**:
+
+```php
+// ❌ WRONG - Service method that fetches model fails in tests
+public function submitLead(int $partnerId, int $userId, object $data): object|false
+{
+    $partner = Partner::get($partnerId); // Returns null in test!
+    if (!$partner) return false;
+    // ...
+}
+
+// ✅ CORRECT - Test the behavior without calling service method
+public function testSubmitLead(): void
+{
+    $partner = Partner::factory()->create();
+
+    // Create lead directly instead of via service
+    $lead = PartnerLead::factory()->create([
+        'partnerId' => $partner->id,
+        'userId' => $user->id,
+        'status' => 'new'
+    ]);
+
+    // Verify via database assertion
+    $this->assertDatabaseHas('partner_leads', [
+        'id' => $lead->id,
+        'status' => 'new'
+    ]);
+}
+```
+
+**Field Naming in Tests**:
+
+```php
+// ❌ WRONG - Using snake_case
+$this->assertEquals('pending', $partner->verification_status);
+$this->assertEquals($user->id, $booking->user_id);
+
+// ✅ CORRECT - Always use camelCase
+$this->assertEquals('pending', $partner->verificationStatus);
+$this->assertEquals($user->id, $booking->userId);
+
+// ✅ CORRECT - Database assertions use camelCase too
+$this->assertDatabaseHas('partners', [
+    'id' => $partner->id,
+    'verificationStatus' => 'pending'
+]);
+```
+
+**Summary - Testing Models with Eager Joins**:
+1. Use the object returned by `factory()->create()` directly
+2. Verify persistence with `assertDatabaseHas()` instead of re-fetching
+3. Write static update methods using query builder, not fetch-then-update
+4. In tests, create models directly instead of calling service methods that fetch
+5. Always use camelCase for field names, both in code and database assertions
+
 ## 7. Configuration
 
 **Location**: `common/Config/.env` (JSON format)
