@@ -73,62 +73,28 @@ try {
     exit(1);
 }
 
-// Now try to run Proto migrations
+// Run Proto migrations
 echo "\nRunning Proto migrations...\n";
 
-echo "About to create Guide instance...\n";
-// Use Proto's migration system
-try {
+try
+{
     $guide = new \Proto\Database\Migrations\Guide();
-    echo "Guide created successfully\n";
-
-    // WORKAROUND: Add migration directories that are skipped by Proto's scanner
-    // The scanner skips 'Auth' and 'Main' folders, but these may contain migrations
-    // at the module level (e.g., modules/Auth/Migrations)
-    $reflection = new ReflectionClass($guide);
-    $dirsProp = $reflection->getProperty('migrationDirs');
-    $dirsProp->setAccessible(true);
-    $existingDirs = $dirsProp->getValue($guide);
-
-    $additionalDirs = [
-        BASE_PATH . '/modules/Auth/Migrations',
-    ];
-
-    foreach ($additionalDirs as $dir) {
-        if (is_dir($dir) && !in_array($dir, $existingDirs)) {
-            $existingDirs[] = $dir;
-            echo "Added missing migration directory: $dir\n";
-        }
-    }
-    $dirsProp->setValue($guide, $existingDirs);
-
-    // Try to get new migrations to debug
-    $method = $reflection->getMethod('getNewMigrations');
-    $method->setAccessible(true);
-
-    echo "About to get new migrations...\n";
-    $migrations = $method->invoke($guide);
-    echo "Found " . count($migrations) . " migrations\n";
-
-    echo "Running migrations...\n";
     $result = $guide->run();
-    echo "Migration run completed...\n";
-    echo "Migration result: " . var_export($result, true) . "\n";
 
-} catch (Throwable $e) {
-    echo "EXCEPTION: " . $e->getMessage() . "\n";
+    if ($result)
+    {
+        echo "Migrations completed successfully!\n";
+    }
+    else
+    {
+        echo "No new migrations to run.\n";
+    }
+}
+catch (Throwable $e)
+{
+    echo "ERROR: Migration failed: " . $e->getMessage() . "\n";
     echo "File: " . $e->getFile() . ":" . $e->getLine() . "\n";
-    echo "Trace:\n" . $e->getTraceAsString() . "\n";
     exit(1);
-}
-
-if ($result)
-{
-    echo "Migrations completed successfully!\n";
-}
-else
-{
-    echo "No migrations to run or migrations failed.\n";
 }
 
 echo "Database setup complete!\n";
