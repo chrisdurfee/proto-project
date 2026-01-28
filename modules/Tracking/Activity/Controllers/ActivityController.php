@@ -1,15 +1,15 @@
 <?php declare(strict_types=1);
-namespace Modules\Tracking\Controllers;
+namespace Modules\Tracking\Activity\Controllers;
 
-use Modules\Tracking\Auth\Policies\ActivityPolicy;
+use Modules\Tracking\Activity\Auth\Policies\ActivityPolicy;
 use Proto\Controllers\ResourceController as Controller;
-use Modules\Tracking\Models\Activity;
+use Modules\Tracking\Activity\Models\Activity;
 use Proto\Http\Router\Request;
 
 /**
  * ActivityController
  *
- * @package Modules\Tracking\Controllers
+ * @package Modules\Tracking\Activity\Controllers
  */
 class ActivityController extends Controller
 {

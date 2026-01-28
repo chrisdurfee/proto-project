@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace Modules\Tracking\Auth\Policies;
+namespace Modules\Tracking\Activity\Auth\Policies;
 
 use Common\Auth\Policies\Policy;
 use Proto\Http\Router\Request;
@@ -7,7 +7,7 @@ use Proto\Http\Router\Request;
 /**
  * ActivityPolicy
  *
- * @package Modules\Tracking\Policies
+ * @package Modules\Tracking\Activity\Auth\Policies
  */
 class ActivityPolicy extends Policy
 {

@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace Modules\Tracking\Models;
+namespace Modules\Tracking\Activity\Models;
 
 use Proto\Models\Model;
 use Modules\User\Main\Models\User;
@@ -7,7 +7,7 @@ use Modules\User\Main\Models\User;
 /**
  * Activity
  *
- * @package Modules\Tracking\Models
+ * @package Modules\Tracking\Activity\Models
  */
 class Activity extends Model
 {
