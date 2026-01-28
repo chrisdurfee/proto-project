@@ -18,7 +18,7 @@ We strive to maintain high code quality and consistency. The code should be resi
 
 ### Autoloading
 - PSR-4: `Modules\` → `modules/`, `Common\` → `common/`.
-- Migrations: classmapped from `common/Migrations` and recursively discovered from `modules/*/Migrations` (up to 3 levels deep).
+- Migrations: classmapped from `common/Migrations` and recursively discovered from `modules/*/Migrations` (up to 6 levels deep).
 
 ## 2. Critical Workflows
 
