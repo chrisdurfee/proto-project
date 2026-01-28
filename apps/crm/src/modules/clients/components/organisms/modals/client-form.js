@@ -50,10 +50,30 @@ export const ClientForm = ({ isEditing = false, client }) => [
 
 	Fieldset({ legend: "Business Details" }, [
 		new FormField({ name: "industry", label: "Industry", description: "The industry of the client." }, [
-			Input({
-				type: "text",
-				placeholder: "Technology",
-				bind: 'industry'
+			Select({
+				bind: 'industry',
+				options: [
+					{ label: 'Technology', value: 'technology' },
+					{ label: 'Healthcare', value: 'healthcare' },
+					{ label: 'Finance', value: 'finance' },
+					{ label: 'Manufacturing', value: 'manufacturing' },
+					{ label: 'Retail', value: 'retail' },
+					{ label: 'Real Estate', value: 'real_estate' },
+					{ label: 'Education', value: 'education' },
+					{ label: 'Construction', value: 'construction' },
+					{ label: 'Hospitality', value: 'hospitality' },
+					{ label: 'Transportation', value: 'transportation' },
+					{ label: 'Professional Services', value: 'professional_services' },
+					{ label: 'Media & Entertainment', value: 'media_entertainment' },
+					{ label: 'Agriculture', value: 'agriculture' },
+					{ label: 'Energy', value: 'energy' },
+					{ label: 'Telecommunications', value: 'telecommunications' },
+					{ label: 'Insurance', value: 'insurance' },
+					{ label: 'Legal', value: 'legal' },
+					{ label: 'Non-Profit', value: 'non_profit' },
+					{ label: 'Government', value: 'government' },
+					{ label: 'Other', value: 'other' }
+				]
 			})
 		]),
 		new FormField({ name: "taxId", label: "Tax ID", description: "Tax identification number." }, [
