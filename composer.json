@@ -41,9 +41,8 @@
 			"Modules\\": "modules/",
 			"Common\\": "common/"
 		},
-		"classmap": [
-			"common/Migrations",
-			"modules/*/Migrations"
+		"exclude-from-classmap": [
+			"**/Migrations/"
 		]
 	}
 }
