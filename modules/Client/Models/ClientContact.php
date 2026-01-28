@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Client\Models;
 
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Proto\Models\Model;
 use Proto\Models\Relations\HasOne;
 

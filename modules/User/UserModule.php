@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 namespace Modules\User;
 
-use Modules\User\Auth\Gates\UserGate;
-use Modules\User\Auth\Gates\RoleGate;
-use Modules\User\Auth\Gates\ResourceGate;
-use Modules\User\Auth\Gates\PermissionGate;
-use Modules\User\Auth\Gates\OrganizationGate;
+use Modules\User\Main\Auth\Gates\UserGate;
+use Modules\User\Role\Auth\Gates\RoleGate;
+use Modules\User\Main\Auth\Gates\ResourceGate;
+use Modules\User\Permission\Auth\Gates\PermissionGate;
+use Modules\User\Organization\Auth\Gates\OrganizationGate;
 use Proto\Module\Module;
 
 /**

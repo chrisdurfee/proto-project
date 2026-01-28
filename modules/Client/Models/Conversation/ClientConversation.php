@@ -2,7 +2,7 @@
 namespace Modules\Client\Models\Conversation;
 
 use Proto\Models\Model;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 
 /**
  * ClientConversation

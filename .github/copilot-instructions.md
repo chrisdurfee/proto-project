@@ -118,7 +118,7 @@ $admin = User::factory()->admin()->create();
 namespace Modules\User\Factories;
 
 use Proto\Models\Factory;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 
 class UserFactory extends Factory
 {
@@ -392,14 +392,14 @@ Use the "use" statement for class references, NOT fully qualified names inline.
 
 ```php
 // ✅ CORRECT
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 
 $user = User::get($userId);
 $class = User::class;
 
 // ❌ WRONG
-$user = \Modules\User\Models\User::get($userId);
-$class = \Modules\User\Models\User::class;
+$user = \Modules\User\Main\Models\User::get($userId);
+$class = \Modules\User\Main\Models\User::class;
 ```
 
 #### Spacing
@@ -2407,7 +2407,7 @@ Import('./file.js')
 | `$this->request` in `addItem()` | Use `modifyAddItem($data, $request)` hook |
 | Override `addItem()` for route params | Use `modifyAddItem()` or override `add()` |
 | `protected function modifyAddItem()` | `protected function modifyAddItem()` (typo) |
-| `\Modules\User\Models\User::get()` | `use Modules\User\Models\User; User::get()` |
+| `\Modules\User\Main\Models\User::get()` | `use Modules\User\Main\Models\User; User::get()` |
 | `$request->route('id')` | `$request->getInt('id')` or `$request->input('id')` |
 | `if (!$userId) return error()` in controller | Remove check - policy handles auth |
 | `$userId = session()->user->id ?? null;` | `$userId = session()->user->id;` after policy |
@@ -2455,7 +2455,7 @@ The Proto test framework extends PHPUnit and provides helpers for database asser
 namespace Modules\User\Tests\Feature;
 
 use Proto\Tests\Test;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 
 class UserTest extends Test
 {

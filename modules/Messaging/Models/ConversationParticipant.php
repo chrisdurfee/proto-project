@@ -2,7 +2,7 @@
 namespace Modules\Messaging\Models;
 
 use Modules\Messaging\Storage\ConversationParticipantStorage;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Proto\Models\Model;
 
 /**

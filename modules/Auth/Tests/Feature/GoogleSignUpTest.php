@@ -4,7 +4,7 @@ namespace Modules\Auth\Tests\Feature;
 use Proto\Tests\Test;
 use Modules\Auth\Services\Auth\GoogleSignInService;
 use Modules\Auth\Integrations\Google\GoogleService;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Modules\User\Services\User\UserImageService;
 
 /**

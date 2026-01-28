@@ -5,7 +5,7 @@ use Modules\Auth\Email\Auth\AuthMultiFactorEmail;
 use Modules\Auth\Email\Auth\AuthNewConnectionEmail;
 use Modules\Auth\Text\Auth\AuthMultiFactorText;
 use Modules\Auth\Text\Auth\AuthNewConnectionText;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Proto\Dispatch\Dispatcher;
 use Modules\Auth\Auth\Gates\MultiFactorAuthGate;
 use Modules\Auth\Services\Auth\ConnectionDto;

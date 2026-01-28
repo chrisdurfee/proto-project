@@ -27,7 +27,7 @@ Current test coverage is minimal with only 2-3 test files in the User module. Th
 namespace Modules\Auth\Tests\Feature;
 
 use Proto\Tests\Test;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 
 class LoginTest extends Test
 {

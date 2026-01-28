@@ -2,7 +2,7 @@
 namespace Modules\Auth\Controllers;
 
 use Modules\User\Gateway\Gateway;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Modules\Auth\Models\LoginLog;
 use Modules\Auth\Controllers\UserStatus;
 

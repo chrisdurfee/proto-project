@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Auth\Controllers;
 
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Modules\Auth\Controllers\UserStatus;
 use Proto\Http\Router\Request;
 

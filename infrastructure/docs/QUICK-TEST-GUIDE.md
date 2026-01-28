@@ -14,7 +14,7 @@ touch modules/Auth/Tests/Feature/LoginTest.php
 namespace Modules\Auth\Tests\Feature;
 
 use Proto\Tests\Test;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 
 class LoginTest extends Test
 {
@@ -582,7 +582,7 @@ docker-compose -f infrastructure/docker-compose.yaml up -d mariadb
 
 #### 2. Autoload Errors
 ```
-Error: Class 'Modules\User\Models\User' not found
+Error: Class 'Modules\User\Main\Models\User' not found
 ```
 **Solution**: Regenerate autoload
 ```bash

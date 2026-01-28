@@ -304,7 +304,7 @@ docker-compose -f infrastructure/docker-compose.yaml exec web vendor/bin/phpunit
 namespace Modules\User\Tests\Feature;
 
 use Proto\Tests\Test;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 
 class UserTest extends Test
 {

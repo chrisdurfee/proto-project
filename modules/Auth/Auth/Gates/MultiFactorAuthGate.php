@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Auth\Auth\Gates;
 
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Proto\Auth\Gates\Gate;
 
 /**

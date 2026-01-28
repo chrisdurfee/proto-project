@@ -5,7 +5,7 @@ use Modules\Auth\Email\Password\PasswordResetRequestEmail;
 use Modules\Auth\Email\Password\PasswordResetSuccessEmail;
 use Modules\Auth\Text\Password\PasswordResetRequestText;
 use Modules\Auth\Text\Password\PasswordResetSuccessText;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Modules\Auth\Models\PasswordRequest;
 use Proto\Dispatch\Dispatcher;
 use Modules\Auth\Auth\Gates\PasswordRequestGate;

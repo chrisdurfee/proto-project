@@ -3,7 +3,7 @@ namespace Modules\Auth\Tests\Feature;
 
 use Proto\Tests\Test;
 use Modules\Auth\Services\Password\PasswordService;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Modules\Auth\Models\PasswordRequest;
 
 /**

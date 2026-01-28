@@ -2,7 +2,7 @@
 namespace Modules\Messaging\Models;
 
 use Proto\Models\Model;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 
 /**
  * MessageReaction

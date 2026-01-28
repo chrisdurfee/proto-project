@@ -2,7 +2,7 @@
 namespace Modules\Client\Models;
 
 use Proto\Models\Model;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 
 /**
  * ClientNote

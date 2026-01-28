@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Auth\Controllers;
 
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Modules\Auth\Services\Auth\MultiFactorAuthService;
 use Modules\Auth\Services\Password\PasswordService;
 use Proto\Controllers\Controller;

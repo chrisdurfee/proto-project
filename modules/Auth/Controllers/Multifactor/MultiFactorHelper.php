@@ -2,7 +2,7 @@
 namespace Modules\Auth\Controllers\Multifactor;
 
 use Proto\Http\Request;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Proto\Utils\Strings;
 
 /**

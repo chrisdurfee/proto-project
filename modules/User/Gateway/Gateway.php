@@ -1,12 +1,22 @@
 <?php declare(strict_types=1);
+
 namespace Modules\User\Gateway;
 
-use Modules\User\Models\User;
-use Modules\User\Services\User\NewUserService;
-use Modules\User\Gateway\SecureRequestGateway;
+use Modules\User\Main\Models\User;
+use Modules\User\Main\Services\NewUserService;
+use Modules\User\Main\Gateway\SecureRequestGateway;
+use Modules\User\Main\Gateway\EmailGateway;
+use Modules\User\Main\Gateway\SmsGateway;
+use Modules\User\Follower\Gateway\Gateway as FollowerGateway;
+use Modules\User\Following\Gateway\Gateway as FollowingGateway;
+use Modules\User\Blocked\Gateway\Gateway as BlockedGateway;
+use Modules\User\Organization\Gateway\Gateway as OrganizationGateway;
+use Modules\User\Permission\Gateway\Gateway as PermissionGateway;
+use Modules\User\Role\Gateway\Gateway as RoleGateway;
+use Modules\User\Push\Gateway\Gateway as PushGateway;
 
 /**
- * Gateway
+ * User Gateway
  *
  * This will handle the user module gateway.
  *
@@ -17,6 +27,7 @@ class Gateway
 	/**
 	 * This will add the user.
 	 *
+	 * @param object $settings
 	 * @return bool
 	 */
 	public function add(object $settings): bool
@@ -28,6 +39,7 @@ class Gateway
 	/**
 	 * This will create the user and returns the model with id.
 	 *
+	 * @param object $settings
 	 * @return User
 	 */
 	public function create(object $settings): User
@@ -38,8 +50,9 @@ class Gateway
 	}
 
 	/**
-	 * This will add the user.
+	 * This will update the user.
 	 *
+	 * @param object $settings
 	 * @return bool
 	 */
 	public function update(object $settings): bool
@@ -147,7 +160,57 @@ class Gateway
 	}
 
 	/**
-	 * This will return the role gateway.
+	 * Access the Follower feature gateway
+	 *
+	 * @return FollowerGateway
+	 */
+	public function follower(): FollowerGateway
+	{
+		return new FollowerGateway();
+	}
+
+	/**
+	 * Access the Following feature gateway
+	 *
+	 * @return FollowingGateway
+	 */
+	public function following(): FollowingGateway
+	{
+		return new FollowingGateway();
+	}
+
+	/**
+	 * Access the Blocked feature gateway
+	 *
+	 * @return BlockedGateway
+	 */
+	public function blocked(): BlockedGateway
+	{
+		return new BlockedGateway();
+	}
+
+	/**
+	 * Access the Organization feature gateway
+	 *
+	 * @return OrganizationGateway
+	 */
+	public function organization(): OrganizationGateway
+	{
+		return new OrganizationGateway();
+	}
+
+	/**
+	 * Access the Permission feature gateway
+	 *
+	 * @return PermissionGateway
+	 */
+	public function permission(): PermissionGateway
+	{
+		return new PermissionGateway();
+	}
+
+	/**
+	 * Access the Role feature gateway
 	 *
 	 * @return RoleGateway
 	 */
@@ -157,7 +220,17 @@ class Gateway
 	}
 
 	/**
-	 * This will return the secure request gateway.
+	 * Access the Push feature gateway
+	 *
+	 * @return PushGateway
+	 */
+	public function push(): PushGateway
+	{
+		return new PushGateway();
+	}
+
+	/**
+	 * Access the secure request gateway
 	 *
 	 * @return SecureRequestGateway
 	 */
@@ -167,7 +240,7 @@ class Gateway
 	}
 
 	/**
-	 * This will return the email gateway.
+	 * Access email gateway
 	 *
 	 * @return EmailGateway
 	 */
@@ -177,22 +250,12 @@ class Gateway
 	}
 
 	/**
-	 * This will return the sms gateway.
+	 * Access SMS gateway
 	 *
 	 * @return SmsGateway
 	 */
 	public function sms(): SmsGateway
 	{
 		return new SmsGateway();
-	}
-
-	/**
-	 * This will return the push gateway.
-	 *
-	 * @return PushGateway
-	 */
-	public function push(): PushGateway
-	{
-		return new PushGateway();
 	}
 }

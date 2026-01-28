@@ -2,7 +2,7 @@
 namespace Modules\Auth\Services\Auth;
 
 use Modules\Auth\Integrations\Google\GoogleService;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 use Modules\User\Services\User\UserImageService;
 
 /**

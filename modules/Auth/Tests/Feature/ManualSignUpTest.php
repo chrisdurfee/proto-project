@@ -3,7 +3,7 @@ namespace Modules\Auth\Tests\Feature;
 
 use Proto\Tests\Test;
 use Modules\User\Services\User\NewUserService;
-use Modules\User\Models\User;
+use Modules\User\Main\Models\User;
 
 /**
  * ManualSignUpTest
