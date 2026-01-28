@@ -4,6 +4,8 @@ require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
 use Proto\Base;
 use Proto\Error\Error;
+use Proto\Database\ConnectionSettingsCache;
+use Proto\Database\ConnectionCache;
 
 /**
  * Enable error tracking for debugging
@@ -18,15 +20,8 @@ Error::disable();
  * Override environment from APP_ENV if set (for CI/testing)
  * The Config class uses HTTP_HOST to detect environment, but in CLI
  * we need to explicitly set it based on APP_ENV environment variable.
- *
- * CRITICAL: This must be done BEFORE initializing the framework
- * so database settings are loaded for the correct environment.
  */
 $isTesting = isset($_SERVER['APP_ENV']) && $_SERVER['APP_ENV'] === 'testing';
-if ($isTesting)
-{
-	echo "Running migrations in TESTING environment\n";
-}
 
 /**
  * Initialize the Proto framework
@@ -34,12 +29,16 @@ if ($isTesting)
 new Base();
 
 /**
- * Set environment after base init but before DB connection
+ * Set environment after base init but before DB connection.
+ * Clear any cached connection settings to ensure the correct
+ * environment's database settings are used.
  */
 if ($isTesting)
 {
 	setEnv('env', 'testing');
-	echo "Current env setting: " . env('env') . "\n";
+	ConnectionSettingsCache::clearAll();
+	ConnectionCache::clear();
+	echo "Running migrations in TESTING environment\n";
 }
 else
 {
