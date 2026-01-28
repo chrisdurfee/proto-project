@@ -106,6 +106,7 @@ class GeneratorController extends Controller
 	public function addGateway(object $resource): bool
 	{
 		$gateway = $resource->gateway ?? (object)[];
+		$gateway->featurePath = $resource->featurePath ?? null;
 		return $this->generator->createResourceType('gateway', 'Gateways', $gateway);
 	}
 
@@ -159,6 +160,7 @@ class GeneratorController extends Controller
 	{
 		$this->setupModel($resource->model);
 		$this->checkModelSettings($resource);
+
 		return $this->generator->createResource($resource);
 	}
 
@@ -170,7 +172,9 @@ class GeneratorController extends Controller
 	 */
 	public function addApi(object $resource): bool
 	{
-		return $this->generator->createResourceType('api', 'Api', settings: $resource->api);
+		$api = $resource->api;
+		$api->featurePath = $resource->featurePath ?? null;
+		return $this->generator->createResourceType('api', 'Api', settings: $api);
 	}
 
 	/**
@@ -181,7 +185,9 @@ class GeneratorController extends Controller
 	 */
 	public function addController(object $resource): bool
 	{
-		return $this->generator->createResourceType('controller', 'Controllers', $resource->controller);
+		$controller = $resource->controller;
+		$controller->featurePath = $resource->featurePath ?? null;
+		return $this->generator->createResourceType('controller', 'Controllers', $controller);
 	}
 
 	/**
@@ -211,6 +217,7 @@ class GeneratorController extends Controller
 		$model = $resource->model;
 		$this->setupModel($model);
 		$model->namespace = $resource->namespace ?? null;
+		$model->featurePath = $resource->featurePath ?? null;
 		return $this->generator->createResourceType('model', 'Models', $model);
 	}
 
@@ -222,7 +229,9 @@ class GeneratorController extends Controller
 	 */
 	public function addStorage(object $resource): bool
 	{
-		return $this->generator->createResourceType('storage', 'Storage', $resource->storage);
+		$storage = $resource->storage;
+		$storage->featurePath = $resource->featurePath ?? null;
+		return $this->generator->createResourceType('storage', 'Storage', $storage);
 	}
 
 	/**
@@ -233,7 +242,9 @@ class GeneratorController extends Controller
 	 */
 	public function addPolicy(object $resource): bool
 	{
-		return $this->generator->createResourceType('policy', 'Policies', $resource->policy);
+		$policy = $resource->policy;
+		$policy->featurePath = $resource->featurePath ?? null;
+		return $this->generator->createResourceType('policy', 'Policies', $policy);
 	}
 
 	/**
@@ -297,7 +308,9 @@ class GeneratorController extends Controller
 	 */
 	public function addMigration(object $resource): bool
 	{
-		return $this->generator->createMigration($resource->migration);
+		$migration = $resource->migration;
+		$migration->featurePath = $resource->featurePath ?? null;
+		return $this->generator->createMigration($migration);
 	}
 
 	/**
@@ -308,6 +321,8 @@ class GeneratorController extends Controller
 	 */
 	public function addUnitTest(object $resource): bool
 	{
-		return $this->generator->createTest($resource->test);
+		$test = $resource->test;
+		$test->featurePath = $resource->featurePath ?? null;
+		return $this->generator->createTest($test);
 	}
 }

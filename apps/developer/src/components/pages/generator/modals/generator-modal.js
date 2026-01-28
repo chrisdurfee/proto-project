@@ -133,6 +133,9 @@ function getResourceForm(type, fullResource = false)
 					fullResource === false && new FormField({ name: "className", label: "Class Name", description: "The class name for the API." }, [
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "api.className" })
 					]),
+					fullResource === false && new FormField({ name: "featurePath", label: "Feature Path", description: "Optional feature path for nested modules (e.g. Group or Group/Forum)." }, [
+						Input({ type: "text", placeholder: "e.g. Group/Forum", bind: "featurePath" })
+					]),
 					new FormField({ name: "namespace", label: "Namespace", description: "Optional namespace for the API." }, [
 						Input({ type: "text", placeholder: "e.g. ExampleSub", bind: "api.namespace" })
 					])
@@ -147,6 +150,9 @@ function getResourceForm(type, fullResource = false)
 					]),
 					fullResource === false && new FormField({ name: "className", label: "Class Name", description: "The class name for the controller." }, [
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "controller.className" })
+					]),
+					fullResource === false && new FormField({ name: "featurePath", label: "Feature Path", description: "Optional feature path for nested modules (e.g. Group or Group/Forum)." }, [
+						Input({ type: "text", placeholder: "e.g. Group/Forum", bind: "featurePath" })
 					]),
 					new FormField({ name: "namespace", label: "Namespace", description: "Optional namespace for the controller." }, [
 						Input({ type: "text", placeholder: "e.g. ExampleSub", bind: "controller.namespace" })
@@ -198,6 +204,9 @@ function getResourceForm(type, fullResource = false)
 						fullResource === false && new FormField({ name: "module", label: "Module Name", description: "The module name to add the resource." }, [
 							Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "model.moduleName", value: 'Common' })
 						]),
+						fullResource === false && new FormField({ name: "featurePath", label: "Feature Path", description: "Optional feature path for nested modules (e.g. Group or Group/Forum)." }, [
+							Input({ type: "text", placeholder: "e.g. Group/Forum", bind: "featurePath" })
+						]),
 						new FormField({ name: "namespace", label: "Namespace", description: "Optional namespace." }, [
 							Input({ type: "text", placeholder: "e.g. ExampleSub", bind: "namespace" })
 						]),
@@ -238,6 +247,9 @@ function getResourceForm(type, fullResource = false)
 					fullResource === false && new FormField({ name: "className", label: "Class Name", description: "The class name for storage." }, [
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "storage.className" })
 					]),
+					fullResource === false && new FormField({ name: "featurePath", label: "Feature Path", description: "Optional feature path for nested modules (e.g. Group or Group/Forum)." }, [
+						Input({ type: "text", placeholder: "e.g. Group/Forum", bind: "featurePath" })
+					]),
 					new FormField({ name: "namespace", label: "Namespace", description: "Optional namespace for storage." }, [
 						Input({ type: "text", placeholder: "e.g. ExampleSub", bind: "storage.namespace" })
 					]),
@@ -255,6 +267,9 @@ function getResourceForm(type, fullResource = false)
 				Fieldset({ legend: "Policy Settings" }, [
 					fullResource === false && new FormField({ name: "module", label: "Module Name", description: "The module name to add the resource." }, [
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "policy.moduleName", value: 'Common' })
+					]),
+					fullResource === false && new FormField({ name: "featurePath", label: "Feature Path", description: "Optional feature path for nested modules (e.g. Group or Group/Forum)." }, [
+						Input({ type: "text", placeholder: "e.g. Group/Forum", bind: "featurePath" })
 					]),
 					new FormField({ name: "className", label: "Class Name", description: "The class name for the policy." }, [
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "policy.className" })
@@ -306,6 +321,9 @@ $table->foreign('message_id')->references('id')->on('messages');`, required: tru
 					fullResource === false && new FormField({ name: "module", label: "Module Name", description: "The module name to add the resource." }, [
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "migration.moduleName", value: 'Common' })
 					]),
+					fullResource === false && new FormField({ name: "featurePath", label: "Feature Path", description: "Optional feature path for nested modules (e.g. Group or Group/Forum)." }, [
+						Input({ type: "text", placeholder: "e.g. Group/Forum", bind: "featurePath" })
+					]),
 					new FormField({ name: "className", label: "Class Name", description: "The migration class name." }, [
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "migration.className" })
 					]),
@@ -347,6 +365,9 @@ $table->foreign('message_id')->references('id')->on('messages');`, required: tru
 					fullResource === false && new FormField({ name: "module", label: "Module Name", description: "The module name to add the resource." }, [
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "test.moduleName", value: 'Common' })
 					]),
+					fullResource === false && new FormField({ name: "featurePath", label: "Feature Path", description: "Optional feature path for nested modules (e.g. Group or Group/Forum)." }, [
+						Input({ type: "text", placeholder: "e.g. Group/Forum", bind: "featurePath" })
+					]),
 					new FormField({ name: "className", label: "Class Name", description: "The class name for the test." }, [
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "test.className" })
 					]),
@@ -371,6 +392,9 @@ $table->foreign('message_id')->references('id')->on('messages');`, required: tru
 				Fieldset({ legend: "Module Settings" }, [
 					new FormField({ name: "module", label: "Module Name", description: "The module name to add the resource." }, [
 						Input({ type: "text", placeholder: "e.g. Example", required: true, bind: "moduleName", value: 'Common' })
+					]),
+					new FormField({ name: "featurePath", label: "Feature Path", description: "Optional feature path for nested modules (e.g. Group or Group/Forum)." }, [
+						Input({ type: "text", placeholder: "e.g. Group/Forum", bind: "featurePath" })
 					])
 				]),
 				...getResourceForm("Model", true),
