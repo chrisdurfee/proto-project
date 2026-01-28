@@ -3,7 +3,7 @@ namespace Modules\Auth\Services\Auth;
 
 use Modules\Auth\Integrations\Google\GoogleService;
 use Modules\User\Main\Models\User;
-use Modules\User\Services\User\UserImageService;
+use Modules\User\Main\Services\UserImageService;
 
 /**
  * Class GoogleSignInService
