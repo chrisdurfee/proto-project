@@ -14,6 +14,7 @@ use Modules\User\Organization\Gateway\Gateway as OrganizationGateway;
 use Modules\User\Permission\Gateway\Gateway as PermissionGateway;
 use Modules\User\Role\Gateway\Gateway as RoleGateway;
 use Modules\User\Push\Gateway\Gateway as PushGateway;
+use Modules\User\Main\Services\UserImageService;
 
 /**
  * User Gateway
@@ -257,5 +258,18 @@ class Gateway
 	public function sms(): SmsGateway
 	{
 		return new SmsGateway();
+	}
+
+	/**
+	 * Import user profile image from URL
+	 *
+	 * @param string $url
+	 * @param int $userId
+	 * @return object
+	 */
+	public function importImageFromUrl(string $url, int $userId): object
+	{
+		$imageService = new UserImageService();
+		return $imageService->importFromUrl($url, $userId);
 	}
 }

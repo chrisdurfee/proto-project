@@ -2,7 +2,7 @@
 namespace Modules\Auth\Tests\Feature;
 
 use Proto\Tests\Test;
-use Modules\User\Services\User\NewUserService;
+use Modules\User\Main\Services\NewUserService;
 use Modules\User\Main\Models\User;
 
 /**

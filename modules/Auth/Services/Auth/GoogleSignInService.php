@@ -3,7 +3,6 @@ namespace Modules\Auth\Services\Auth;
 
 use Modules\Auth\Integrations\Google\GoogleService;
 use Modules\User\Main\Models\User;
-use Modules\User\Main\Services\UserImageService;
 
 /**
  * Class GoogleSignInService
@@ -102,18 +101,13 @@ class GoogleSignInService
 	 *
 	 * @param string $imageUrl
 	 * @param int $userId
-	 * @param UserImageService $imageService
 	 * @return string|null
 	 */
-	protected function uploadProfileImage(
-		string $imageUrl,
-		int $userId,
-		UserImageService $imageService = new UserImageService()
-	): ?string
+	protected function uploadProfileImage(string $imageUrl, int $userId): ?string
 	{
 		try
 		{
-			$response = $imageService->importFromUrl($imageUrl, $userId);
+			$response = modules()->user()->importImageFromUrl($imageUrl, $userId);
 			if (isset($response->success) && $response->success)
 			{
 				return $response->image ?? null;
