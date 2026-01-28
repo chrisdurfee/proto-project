@@ -20,10 +20,10 @@ class PasswordResetTest extends Test
 	 */
 	public function testRequestPasswordReset(): void
 	{
-		// Create a user with properly hashed password
+		// Create a user - storage layer handles password hashing
 		$user = User::factory()->create([
 			'email' => 'reset_test@example.com',
-			'password' => password_hash('OldPassword123!', PASSWORD_BCRYPT)
+			'password' => 'OldPassword123!'
 		]);
 
 		$this->assertNotNull($user->id, 'User should be created with an ID');
@@ -77,10 +77,10 @@ class PasswordResetTest extends Test
 		$oldPassword = 'OldPassword123!';
 		$newPassword = 'NewPassword456!';
 
-		// Create a user with properly hashed password
+		// Create a user - storage layer handles password hashing
 		$user = User::factory()->create([
 			'email' => 'reset_complete@example.com',
-			'password' => password_hash($oldPassword, PASSWORD_BCRYPT)
+			'password' => $oldPassword
 		]);
 
 		$this->assertNotNull($user->id, 'User should be created with an ID');
