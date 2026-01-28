@@ -82,8 +82,27 @@ try {
     $guide = new \Proto\Database\Migrations\Guide();
     echo "Guide created successfully\n";
 
-    // Try to get new migrations to debug
+    // WORKAROUND: Add migration directories that are skipped by Proto's scanner
+    // The scanner skips 'Auth' and 'Main' folders, but these may contain migrations
+    // at the module level (e.g., modules/Auth/Migrations)
     $reflection = new ReflectionClass($guide);
+    $dirsProp = $reflection->getProperty('migrationDirs');
+    $dirsProp->setAccessible(true);
+    $existingDirs = $dirsProp->getValue($guide);
+
+    $additionalDirs = [
+        BASE_PATH . '/modules/Auth/Migrations',
+    ];
+
+    foreach ($additionalDirs as $dir) {
+        if (is_dir($dir) && !in_array($dir, $existingDirs)) {
+            $existingDirs[] = $dir;
+            echo "Added missing migration directory: $dir\n";
+        }
+    }
+    $dirsProp->setValue($guide, $existingDirs);
+
+    // Try to get new migrations to debug
     $method = $reflection->getMethod('getNewMigrations');
     $method->setAccessible(true);
 
