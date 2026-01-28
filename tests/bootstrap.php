@@ -21,25 +21,23 @@ if (!defined('BASE_PATH'))
 	define('BASE_PATH', dirname(__DIR__));
 }
 
-// Detect if running inside Docker
+// Detect if running inside Docker (where 'mariadb' hostname resolves)
 $inDocker = file_exists('/.dockerenv') || file_exists('/run/.containerenv');
 
-// Initialize Config
+// Check if APP_ENV is explicitly set (e.g., in CI)
+$appEnv = $_SERVER['APP_ENV'] ?? $_ENV['APP_ENV'] ?? null;
+$forceTesting = ($appEnv === 'testing') || !$inDocker;
+
+// Initialize Config BEFORE Base to configure environment
 $config = Config::getInstance();
 
-// If NOT running in Docker, force 'testing' environment to use localhost connection
-// This fixes local testing via VS Code or CLI on host machine
-if (!$inDocker)
+// Set testing environment when not in Docker OR when APP_ENV=testing
+if ($forceTesting)
 {
 	$config->set('env', 'testing');
-
-	// Clear cached connections to pick up new environment settings
-	ConnectionSettingsCache::clearAll();
-	ConnectionCache::clear();
 }
 
 // Disable Redis cache driver to prevent connection issues in CI/local testing
-// where Redis hostname may not resolve
 $cacheConfig = $config->get('cache');
 if ($cacheConfig)
 {
@@ -50,14 +48,18 @@ if ($cacheConfig)
 // Enable dbCaching for transaction support (ensures test isolation)
 $config->set('dbCaching', true);
 
+// Clear cached connections BEFORE Base init
+ConnectionSettingsCache::clearAll();
+ConnectionCache::clear();
+
 /**
  * Initialize the Proto framework.
  * This loads modules and services.
  */
 new Base();
 
-// Ensure testing environment persists after Base init (if not in Docker)
-if (!$inDocker)
+// Ensure testing environment persists after Base init
+if ($forceTesting)
 {
 	setEnv('env', 'testing');
 	ConnectionSettingsCache::clearAll();
