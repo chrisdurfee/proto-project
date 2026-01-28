@@ -15,19 +15,30 @@ error_reporting(E_ALL);
 Error::disable();
 
 /**
+ * Override environment from APP_ENV if set (for CI/testing)
+ * The Config class uses HTTP_HOST to detect environment, but in CLI
+ * we need to explicitly set it based on APP_ENV environment variable.
+ *
+ * CRITICAL: This must be done BEFORE initializing the framework
+ * so database settings are loaded for the correct environment.
+ */
+$isTesting = isset($_SERVER['APP_ENV']) && $_SERVER['APP_ENV'] === 'testing';
+if ($isTesting)
+{
+	echo "Running migrations in TESTING environment\n";
+}
+
+/**
  * Initialize the Proto framework
  */
 new Base();
 
 /**
- * Override environment from APP_ENV if set (for CI/testing)
- * The Config class uses HTTP_HOST to detect environment, but in CLI
- * we need to explicitly set it based on APP_ENV environment variable
+ * Set environment after base init but before DB connection
  */
-if (isset($_SERVER['APP_ENV']) && $_SERVER['APP_ENV'] === 'testing')
+if ($isTesting)
 {
 	setEnv('env', 'testing');
-	echo "Running migrations in TESTING environment\n";
 	echo "Current env setting: " . env('env') . "\n";
 }
 else
