@@ -39,14 +39,11 @@ class ClientContact extends Migration
 			// Contact Information
 			$table->varchar('job_title', 150)->nullable();
 			$table->varchar('department', 100)->nullable();
-			$table->varchar('email', 255);
 			$table->varchar('phone', 20)->nullable();
 			$table->varchar('fax', 20)->nullable();
 
 			// Preferences
 			$table->enum('preferred_contact_method', 'email','phone','sms','fax','mail')->nullable();
-			$table->varchar('language', 10)->default("'en'");
-			$table->varchar('timezone', 50)->nullable();
 
 			// Social Media
 			$table->varchar('linkedin_url', 255)->nullable();

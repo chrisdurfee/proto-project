@@ -171,10 +171,40 @@ export const ClientForm = ({ isEditing = false, client }) => [
 			})
 		]),
 		new FormField({ name: "country", label: "Country", description: "Country name." }, [
-			Input({
-				type: "text",
-				placeholder: "United States",
-				bind: 'country'
+			Select({
+				bind: 'country',
+				options: [
+					{ value: "US", label: "United States" },
+					{ value: "CA", label: "Canada" },
+					{ value: "GB", label: "United Kingdom" },
+					{ value: "AU", label: "Australia" },
+					{ value: "DE", label: "Germany" },
+					{ value: "FR", label: "France" },
+					{ value: "IT", label: "Italy" },
+					{ value: "ES", label: "Spain" },
+					{ value: "NL", label: "Netherlands" },
+					{ value: "BE", label: "Belgium" },
+					{ value: "CH", label: "Switzerland" },
+					{ value: "AT", label: "Austria" },
+					{ value: "SE", label: "Sweden" },
+					{ value: "NO", label: "Norway" },
+					{ value: "DK", label: "Denmark" },
+					{ value: "FI", label: "Finland" },
+					{ value: "IE", label: "Ireland" },
+					{ value: "PT", label: "Portugal" },
+					{ value: "PL", label: "Poland" },
+					{ value: "CZ", label: "Czech Republic" },
+					{ value: "JP", label: "Japan" },
+					{ value: "CN", label: "China" },
+					{ value: "IN", label: "India" },
+					{ value: "BR", label: "Brazil" },
+					{ value: "MX", label: "Mexico" },
+					{ value: "AR", label: "Argentina" },
+					{ value: "ZA", label: "South Africa" },
+					{ value: "NZ", label: "New Zealand" },
+					{ value: "SG", label: "Singapore" },
+					{ value: "KR", label: "South Korea" }
+				]
 			})
 		])
 	]),
@@ -205,10 +235,21 @@ export const ClientForm = ({ isEditing = false, client }) => [
 			})
 		]),
 		new FormField({ name: "leadSource", label: "Lead Source", description: "How did you acquire this client?" }, [
-			Input({
-				type: "text",
-				placeholder: "Website, Referral, Cold Call, etc.",
-				bind: 'leadSource'
+			Select({
+				bind: 'leadSource',
+				options: [
+					{ label: 'Website', value: 'website' },
+					{ label: 'Referral', value: 'referral' },
+					{ label: 'Cold Call', value: 'cold_call' },
+					{ label: 'Email Campaign', value: 'email_campaign' },
+					{ label: 'Social Media', value: 'social_media' },
+					{ label: 'Trade Show', value: 'trade_show' },
+					{ label: 'Partner', value: 'partner' },
+					{ label: 'Advertisement', value: 'advertisement' },
+					{ label: 'Word of Mouth', value: 'word_of_mouth' },
+					{ label: 'Direct Mail', value: 'direct_mail' },
+					{ label: 'Other', value: 'other' }
+				]
 			})
 		]),
 		new FormField({ name: "rating", label: "Rating", description: "Client rating (hot, warm, cold)." }, [
