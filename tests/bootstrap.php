@@ -2,9 +2,10 @@
 /**
  * PHPUnit Bootstrap File
  *
- * This bootstrap file ensures the Proto framework is properly initialized
- * before any tests run. It must load the Base class first so that the
- * env() and setEnv() global functions are available.
+ * This file ensures the environment is correctly configured for testing
+ * before the framework initializes. This prevents the Config class from
+ * defaulting to 'prod' or 'dev' when running tests from CLI, which would
+ * cause connection errors if the 'mariadb' host is not resolvable locally.
  */
 
 require dirname(__DIR__) . '/vendor/autoload.php';
@@ -14,29 +15,31 @@ use Proto\Config;
 use Proto\Database\ConnectionSettingsCache;
 use Proto\Database\ConnectionCache;
 
-/**
- * Set testing environment variables BEFORE initializing the framework.
- */
-$_SERVER['APP_ENV'] = 'testing';
-$_ENV['APP_ENV'] = 'testing';
-
-/**
- * Define BASE_PATH before Config can be loaded.
- * This is normally done by Base::setBasePath(), but we need it early.
- */
+// Define BASE_PATH as the project root
 if (!defined('BASE_PATH'))
 {
 	define('BASE_PATH', dirname(__DIR__));
 }
 
-/**
- * Pre-configure the Config singleton to disable Redis cache
- * before Base initialization triggers module loading.
- */
-$config = Config::getInstance();
-$config->set('env', 'testing');
+// Detect if running inside Docker
+$inDocker = file_exists('/.dockerenv') || file_exists('/run/.containerenv');
 
-// Disable Redis cache driver to prevent connection issues in CI
+// Initialize Config
+$config = Config::getInstance();
+
+// If NOT running in Docker, force 'testing' environment to use localhost connection
+// This fixes local testing via VS Code or CLI on host machine
+if (!$inDocker)
+{
+	$config->set('env', 'testing');
+
+	// Clear cached connections to pick up new environment settings
+	ConnectionSettingsCache::clearAll();
+	ConnectionCache::clear();
+}
+
+// Disable Redis cache driver to prevent connection issues in CI/local testing
+// where Redis hostname may not resolve
 $cacheConfig = $config->get('cache');
 if ($cacheConfig)
 {
@@ -44,11 +47,8 @@ if ($cacheConfig)
 	$config->set('cache', $cacheConfig);
 }
 
-/**
- * Clear any cached connection settings before Base init
- */
-ConnectionSettingsCache::clearAll();
-ConnectionCache::clear();
+// Enable dbCaching for transaction support (ensures test isolation)
+$config->set('dbCaching', true);
 
 /**
  * Initialize the Proto framework.
@@ -56,9 +56,10 @@ ConnectionCache::clear();
  */
 new Base();
 
-/**
- * Ensure testing environment is set after Base init
- */
-setEnv('env', 'testing');
-ConnectionSettingsCache::clearAll();
-ConnectionCache::clear();
+// Ensure testing environment persists after Base init (if not in Docker)
+if (!$inDocker)
+{
+	setEnv('env', 'testing');
+	ConnectionSettingsCache::clearAll();
+	ConnectionCache::clear();
+}
