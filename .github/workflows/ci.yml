@@ -209,7 +209,13 @@ jobs:
         run: |
           echo "Checking migrated tables..."
           mysql -h127.0.0.1 -P3307 -uroot -proot proto -e "SHOW TABLES;"
-          mysql -h127.0.0.1 -P3307 -uroot -proot proto -e "DESCRIBE permissions;" || echo "permissions table not found"
+          echo ""
+          echo "Checking Auth module tables..."
+          mysql -h127.0.0.1 -P3307 -uroot -proot proto -e "DESCRIBE password_requests;" || echo "ERROR: password_requests table not found!"
+          mysql -h127.0.0.1 -P3307 -uroot -proot proto -e "DESCRIBE login_attempts;" || echo "login_attempts table not found"
+          echo ""
+          echo "Checking User module tables..."
+          mysql -h127.0.0.1 -P3307 -uroot -proot proto -e "DESCRIBE users;" || echo "ERROR: users table not found!"
 
       - name: Run tests
         run: vendor/bin/phpunit --testdox

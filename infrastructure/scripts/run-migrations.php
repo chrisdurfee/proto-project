@@ -79,6 +79,34 @@ echo "\nRunning Proto migrations...\n";
 try
 {
     $guide = new \Proto\Database\Migrations\Guide();
+
+    // Debug: Show what migration directories were discovered
+    $reflection = new ReflectionClass($guide);
+    $dirsProp = $reflection->getProperty('migrationDirs');
+    $dirsProp->setAccessible(true);
+    $migrationDirs = $dirsProp->getValue($guide);
+
+    echo "Migration directories found:\n";
+    foreach ($migrationDirs as $dir)
+    {
+        $exists = is_dir($dir) ? '✓' : '✗';
+        echo "  {$exists} {$dir}\n";
+    }
+
+    // Check specifically for Auth migrations
+    $authMigrationsDir = BASE_PATH . '/modules/Auth/Migrations';
+    if (!in_array($authMigrationsDir, $migrationDirs))
+    {
+        echo "\nWARNING: Auth migrations directory not found in scan!\n";
+        echo "  Expected: {$authMigrationsDir}\n";
+        if (is_dir($authMigrationsDir))
+        {
+            echo "  Directory exists, manually adding...\n";
+            $migrationDirs[] = $authMigrationsDir;
+            $dirsProp->setValue($guide, $migrationDirs);
+        }
+    }
+
     $result = $guide->run();
 
     if ($result)
