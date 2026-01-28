@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Docker container startup script for Proto Project
-echo "🚀 Starting Proto Project container..."
+# Docker container startup script for Rally
+echo "🚀 Starting Rally container..."
 
 # Function to check if a service is ready
 wait_for_service() {
@@ -36,7 +36,7 @@ if [ -n "$REDIS_HOST" ] && [ "$REDIS_HOST" != "localhost" ]; then
 fi
 
 # Runtime initialization (safe operations only)
-echo "🚀 Running startup initialization..."
+echo "� Running startup initialization..."
 
 # Wait for important app files to appear (helps when host bind-mounts may take a
 # short while to become available). This prevents running composer/migrations
@@ -80,14 +80,26 @@ else
 fi
 
 # Create file storage directories if they don't exist
-echo "�� Ensuring file storage directories exist..."
+echo "📁 Ensuring file storage directories exist..."
 mkdir -p /var/www/html/public/files/users/profile 2>/dev/null || true
 mkdir -p /var/www/html/common/files/attachments 2>/dev/null || true
 
-# Fix permissions for bind-mounted directories (allow www-data to write)
-echo "🔐 Setting write permissions for bind-mounted directories..."
-chown -R www-data:www-data /var/www/html/modules /var/www/html/common/files /var/www/html/public/files 2>/dev/null || true
-chmod -R 775 /var/www/html/modules /var/www/html/common/files /var/www/html/public/files 2>/dev/null || true
+# Add www-data to host user's group for bind-mount write access
+echo "🔐 Configuring www-data permissions for bind-mounted directories..."
+HOST_UID=${HOST_UID:-1000}
+HOST_GID=${HOST_GID:-1000}
+
+# Create host user's group if it doesn't exist
+if ! getent group $HOST_GID > /dev/null 2>&1; then
+    groupadd -g $HOST_GID hostgroup 2>/dev/null || true
+fi
+
+# Add www-data to the host user's group
+usermod -a -G $HOST_GID www-data 2>/dev/null || true
+
+# Set group write permissions on bind-mounted directories
+chmod -R g+w /var/www/html/modules /var/www/html/common /var/www/html/public 2>/dev/null || true
+chgrp -R $HOST_GID /var/www/html/modules /var/www/html/common /var/www/html/public 2>/dev/null || true
 
 # Check if we need to run migrations (only if requested via env var)
 if [ "$AUTO_MIGRATE" = "true" ]; then
@@ -205,13 +217,34 @@ fi
 
 echo "✅ PHP-FPM started successfully"
 
-# Start module ownership watcher in background (for bind-mounted modules)
-if [ -f "/var/www/html/infrastructure/scripts/watch-and-fix-ownership.sh" ]; then
-    echo "🔍 Starting module ownership watcher..."
-    bash /var/www/html/infrastructure/scripts/watch-and-fix-ownership.sh &
-fi
+# Start ownership and permissions watcher inline (for bind-mounted directories)
+echo "🔍 Starting ownership and permissions watcher for bind-mounted directories..."
+bash -c 'while true; do
+    # Fix ownership for files
+    find /var/www/html/modules -type f ! -user ${HOST_UID:-1000} -exec chown ${HOST_UID:-1000}:${HOST_GID:-1000} {} + 2>/dev/null || true
+    find /var/www/html/common -type f ! -user ${HOST_UID:-1000} -exec chown ${HOST_UID:-1000}:${HOST_GID:-1000} {} + 2>/dev/null || true
+    find /var/www/html/public -type f ! -user ${HOST_UID:-1000} -exec chown ${HOST_UID:-1000}:${HOST_GID:-1000} {} + 2>/dev/null || true
+
+    # Fix ownership and permissions for directories (ensure group write)
+    find /var/www/html/modules -type d ! -user ${HOST_UID:-1000} -exec chown ${HOST_UID:-1000}:${HOST_GID:-1000} {} + 2>/dev/null || true
+    find /var/www/html/common -type d ! -user ${HOST_UID:-1000} -exec chown ${HOST_UID:-1000}:${HOST_GID:-1000} {} + 2>/dev/null || true
+    find /var/www/html/public -type d ! -user ${HOST_UID:-1000} -exec chown ${HOST_UID:-1000}:${HOST_GID:-1000} {} + 2>/dev/null || true
+
+    # Ensure all directories have group write permission (775)
+    find /var/www/html/modules -type d ! -perm -g=w -exec chmod g+w {} + 2>/dev/null || true
+    find /var/www/html/common -type d ! -perm -g=w -exec chmod g+w {} + 2>/dev/null || true
+    find /var/www/html/public -type d ! -perm -g=w -exec chmod g+w {} + 2>/dev/null || true
+
+    sleep 3
+done' &
 
 echo "🚀 Starting Apache with Event MPM and HTTP/2..."
+
+# Set Apache runtime directory to a writable location
+# Directories are already created with proper permissions in Dockerfile
+export APACHE_RUN_DIR=/tmp/apache2-runtime
+export APACHE_PID_FILE=$APACHE_RUN_DIR/apache2.pid
+export APACHE_LOCK_DIR=/tmp/apache2-locks
 
 # Start Apache in foreground (this keeps the container running)
 exec /usr/sbin/apache2ctl -D FOREGROUND
