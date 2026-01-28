@@ -45,6 +45,10 @@ if ($cacheConfig)
 	$config->set('cache', $cacheConfig);
 }
 
+// Disable error tracking to prevent early database connections
+// This prevents Error::silent() from trying to check database availability
+$config->set('errorTracking', false);
+
 // Enable dbCaching for transaction support (ensures test isolation)
 $config->set('dbCaching', true);
 
