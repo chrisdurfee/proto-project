@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.369.20",
+            "version": "3.369.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "f53d8fc6cdbc1e64e7d14e72d1e315d05003b2b4"
+                "reference": "7076af00534135cbbf6cc19eb2521124a3549f0d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/f53d8fc6cdbc1e64e7d14e72d1e315d05003b2b4",
-                "reference": "f53d8fc6cdbc1e64e7d14e72d1e315d05003b2b4",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/7076af00534135cbbf6cc19eb2521124a3549f0d",
+                "reference": "7076af00534135cbbf6cc19eb2521124a3549f0d",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.20"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.21"
             },
-            "time": "2026-01-26T19:14:05+00:00"
+            "time": "2026-01-27T19:14:48+00:00"
         },
         {
             "name": "brick/math",
@@ -817,16 +817,16 @@
         },
         {
             "name": "protoframework/proto",
-            "version": "1.0.186",
+            "version": "1.0.188",
             "source": {
                 "type": "git",
                 "url": "https://github.com/chrisdurfee/proto.git",
-                "reference": "78ae8fbd274485cb0324a456fb34be84c261ab1b"
+                "reference": "1f33efce8dd8eddce9f3730a06506ab317d36888"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/78ae8fbd274485cb0324a456fb34be84c261ab1b",
-                "reference": "78ae8fbd274485cb0324a456fb34be84c261ab1b",
+                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/1f33efce8dd8eddce9f3730a06506ab317d36888",
+                "reference": "1f33efce8dd8eddce9f3730a06506ab317d36888",
                 "shasum": ""
             },
             "require": {
@@ -876,9 +876,9 @@
             ],
             "support": {
                 "issues": "https://github.com/chrisdurfee/proto/issues",
-                "source": "https://github.com/chrisdurfee/proto/tree/1.0.186"
+                "source": "https://github.com/chrisdurfee/proto/tree/1.0.188"
             },
-            "time": "2026-01-27T01:55:34+00:00"
+            "time": "2026-01-28T03:03:00+00:00"
         },
         {
             "name": "psr/clock",
@@ -2510,16 +2510,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.5.61",
+            "version": "10.5.63",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "bd265b671a63b87e85a8155f885b6fbb41ee505b"
+                "reference": "33198268dad71e926626b618f3ec3966661e4d90"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/bd265b671a63b87e85a8155f885b6fbb41ee505b",
-                "reference": "bd265b671a63b87e85a8155f885b6fbb41ee505b",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/33198268dad71e926626b618f3ec3966661e4d90",
+                "reference": "33198268dad71e926626b618f3ec3966661e4d90",
                 "shasum": ""
             },
             "require": {
@@ -2591,7 +2591,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.61"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.63"
             },
             "funding": [
                 {
@@ -2615,7 +2615,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-01-24T16:06:23+00:00"
+            "time": "2026-01-27T05:48:37+00:00"
         },
         {
             "name": "psr/container",
