@@ -8,10 +8,16 @@
         <testsuite name="Unit">
             <directory suffix="Test.php">./common/Tests/Unit</directory>
             <directory suffix="Test.php">./modules/*/Tests/Unit</directory>
+            <directory suffix="Test.php">./modules/*/*/Tests/Unit</directory>
+            <directory suffix="Test.php">./modules/*/*/*/Tests/Unit</directory>
+            <directory suffix="Test.php">./modules/*/*/*/*/Tests/Unit</directory>
         </testsuite>
         <testsuite name="Feature">
             <directory suffix="Test.php">./common/Tests/Feature</directory>
             <directory suffix="Test.php">./modules/*/Tests/Feature</directory>
+            <directory suffix="Test.php">./modules/*/*/Tests/Feature</directory>
+            <directory suffix="Test.php">./modules/*/*/*/Tests/Feature</directory>
+            <directory suffix="Test.php">./modules/*/*/*/*/Tests/Feature</directory>
         </testsuite>
     </testsuites>
 
