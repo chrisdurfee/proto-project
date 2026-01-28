@@ -396,6 +396,10 @@ Behind the scenes Composer’s autoloader handles:
 
 ## 📦 Creating a New Module
 
+Proto supports both **flat modules** and **nested feature modules** for organizing your codebase.
+
+### Flat Modules (Standard)
+
 1. Make a directory under `modules/YourFeature`
 2. Define your namespace in PHP files:
 
@@ -416,6 +420,90 @@ Behind the scenes Composer’s autoloader handles:
    router()
      ->resource('feature', FeatureController::class);
    ```
+
+### Nested Feature Modules
+
+For large modules with multiple sub-domains, Proto supports nested feature modules. This allows you to organize related features hierarchically while keeping them self-contained.
+
+**Directory Structure:**
+```
+modules/
+  Community/
+    CommunityModule.php           # Parent module class
+    Main/                          # Root-level module code (optional)
+      Api/
+        api.php                    # Handles /api/community
+      Controllers/
+      Models/
+    Group/                         # Nested feature
+      Api/
+        api.php                    # Handles /api/community/group
+      Controllers/
+      Models/
+      Migrations/
+    Events/                        # Another nested feature
+      Api/
+        api.php                    # Handles /api/community/events
+      Controllers/
+      Models/
+    Gateway/
+      Gateway.php                  # Parent gateway with feature access
+```
+
+**URL Resolution:**
+
+| URL | Resolution Path |
+|-----|----------------|
+| `/api/community` | `modules/Community/Main/Api/api.php` |
+| `/api/community/group` | `modules/Community/Group/Api/api.php` |
+| `/api/community/group/settings` | `modules/Community/Group/Api/Settings/api.php` |
+| `/api/community/events` | `modules/Community/Events/Api/api.php` |
+
+**Gateway Access Pattern:**
+
+Parent gateways expose nested features as methods:
+
+```php
+<?php declare(strict_types=1);
+namespace Modules\Community\Gateway;
+
+use Modules\Community\Group\Gateway\Gateway as GroupGateway;
+use Modules\Community\Events\Gateway\Gateway as EventsGateway;
+
+class Gateway
+{
+    public function group(): GroupGateway
+    {
+        return new GroupGateway();
+    }
+
+    public function events(): EventsGateway
+    {
+        return new EventsGateway();
+    }
+}
+```
+
+**Usage:**
+```php
+// Access nested feature gateway
+modules()->community()->group()->addMember($userId, $groupId);
+
+// Access nested feature with versioning
+modules()->community()->group()->v1()->createGroup($data);
+```
+
+**When to Use Nested Features:**
+- Module has 3+ distinct sub-domains
+- Features are self-contained with their own Controllers, Models, and Services
+- You want to organize large modules hierarchically
+- Keeping related functionality grouped improves maintainability
+
+**Key Points:**
+- Parent modules are registered as usual—nested features are automatically available
+- Existing flat modules continue to work (backward compatible)
+- Each feature can have its own Migrations folder
+- Migrations are discovered recursively (up to 6 levels deep)
 
 ---
 
