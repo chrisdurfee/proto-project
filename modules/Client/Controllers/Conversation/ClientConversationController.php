@@ -58,7 +58,7 @@ class ClientConversationController extends Controller
 	 * @param Request $request
 	 * @return void
 	 */
-	protected function modifiyAddItem(object &$data, Request $request): void
+	protected function modifyAddItem(object &$data, Request $request): void
 	{
 		// Decode HTML entities and URL encoding from the message
 		if (isset($data->message))

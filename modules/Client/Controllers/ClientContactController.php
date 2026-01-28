@@ -57,7 +57,7 @@ class ClientContactController extends Controller
 	 * @param Request $request
 	 * @return void
 	 */
-	protected function modifiyAddItem(object &$data, Request $request): void
+	protected function modifyAddItem(object &$data, Request $request): void
 	{
 		// Restrict fields that shouldn't be directly set
 		$restrictedFields = ['id', 'createdAt', 'updatedAt', 'deletedAt'];
@@ -77,7 +77,7 @@ class ClientContactController extends Controller
 	 * @param Request $request
 	 * @return void
 	 */
-	protected function modifiyUpdateItem(object &$data, Request $request): void
+	protected function modifyUpdateItem(object &$data, Request $request): void
 	{
 		// Store the ID before restricting it
 		$id = $data->id ?? null;

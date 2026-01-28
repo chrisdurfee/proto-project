@@ -256,7 +256,7 @@ class UserController extends ResourceController
 					`The ResourceController provides hook methods that allow you to modify data before it's processed by the default CRUD operations. These hooks receive the Request object, allowing access to route parameters and request data.`
 				),
 				P({ class: 'text-muted-foreground font-semibold' },
-					`Note: The hook method names contain a typo ("modifiy" instead of "modify") that must be preserved for compatibility.`
+					`Note: The hook method names contain a typo ("modify" instead of "modify") that must be preserved for compatibility.`
 				),
 				CodeBlock(
 `<?php declare(strict_types=1);
@@ -283,7 +283,7 @@ class GroupController extends ResourceController
      * @param Request $request The request object
      * @return void
      */
-    protected function modifiyAddItem(object &$data, Request $request): void
+    protected function modifyAddItem(object &$data, Request $request): void
     {
         // Access route parameters from URI
         $params = $request->params();
@@ -311,7 +311,7 @@ class GroupController extends ResourceController
      * @param Request $request The request object
      * @return void
      */
-    protected function modifiyUpdateItem(object &$data, Request $request): void
+    protected function modifyUpdateItem(object &$data, Request $request): void
     {
         // Preserve ID before restricting fields
         $id = $data->id ?? null;
@@ -354,8 +354,8 @@ class GroupController extends ResourceController
 					`The public methods receive Request, call hooks, then delegate to protected methods:`
 				),
 				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
-					Li('add(Request) → modifiyAddItem() → addItem(object)'),
-					Li('update(Request) → modifiyUpdateItem() → updateItem(object)'),
+					Li('add(Request) → modifyAddItem() → addItem(object)'),
+					Li('update(Request) → modifyUpdateItem() → updateItem(object)'),
 					Li('delete(Request) → deleteItem(object)'),
 					Li('all(Request) → modifyFilter() → model query')
 				])
@@ -412,9 +412,9 @@ public function get(Request $request): object
 					`Controllers should fail gracefully without throwing exceptions. Use different error methods depending on context:`
 				),
 				CodeBlock(
-`// In hook methods (modifiyAddItem, modifiyUpdateItem, etc.)
+`// In hook methods (modifyAddItem, modifyUpdateItem, etc.)
 // Use $this->setError() - sets error state and returns
-protected function modifiyAddItem(object &$data, Request $request): void
+protected function modifyAddItem(object &$data, Request $request): void
 {
     $params = $request->params();
     $communityId = (int)($params->communityId ?? 0);
@@ -455,7 +455,7 @@ public function customAction(Request $request): object
 }
 
 // WRONG: Don't throw exceptions in controllers
-protected function modifiyAddItem(object &$data, Request $request): void
+protected function modifyAddItem(object &$data, Request $request): void
 {
     if (!$data->name)
     {

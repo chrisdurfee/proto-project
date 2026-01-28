@@ -40,7 +40,7 @@ class AssistantMessageController extends ResourceController
 	 * @param Request $request
 	 * @return void
 	 */
-	protected function modifiyAddItem(object &$data, Request $request): void
+	protected function modifyAddItem(object &$data, Request $request): void
 	{
 		$data->conversationId = (int)($request->params()->conversationId ?? $data->conversationId ?? null);
 		$data->role = 'user';
