@@ -161,6 +161,12 @@ class GeneratorController extends Controller
 		$this->setupModel($resource->model);
 		$this->checkModelSettings($resource);
 
+		// Ensure featurePath is available at the resource level for the generator
+		if (!isset($resource->featurePath))
+		{
+			$resource->featurePath = null;
+		}
+
 		return $this->generator->createResource($resource);
 	}
 
