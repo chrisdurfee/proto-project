@@ -522,19 +522,87 @@ modules/
 | `/api/user/profile` | `modules/User/Profile/Api/api.php` |
 
 **Gateway Access Pattern**:
-Parent gateways expose child features as methods:
+Parent gateways expose child features as methods AND include main functionality directly.
+
+**CRITICAL Gateway Rules**:
+1. **Main module methods are direct** - Core CRUD operations on parent gateway (e.g., `modules()->user()->get()`)
+2. **Nested features use accessor methods** - Sub-features accessed via methods (e.g., `modules()->user()->follower()`)
+3. **No separate main() accessor** - Don't require `modules()->user()->main()->get()`, put directly on parent gateway
 
 ```php
-// modules/Community/Gateway/Gateway.php
+// modules/User/Gateway/Gateway.php
 <?php declare(strict_types=1);
 
-namespace Modules\Community\Gateway;
+namespace Modules\User\Gateway;
 
-use Modules\Community\Group\Gateway\Gateway as GroupGateway;
-use Modules\Community\Events\Gateway\Gateway as EventsGateway;
+use Modules\User\Main\Models\User;
+use Modules\User\Main\Services\User\NewUserService;
+use Modules\User\Follower\Gateway\Gateway as FollowerGateway;
+use Modules\User\Role\Gateway\Gateway as RoleGateway;
 
 class Gateway
 {
+    // ✅ CORRECT - Main User methods directly on gateway
+    public function get(mixed $id): ?User
+    {
+        return User::get($id);
+    }
+
+    public function create(object $settings): User
+    {
+        $model = new User($settings);
+        $model->add();
+        return $model;
+    }
+
+    public function authenticate(string $username, string $password): int
+    {
+        return User::authenticate($username, $password);
+    }
+
+    // ✅ CORRECT - Nested features via accessor methods
+    public function follower(): FollowerGateway
+    {
+        return new FollowerGateway();
+    }
+
+    public function role(): RoleGateway
+    {
+        return new RoleGateway();
+    }
+}
+
+// ❌ WRONG - Don't create main() accessor
+public function main(): MainGateway
+{
+    return new MainGateway();
+}
+```
+
+**Usage**:
+```php
+// ✅ CORRECT - Main methods directly
+$user = modules()->user()->get($userId);
+$user = modules()->user()->create($data);
+modules()->user()->authenticate($username, $password);
+
+// ✅ CORRECT - Nested features via accessor
+modules()->user()->follower()->follow($userId, $targetId);
+modules()->user()->role()->assign($userId, $roleId);
+
+// ❌ WRONG - Don't require main() accessor
+$user = modules()->user()->main()->get($userId);
+```
+
+**Community Example**:
+```php
+// modules/Community/Gateway/Gateway.php
+class Gateway
+{
+    // Main Community methods (if any) go directly here
+    public function get(int $id): ?Community { ... }
+
+    // Nested features via accessors
     public function group(): GroupGateway
     {
         return new GroupGateway();
@@ -545,15 +613,9 @@ class Gateway
         return new EventsGateway();
     }
 }
-```
 
-**Usage**:
-```php
-// Access nested feature gateway
+// Usage
 modules()->community()->group()->addMember($userId, $groupId);
-
-// Access nested feature with versioning
-modules()->community()->group()->v1()->createGroup($data);
 ```
 
 **Feature Namespacing** (PSR-4):
