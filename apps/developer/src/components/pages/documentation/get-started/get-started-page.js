@@ -105,6 +105,7 @@ composer update`
 				CodeBlock(
 `common/          // Shared code
 modules/         // Each major feature or domain is a self-contained module
+                 // Supports flat modules and nested feature modules
 public/          // Public-facing files (including the developer app in /public/developer)
 apps/            // the front end applications, crm, developer, main
 
@@ -114,7 +115,8 @@ vendor/protoframework/proto/src/          // The core framework. This folder is 
 				P(
 					{ class: 'text-muted-foreground' },
 					`Proto automatically loads modules and other resources on demand, ensuring performance and
-					 maintainability as your application grows.`
+					 maintainability as your application grows. Nested feature modules allow organizing large
+					 modules into sub-features (e.g., Community/Group, Community/Events).`
 				)
 			]),
 
@@ -181,44 +183,51 @@ modules()->user()->v1()->add($data);`
 				),
 				P(
 					{ class: 'text-muted-foreground' },
+					`Proto supports both flat modules and nested feature modules. Nested features allow you to
+					 organize large modules with many related sub-domains hierarchically.`
+				),
+				P(
+					{ class: 'text-muted-foreground' },
 					`Gateways provide a public interface for modules. Other modules can call them like so:
 					 modules()->example()->add();
-					 or with versioning: modules()->example()->v1()->add();`
+					 or with versioning: modules()->example()->v1()->add();
+					 For nested features: modules()->community()->group()->addMember($userId, $groupId);`
 				),
 				CodeBlock(
 `<?php declare(strict_types=1);
-namespace Modules\\Example\\Gateway;
+namespace Modules\\Community\\Gateway;
+
+use Modules\\Community\\Group\\Gateway\\Gateway as GroupGateway;
 
 class Gateway
 {
-    public function add(): void
+    public function group(): GroupGateway
     {
-        // Implementation
+        return new GroupGateway();
     }
 
     public function v1(): V1\\Gateway
     {
         return new V1\\Gateway();
     }
-
-    public function v2(): V2\\Gateway
-    {
-        return new V2\\Gateway();
-    }
 }`
 				),
 				P(
 					{ class: 'text-muted-foreground' },
-					`You can also define API routes in each module. For example,
-					 placing an api.php or subfolders within your module's "Api" directory
-					 registers routes only if a request path matches the module's route prefix.`
+					`You can also define API routes in each module. For flat modules, place routes in
+					 "Api/api.php". For nested features, each feature has its own "Feature/Api/api.php"
+					 that registers routes only if a request path matches.`
 				),
 				CodeBlock(
-`router()
+`// Flat module route: modules/User/Api/api.php
+router()
 	->middleware([
         CrossSiteProtectionMiddleware::class
     ])
-    ->resource('user', UserController::class);`
+    ->resource('user', UserController::class);
+
+// Nested feature route: modules/Community/Group/Api/api.php
+router()->resource('community/group', GroupController::class);`
 				)
 			]),
 

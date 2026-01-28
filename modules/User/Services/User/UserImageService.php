@@ -25,7 +25,7 @@ class UserImageService
 	public function storeImage(UploadFile $uploadFile, int $userId): object
 	{
 		try
-        {
+		{
 			/**
 			 * Store the file using the Vault system.
 			 */
@@ -62,7 +62,7 @@ class UserImageService
 	public function updateUserImage(int $userId, string $fileName): object
 	{
 		try
-        {
+		{
 			$user = User::get($userId);
 			if (!$user)
 			{
@@ -77,7 +77,7 @@ class UserImageService
 				return Response::success(['updated' => true]);
 			}
 
-            return Response::invalid('Failed to update user image reference.');
+			return Response::invalid('Failed to update user image reference.');
 		}
 		catch (\Exception $e)
 		{
@@ -134,10 +134,7 @@ class UserImageService
 	{
 		if (empty($storedFileName))
 		{
-			// Generate a unique filename if not provided
-			$fileName = $uploadFile->getOriginalName();
-			$fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-			$storedFileName = 'user_' . $userId . '_' . time() . '.' . $fileExtension;
+			$storedFileName = File::generateFileName($uploadFile, 'user_' . $userId);
 		}
 
 		return $storedFileName;
@@ -187,7 +184,7 @@ class UserImageService
 				$ext = $map[$mime];
 			}
 
-			// Mock the $_FILES array
+			// Create file data array for UploadFile constructor
 			$tmpName = basename($tmpPath);
 			$tmpFile = [
 				'name' => "{$tmpName}.{$ext}",
@@ -197,7 +194,7 @@ class UserImageService
 				'error' => 0
 			];
 
-			// Create UploadFile instance
+			// Create UploadFile instance from the downloaded file
 			$uploadFile = new UploadFile($tmpFile);
 
 			// Process the upload

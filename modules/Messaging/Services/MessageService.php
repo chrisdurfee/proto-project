@@ -27,13 +27,13 @@ class MessageService extends Service
 	public function createMessage(int $conversationId, object $data, Request $request): object
 	{
 		// Validate input
-		if (!$this->validateMessageInput($conversationId, $data))
+		if (!$this->validateMessageInput($conversationId, $data, $request))
 		{
 			return $this->error('Conversation ID and either content or attachments are required');
 		}
 
 		// Prepare message data
-		$this->prepareMessageData($data, $conversationId);
+		$this->prepareMessageData($data, $conversationId, $request);
 
 		// Create the message using model instance to get the ID
 		$message = new Message($data);
@@ -63,9 +63,10 @@ class MessageService extends Service
 	 *
 	 * @param object $data
 	 * @param int $conversationId
+	 * @param Request $request
 	 * @return void
 	 */
-	protected function prepareMessageData(object $data, int $conversationId): void
+	protected function prepareMessageData(object $data, int $conversationId, Request $request): void
 	{
 		$data->senderId = session()->user->id ?? null;
 		$data->type = $data->type ?? 'text';
@@ -75,7 +76,7 @@ class MessageService extends Service
 		{
 			$data->content = urldecode($data->content);
 		}
-		else if ($this->hasAttachments())
+		else if ($this->hasAttachments($request))
 		{
 			$data->content = '';
 		}
@@ -86,16 +87,17 @@ class MessageService extends Service
 	 *
 	 * @param int|null $conversationId
 	 * @param object $data
+	 * @param Request $request
 	 * @return bool
 	 */
-	protected function validateMessageInput(?int $conversationId, object $data): bool
+	protected function validateMessageInput(?int $conversationId, object $data, Request $request): bool
 	{
 		if (empty($conversationId))
 		{
 			return false;
 		}
 
-		$hasFiles = $this->hasAttachments();
+		$hasFiles = $this->hasAttachments($request);
 		$hasContent = !empty($data->content);
 
 		return $hasContent || $hasFiles;
@@ -104,11 +106,18 @@ class MessageService extends Service
 	/**
 	 * Check if the request has file attachments.
 	 *
+	 * @param Request|null $request The HTTP request object.
 	 * @return bool
 	 */
-	protected function hasAttachments(): bool
+	protected function hasAttachments(?Request $request = null): bool
 	{
-		return !empty($_FILES['attachments']) && !empty($_FILES['attachments']['name']);
+		if (!$request)
+		{
+			return false;
+		}
+
+		$attachments = $request->fileArray('attachments');
+		return !empty($attachments);
 	}
 
 	/**
@@ -120,7 +129,7 @@ class MessageService extends Service
 	 */
 	protected function processAttachments(Request $request, int $messageId): void
 	{
-		if (!$this->hasAttachments())
+		if (!$this->hasAttachments($request))
 		{
 			return;
 		}

@@ -11,14 +11,14 @@ We strive to maintain high code quality and consistency. The code should be resi
 - **Infrastructure**: Dockerized (Web/PHP, MariaDB, Redis) via `infrastructure/docker-compose.yaml`.
 
 ### Code Layout
-- `modules/*`: Feature modules (domain logic).
+- `modules/*`: Feature modules (domain logic). Supports nested feature modules.
 - `common/*`: Shared framework glue, base classes, configs.
 - `public/*`: HTTP entrypoints and assets.
 - `apps/*`: Independent frontend applications proxying to backend.
 
 ### Autoloading
 - PSR-4: `Modules\` → `modules/`, `Common\` → `common/`.
-- Migrations: classmapped from `common/Migrations` and `modules/*/Migrations`.
+- Migrations: classmapped from `common/Migrations` and recursively discovered from `modules/*/Migrations` (up to 3 levels deep).
 
 ## 2. Critical Workflows
 
@@ -448,6 +448,173 @@ class YourModuleModule extends Module
 - Extend `Proto\Module\Module` (singular, NOT `Proto\Modules\Module`)
 - Use `activate()` method NOT `boot()`
 - Routes automatically loaded from `modules/*/Api/api.php`
+
+### Nested Feature Modules
+
+Proto supports nested feature modules within parent modules for better organization of large modules with many related features.
+
+**Directory Structure**:
+
+```
+modules/
+  Community/
+    CommunityModule.php           # Parent module class
+    Main/                          # Root-level module code (optional)
+      Api/
+        api.php                    # Handles /api/community
+      Controllers/
+      Models/
+    Group/                         # Nested feature
+      Api/
+        api.php                    # Handles /api/community/group
+        Settings/
+          api.php                  # Handles /api/community/group/settings
+      Controllers/
+      Models/
+      Migrations/
+      Services/
+    Events/                        # Another nested feature
+      Api/
+        api.php                    # Handles /api/community/events
+      Controllers/
+      Models/
+    Gateway/
+      Gateway.php                  # Parent gateway with feature access
+```
+
+**The "Main" Folder Convention**:
+For modules that need both root-level functionality AND nested features, use a `Main/` folder:
+
+```
+modules/
+  User/
+    UserModule.php
+    Main/                          # Root user functionality
+      Api/
+        api.php                    # /api/user
+      Controllers/
+        UserController.php
+      Models/
+        User.php
+    Profile/                       # Nested feature
+      Api/
+        api.php                    # /api/user/profile
+    Settings/                      # Another nested feature
+      Api/
+        api.php                    # /api/user/settings
+```
+
+**URL Resolution Order**:
+1. **Nested Feature**: `modules/{Seg1}/{Seg2}/Api/{Seg3...}/api.php`
+2. **Nested Feature with Main**: `modules/{Seg1}/{Seg2}/Main/Api/{Seg3...}/api.php`
+3. **Flat Module**: `modules/{Seg1}/Api/{Seg2...}/api.php`
+4. **Main Folder Fallback**: `modules/{Seg1}/Main/Api/{Seg2...}/api.php`
+5. **Recursive Fallback**: Try parent paths if specific file not found
+
+**URL Resolution Examples**:
+
+| URL | Resolution Path |
+|-----|----------------|
+| `/api/community/group` | `modules/Community/Group/Api/api.php` |
+| `/api/community/group/settings` | `modules/Community/Group/Api/Settings/api.php` |
+| `/api/community/group/forum` | `modules/Community/Group/Forum/Api/api.php` |
+| `/api/user` | `modules/User/Api/api.php` OR `modules/User/Main/Api/api.php` |
+| `/api/user/profile` | `modules/User/Profile/Api/api.php` |
+
+**Gateway Access Pattern**:
+Parent gateways expose child features as methods:
+
+```php
+// modules/Community/Gateway/Gateway.php
+<?php declare(strict_types=1);
+
+namespace Modules\Community\Gateway;
+
+use Modules\Community\Group\Gateway\Gateway as GroupGateway;
+use Modules\Community\Events\Gateway\Gateway as EventsGateway;
+
+class Gateway
+{
+    public function group(): GroupGateway
+    {
+        return new GroupGateway();
+    }
+
+    public function events(): EventsGateway
+    {
+        return new EventsGateway();
+    }
+}
+```
+
+**Usage**:
+```php
+// Access nested feature gateway
+modules()->community()->group()->addMember($userId, $groupId);
+
+// Access nested feature with versioning
+modules()->community()->group()->v1()->createGroup($data);
+```
+
+**Feature Namespacing** (PSR-4):
+```php
+// modules/Community/Group/Models/Group.php
+namespace Modules\Community\Group\Models;
+
+use Proto\Models\Model;
+
+class Group extends Model
+{
+    // ...
+}
+
+// modules/Community/Group/Controllers/GroupController.php
+namespace Modules\Community\Group\Controllers;
+
+use Proto\Controllers\ResourceController;
+use Modules\Community\Group\Models\Group;
+
+class GroupController extends ResourceController
+{
+    public function __construct(protected ?string $model = Group::class)
+    {
+        parent::__construct();
+    }
+}
+```
+
+**Feature API Routes**:
+```php
+// modules/Community/Group/Api/api.php
+<?php declare(strict_types=1);
+
+use Modules\Community\Group\Controllers\GroupController;
+use Modules\Community\Group\Controllers\MemberController;
+
+// Resource routes for /api/community/group
+router()->resource('community/group', GroupController::class);
+
+// Nested resource for /api/community/group/:groupId/member
+router()->resource('community/group/:groupId/member', MemberController::class);
+```
+
+**Migrations in Nested Features**:
+Migrations are discovered recursively throughout the module structure (up to 6 levels deep):
+- `modules/Community/Migrations/`
+- `modules/Community/Group/Migrations/`
+- `modules/Community/Group/Forum/Migrations/`
+
+**When to Use Nested Features**:
+- Module has 3+ distinct sub-domains
+- Features are self-contained with own Controllers, Models, Services
+- Want to organize large modules hierarchically
+
+**CRITICAL**:
+- Parent modules registered as usual in config - nested features automatically available
+- Existing flat modules continue to work (backward compatible)
+- Keep features self-contained - each with its own Controllers, Models, Services
+- Share functionality via parent Gateway methods
+- Migrations per feature - keep in the feature that owns the tables
 
 ### Routing
 
@@ -2606,13 +2773,20 @@ modules()->user()->push()->send($userId, $settings, $data);
 
 ### Add New Feature
 
-**Backend**:
+**Backend (Flat Module)**:
 1. Create controller: `modules/Feature/Controllers/FeatureController.php`
 2. Register routes: `modules/Feature/Api/api.php`
-   - **Nested API folders supported**: `modules/Feature/Api/Subfeature/api.php` or `modules/Feature/Api/Subfeature/SubSubfeature/api.php` → path prefix `api/feature/subfeature/...`
-   Nest apis in sub folders to reduce complexity and focus the routes to a single scope. Files can be nested recursively. This keep large APIs organized.
+   - **Nested API folders supported**: `modules/Feature/Api/Subfeature/api.php`
 3. Add migrations: `modules/Feature/Migrations/*`
 4. Add tests: `modules/Feature/Tests/Feature/*Test.php`
+
+**Backend (Nested Feature Module)**:
+1. Create feature directory: `modules/ParentModule/Feature/`
+2. Add controller: `modules/ParentModule/Feature/Controllers/FeatureController.php`
+3. Register routes: `modules/ParentModule/Feature/Api/api.php` → `/api/parentmodule/feature`
+4. Add migrations: `modules/ParentModule/Feature/Migrations/*`
+5. Add gateway method to parent: `modules/ParentModule/Gateway/Gateway.php`
+6. Use Main folder if parent needs root-level routes: `modules/ParentModule/Main/Api/api.php`
 
 **Frontend**:
 1. Create component: `apps/main/src/components/Feature.js`

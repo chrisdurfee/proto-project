@@ -96,8 +96,9 @@ class ClientConversationController extends Controller
 		$conversationId = (int)$response->id;
 		$clientId = (int)($request->params()->clientId ?? null);
 
-		// Check if files were uploaded
-		if (!empty($_FILES['attachments']) && !empty($_FILES['attachments']['name']))
+		// Check if files were uploaded using Request method
+		$attachments = $request->fileArray('attachments');
+		if (!empty($attachments))
 		{
 			$userId = getSession('user')->id ?? null;
 			$response = $this->service->handleAttachments($request, $conversationId, $userId);
