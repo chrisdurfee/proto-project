@@ -42,7 +42,7 @@ const NoteListItem = (note) =>
 
 	return Div({ class: "flex rounded-md gap-x-3 px-4 py-4 hover:bg-muted/50" }, [
 		Avatar({
-			src: note.userImage && `/files/users/profile/${note.userImage}`,
+			src: note.image && `/files/users/profile/${note.image}`,
 			alt: name,
 			fallbackText: name,
 			size: "sm"
