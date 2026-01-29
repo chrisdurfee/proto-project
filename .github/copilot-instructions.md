@@ -1,9 +1,9 @@
-# Copilot Instructions
+# Copilot Instructions for Rally
 
 **Goal**: Enable AI agents to build resilient, scalable, maintainable, and secure code with minimal errors and without human intervention.
 
 ## 1. Project Overview & Architecture
-We strive to maintain high code quality and consistency. The code should be resilient, scalable, maintainable, and secure. Functions and methods should adhere to single responsibility principle, and classes should follow SOLID principles. fail gracefully with proper error handling and logging.
+We strive to maintain high code quality and consistency. The code should be resilient, scalable, maintainable, and secure. Functions and methods should adhere to single responsibility principle, and classes should follow SOLID principles. fail gracefully with proper error handling and logging. Database tables should be normalized to at least 3NF.
 
 ### Stack
 - **Backend**: PHP 8.4 monolith using **Proto Framework**. Entry: `public/api/index.php`.
@@ -118,20 +118,20 @@ $admin = User::factory()->admin()->create();
 namespace Modules\User\Factories;
 
 use Proto\Models\Factory;
-use Modules\User\Main\Models\User;
+use Modules\User\Models\User;
 
 class UserFactory extends Factory
 {
     /**
-	 * Get the model class name
-	 *
+     * Get the model class name
+     *
      * @abstract
-	 * @return string
-	 */
-	protected function model(): string
-	{
-		return User::class;
-	}
+     * @return string
+     */
+    protected function model(): string
+    {
+        return User::class;
+    }
 
     public function definition(): array
     {
@@ -392,14 +392,14 @@ Use the "use" statement for class references, NOT fully qualified names inline.
 
 ```php
 // ✅ CORRECT
-use Modules\User\Main\Models\User;
+use Modules\User\Models\User;
 
 $user = User::get($userId);
 $class = User::class;
 
 // ❌ WRONG
-$user = \Modules\User\Main\Models\User::get($userId);
-$class = \Modules\User\Main\Models\User::class;
+$user = \Modules\User\Models\User::get($userId);
+$class = \Modules\User\Models\User::class;
 ```
 
 #### Spacing
@@ -536,7 +536,7 @@ Parent gateways expose child features as methods AND include main functionality 
 namespace Modules\User\Gateway;
 
 use Modules\User\Main\Models\User;
-use Modules\User\Main\Services\User\NewUserService;
+use Modules\User\Main\Services\NewUserService;
 use Modules\User\Follower\Gateway\Gateway as FollowerGateway;
 use Modules\User\Role\Gateway\Gateway as RoleGateway;
 
@@ -1546,10 +1546,10 @@ joining tables using eager joins.
 ```php
 $filter = [
     "id = '1'", // ambiguous
-	"a.id = '1'", // raw condition with table alias
-	["a.created_at BETWEEN ? AND ?", ['2021-02-02', '2021-02-28']], // Manual bind
-	['a.id', $user->id], // auto bind
-	['a.id', '>', $user->id] // auto bind with operator
+    "a.id = '1'", // raw condition with table alias
+    ["a.created_at BETWEEN ? AND ?", ['2021-02-02', '2021-02-28']], // Manual bind
+    ['a.id', $user->id], // auto bind
+    ['a.id', '>', $user->id] // auto bind with operator
 ];
 
 $row = User::getBy($filter);   // one
@@ -2053,11 +2053,11 @@ use Proto\Http\Router\Request;
 class UserPolicy extends Policy
 {
     /**
-	 * The type of the policy.
-	 *
-	 * @var string|null
-	 */
-	protected ?string $type = 'user';
+     * The type of the policy.
+     *
+     * @var string|null
+     */
+    protected ?string $type = 'user';
 
     // Runs before all methods
     // override to add a before check that applies to all actions
@@ -2407,7 +2407,7 @@ Import('./file.js')
 | `$this->request` in `addItem()` | Use `modifyAddItem($data, $request)` hook |
 | Override `addItem()` for route params | Use `modifyAddItem()` or override `add()` |
 | `protected function modifyAddItem()` | `protected function modifyAddItem()` (typo) |
-| `\Modules\User\Main\Models\User::get()` | `use Modules\User\Main\Models\User; User::get()` |
+| `\Modules\User\Models\User::get()` | `use Modules\User\Models\User; User::get()` |
 | `$request->route('id')` | `$request->getInt('id')` or `$request->input('id')` |
 | `if (!$userId) return error()` in controller | Remove check - policy handles auth |
 | `$userId = session()->user->id ?? null;` | `$userId = session()->user->id;` after policy |
@@ -2455,7 +2455,7 @@ The Proto test framework extends PHPUnit and provides helpers for database asser
 namespace Modules\User\Tests\Feature;
 
 use Proto\Tests\Test;
-use Modules\User\Main\Models\User;
+use Modules\User\Models\User;
 
 class UserTest extends Test
 {
@@ -2851,9 +2851,171 @@ modules()->user()->push()->send($userId, $settings, $data);
 6. Use Main folder if parent needs root-level routes: `modules/ParentModule/Main/Api/api.php`
 
 **Frontend**:
-1. Create component: `apps/main/src/components/Feature.js`
-2. Call API: `Ajax.get('/api/feature')` (relative paths - Vite proxy handles routing)
-3. Add route: Update router config
+1. Create the frontend Module if not already available: `apps/{crm|main}/src/modules/{moduleName}/module.js`
+```js
+import { Icons } from "@base-framework/ui/icons";
+import { Module } from '../module/module.js';
+
+/**
+ * This will set the routes for the module.
+ *
+ * @type {Array<object>} routes
+ */
+const routes = Module.convertRoutes(
+[
+    { path: '/', import: () => import('./components/pages/home/home-page.js'), title: 'Home' }
+]);
+
+/**
+ * This will set the links for the module.
+ *
+ * @type {Array<object>} links
+ */
+const links =
+[
+    { label: 'Home', href: './', icon: Icons.home, mobileOrder: 1, exact: true }
+];
+
+/**
+ * This will create our module and add it to the app
+ * modules.
+ */
+Module.create(
+{
+    /**
+     * @param {Array<object>} routes
+     */
+    routes,
+
+    /**
+     * This will get the options to create the app
+     * navigation.
+     *
+     * @param {Array<object>} links
+     */
+    links
+});
+```
+2. Create components including pages, atoms, etc. for the feature: `apps/{crm|main}/src/modules/{moduleName}/components/pages/{feature}/{pageName}-page.js`
+3. Create the necessary Models that extends the base Model to connect the data to the api. Models include default actions like add, update, setup, all, get, delete (relative paths - Vite proxy handles routing)
+
+the all method can select a list of items from the api, get method can get a single item by id, add method to create a new item, update method to update an existing item, delete method to remove an item.
+
+```js
+import { Model } from "@base-framework/base";
+import { Icons } from "@base-framework/ui/icons";
+
+/**
+ * ConversationModel
+ *
+ * This model handles client conversation operations.
+ *
+ * @type {typeof Model}
+ */
+export const ConversationModel = Model.extend({
+    /**
+     * Base URL for conversation endpoints.
+     * Will be completed with clientId in the component.
+     */
+    url: '/api/client/[[clientId]]/conversation',
+
+    xhr: {
+        /**
+         * Synchronize conversations in real-time using EventSource.
+         *
+         * @param {object} instanceParams - The instance parameters.
+         * @param {function} callBack - The callback function for incoming updates.
+         * @param {function} onOpenCallBack - Optional callback when connection opens.
+         * @returns {object} Object with source and cleanup function
+         */
+        sync(instanceParams, callBack, onOpenCallBack)
+        {
+            const lastId = instanceParams?.lastId || 0;
+            const params = lastId ? `lastId=${lastId}` : '';
+            return this.setupEventSource('/sync', params, callBack, onOpenCallBack);
+        },
+
+        addFiles(data, formData)
+        {
+            Object.keys(data).forEach(key =>
+            {
+                if (key !== 'attachments')
+                {
+                    formData.append(key, data[key]);
+                }
+            });
+
+            // Add files
+            Array.from(files).forEach(file =>
+            {
+                // Validate file size (10MB as per backend validation)
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                if (file.size > maxSize)
+                {
+                    app.notify({
+                        type: "destructive",
+                        title: "File Too Large",
+                        description: `${file.name} exceeds 10MB limit.`,
+                        icon: Icons.warning
+                    });
+                    return;
+                }
+
+                formData.append('attachments[]', file);
+            });
+        },
+
+        /**
+         * Add a new conversation message with optional file attachments.
+         *
+         * @param {object} instanceParams - The instance parameters.
+         * @param {function} callBack - The callback function.
+         * @param {FileList|File[]} [files] - Optional files to attach.
+         * @returns {XMLHttpRequest|void} The request promise.
+         */
+        add(instanceParams, callBack, files)
+        {
+            const data = this.model.get();
+            const url = (typeof data.id === 'undefined')? '' : `/${data.id}`;
+
+            // If no files, send as JSON (exclude attachments field)
+            if (!files || files.length === 0)
+            {
+                const cleanData = { ...data };
+                delete cleanData.attachments;
+                const params = this.setupObjectData(cleanData);
+                return this._post(url, params, instanceParams, callBack);
+            }
+
+            // With files, use FormData
+            const formData = new FormData();
+            this.addFiles(data, formData);
+
+            return this._post(url, formData, instanceParams, callBack);
+        },
+
+        update(instanceParams, callBack)
+        {
+            let params = this.setupObjectData();
+            const id = this.model.id;
+            const url = (typeof id === 'undefined')? '' : `/${id}`;
+
+            return this._patch(url, params, instanceParams, callBack);
+        },
+
+        verifyEmail(instanceParams, callBack)
+        {
+            const data = this.model.get();
+            let params = {
+                token: instanceParams.token
+            };
+
+            return this._patch(`${data.id}/verify-email`, params, instanceParams, callBack);
+        }
+    }
+});
+```
+4. Import module in module-imports.js to add the new module to the platform: `apps/{crm|main}/src/modules/imported-modules.js`
 
 ### Key Files
 
