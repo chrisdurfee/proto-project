@@ -1,4 +1,4 @@
-# Copilot Instructions
+# Copilot Instructions for Rally
 
 **Goal**: Enable AI agents to build resilient, scalable, maintainable, and secure code with minimal errors and without human intervention.
 
@@ -388,19 +388,41 @@ public function getUserCars(int $userId): array {
 ```
 
 ### References
-Use the "use" statement for class references, NOT fully qualified names inline.
+**CRITICAL**: ALWAYS use the "use" statement for class references at the top of the file, NOT fully qualified names inline. This applies to ALL contexts including method parameters, return types, builder methods, and static calls.
 
 ```php
-// ✅ CORRECT
+// ✅ CORRECT - Import at top of file
 use Modules\User\Models\User;
+use Modules\Post\Media\Models\PostMedia;
 
+// Then use short class names
 $user = User::get($userId);
 $class = User::class;
 
-// ❌ WRONG
+// In model joins
+$builder->hasMany(PostMedia::class, 'postId', 'id', 'media');
+
+// In type hints
+public function getUser(User $user): User
+{
+    return $user;
+}
+
+// In model properties (factory, etc.)
+protected static ?string $factory = PostFactory::class;
+
+// ❌ WRONG - Inline fully qualified names
 $user = \Modules\User\Models\User::get($userId);
 $class = \Modules\User\Models\User::class;
+
+// ❌ WRONG - In builder methods
+$builder->hasMany(\Modules\Post\Media\Models\PostMedia::class, 'postId', 'id', 'media');
+
+// ❌ WRONG - In type hints
+public function getUser(\Modules\User\Models\User $user): \Modules\User\Models\User
 ```
+
+**Key Rule**: If you need to reference a class, add it to the use statements at the top of the file FIRST, then use the short name everywhere in the file.
 
 #### Spacing
 use tabs for indentation, 4 spaces for alignment.
@@ -741,6 +763,7 @@ router()
 - Module routes MUST start with module name: `'garage/...'` NOT `'user/:id/garage/...'`
 - Controller methods: ALWAYS wrap in array `[Controller::class, 'method']`
 - Use fluent interface for chaining
+- Controllers should use Auth Policies for authentication/authorization. The controller methods should not be checking for authentication directly.
 
 ### Controllers
 
@@ -750,8 +773,12 @@ router()
 
 **Example**:
 ```php
+use Modules\User\Main\Auth\Policies\UserPolicy;
+
 class UserController extends ResourceController
 {
+    protected ?string $policy = UserPolicy::class;
+
     public function __construct(protected ?string $model = User::class)
     {
         parent::__construct();
@@ -784,10 +811,9 @@ protected function modifyUpdateItem(object &$data, Request $request): void
     }
 
     $userId = session()->user->id;
-    if ($post->userId !== (int)$userId)
+    if ($userId)
     {
-        $this->setError('Unauthorized');
-        return;
+        $data->modifiedBy = $userId;
     }
 }
 
@@ -1018,6 +1044,8 @@ public function create(Request $request): object
 **Hook Method Examples**:
 
 ```php
+use Proto\Utils\Strings;
+
 // Add route parameter to data
 protected function modifyAddItem(object &$data, Request $request): void
 {
@@ -1030,7 +1058,7 @@ protected function modifyAddItem(object &$data, Request $request): void
     // Sanitize content
     if (isset($data->content))
     {
-        $data->content = trim(html_entity_decode($data->content, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        $data->content = Strings::prepareContent($data->content);
     }
 }
 
@@ -1705,6 +1733,39 @@ class CreateUsersTable extends Migration
             $table->varchar('name', 100);
             $table->varchar('email', 255);
             $table->timestamps();
+        });
+
+        $this->alter('test_table', function($table)
+        {
+            // rename table
+            $table->rename('new_name');
+
+            $table->engine('InnoDB');
+
+            // add new field
+            $table->add('status')->int(20);
+            // or
+            $table->int('status', 20);
+
+            // modify existing field
+            $table->alter('subject')->varchar(180);
+
+            // drop field
+            $table->drop('read_at');
+
+            // add index
+            $table->index('idx_new_index')->fields('user_id', 'created_at');
+            // drop index
+            $table->dropIndex('idx_old_index');
+
+            // add foreign key
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('CASCADE');
+
+            // drop foreign key
+            $table->dropForeignKey('fk_user_id');
         });
     }
 
@@ -2408,6 +2469,7 @@ Import('./file.js')
 | Override `addItem()` for route params | Use `modifyAddItem()` or override `add()` |
 | `protected function modifyAddItem()` | `protected function modifyAddItem()` (typo) |
 | `\Modules\User\Models\User::get()` | `use Modules\User\Models\User; User::get()` |
+| `$factory = 'Modules\\Post\\...\\PostFactory';` | `use ...\PostFactory; $factory = PostFactory::class;` |
 | `$request->route('id')` | `$request->getInt('id')` or `$request->input('id')` |
 | `if (!$userId) return error()` in controller | Remove check - policy handles auth |
 | `$userId = session()->user->id ?? null;` | `$userId = session()->user->id;` after policy |

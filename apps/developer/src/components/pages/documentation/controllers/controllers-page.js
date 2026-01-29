@@ -265,6 +265,7 @@ namespace Modules\\Group\\Controllers;
 use Modules\\Group\\Models\\Group;
 use Proto\\Controllers\\ResourceController;
 use Proto\\Http\\Router\\Request;
+use Proto\\Utils\\Strings;
 
 class GroupController extends ResourceController
 {
@@ -299,7 +300,7 @@ class GroupController extends ResourceController
         // Sanitize content
         if (isset($data->content))
         {
-            $data->content = trim(html_entity_decode($data->content, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            $data->content = Strings::prepareContent($data->content);
         }
     }
 
