@@ -204,5 +204,16 @@ export const ThreadComposer = Jot(
 				})
 			])
 		]);
+	},
+
+	/**
+	 * Clean up resources.
+	 *
+	 * @returns {void}
+	 */
+	destroy()
+	{
+		// @ts-ignore
+		this.fileInput = null;
 	}
 });

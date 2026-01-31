@@ -244,5 +244,16 @@ export const ThreadTextarea = Jot(
 				SendButton()
 			])
 		]);
+	},
+
+	/**
+	 * Clean up resources.
+	 *
+	 * @returns {void}
+	 */
+	destroy()
+	{
+		// @ts-ignore
+		this.textarea = null;
 	}
 });
