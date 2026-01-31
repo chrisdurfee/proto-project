@@ -25,13 +25,7 @@ export const ListContainer = (children) => (
  * @returns {BlankPage}
  */
 export const ListPage = Atom((props, children) => (
-	new BlankPage(
-	{
-		beforeDestroy()
-		{
-			super.beforeDestroy();
-			this.list = null;
-		},
+	new BlankPage({
 		...props
 	}, [
 		Div({ class: 'grid grid-cols-1 flex-auto' }, [
