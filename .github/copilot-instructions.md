@@ -1,4 +1,4 @@
-# Copilot Instructions for Rally
+# Copilot Instructions
 
 **Goal**: Enable AI agents to build resilient, scalable, maintainable, and secure code with minimal errors and without human intervention.
 
