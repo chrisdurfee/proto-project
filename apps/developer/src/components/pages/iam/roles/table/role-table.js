@@ -15,7 +15,15 @@ import { RoleModal } from "../modals/role-modal.js";
 const Modal = (item, { parent }) => (
 	RoleModal({
 		item,
-		onClose: (data) => parent.list.mingle([ data.get() ])
+		onClose: (data) =>
+		{
+			if (!parent.list)
+			{
+				return;
+			}
+
+			parent.list.mingle([ data.get() ]);
+		}
 	})
 );
 

@@ -15,7 +15,15 @@ import { PermissionModal } from "../modals/permission-modal.js";
 const Modal = (item, { parent }) => (
 	PermissionModal({
 		item,
-		onClose: (data) => parent.list.mingle([ data.get() ])
+		onClose: (data) =>
+		{
+			if (!parent.list)
+			{
+				return;
+			}
+
+			parent.list.mingle([ data.get() ]);
+		}
 	})
 );
 
