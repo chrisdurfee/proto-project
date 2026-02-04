@@ -95,7 +95,7 @@ export const ClientDetailsConversation = Jot(
 	scrollToBottom()
 	{
 		// @ts-ignore
-		this.panel.scrollTo({ top: this.panel.scrollHeight, behavior: 'smooth' });
+		this.scrollContainer.scrollTo({ top: this.scrollContainer.scrollHeight, behavior: 'smooth' });
 	},
 
 	/**
@@ -107,7 +107,7 @@ export const ClientDetailsConversation = Jot(
 	{
 		const BOTTOM_GRACE = 60;
 		// @ts-ignore
-		return this.panel.scrollHeight - this.panel.scrollTop - this.panel.clientHeight <= BOTTOM_GRACE;
+		return this.scrollContainer.scrollHeight - this.scrollContainer.scrollTop - this.scrollContainer.clientHeight <= BOTTOM_GRACE;
 	},
 
 	/**
@@ -153,12 +153,12 @@ export const ClientDetailsConversation = Jot(
 
 		return Div({ class: "flex flex-auto flex-col h-96 overflow-hidden" }, [
 			// Conversation list with scroll container
-			Div({ class: "flex flex-1 flex-col overflow-y-auto", cache: "panel" }, [
-				UseParent(({ panel }) => (
+			Div({ class: "flex flex-1 flex-col overflow-y-auto h-full", cache: "scrollContainer" }, [
+				UseParent(({ scrollContainer }) => (
 					ConversationList({
 						// @ts-ignore
 						data: this.data,
-						scrollContainer: panel
+						scrollContainer
 					})
 				))
 			]),
