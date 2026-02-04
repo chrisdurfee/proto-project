@@ -162,7 +162,7 @@ export const ConversationSection = Jot(
 	render()
 	{
 		return Div({
-			class: "flex flex-auto flex-col max-h-screen gap-y-4 p-0 overflow-y-auto w-full max-w-full",
+			class: "flex flex-auto flex-col max-h-screen gap-y-4 p-0 overflow-y-auto w-full max-w-full sticky top-0",
 		}, [
 			HeaderContainer(),
 			Div({ class: "flex-1 gap-y-2" }, [
