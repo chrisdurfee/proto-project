@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.369.21",
+            "version": "3.369.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "7076af00534135cbbf6cc19eb2521124a3549f0d"
+                "reference": "f844afab2a74eb3cf881970a9c31de460510eb74"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/7076af00534135cbbf6cc19eb2521124a3549f0d",
-                "reference": "7076af00534135cbbf6cc19eb2521124a3549f0d",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/f844afab2a74eb3cf881970a9c31de460510eb74",
+                "reference": "f844afab2a74eb3cf881970a9c31de460510eb74",
                 "shasum": ""
             },
             "require": {
@@ -153,22 +153,22 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.21"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.27"
             },
-            "time": "2026-01-27T19:14:48+00:00"
+            "time": "2026-02-04T19:07:08+00:00"
         },
         {
             "name": "brick/math",
-            "version": "0.14.1",
+            "version": "0.14.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/brick/math.git",
-                "reference": "f05858549e5f9d7bb45875a75583240a38a281d0"
+                "reference": "32498d5e1897e7642c0b961ace2df6d7dc9a3bc3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/brick/math/zipball/f05858549e5f9d7bb45875a75583240a38a281d0",
-                "reference": "f05858549e5f9d7bb45875a75583240a38a281d0",
+                "url": "https://api.github.com/repos/brick/math/zipball/32498d5e1897e7642c0b961ace2df6d7dc9a3bc3",
+                "reference": "32498d5e1897e7642c0b961ace2df6d7dc9a3bc3",
                 "shasum": ""
             },
             "require": {
@@ -207,7 +207,7 @@
             ],
             "support": {
                 "issues": "https://github.com/brick/math/issues",
-                "source": "https://github.com/brick/math/tree/0.14.1"
+                "source": "https://github.com/brick/math/tree/0.14.6"
             },
             "funding": [
                 {
@@ -215,7 +215,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-11-24T14:40:29+00:00"
+            "time": "2026-02-05T07:59:58+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -817,16 +817,16 @@
         },
         {
             "name": "protoframework/proto",
-            "version": "1.2.6",
+            "version": "1.2.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/chrisdurfee/proto.git",
-                "reference": "f73224bbb15bdb833be5e457409a906e2e9c8000"
+                "reference": "566b6dd1e77682d8f4367bd125c9141665ab896e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/f73224bbb15bdb833be5e457409a906e2e9c8000",
-                "reference": "f73224bbb15bdb833be5e457409a906e2e9c8000",
+                "url": "https://api.github.com/repos/chrisdurfee/proto/zipball/566b6dd1e77682d8f4367bd125c9141665ab896e",
+                "reference": "566b6dd1e77682d8f4367bd125c9141665ab896e",
                 "shasum": ""
             },
             "require": {
@@ -876,9 +876,9 @@
             ],
             "support": {
                 "issues": "https://github.com/chrisdurfee/proto/issues",
-                "source": "https://github.com/chrisdurfee/proto/tree/1.2.6"
+                "source": "https://github.com/chrisdurfee/proto/tree/1.2.12"
             },
-            "time": "2026-01-28T11:28:36+00:00"
+            "time": "2026-02-05T09:26:40+00:00"
         },
         {
             "name": "psr/clock",
