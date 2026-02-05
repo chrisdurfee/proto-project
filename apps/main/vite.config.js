@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { defineConfig } from 'vite';
 import { generateUrls } from '../../infrastructure/config/domain.config.js';
+import { http2ProxyPlugin } from '../../infrastructure/config/vite-http2-proxy-plugin.js';
 
 // Generate URLs based on environment
 const isDev = process.env.NODE_ENV !== 'production';
@@ -10,10 +11,21 @@ const urls = generateUrls(isDev);
 const apiTarget = urls.api;
 const BASE_URL = (isDev ? '/' : '/main/');
 
+// SSL certificate paths
+const sslKeyPath = '../../infrastructure/docker/ssl/localhost.key';
+const sslCertPath = '../../infrastructure/docker/ssl/localhost.crt';
+const hasSSL = fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath);
+
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [
-		tailwindcss()
+		tailwindcss(),
+		// HTTP/2 proxy plugin for API requests - removes 6 connection limit
+		http2ProxyPlugin({
+			apiTarget,
+			paths: ['/api', '/files'],
+			certPath: hasSSL ? sslCertPath : undefined
+		})
 	],
 	base: BASE_URL,
 	resolve: {
@@ -29,36 +41,13 @@ export default defineConfig({
 		port: 3000,
 		cors: true,
 		open: true,
-		...(fs.existsSync('../../infrastructure/docker/ssl/localhost.key') && fs.existsSync('../../infrastructure/docker/ssl/localhost.crt') ? {
+		...(hasSSL ? {
 			https: {
-				key: fs.readFileSync('../../infrastructure/docker/ssl/localhost.key'),
-				cert: fs.readFileSync('../../infrastructure/docker/ssl/localhost.crt'),
+				key: fs.readFileSync(sslKeyPath),
+				cert: fs.readFileSync(sslCertPath),
 			}
-		} : {}),
-		proxy: {
-			'/api': {
-				target: apiTarget,
-				changeOrigin: true,
-				secure: false,
-				ws: true,
-				bypass(req, res) {
-					const accept = req.headers.accept || '';
-					// Detect EventSource or Fetch('text/event-stream')
-					if (accept.includes('text/event-stream')) {
-						const target = `${apiTarget}${req.url}`;
-						console.log('[vite] redirecting SSE to', target);
-						res.writeHead(301, { Location: target });
-						res.end();
-						return false;
-					}
-				}
-			},
-			'/files': {
-				target: apiTarget,
-				changeOrigin: true,
-				secure: false
-			}
-		}
+		} : {})
+		// Note: Proxy is handled by http2ProxyPlugin above
 	},
 	build: {
 		outDir: path.resolve(__dirname, '../../public/main'),
