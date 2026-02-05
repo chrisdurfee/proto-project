@@ -42,13 +42,13 @@ services:
     volumes:
       - redis_data:/data
       - ./infrastructure/config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--requirepass", "${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}"]
+    command: ["redis-server","/usr/local/etc/redis/redis.conf"]
     networks:
       - proto-network
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a $${REDIS_PASSWORD} ping | grep PONG || exit 1"]
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -69,6 +69,9 @@ services:
       - ../modules:/var/www/html/modules:rw
       - ../public:/var/www/html/public:rw
 
+      # Scripts directory for ownership watcher
+      - ./scripts:/var/www/html/infrastructure/scripts:ro
+
       # Config files only
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
       - ./docker/apache-mpm.conf:/etc/apache2/conf-available/mpm-tuning.conf:ro
@@ -78,6 +81,8 @@ services:
     networks:
       - proto-network
     environment:
+      - HOST_UID=1000  # Your host user ID for file ownership
+      - HOST_GID=1000  # Your host group ID for file ownership
       - DB_HOST=${DB_HOST:-mariadb}
       - DB_PORT=${DB_PORT:-3306}
       - DB_DATABASE=${DB_DATABASE:-proto}
@@ -98,8 +103,8 @@ services:
       - MAIL_USERNAME=${MAIL_USERNAME:-}
       - MAIL_PASSWORD=${MAIL_PASSWORD:-}
       - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-tls}
-      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@proto-project.local}
-      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Proto Project}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@rally.local}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Rally}
       - MAIL_ENABLED=${MAIL_ENABLED:-true}
       # Enable CORS for local development
       - CORS_ENABLED=true

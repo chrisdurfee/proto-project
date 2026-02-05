@@ -1,4 +1,4 @@
--- Initial database setup for Proto Project
+-- Initial database setup
 -- This script runs automatically when the MariaDB container starts for the first time
 
 -- Create additional databases if needed

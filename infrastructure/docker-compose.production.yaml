@@ -19,8 +19,8 @@ services:
       MARIADB_USER: ${DB_USERNAME:-proto_app_user}
       MARIADB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in infrastructure/.env file}
       MARIADB_AUTO_UPGRADE: "yes"
-    ports:
-      - "3307:3306"
+    # SECURITY: Database port NOT exposed in production
+    # Access via Docker network or SSH tunnel only
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./infrastructure/config/mariadb/conf.d:/etc/mysql/mariadb.conf.d:ro
@@ -34,23 +34,31 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
-          cpus: '0.5'
+          memory: 4G
+          cpus: '2.0'
         reservations:
-          memory: 512M
-          cpus: '0.25'
+          memory: 2G
+          cpus: '1.0'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -p$${MARIADB_ROOT_PASSWORD} || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
 
   # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: proto-redis
     restart: unless-stopped
-    ports:
-      - "6380:6379"
+    # SECURITY: Redis port NOT exposed in production
     volumes:
       - redis_data:/data
       - ./infrastructure/config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--requirepass", "${REDIS_PASSWORD}"]
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     networks:
       - proto-network
     environment:
@@ -58,18 +66,27 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
-          cpus: '0.25'
+          memory: 1G
+          cpus: '1.0'
         reservations:
-          memory: 128M
-          cpus: '0.1'
+          memory: 512M
+          cpus: '0.5'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
 
   # PHP Apache Web Server - PRODUCTION with baked-in assets
   web:
     build:
       context: ..
       dockerfile: infrastructure/docker/Dockerfile
-    image: proto-project-web:latest
+    image: rally-web:latest
     container_name: proto-web
     restart: unless-stopped
     ports:
@@ -107,8 +124,8 @@ services:
       - MAIL_USERNAME=${MAIL_USERNAME:-}
       - MAIL_PASSWORD=${MAIL_PASSWORD:-}
       - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-tls}
-      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@proto-project.local}
-      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Proto Project}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@rally.local}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Rally}
       - MAIL_ENABLED=${MAIL_ENABLED:-true}
       - CORS_ENABLED=true
     healthcheck:
@@ -116,14 +133,34 @@ services:
       interval: 30s
       timeout: 5s
       retries: 5
+    # SECURITY HARDENING
+    read_only: false  # Keep false due to runtime file needs
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=256M,mode=1777
+      - /var/log:size=128M
     deploy:
       resources:
         limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
           memory: 1G
           cpus: '0.5'
-        reservations:
-          memory: 512M
-          cpus: '0.25'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
 networks:
   proto-network:

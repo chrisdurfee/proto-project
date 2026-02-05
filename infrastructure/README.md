@@ -1,6 +1,6 @@
 # Infrastructure
 
-This directory contains all development and deployment infrastructure for the Proto Project.
+This directory contains all development and deployment infrastructure.
 
 ## 📁 Directory Structure
 

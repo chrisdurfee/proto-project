@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Docker container startup script for Rally
+# Docker container startup script
 echo "🚀 Starting Rally container..."
 
 # Function to check if a service is ready
