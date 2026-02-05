@@ -2185,52 +2185,534 @@ router()->resource('user/:userId/account', UserController::class);
 - **Reactive Data**: Use `new Data({})` NOT `useState`
 - **Component instances**: Always `new Component()`, never `new Atom()`
 
+### Code Style (CRITICAL)
+
+#### Braces
+**Opening braces ALWAYS on new line** (methods, classes, if/else, loops):
+```javascript
+// ✅ CORRECT
+export class HomePage extends Component
+{
+    render()
+    {
+        return Div({ class: 'page' }, [
+            Header()
+        ]);
+    }
+
+    afterSetup()
+    {
+        if (this.data.loaded)
+        {
+            this.loadData();
+        }
+    }
+}
+
+// Atoms can have inline return
+export const QuickAction = Atom(({ icon, label, click }) => (
+    Button({
+        class: 'flex h-10 items-center gap-2',
+        click
+    }, [
+        MaterialIcon({ icon, size: 'sm' })
+    ])
+));
+
+// ❌ WRONG - Opening brace on same line
+export class HomePage extends Component {
+    render() {
+        return Div({ class: 'page' }, [
+            Header()
+        ]);
+    }
+}
+```
+
+#### Semicolons
+**ALWAYS use semicolons**:
+```javascript
+// ✅ CORRECT
+const data = new Data({ count: 0 });
+this.data.count = 5;
+app.navigate('home');
+
+// ❌ WRONG
+const data = new Data({ count: 0 })
+this.data.count = 5
+app.navigate('home')
+```
+
+#### Theme Colors (CRITICAL)
+**ALWAYS use theme variables, NEVER hardcoded colors**:
+```javascript
+// ✅ CORRECT - Theme variables
+{ class: 'text-foreground bg-surface border-border' }
+{ class: 'text-primary hover:text-primary-hover' }
+{ class: 'bg-accent text-accent-foreground' }
+{ class: 'bg-gradient-to-r from-primary to-accent' }
+
+// ❌ WRONG - Hardcoded colors
+{ class: 'text-white bg-black border-gray-300' }
+{ class: 'text-blue-500 hover:text-blue-700' }
+{ class: 'bg-red-500 text-white' }
+```
+
+**Available Theme Variables**:
+- **Text**: `text-foreground`, `text-muted-foreground`, `text-primary`, `text-accent`, `text-destructive`
+- **Background**: `bg-background`, `bg-surface`, `bg-surface-dark`, `bg-muted`, `bg-primary`, `bg-accent`, `bg-destructive`
+- **Border**: `border-border`, `border-input`, `border-primary`, `border-accent`
+- **Foreground**: `text-primary-foreground`, `text-accent-foreground`, `text-destructive-foreground`
+- **Hover States**: `hover:bg-muted`, `hover:text-primary`, `hover:border-primary`
+
+### File Organization
+Files should be organized by feature/module. Each module contains its own components, models, and pages. Shared components can be placed in a common directory if needed. Folders should be structures in nested levels of organisms, molecules, and atoms to reflect component complexity and reusability. Nested folders can be created for specific atoms, molecules, or organisms if needed for organization.
+
+e.g.
+```
+atoms/
+    /cards
+        post-card.js
+        user-card.js
+    /buttons
+        primary-button.js
+```
+
+**Module Structure**:
+```
+apps/{crm,main}/src/modules/
+  {moduleName}/
+    module.js                    # Module registration
+    components/
+      models/                    # API models
+        {name}-model.js
+      pages/                     # Full page components
+        {pageName}/
+          {pageName}-page.js
+          organisms/             # Complex composite components
+            {name}.js
+          molecules/             # Mid-level components
+            {name}.js
+          atoms/                 # Simple reusable components
+            {name}.js
+      organisms/                 # Shared organisms across module
+      molecules/                 # Shared molecules across module
+      atoms/                     # Shared atoms across module
+```
+
+**Example Structure**:
+```
+apps/main/src/modules/
+  home/
+    module.js
+    components/
+      models/
+        feed-model.js
+      pages/
+        home/
+          home-page.js           # Main page component
+          organisms/
+            feed-section.js
+            assistant-panel.js
+          molecules/
+            post-card.js
+            quick-actions-bar.js
+          atoms/
+            post-header.js
+            action-button.js
+```
+
 ### Common Mistakes (READ FIRST)
 
 1. ❌ DON'T use templates or JSX
 2. ❌ DON'T pass children in props: `Div({ children: [...] })`
 3. ❌ DON'T use `new` with Atoms: `new Button()`
 4. ❌ DON'T forget `new` with Components: `MyComponent()`
-5. ❌ DON'T use `.map()` for reactive lists
+5. ❌ DON'T use `.map()` for reactive lists - use `map` or `for` directive
 6. ❌ DON'T use `Import('./file.js')` - use function form
 7. ❌ DON'T call `render()` directly
 8. ❌ DON'T access DOM before `afterSetup()`
+9. ❌ DON'T use hardcoded colors - use theme variables
+10. ❌ DON'T put opening braces on same line (except inline Atom returns)
+
+### Modules System
+
+**Location**: `apps/{crm,main}/src/modules/{moduleName}/module.js`
+
+**Purpose**: Define routes, navigation links, and register module with the app.
+
+**Structure**:
+```javascript
+import { Icons } from "@base-framework/ui/icons";
+import { Module } from '../module/module.js';
+
+/**
+ * Routes for the module
+ * @type {Array<object>}
+ */
+const routes = Module.convertRoutes(
+[
+    {
+        path: '/',
+        import: () => import('./components/pages/home/home-page.js'),
+        title: 'Home'
+    },
+    {
+        path: '/settings',
+        import: () => import('./components/pages/settings/settings-page.js'),
+        title: 'Settings'
+    }
+]);
+
+/**
+ * Navigation links for the module
+ * @type {Array<object>}
+ */
+const links =
+[
+    {
+        label: 'Home',
+        href: './',
+        icon: Icons.home,
+        mobileOrder: 1,
+        exact: true
+    },
+    {
+        label: 'Settings',
+        href: './settings',
+        icon: Icons.settings,
+        mobileOrder: 5
+    }
+];
+
+/**
+ * Create and register the module
+ */
+Module.create(
+{
+    routes,
+    links
+});
+```
+
+**Route Options**:
+- `path` (string): Route path (relative to module base)
+- `import` (function): Dynamic import function
+- `title` (string): Page title
+- `exact` (boolean): Exact path match only
+
+**Link Options**:
+- `label` (string): Display text
+- `href` (string): Navigation path (relative: `./`, `./page`)
+- `icon` (string): Icon from `Icons` or `MaterialIcons`
+- `mobileOrder` (number): Order in mobile nav (1-10)
+- `exact` (boolean): Highlight only on exact match
+
+**Registration**:
+Add module to `apps/{crm,main}/src/modules/imported-modules.js`:
+```javascript
+/**
+ * Import all modules in order
+ */
+import "./activity/module.js";
+import "./community/module.js";
+import "./home/module.js";
+import "./settings/module.js";  // New module
+```
 
 ### Component Structure
 
+**Page Component**:
 ```javascript
 import { Component, Data } from '@base-framework/base';
 import { Div, Button } from '@base-framework/atoms';
+import { BlankPage } from '@base-framework/ui/pages';
+import { FeedModel } from '../../models/feed-model.js';
+import { FeedSection } from './organisms/feed-section.js';
 
-export class Counter extends Component
+/**
+ * HomePage
+ *
+ * Main home page combining feed and assistant
+ *
+ * @returns {BlankPage}
+ */
+export class HomePage extends Component
 {
+    /**
+     * Set up reactive data
+     *
+     * @returns {Data}
+     */
     setData()
     {
-        return new Data({ count: 0 });
+        return new FeedModel({
+            posts: [],
+            loading: true,
+            filter: {}
+        });
     }
 
+    /**
+     * Set up local state
+     *
+     * @returns {object}
+     */
     setupStates()
     {
-        return { isOpen: false };
+        return {
+            isOpen: false,
+            view: 'grid'
+        };
     }
 
+    /**
+     * Render the page
+     *
+     * @returns {object}
+     */
     render()
     {
-        return Div({ class: 'counter' }, [
-            Div('Count: [[count]]'),
-            Button({ click: () => this.data.count++ }, 'Increment')
+        return BlankPage({ class: 'home-page' }, [
+            FeedSection(this.data)
         ]);
     }
 
-    // Lifecycle hooks (in order)
-    onCreated() { /* props available, NO DOM yet */ }
-    beforeSetup() { /* before render */ }
-    afterSetup() { /* DOM created, this.panel available */ }
-    afterLayout() { /* DOM in document, safe for measurements */ }
-    beforeDestroy() { /* cleanup before removal */ }
+    /**
+     * After DOM is created
+     */
+    afterSetup()
+    {
+        this.loadFeed();
+    }
+
+    /**
+     * Load feed data from API
+     */
+    loadFeed()
+    {
+        this.data.xhr.all({}, (response) =>
+        {
+            if (response.success)
+            {
+                this.data.set('posts', response.data);
+                this.data.set('loading', false);
+            }
+        });
+    }
+
+    /**
+     * Cleanup before destroy
+     */
+    beforeDestroy()
+    {
+        // Clean up subscriptions, timers, etc.
+    }
 }
 
-// Usage: new Counter()
+export default HomePage;
+```
+
+**Organism Component**:
+```javascript
+import { Div, H2 } from '@base-framework/atoms';
+import { Atom } from '@base-framework/base';
+import { PostCard } from '../molecules/post-card.js';
+
+/**
+ * FeedSection
+ *
+ * Main feed section displaying posts
+ *
+ * @param {Data} data - Feed data
+ * @returns {object}
+ */
+export const FeedSection = Atom((data) => (
+    Div({ class: 'feed-section w-full' }, [
+        H2({ class: 'text-2xl font-bold text-foreground mb-4' }, 'Feed'),
+        Div({
+            class: 'space-y-4',
+            for: [data, 'posts', (post) => PostCard(post)]
+        })
+    ])
+));
+
+export default FeedSection;
+```
+
+**Molecule Component**:
+```javascript
+import { Avatar, Card, Button } from '@base-framework/ui/atoms';
+import { Div, Img, P, Span } from '@base-framework/atoms';
+import { Atom } from '@base-framework/base';
+import { MaterialIcon, MaterialIcons } from '@components/material-icon.js';
+
+/**
+ * PostCard
+ *
+ * Individual post card in feed
+ *
+ * @param {object} post - Post data
+ * @returns {object}
+ */
+export const PostCard = Atom((post) => (
+    Card({ class: 'post-card' }, [
+        Div({ class: 'flex items-center gap-3 p-4' }, [
+            Avatar({
+                src: post.user.avatar,
+                alt: post.user.name,
+                fallback: post.user.name[0]
+            }),
+            Div({ class: 'flex-1' }, [
+                P({ class: 'font-semibold text-foreground' }, post.user.name),
+                P({ class: 'text-sm text-muted-foreground' }, post.timeAgo)
+            ]),
+            Button({
+                variant: 'ghost',
+                size: 'icon',
+                click: () => handleOptions(post)
+            }, [
+                MaterialIcon({ icon: MaterialIcons.more_vert, size: 'sm' })
+            ])
+        ]),
+        post.image && Img({
+            src: post.image,
+            class: 'w-full aspect-video object-cover'
+        }),
+        Div({ class: 'p-4' }, [
+            P({ class: 'text-foreground' }, post.content)
+        ]),
+        Div({ class: 'flex items-center gap-6 px-4 pb-4 text-muted-foreground' }, [
+            Button({
+                variant: 'ghost',
+                class: 'flex items-center gap-2',
+                click: () => handleLike(post)
+            }, [
+                MaterialIcon({ icon: MaterialIcons.favorite_border, size: 'sm' }),
+                Span(post.likes)
+            ]),
+            Button({
+                variant: 'ghost',
+                class: 'flex items-center gap-2',
+                click: () => handleComment(post)
+            }, [
+                MaterialIcon({ icon: MaterialIcons.comment, size: 'sm' }),
+                Span(post.comments)
+            ])
+        ])
+    ])
+));
+
+const handleLike = (post) =>
+{
+    // Like logic
+};
+
+const handleComment = (post) =>
+{
+    // Comment logic
+};
+
+export default PostCard;
+```
+
+**Atom Component**:
+```javascript
+import { Button, Span } from '@base-framework/atoms';
+import { Atom } from '@base-framework/base';
+import { MaterialIcon } from '@components/material-icon.js';
+
+/**
+ * QuickAction
+ *
+ * A single quick action button
+ *
+ * @param {object} props
+ * @returns {object}
+ */
+export const QuickAction = Atom(({ icon, label, click }) => (
+    Button({
+        class: 'flex h-10 items-center gap-2 rounded-lg bg-foreground/5 border border-border pl-3 pr-4 active:scale-95 transition-transform hover:bg-muted shrink-0',
+        click
+    }, [
+        MaterialIcon({ icon, size: 'sm', class: 'text-foreground' }),
+        Span({ class: 'text-sm font-bold text-foreground whitespace-nowrap' }, label)
+    ])
+));
+
+export default QuickAction;
+```
+
+### Base UI Components & Icons
+
+**CRITICAL**: Use Base UI components as much as possible before creating custom ones.
+
+**Available Base UI Components**:
+```javascript
+import {
+    Avatar,
+    Badge,
+    Button,
+    Card,
+    Checkbox,
+    Dialog,
+    Input,
+    Label,
+    Select,
+    Switch,
+    Tabs,
+    Textarea
+} from '@base-framework/ui/atoms';
+```
+
+**Icon Priority**:
+1. **First**: Use Base Framework Icons
+2. **Second**: Use Material Icons when Base doesn't have the icon
+
+```javascript
+// ✅ CORRECT - Base Icons first
+import { Icons } from '@base-framework/ui/icons';
+import { Icon } from '@base-framework/ui/atoms';
+
+Icon({ size: 'sm' }, Icons.home);
+Icon({ size: 'md' }, Icons.settings);
+Button({ variant: 'withIcon', icon: Icons.plus }, 'Add');
+
+// ✅ CORRECT - Material Icons when Base doesn't have it
+import { MaterialIcon, MaterialIcons } from '@components/material-icon.js';
+
+MaterialIcon({ icon: MaterialIcons.notifications, size: 'md' });
+MaterialIcon({ icon: MaterialIcons.favorite, size: 'sm' });
+
+// ❌ WRONG - Using Material when Base has it
+MaterialIcon({ icon: MaterialIcons.home, size: 'sm' }); // Use Icons.home instead
+MaterialIcon({ icon: MaterialIcons.settings, size: 'sm' }); // Use Icons.settings instead
+```
+
+**Button Variants**:
+```javascript
+// Use Base UI Button variants
+Button({ variant: 'default' }, 'Default');
+Button({ variant: 'secondary' }, 'Secondary');
+Button({ variant: 'outline' }, 'Outline');
+Button({ variant: 'ghost' }, 'Ghost');
+Button({ variant: 'link' }, 'Link');
+Button({ variant: 'destructive' }, 'Delete');
+Button({ variant: 'icon' }, [Icon({ size: 'sm' }, Icons.settings)]);
+Button({ variant: 'withIcon', icon: Icons.plus }, 'Add New');
+```
+
+**Card Variants**:
+```javascript
+// Use Base UI Card
+Card({ class: 'p-4' }, [
+    Div({ class: 'card-header' }, [
+        H3({ class: 'text-lg font-semibold text-foreground' }, 'Title')
+    ]),
+    Div({ class: 'card-content' }, [
+        P({ class: 'text-muted-foreground' }, 'Content')
+    ])
+]);
 ```
 
 ### Layout Patterns
@@ -2241,13 +2723,13 @@ export class Counter extends Component
 Div({ class: 'container' }, [
     Div('Text'),
     Button({ click: handler }, 'Click')
-])
+]);
 
 // Text only
-Div('Just text')
+Div('Just text');
 
 // Props only
-Div({ class: 'empty' })
+Div({ class: 'empty' });
 ```
 
 **Data Binding**:
@@ -2271,13 +2753,17 @@ Select({ bind: 'form.color' }, [
 
 **Lists** (CRITICAL):
 ```javascript
-// ✅ CORRECT - Use map directive
-Ul({ map: [items, (item) => Li(item.name)] })
-Div({ map: [this.data.items, (item) => ItemCard(item)] }) // static version
-Div({ for: ['items', (item) => ItemCard(item)] }) // reactive version
+// ✅ CORRECT - Use for directive (reactive)
+Div({ for: ['posts', (post) => PostCard(post)] })
 
-// ✅ Also works
+// ✅ CORRECT - Use map directive (static)
+Div({ map: [this.data.posts, (post) => PostCard(post)] })
+
+// ✅ Also works for simple cases
 Ul([items.map(item => Li(item))])
+
+// ❌ WRONG
+Div({ children: items.map(item => ItemCard(item)) })
 ```
 
 **Watchers & Computed**:
@@ -2291,60 +2777,218 @@ Ul([items.map(item => Li(item))])
 // Deep paths
 { text: '[[user.profile.name]]' }
 
-// Two Data sources
-{ class: ['theme-[[theme]] [[page]]', [data1, data2]] }
+// Multi-data watcher
+{ class: ['[[propName]] [[otherPropName]]', [data1, data2]] }
 ```
 
 **Conditionals**:
 ```javascript
-// Simple
+// Simple conditional
 { children: [condition && element] }
+
+// Conditional with alternative
+{
+    children: [
+        condition ? TrueComponent() : FalseComponent()
+    ]
+}
+
+// Multiple conditions
+{
+    children: [
+        loading && LoadingSpinner(),
+        !loading && data.items.length > 0 && ItemsList(),
+        !loading && data.items.length === 0 && EmptyState()
+    ]
+}
 ```
 
-### Atoms (Functional)
+### Models (API Integration)
 
-**Create**:
+**Location**: `apps/{crm,main}/src/modules/{moduleName}/components/models/{name}-model.js`
+
+**Purpose**: Handle API communication and data management.
+
+**Structure**:
 ```javascript
-import { Atom } from '@base-framework/base';
-import { Button as BaseButton } from '@base-framework/atoms';
+import { Model } from "@base-framework/base";
 
-const Button = Atom((props, children) => (
-    BaseButton({
-        type: 'button',
-        ...props,
-        class: `btn ${props.class || ''}`
-    }, children)
-));
+/**
+ * FeedModel
+ *
+ * Handles feed API operations
+ *
+ * @type {typeof Model}
+ */
+export const FeedModel = Model.extend({
+    /**
+     * Base API URL
+     */
+    url: '/api/feed',
+
+    /**
+     * Custom API methods
+     */
+    xhr: {
+        /**
+         * Get all posts with filters
+         *
+         * @param {object} instanceParams
+         * @param {function} callBack
+         * @returns {XMLHttpRequest}
+         */
+        all(instanceParams, callBack)
+        {
+            const data = this.model.get();
+            const params = {
+                filter: data.filter || {},
+                limit: data.limit || 20,
+                offset: data.offset || 0
+            };
+
+            return this._get('', params, instanceParams, callBack);
+        },
+
+        /**
+         * Add a new post
+         *
+         * @param {object} instanceParams
+         * @param {function} callBack
+         * @param {FileList|File[]} [files] - Optional file attachments
+         * @returns {XMLHttpRequest}
+         */
+        add(instanceParams, callBack, files)
+        {
+            const data = this.model.get();
+
+            // Without files - send JSON
+            if (!files || files.length === 0)
+            {
+                const params = this.setupObjectData(data);
+                return this._post('', params, instanceParams, callBack);
+            }
+
+            // With files - use FormData
+            const formData = new FormData();
+            Object.keys(data).forEach(key =>
+            {
+                if (key !== 'attachments')
+                {
+                    formData.append(key, data[key]);
+                }
+            });
+
+            Array.from(files).forEach(file =>
+            {
+                formData.append('attachments[]', file);
+            });
+
+            return this._post('', formData, instanceParams, callBack);
+        },
+
+        /**
+         * Update existing post
+         *
+         * @param {object} instanceParams
+         * @param {function} callBack
+         * @returns {XMLHttpRequest}
+         */
+        update(instanceParams, callBack)
+        {
+            const params = this.setupObjectData();
+            const id = this.model.id;
+            const url = id ? `/${id}` : '';
+
+            return this._patch(url, params, instanceParams, callBack);
+        },
+
+        /**
+         * Delete post
+         *
+         * @param {object} instanceParams
+         * @param {function} callBack
+         * @returns {XMLHttpRequest}
+         */
+        delete(instanceParams, callBack)
+        {
+            const id = this.model.id;
+            if (!id) return false;
+
+            return this._delete(`/${id}`, {}, instanceParams, callBack);
+        },
+
+        /**
+         * Real-time sync using Server-Sent Events
+         *
+         * @param {object} instanceParams
+         * @param {function} callBack
+         * @param {function} onOpenCallBack
+         * @returns {object} { source, cleanup }
+         */
+        sync(instanceParams, callBack, onOpenCallBack)
+        {
+            const lastId = instanceParams?.lastId || 0;
+            const params = lastId ? `lastId=${lastId}` : '';
+            return this.setupEventSource('/sync', params, callBack, onOpenCallBack);
+        }
+    }
+});
 ```
 
-**Usage**:
+**Usage in Component**:
 ```javascript
-// ✅ CORRECT - No 'new'
-Button({ class: 'primary' }, 'Click')
-Button('Text only')
+import { Component } from '@base-framework/base';
+import { FeedModel } from '../../models/feed-model.js';
 
-// ❌ WRONG
-new Button()
-```
+export class FeedPage extends Component
+{
+    setData()
+    {
+        return new FeedModel({
+            posts: [],
+            loading: true,
+            filter: { type: 'all' }
+        });
+    }
 
-### Icons
+    afterSetup()
+    {
+        // Load initial data
+        this.data.xhr.all({}, (response) =>
+        {
+            if (response.success)
+            {
+                this.data.set('posts', response.data);
+                this.data.set('loading', false);
+            }
+        });
 
-**Import**:
-```javascript
-import { Icons } from '@base-framework/ui/icons';
-import { Icon } from '@base-framework/ui/atoms';
-```
+        // Set up real-time sync
+        this.data.xhr.sync(
+            { lastId: 0 },
+            (updates) =>
+            {
+                // Handle real-time updates
+                if (updates.merge)
+                {
+                    updates.merge.forEach(post =>
+                    {
+                        this.data.push('posts', post);
+                    });
+                }
+            },
+            () =>
+            {
+                console.log('Sync connected');
+            }
+        );
+    }
 
-**Usage**:
-```javascript
-// ✅ CORRECT
-Icon({ size: 'sm' }, Icons.home)
-I({ html: Icons.home })
-Button({ variant: 'withIcon', icon: Icons.plus }, 'Add')
+    beforeDestroy()
+    {
 
-// ❌ WRONG
-Icon(Icons.home)
-Icon({ icon: Icons.home })
+    }
+}
 ```
 
 ### State Management
@@ -2390,10 +3034,34 @@ import { Ajax } from '@base-framework/base';
 
 // GET
 Ajax({
-  method: 'GET',
-  url: '/api/users',
-  params: { active: 1 },
-  completed: (response, xhr) => {}
+    method: 'GET',
+    url: '/api/users',
+    params: { active: 1 },
+    completed: (response, xhr) =>
+    {
+        if (response.success)
+        {
+            // Handle response
+        }
+    }
+});
+
+// POST
+Ajax({
+    method: 'POST',
+    url: '/api/users',
+    params: { name: 'John', email: 'john@example.com' },
+    completed: (response) =>
+    {
+        if (response.success)
+        {
+            app.notify({
+                type: 'success',
+                title: 'Success',
+                description: 'User created'
+            });
+        }
+    }
 });
 ```
 
@@ -2402,8 +3070,13 @@ Ajax({
 ```javascript
 import { router, NavLink } from '@base-framework/base';
 
-// Setup FIRST
+// Setup FIRST (in main.js)
 router.setup('/app/', 'App Title');
+
+// Navigate programmatically
+app.navigate('home');
+app.navigate('user/profile');
+router.navigate('/settings');
 
 // Switch (first match)
 {
@@ -2414,12 +3087,12 @@ router.setup('/app/', 'App Title');
     ]
 }
 
-// Access params
+// Access params in component
 class UserDetail extends Component
 {
     render()
     {
-      const id = this.route.id;
+        const id = this.route.id;
         return Div(`User ID: ${id}`);
     }
 }
@@ -2430,7 +3103,7 @@ new NavLink({
     text: 'Users',
     exact: true,
     activeClass: 'active'
-})
+});
 ```
 
 ### Dynamic Imports
@@ -2438,19 +3111,153 @@ new NavLink({
 ```javascript
 import { Import } from '@base-framework/base';
 
-// ✅ CORRECT - Function form
+// ✅ CORRECT - Function form (required for Vite)
 Import(() => import('./components/heavy.js'))
 
-// Route-based
+// In module routes
+const routes = Module.convertRoutes(
+[
+    {
+        path: '/dashboard',
+        import: () => import('./components/pages/dashboard/dashboard-page.js'),
+        title: 'Dashboard'
+    }
+]);
+
+// Conditional import in component
 {
-    switch: [
-        { uri: '/dashboard', import: () => import('./pages/dashboard.js') }
+    children: [
+        condition && Import(() => import('./components/heavy-component.js'))
     ]
 }
 
-// ❌ WRONG
+// ❌ WRONG - String path doesn't work with Vite
 Import('./file.js')
 ```
+
+### Common Patterns
+
+**Loading States**:
+```javascript
+setData()
+{
+    return new Data({
+        title: 'My Page',
+        activeClass: 'inactive',
+        items: [],
+        loading: true
+    });
+}
+
+render()
+{
+    // Dynamic class with watcher for active state in class string
+    return Div({ class: 'page', class: 'is-[[activeClass]]' }, [
+
+        // Dynamic text with watcher for data title
+        H1('[[title]]'),
+
+        // reactive when using bindable data sources
+        If('loading', true, () => LoadingSpinner()),
+        If('loading', false, () => ContentSection(this.data)),
+
+        // On uses the Data, or context Data, or state in that order of priority
+        On('loading', (loading) =>
+        {
+            return (loading)
+            ? LoadingSpinner()
+            : ContentSection(this.data);
+        }),
+
+        // Base atoms includes many smart atoms
+        // On, OnState, If, IfState, OnRoute, UseParent, OnLoad, OnStateLoad, OnOpen, OnStateOpen
+    ]);
+}
+```
+
+**Empty States**:
+```javascript
+render()
+{
+    const something = false;
+    return Div({ class: 'page' }, [
+
+        // static conditional rendering that does not react to changes in data
+        this.data.items.length > 0 && ItemsList(this.data.items),
+        this.data.items.length === 0 && EmptyState({
+            message: 'No items found',
+            icon: Icons.inbox
+        })
+
+        something && EmptyState() // Simple static conditional rendering
+    ]);
+}
+```
+
+**Error Handling**:
+```javascript
+afterSetup()
+{
+    this.data.xhr.all({}, (response, xhr) =>
+    {
+        if (response.success)
+        {
+            this.data.set('items', response.data);
+        }
+        else
+        {
+            app.notify({
+                type: 'destructive',
+                title: 'Error',
+                description: response.message || 'Failed to load data',
+                icon: Icons.warning
+            });
+        }
+    });
+}
+```
+
+**Form Submission**:
+```javascript
+
+setData()
+{
+    return new Data({
+        form: {
+            name: '',
+            email: ''
+        }
+    });
+}
+
+render()
+{
+    return Form({ submit: (e) => this.handleSubmit(e) }, [
+        Input({ bind: 'form.name', placeholder: 'Name' }),
+        Input({ bind: 'form.email', placeholder: 'Email' }),
+        Button({ type: 'submit' }, 'Submit')
+    ]);
+}
+
+handleSubmit(e)
+{
+    e.preventDefault();
+
+    const formData = this.data.get('form');
+
+    this.data.xhr.add({}, (response) =>
+    {
+        if (response.success)
+        {
+            app.notify({
+                type: 'success',
+                title: 'Success',
+                description: 'Form submitted'
+            });
+            app.navigate('list');
+        }
+    });
+}
 
 ## 5. Anti-Patterns (What NOT to Do)
 
@@ -2500,11 +3307,21 @@ Import('./file.js')
 | ❌ WRONG | ✅ CORRECT |
 |---------|-----------|
 | `Div({ children: [...] })` | `Div({}, [...])` |
-| `Ul([items.map(...)])` | `Ul({ map: [items, ...] })` |
-| `new Button()` | `Button()` |
+| `Ul([items.map(...)])` | `Ul({ map: [items, ...] })` or `Ul({ for: ['items', ...] })` |
+| `new Button()` | `Button()` (Atoms don't use `new`) |
 | `Icon(Icons.home)` | `Icon({ size: 'sm' }, Icons.home)` |
 | `Import('./file.js')` | `Import(() => import('./file.js'))` |
 | `Icon({ icon: Icons.home })` | `Icon({ size: 'sm' }, Icons.home)` |
+| `class: 'text-white bg-black'` | `class: 'text-foreground bg-surface'` |
+| `class: 'text-blue-500'` | `class: 'text-primary'` |
+| `class: 'border-gray-300'` | `class: 'border-border'` |
+| `MaterialIcon({ icon: MaterialIcons.home })` | `Icon({ size: 'sm' }, Icons.home)` (use Base first) |
+| `export class Page extends Component {` | `export class Page extends Component\n{` (brace on new line) |
+| `render() {` | `render()\n{` (brace on new line) |
+| `const data = new Data({})` | `const data = new Data({});` (semicolon required) |
+| Module not in `imported-modules.js` | Add `import "./module/module.js";` |
+| Files in `src/modules/home/` | Organize: `src/modules/home/components/pages/home/` |
+| Custom button without Base UI | Use `Button` from `@base-framework/ui/atoms` first |
 
 ## 6. Testing (Backend)
 
