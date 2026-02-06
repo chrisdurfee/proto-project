@@ -2215,7 +2215,7 @@ export const QuickAction = Atom(({ icon, label, click }) => (
         class: 'flex h-10 items-center gap-2',
         click
     }, [
-        MaterialIcon({ icon, size: 'sm' })
+        UniversalIcon({ size: 'sm' }, icon)
     ])
 ));
 
@@ -2404,7 +2404,7 @@ Module.create(
 **Link Options**:
 - `label` (string): Display text
 - `href` (string): Navigation path (relative: `./`, `./page`)
-- `icon` (string): Icon from `Icons` or `MaterialIcons`
+- `icon` (string|object): Icon from `Icons` (Heroicons SVG), `MaterialSymbols`, or a Material Symbol name string
 - `mobileOrder` (number): Order in mobile nav (1-10)
 - `exact` (boolean): Highlight only on exact match
 
@@ -2541,11 +2541,113 @@ export default FeedSection;
 ```
 
 **Molecule Component**:
+Molecules are reusable layouts that combine atoms and can be used across different organisms or pages. Large molecules that are specific to a single organism can be placed in an `organisms` subfolder instead.
+
+Molecules and organisms should factor out the major portions to smaller atoms, molecules, and organisms to keep the layout maintainable and reusable.
 ```javascript
 import { Avatar, Card, Button } from '@base-framework/ui/atoms';
 import { Div, Img, P, Span } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { MaterialIcon, MaterialIcons } from '@components/material-icon.js';
+import { UniversalIcon } from '@base-framework/ui/atoms';
+import { Icons, MaterialSymbols } from '@base-framework/ui/icons';
+
+/**
+ * UserName
+ *
+ * Simple molecule for displaying user name and time
+ *
+ * @param {object} post - Post data
+ * @returns {object}
+ */
+const UserName = (post) => (
+    Div({ class: 'flex-1' }, [
+        P({ class: 'font-semibold text-foreground' }, post.user.name),
+        P({ class: 'text-sm text-muted-foreground' }, post.timeAgo)
+    ])
+);
+
+/**
+ * UserHeader
+ *
+ * Header section of a post card showing user info and options
+ *
+ * @param {object} post - Post data
+ * @returns {object}
+ */
+const UserHeader = (post) => (
+    Div({ class: 'flex items-center gap-3 p-4' }, [
+        Avatar({
+            src: post.user.avatar,
+            alt: post.user.name,
+            fallback: post.user.name[0]
+        }),
+        UserName(post),
+        Button({
+            variant: 'ghost',
+            size: 'icon',
+            click: () => handleOptions(post)
+        }, [
+            UniversalIcon({ size: 'sm' }, MaterialSymbols.more_vert)
+        ])
+    ])
+);
+
+/**
+ * PostImage
+ *
+ * Image section of a post card
+ *
+ * @param {string} src - Image URL
+ * @returns {object}
+ */
+const PostImage = (src) => (
+    Img({
+        src,
+        class: 'w-full aspect-video object-cover'
+    })
+);
+
+/**
+ * Content
+ *
+ * Text content section of a post card
+ *
+ * @param {string} text - Post content
+ * @returns {object}
+ */
+const Content = (text) => (
+    Div({ class: 'p-4' }, [
+        P({ class: 'text-foreground' }, text)
+    ])
+);
+
+/**
+ * ButtonGroup
+ *
+ * Action buttons for a post card (like, comment)
+ *
+ * @param {number} likes - Like count
+ * @param {number} comments - Comment count
+ * @param {function} onLike - Like button handler
+ * @param {function} onComment - Comment button handler
+ * @returns {object}
+ */
+const ButtonGroup = ({ likes, comments, onLike, onComment }) => (
+    Div({ class: 'flex items-center gap-6 px-4 pb-4 text-muted-foreground' }, [
+        Button({
+            variant: 'withIcon',
+            class: 'flex items-center gap-2',
+            click: onLike,
+            icon: Icons.hand.thumb.up
+        }, String(likes)),
+        Button({
+            variant: 'withIcon',
+            class: 'flex items-center gap-2',
+            click: onComment,
+            icon: Icons.chat
+        }, String(comments))
+    ])
+);
 
 /**
  * PostCard
@@ -2557,61 +2659,20 @@ import { MaterialIcon, MaterialIcons } from '@components/material-icon.js';
  */
 export const PostCard = Atom((post) => (
     Card({ class: 'post-card' }, [
-        Div({ class: 'flex items-center gap-3 p-4' }, [
-            Avatar({
-                src: post.user.avatar,
-                alt: post.user.name,
-                fallback: post.user.name[0]
-            }),
-            Div({ class: 'flex-1' }, [
-                P({ class: 'font-semibold text-foreground' }, post.user.name),
-                P({ class: 'text-sm text-muted-foreground' }, post.timeAgo)
-            ]),
-            Button({
-                variant: 'ghost',
-                size: 'icon',
-                click: () => handleOptions(post)
-            }, [
-                MaterialIcon({ icon: MaterialIcons.more_vert, size: 'sm' })
-            ])
-        ]),
-        post.image && Img({
-            src: post.image,
-            class: 'w-full aspect-video object-cover'
-        }),
-        Div({ class: 'p-4' }, [
-            P({ class: 'text-foreground' }, post.content)
-        ]),
-        Div({ class: 'flex items-center gap-6 px-4 pb-4 text-muted-foreground' }, [
-            Button({
-                variant: 'ghost',
-                class: 'flex items-center gap-2',
-                click: () => handleLike(post)
-            }, [
-                MaterialIcon({ icon: MaterialIcons.favorite_border, size: 'sm' }),
-                Span(post.likes)
-            ]),
-            Button({
-                variant: 'ghost',
-                class: 'flex items-center gap-2',
-                click: () => handleComment(post)
-            }, [
-                MaterialIcon({ icon: MaterialIcons.comment, size: 'sm' }),
-                Span(post.comments)
-            ])
-        ])
+
+        UserHeader(post),
+        post.image && PostImage(post.image),
+
+        Content(post.content),
+
+        ButtonGroup({
+            likes: post.likes,
+            comments: post.comments,
+            onLike: () => {},
+            onComment: () => {}
+        })
     ])
 ));
-
-const handleLike = (post) =>
-{
-    // Like logic
-};
-
-const handleComment = (post) =>
-{
-    // Comment logic
-};
 
 export default PostCard;
 ```
@@ -2620,7 +2681,7 @@ export default PostCard;
 ```javascript
 import { Button, Span } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { MaterialIcon } from '@components/material-icon.js';
+import { UniversalIcon } from '@base-framework/ui/atoms';
 
 /**
  * QuickAction
@@ -2635,7 +2696,7 @@ export const QuickAction = Atom(({ icon, label, click }) => (
         class: 'flex h-10 items-center gap-2 rounded-lg bg-foreground/5 border border-border pl-3 pr-4 active:scale-95 transition-transform hover:bg-muted shrink-0',
         click
     }, [
-        MaterialIcon({ icon, size: 'sm', class: 'text-foreground' }),
+        UniversalIcon({ size: 'sm', class: 'text-foreground' }, icon),
         Span({ class: 'text-sm font-bold text-foreground whitespace-nowrap' }, label)
     ])
 ));
@@ -2665,32 +2726,121 @@ import {
 } from '@base-framework/ui/atoms';
 ```
 
-**Icon Priority**:
-1. **First**: Use Base Framework Icons
-2. **Second**: Use Material Icons when Base doesn't have the icon
+### Universal Icon System
+
+Base UI features a **universal icon handler** that seamlessly supports both **Heroicons (SVG-based)** and **Material Symbols (font-based)**. All components automatically detect and render the appropriate icon type.
+
+**Icon Imports**:
+```javascript
+// Icon components
+import { Icon, MaterialIcon, UniversalIcon, isMaterialIcon, isHeroicon } from '@base-framework/ui/atoms';
+
+// Icon libraries
+import { Icons, MaterialSymbols } from '@base-framework/ui/icons';
+```
+
+**UniversalIcon (Recommended)**:
+Use `UniversalIcon` when you want to support both icon systems. All Base UI components (Button, Alert, Modal, Navigation, etc.) use this internally.
 
 ```javascript
-// ✅ CORRECT - Base Icons first
-import { Icons } from '@base-framework/ui/icons';
+import { UniversalIcon } from '@base-framework/ui/atoms';
+import { Icons, MaterialSymbols } from '@base-framework/ui/icons';
+
+// All of these work with UniversalIcon:
+UniversalIcon({ size: 'md' }, Icons.home);                            // Heroicon SVG
+UniversalIcon({ size: 'md' }, MaterialSymbols.home);                   // Material Symbol
+UniversalIcon({ size: 'md' }, 'home');                                 // Material Symbol name string
+UniversalIcon({ size: 'md' }, { name: 'favorite', variant: 'filled' }); // With variant
+```
+
+**Icon Detection Logic**:
+1. **SVG String** (Heroicons): Contains `<svg` → renders `Icon`
+2. **Object with `name`**: Has `.name` property → renders `MaterialIcon` with variant
+3. **Plain String**: No `<svg` → treats as Material Symbol name → renders `MaterialIcon`
+
+**Direct Icon Components**:
+```javascript
+// Heroicons (SVG) - use Icon component directly
 import { Icon } from '@base-framework/ui/atoms';
+import { Icons } from '@base-framework/ui/icons';
 
 Icon({ size: 'sm' }, Icons.home);
 Icon({ size: 'md' }, Icons.settings);
-Button({ variant: 'withIcon', icon: Icons.plus }, 'Add');
 
-// ✅ CORRECT - Material Icons when Base doesn't have it
-import { MaterialIcon, MaterialIcons } from '@components/material-icon.js';
+// Material Symbols (Font) - use MaterialIcon component directly
+import { MaterialIcon } from '@base-framework/ui/atoms';
+import { MaterialSymbols } from '@base-framework/ui/icons';
 
-MaterialIcon({ icon: MaterialIcons.notifications, size: 'md' });
-MaterialIcon({ icon: MaterialIcons.favorite, size: 'sm' });
+MaterialIcon({ name: MaterialSymbols.home, size: 'md' });
+MaterialIcon({ name: 'notifications', size: 'md' });
+MaterialIcon({ name: 'favorite', variant: 'filled', size: 'sm' });
+```
 
-// ❌ WRONG - Using Material when Base has it
-MaterialIcon({ icon: MaterialIcons.home, size: 'sm' }); // Use Icons.home instead
-MaterialIcon({ icon: MaterialIcons.settings, size: 'sm' }); // Use Icons.settings instead
+**Material Symbol Variants**: `outlined` (default), `filled`, `rounded`, `sharp`
+
+**Consistent Sizes** (both systems use identical pixel sizes):
+| Size | Pixels | Tailwind |
+|------|--------|----------|
+| xs | 16px | w-4 h-4 |
+| sm | 24px | w-6 h-6 (default) |
+| md | 32px | w-8 h-8 |
+| lg | 40px | w-10 h-10 |
+| xl | 48px | w-12 h-12 |
+| 2xl | 56px | w-14 h-14 |
+| 3xl | 64px | w-16 h-16 |
+
+**Using Icons in Components**:
+All Base UI components that accept an `icon` prop support both icon systems automatically:
+```javascript
+import { Button } from '@base-framework/ui/atoms';
+import { Icons, MaterialSymbols } from '@base-framework/ui/icons';
+
+// All work automatically - no configuration needed:
+Button({ variant: 'withIcon', icon: Icons.plus }, 'Add Item');          // Heroicon
+Button({ variant: 'withIcon', icon: MaterialSymbols.add }, 'Add Item');  // Material Symbol
+Button({ variant: 'withIcon', icon: 'add' }, 'Add Item');               // Material Symbol name
+Button({ variant: 'withIcon', icon: { name: 'favorite', variant: 'filled' } }, 'Like'); // With variant
+
+// Works the same in Alert, Modal, Navigation, etc.
+Alert({ type: 'success', icon: Icons.check, title: 'Done!' });
+Alert({ type: 'success', icon: MaterialSymbols.status.success, title: 'Done!' });
+```
+
+**Helper Functions** (for custom components):
+```javascript
+import { isMaterialIcon, isHeroicon } from '@base-framework/ui/atoms';
+
+isMaterialIcon('home');              // true
+isMaterialIcon(MaterialSymbols.add); // true
+isMaterialIcon(Icons.home);          // false (SVG string)
+
+isHeroicon(Icons.home);              // true
+isHeroicon('home');                  // false
+```
+
+**Custom Components with Universal Icons**:
+```javascript
+import { Div, Span } from '@base-framework/atoms';
+import { Atom } from '@base-framework/base';
+import { UniversalIcon } from '@base-framework/ui/atoms';
+
+export const CustomCard = Atom((props) => (
+    Div({ class: 'card' }, [
+        props.icon && UniversalIcon({ size: 'md' }, props.icon),
+        Div({ class: 'card-content' }, props.children)
+    ])
+));
+
+// Now works with both icon systems:
+CustomCard({ icon: Icons.star }, [...]);
+CustomCard({ icon: MaterialSymbols.star }, [...]);
+CustomCard({ icon: 'star' }, [...]);
 ```
 
 **Button Variants**:
 ```javascript
+import { Button } from '@base-framework/ui/atoms';
+
 // Use Base UI Button variants
 Button({ variant: 'default' }, 'Default');
 Button({ variant: 'secondary' }, 'Secondary');
@@ -3315,7 +3465,10 @@ handleSubmit(e)
 | `class: 'text-white bg-black'` | `class: 'text-foreground bg-surface'` |
 | `class: 'text-blue-500'` | `class: 'text-primary'` |
 | `class: 'border-gray-300'` | `class: 'border-border'` |
-| `MaterialIcon({ icon: MaterialIcons.home })` | `Icon({ size: 'sm' }, Icons.home)` (use Base first) |
+| `import { MaterialIcon } from '@components/material-icon.js'` | `import { MaterialIcon, UniversalIcon } from '@base-framework/ui/atoms'` |
+| `import { MaterialIcons } from '@components/material-icon.js'` | `import { MaterialSymbols } from '@base-framework/ui/icons'` |
+| `MaterialIcon({ icon: 'home' })` | `MaterialIcon({ name: 'home', size: 'sm' })` (use `name` not `icon`) |
+| `UniversalIcon('home')` | `UniversalIcon({ size: 'sm' }, 'home')` (icon is 2nd arg) |
 | `export class Page extends Component {` | `export class Page extends Component\n{` (brace on new line) |
 | `render() {` | `render()\n{` (brace on new line) |
 | `const data = new Data({})` | `const data = new Data({});` (semicolon required) |
