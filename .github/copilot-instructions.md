@@ -2184,28 +2184,38 @@ router()->resource('user/:userId/account', UserController::class);
 - **Children as 2nd argument**: NEVER in props
 - **Reactive Data**: Use `new Data({})` NOT `useState`
 - **Component instances**: Always `new Component()`, never `new Atom()`
+- Composition over inheritance: Build complex components by composing simpler ones, not by extending classes
+
+All new layouts should be built as close to pixel-perfect as possible to the design from Figma or screen shots, using the provided theme variables for colors, spacing, and typography. Avoid using utility classes that don't map directly to the design. If a specific style is needed that isn't covered by theme variables, add a new variable to the theme instead of hardcoding values.
 
 ### Code Style (CRITICAL)
 
 #### Braces
 **Opening braces ALWAYS on new line** (methods, classes, if/else, loops):
 ```javascript
+import { BlankPage } from "@base-framework/ui/pages";
+import { Div } from "@base-framework/atoms";
+import { Component, Atom, Data } from "@base-framework/base";
+
 // ✅ CORRECT
-export class HomePage extends Component
-{
-    render()
-    {
-        return Div({ class: 'page' }, [
+export const HomePage = () => (
+    new BlankPage([
+        Div({ class: 'page' }, [
             Header()
-        ]);
+        ])
+    ])
+);
+
+class Counter extends Component
+{
+    setData()
+    {
+        return new Data({ count: 0 });
     }
 
-    afterSetup()
+    render()
     {
-        if (this.data.loaded)
-        {
-            this.loadData();
-        }
+        return Div({ class: 'page' }, '[[count]]');
     }
 }
 
@@ -2220,7 +2230,7 @@ export const QuickAction = Atom(({ icon, label, click }) => (
 ));
 
 // ❌ WRONG - Opening brace on same line
-export class HomePage extends Component {
+export class Counter extends Component {
     render() {
         return Div({ class: 'page' }, [
             Header()
@@ -2245,12 +2255,17 @@ app.navigate('home')
 
 #### Theme Colors (CRITICAL)
 **ALWAYS use theme variables, NEVER hardcoded colors**:
+Map all new created components to theme variables for text, background, borders, and hover states. This ensures consistency and allows for easy theming across the app. Avoid using hardcoded color values like `#fff`, `rgb(0,0,0)`, or Tailwind color classes like `text-white` or `bg-black`.
+
+The theme is based on Shadcn UI with full light/dark mode support.
+
 ```javascript
 // ✅ CORRECT - Theme variables
-{ class: 'text-foreground bg-surface border-border' }
-{ class: 'text-primary hover:text-primary-hover' }
+{ class: 'text-foreground bg-background border-border' }
+{ class: 'bg-card text-card-foreground' }
+{ class: 'bg-primary text-primary-foreground' }
 { class: 'bg-accent text-accent-foreground' }
-{ class: 'bg-gradient-to-r from-primary to-accent' }
+{ class: 'hover:bg-muted hover:text-muted-foreground' }
 
 // ❌ WRONG - Hardcoded colors
 { class: 'text-white bg-black border-gray-300' }
@@ -2258,12 +2273,57 @@ app.navigate('home')
 { class: 'bg-red-500 text-white' }
 ```
 
-**Available Theme Variables**:
-- **Text**: `text-foreground`, `text-muted-foreground`, `text-primary`, `text-accent`, `text-destructive`
-- **Background**: `bg-background`, `bg-surface`, `bg-surface-dark`, `bg-muted`, `bg-primary`, `bg-accent`, `bg-destructive`
-- **Border**: `border-border`, `border-input`, `border-primary`, `border-accent`
-- **Foreground**: `text-primary-foreground`, `text-accent-foreground`, `text-destructive-foreground`
-- **Hover States**: `hover:bg-muted`, `hover:text-primary`, `hover:border-primary`
+**Available Theme Variables** (based on Shadcn UI):
+
+**Core Colors**:
+- `bg-background` / `text-foreground` - Default background/text colors
+The text has 4 levels of emphasis:
+- `text-foreground` - Primary text
+- `text-foreground-secondary` - Secondary text
+- `text-foreground-tertiary` - Tertiary text
+- `text-foreground-quaternary` - Quaternary text (e.g., disabled)
+- `bg-card` / `text-card-foreground` - Card backgrounds
+- `bg-popover` / `text-popover-foreground` - Popovers, dropdowns, hover cards
+
+**Interactive Elements**:
+- `bg-primary` / `text-primary-foreground` - Primary buttons and CTAs
+- `bg-secondary` / `text-secondary-foreground` - Secondary buttons
+- `bg-accent` / `text-accent-foreground` - Hover effects, highlights (e.g., dropdown items, select items)
+- `bg-muted` / `text-muted-foreground` - Muted backgrounds (tabs, skeleton, switch)
+
+**Feedback Colors**:
+- `bg-destructive` / `text-destructive-foreground` - Destructive actions (delete, error)
+- `bg-warning` / `text-warning-foreground` - Warning actions and alerts
+
+**Borders & Inputs**:
+- `border-border` - Default border color
+- `border-input` / `bg-input` - Input field borders and backgrounds
+- `ring-ring` - Focus ring color
+
+**Text Sizes**:
+- `text-xs` - Extra small text
+- `text-sm` - Small text
+- `text-base` - Base text size
+- `text-lg` - Large text
+- `text-xl` - Extra large text
+- `text-2xl` - 2x extra large text
+- `text-3xl` - 3x extra large text
+
+**Common Patterns**:
+```javascript
+// Buttons
+Button({ variant: 'default' }, [...])     // bg-primary text-primary-foreground
+Button({ variant: 'secondary' }, [...])   // bg-secondary text-secondary-foreground
+Button({ variant: 'destructive' }, [...]) // bg-destructive text-destructive-foreground
+Button({ variant: 'warning' }, [...])     // bg-warning text-warning-foreground
+
+// Cards
+Card({ class: 'bg-card text-card-foreground border-border' }, [...])
+
+// Hover states
+{ class: 'hover:bg-accent hover:text-accent-foreground' }
+{ class: 'hover:bg-muted hover:text-muted-foreground' }
+```
 
 ### File Organization
 Files should be organized by feature/module. Each module contains its own components, models, and pages. Shared components can be placed in a common directory if needed. Folders should be structures in nested levels of organisms, molecules, and atoms to reflect component complexity and reusability. Nested folders can be created for specific atoms, molecules, or organisms if needed for organization.
@@ -2404,7 +2464,7 @@ Module.create(
 **Link Options**:
 - `label` (string): Display text
 - `href` (string): Navigation path (relative: `./`, `./page`)
-- `icon` (string|object): Icon from `Icons` (Heroicons SVG), `MaterialSymbols`, or a Material Symbol name string
+- `icon` (string|object): Icon from `Icons` (Heroicons SVG), `MaterialSymbols`, or a Material Symbol name string if not set in `MaterialSymbols`
 - `mobileOrder` (number): Order in mobile nav (1-10)
 - `exact` (boolean): Highlight only on exact match
 
@@ -2430,14 +2490,7 @@ import { BlankPage } from '@base-framework/ui/pages';
 import { FeedModel } from '../../models/feed-model.js';
 import { FeedSection } from './organisms/feed-section.js';
 
-/**
- * HomePage
- *
- * Main home page combining feed and assistant
- *
- * @returns {BlankPage}
- */
-export class HomePage extends Component
+const Props =
 {
     /**
      * Set up reactive data
@@ -2464,18 +2517,6 @@ export class HomePage extends Component
             isOpen: false,
             view: 'grid'
         };
-    }
-
-    /**
-     * Render the page
-     *
-     * @returns {object}
-     */
-    render()
-    {
-        return BlankPage({ class: 'home-page' }, [
-            FeedSection(this.data)
-        ]);
     }
 
     /**
@@ -2510,6 +2551,21 @@ export class HomePage extends Component
     }
 }
 
+/**
+ * HomePage
+ *
+ * Main home page combining feed and assistant
+ *
+ * @returns {BlankPage}
+ */
+export const HomePage = () => (
+    new BlankPage(Props, [
+        BlankPage({ class: 'home-page' }, [
+            FeedSection()
+        ])
+    ])
+);
+
 export default HomePage;
 ```
 
@@ -2527,12 +2583,12 @@ import { PostCard } from '../molecules/post-card.js';
  * @param {Data} data - Feed data
  * @returns {object}
  */
-export const FeedSection = Atom((data) => (
+export const FeedSection = Atom(() => (
     Div({ class: 'feed-section w-full' }, [
         H2({ class: 'text-2xl font-bold text-foreground mb-4' }, 'Feed'),
         Div({
             class: 'space-y-4',
-            for: [data, 'posts', (post) => PostCard(post)]
+            for: ['posts', (post) => PostCard(post)]
         })
     ])
 ));
@@ -3462,7 +3518,7 @@ handleSubmit(e)
 | `Icon(Icons.home)` | `Icon({ size: 'sm' }, Icons.home)` |
 | `Import('./file.js')` | `Import(() => import('./file.js'))` |
 | `Icon({ icon: Icons.home })` | `Icon({ size: 'sm' }, Icons.home)` |
-| `class: 'text-white bg-black'` | `class: 'text-foreground bg-surface'` |
+| `class: 'text-white'` | `class: 'text-foreground'` |
 | `class: 'text-blue-500'` | `class: 'text-primary'` |
 | `class: 'border-gray-300'` | `class: 'border-border'` |
 | `import { MaterialIcon } from '@components/material-icon.js'` | `import { MaterialIcon, UniversalIcon } from '@base-framework/ui/atoms'` |
