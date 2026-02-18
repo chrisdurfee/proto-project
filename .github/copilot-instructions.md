@@ -2601,10 +2601,10 @@ Molecules are reusable layouts that combine atoms and can be used across differe
 
 Molecules and organisms should factor out the major portions to smaller atoms, molecules, and organisms to keep the layout maintainable and reusable.
 ```javascript
-import { Avatar, Card, Button } from '@base-framework/ui/atoms';
+import { Card, Button, UniversalIcon } from '@base-framework/ui/atoms';
+import { Avatar } from '@base-framework/ui/molecules';
 import { Div, Img, P, Span } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { UniversalIcon } from '@base-framework/ui/atoms';
 import { Icons, MaterialSymbols } from '@base-framework/ui/icons';
 
 /**
@@ -2643,7 +2643,7 @@ const UserHeader = (post) => (
             size: 'icon',
             click: () => handleOptions(post)
         }, [
-            UniversalIcon({ size: 'sm' }, MaterialSymbols.more_vert)
+            UniversalIcon({ size: 'sm' }, 'more_vert')
         ])
     ])
 );
