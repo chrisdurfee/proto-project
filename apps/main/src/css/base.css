@@ -6,6 +6,7 @@
 	}
 
 	body {
+		font-family: 'Inter', sans-serif;
 		font-feature-settings: "rlig" 1, "calt" 1;
 		/* Improve font rendering */
 		-webkit-font-smoothing: antialiased;
@@ -128,6 +129,7 @@
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
 	font-feature-settings: 'liga';
+	user-select: none;
 }
 
 .material-symbols-filled {
@@ -147,6 +149,7 @@
 	text-rendering: optimizeLegibility;
 	font-feature-settings: 'liga';
 	font-variation-settings: 'FILL' 1;
+	user-select: none;
 }
 
 .material-symbols-rounded {
@@ -165,6 +168,20 @@
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
 	font-feature-settings: 'liga';
+	/* Hide text content until icon font loads */
+	color: transparent;
+	user-select: none;
+}
+
+.material-symbols-rounded::before {
+	content: '';
+	display: inline-block;
+}
+
+/* Show icon when font is loaded */
+.material-symbols-rounded.loaded,
+html.fonts-loaded .material-symbols-rounded {
+	color: currentColor;
 }
 
 .material-symbols-sharp {
@@ -183,6 +200,20 @@
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
 	font-feature-settings: 'liga';
+	/* Hide text content until icon font loads */
+	color: transparent;
+	user-select: none;
+}
+
+.material-symbols-sharp::before {
+	content: '';
+	display: inline-block;
+}
+
+/* Show icon when font is loaded */
+.material-symbols-sharp.loaded,
+html.fonts-loaded .material-symbols-sharp {
+	color: currentColor;
 }
 
 i.icon-size svg {
@@ -216,7 +247,7 @@ i.icon-size svg {
 	}
 }
 
-@media (min-width: 641px) {
+@media (min-width: 640px) {
 
 	.app-container {
 		padding-left: env(safe-area-inset-left);

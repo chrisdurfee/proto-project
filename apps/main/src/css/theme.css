@@ -93,6 +93,22 @@
     }
 }
 
+@utility top-safe {
+	top: max(var(--safe-top), 0px);
+}
+
+@utility bottom-safe {
+	bottom: max(var(--safe-bottom), 0px);
+}
+
+@utility left-safe {
+	left: max(var(--safe-left), 0px);
+}
+
+@utility right-safe {
+	right: max(var(--safe-right), 0px);
+}
+
 @utility pt-safe-top {
     padding-top: var(--safe-top);
 }

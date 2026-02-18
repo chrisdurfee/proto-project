@@ -1,21 +1,16 @@
 /* Tell Tailwind where to look for class names (paths are relative to this file) */
-@source "../../index.html";
+@source "../index.html";
 @source "../**/*.{html,js,jsx,ts,tsx,mjs,cjs,md,mdx,vue,svelte}";
-@source "../../node_modules/@base-framework/**/*.{js,ts,jsx,tsx}";
-@source "../../node_modules/@base-framework/atoms/dist/**/*.{js,ts,jsx,tsx}";
-@source "../../node_modules/@base-framework/organisms/dist/**/*.{js,ts,jsx,tsx}";
-@source "../../node_modules/@base-framework/ui/dist/**/*.{js,ts,jsx,tsx}";
+@source "../node_modules/@base-framework/**/*.{js,ts,jsx,tsx}";
+@source "../node_modules/@base-framework/atoms/dist/**/*.{js,ts,jsx,tsx}";
+@source "../node_modules/@base-framework/organisms/dist/**/*.{js,ts,jsx,tsx}";
+@source "../node_modules/@base-framework/ui/dist/**/*.{js,ts,jsx,tsx}";
 
 @import "tailwindcss";
 
 @theme {
-    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-
     --color-background: hsl(0 0% 92%);
-    --color-foreground: hsl(0 0% 0%);
-    --color-foreground-secondary: hsl(240 5% 55%);
-    --color-foreground-tertiary: hsl(240 2% 77%);
-    --color-foreground-quaternary: hsl(240 2% 86%);
+    --color-foreground: hsl(240 10% 3.9%);
     --color-card: hsl(0 0% 95%);
     --color-card-foreground: hsl(240 10% 3.9%);
     --color-popover: hsl(0 0% 95%);
@@ -54,21 +49,18 @@
 /* 2) System dark mode */
 @media (prefers-color-scheme: dark) {
     :root:not(.light) {
-        --color-background: hsl(240 10% 3.9%);
-        --color-foreground: hsl(0 0% 100%);
-        --color-foreground-secondary: hsl(240 3% 56%);
-        --color-foreground-tertiary: hsl(240 2% 28%);
-        --color-foreground-quaternary: hsl(240 2% 17%);
-        --color-card: hsl(240 3% 11%);
-        --color-card-foreground: hsl(0 0% 100%);
-        --color-popover: hsl(240 3% 11%);
-        --color-popover-foreground: hsl(0 0% 100%);
-        --color-primary: hsl(0 0% 100%);
-        --color-primary-foreground: hsl(240 10% 3.9%);
+        --color-background: hsl(240 10% 2.5%);
+        --color-foreground: hsl(0 0% 98%);
+        --color-card: hsl(240 10% 4%);
+        --color-card-foreground: hsl(0 0% 98%);
+        --color-popover: hsl(240 10% 4%);
+        --color-popover-foreground: hsl(0 0% 98%);
+        --color-primary: hsl(0 0% 98%);
+        --color-primary-foreground: hsl(240 5.9% 10%);
         --color-secondary: hsl(240 3.7% 15.9%);
-        --color-secondary-foreground: hsl(0 0% 100%);
-        --color-muted: hsl(240 4% 16%);
-        --color-muted-foreground: hsl(240 3% 56%);
+        --color-secondary-foreground: hsl(0 0% 98%);
+        --color-muted: hsl(240 3.7% 15.9%);
+        --color-muted-foreground: hsl(240 5% 64.9%);
         --color-accent: hsl(240 3.7% 15.9%);
         --color-accent-foreground: hsl(0 0% 98%);
         --color-destructive: hsl(0 62.8% 30.6%);
@@ -82,15 +74,20 @@
     }
 }
 
-@layer base {
-    html,
-    body,
-    input,
-    textarea,
-    select,
-    button {
-        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    }
+@utility top-safe {
+	top: max(var(--safe-top), 0px);
+}
+
+@utility bottom-safe {
+	bottom: max(var(--safe-bottom), 0px);
+}
+
+@utility left-safe {
+	left: max(var(--safe-left), 0px);
+}
+
+@utility right-safe {
+	right: max(var(--safe-right), 0px);
 }
 
 @utility pt-safe-top {
