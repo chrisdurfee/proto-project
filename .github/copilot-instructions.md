@@ -5,8 +5,41 @@
 ## 1. Project Overview & Architecture
 We strive to maintain high code quality and consistency. The code should be resilient, scalable, maintainable, and secure. Functions and methods should adhere to single responsibility principle, and classes should follow SOLID principles. fail gracefully with proper error handling and logging. Database tables should be normalized to at least 3NF.
 
+### Critical Principles: ###
+
+#### ZERO TOLERANCE: No Vertical Alignment — ever, in any form. ####
+Vertical alignment is strictly forbidden in ALL code and ALL contexts. This means you must NEVER pad values, keys, operators, types, or comments with extra spaces to make them line up into visual columns. This rule has no exceptions and no edge cases. Every instance of vertical alignment is a formatting error that must be corrected.
+
+This prohibition covers every possible form, including but not limited to:
+- Object or array literal properties padded with spaces so their values line up
+- Variable assignments padded so `=` signs line up
+- Object keys padded so `:` or `=>` operators line up
+- `@param`, `@type`, `@returns`, or `@var` doc block columns aligned with spaces
+- Inline comments padded so they start in the same column
+- String values padded with trailing spaces to align symbols on the next token
+- Any other use of extra whitespace whose sole purpose is visual column alignment
+
+**WRONG — object array with padded properties (a common agent mistake):**
+```js
+{ value: 'white',       label: 'White',  hex: '#F8F8F8' },
+{ value: 'pearl_white', label: 'Pearl',  hex: '#EEE8D5' },
+{ value: 'black',       label: 'Black',  hex: '#1A1A1A' },
+```
+
+**CORRECT — each property immediately follows its key with a single space:**
+```js
+{ value: 'white', label: 'White', hex: '#F8F8F8' },
+{ value: 'pearl_white', label: 'Pearl', hex: '#EEE8D5' },
+{ value: 'black', label: 'Black', hex: '#1A1A1A' },
+```
+
+If you produce vertically aligned code you must fix it before considering the task complete. There is no situation where vertical alignment is acceptable.
+
+Always use tabs with 4 spaces for alignment, and do not use spaces for indentation. This ensures consistent formatting across different editors and prevents issues with mixed indentation.
+
 ### Stack
 - **Backend**: PHP 8.4 monolith using **Proto Framework**. Entry: `public/api/index.php`.
+Proto comes with built-in features like routing, middleware, server events, events, sockets, tests, controllers, models, factories, seeders, generators, dispatching, jobs, integrations, automations, auth, patterns, services, storages, migrations, ORM, validation, file storage, utils for files, strings, dates, json, encryption, filtering, asn arrays.
 - **Frontend**: Vite-based apps in `apps/{crm,developer,main}` using **Base Framework** (fundamentally different from React/Vue).
 - **Infrastructure**: Dockerized (Web/PHP, MariaDB, Redis) via `infrastructure/docker-compose.yaml`.
 
@@ -85,14 +118,18 @@ curl -X POST "https://localhost:8443/api/developer/generator" \
   - Numbers: `numberBetween()`, `floatBetween()`, `boolean()`
   - Dates: `dateTimeBetween()`, `date()`, `time()`
   - Utility: `randomElement()`, `uuid()`, `url()`, `slug()`
-- **NOT Available**: `latitude()`, `longitude()`, `imageUrl()`, `optional()`, `randomFloat()`, `paragraphs()`, `dateTimeThisMonth()`
-- **Replacements**:
-  - `latitude()` → `floatBetween(25.0, 50.0, 6)`
-  - `longitude()` → `floatBetween(-125.0, -65.0, 6)`
-  - `randomFloat(2, 10, 100)` → `floatBetween(10.0, 100.0, 2)`
-  - `optional(0.7)->value` → `boolean(70) ? value : null`
-  - `paragraphs(3, true)` → `paragraph(3)`
-  - `dateTimeThisMonth()` → `dateTimeBetween('-1 month', 'now')`
+- **Also Available** (check SimpleFaker source for full list):
+  - Geo: `latitude()`, `longitude()`
+  - Contact: `safeEmail()`, `phoneNumber()`, `company()`, `jobTitle()`
+  - Location: `address()`, `country()`, `countryCode()`
+  - Numbers: `randomFloat()`, `randomDigit()`
+  - Text: `paragraphs()`, `realText()`
+  - Advanced: `optional()`, `unique()`, `randomElements()`, `hexColor()`, `imageUrl()`
+  - Dates: `dateTimeThisMonth()`, `dateTimeThisYear()`, `dateTimeThisDecade()`
+- **Aliases / Alternatives** (both work, use whichever you prefer):
+  - `randomFloat(2, 10, 100)` or `floatBetween(10.0, 100.0, 2)`
+  - `paragraphs(3, true)` or `paragraph(3)`
+  - `dateTimeThisMonth()` or `dateTimeBetween('-1 month', 'now')`
 
 - **Usage**:
 ```php
@@ -136,7 +173,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'username' => $this->faker()->userName(), // METHOD call
+            'username' => $this->faker()->username(), // METHOD call
             'email' => $this->faker()->email(),
             'password' => password_hash('password', PASSWORD_DEFAULT),
             'firstName' => $this->faker()->firstName(),
@@ -147,9 +184,24 @@ class UserFactory extends Factory
     // State methods
     public function admin(): static
     {
-        return $this->state(['role' => 'admin']);
+        return $this->state(fn() => ['role' => 'admin']); // MUST be a callable, not a plain array
     }
 }
+```
+
+**CRITICAL - Enum Fields in Factories**:
+When a factory uses `randomElement()` for an enum field, the values MUST exactly match the enum values defined in the migration. Invalid values cause a `RuntimeException: Failed to create model` at runtime.
+```php
+// Migration defines:
+$table->enum('category', 'events', 'community', 'automotive', 'lifestyle', 'performance', 'technology');
+
+// ❌ WRONG - 'tech' and 'culture' are NOT in the enum
+'category' => $this->faker()->randomElement(['automotive', 'lifestyle', 'tech', 'culture'])
+
+// ✅ CORRECT - matches migration enum values exactly
+'category' => $this->faker()->randomElement(['automotive', 'lifestyle', 'events', 'community', 'performance', 'technology'])
+```
+Always cross-reference the migration file when writing factory `randomElement()` calls for enum fields.
 ```
 
 Add a @method comment to factory model class help the intellisense. This should be added using the "use" keyword and factory ":class" static property.
@@ -164,7 +216,7 @@ use Modules\User\Models\Factories\UserFactory;
 class User extends Model
 {
     /**
-     * @var string|null $factory the factory class name
+     * @var string|null $factory the factory class name (IDE hint only — HasFactory resolves by naming convention)
      */
     protected static ?string $factory = UserFactory::class;
 
@@ -399,8 +451,8 @@ use Modules\Post\Media\Models\PostMedia;
 $user = User::get($userId);
 $class = User::class;
 
-// In model joins
-$builder->hasMany(PostMedia::class, 'postId', 'id', 'media');
+// In model joins (JoinBuilder methods only)
+$builder->belongsTo(User::class, fields: ['name', 'email']);
 
 // In type hints
 public function getUser(User $user): User
@@ -415,8 +467,8 @@ protected static ?string $factory = PostFactory::class;
 $user = \Modules\User\Models\User::get($userId);
 $class = \Modules\User\Models\User::class;
 
-// ❌ WRONG - In builder methods
-$builder->hasMany(\Modules\Post\Media\Models\PostMedia::class, 'postId', 'id', 'media');
+// ❌ WRONG - Inline fully qualified names in builder methods
+$builder->belongsTo(\Modules\User\Models\User::class, fields: ['name', 'email']);
 
 // ❌ WRONG - In type hints
 public function getUser(\Modules\User\Models\User $user): \Modules\User\Models\User
@@ -768,7 +820,7 @@ router()
 ### Controllers
 
 **Base Classes**:
-- `Proto\Controllers\ResourceController` (CRUD)
+- `Proto\Controllers\ResourceController` (Has support for CRUD. Add, Update, Delete, Get, All, Search, etc. with default implementations and hooks)
 - `Proto\Controllers\ApiController` (custom endpoints)
 
 **Example**:
@@ -797,7 +849,7 @@ class UserController extends ResourceController
 ***Route Requests***:
 Controllers receive `use Proto\Http\Router\Request` objects in public methods and hook methods.
 
-***Exceptions**:
+**Exceptions**:
 Do not throw exceptions in controllers. Use `$this->setError('message')` in hook methods or `$this->error('message')` in public methods to fail gracefully.
 ```php
 // ✅ CORRECT - Graceful error handling in hook
@@ -841,7 +893,7 @@ protected function modifyUpdateItem(object &$data, Request $request): void
 **Session Access**:
 The api router sets up global session access:
 ```php
-// get user from session
+// get user from session (general context, outside controllers with policies)
 $user = session()->user ?? null;
 $userId = session()->user->id ?? null;
 
@@ -851,6 +903,7 @@ getSession('user');
 // set session value
 setSession('key', 'value');
 ```
+**Note**: In controllers with a policy applied, null checks are unnecessary — see CRITICAL Authentication Pattern below.
 
 **CRITICAL Authentication Pattern**:
 - **Policies handle authentication** - Use `protected ?string $policy = YourPolicy::class;` in controllers
@@ -893,7 +946,7 @@ Controllers can access the session to inject user data into add/update operation
 - Always use model methods: `$car = CarProfile::get($id)` NOT `$storage->get($id)`
 - Use validation: `$this->validateRules($data, [...])` or `$request->validate([...])`
 
-The validate method is called by the default add or update methods in the ResrouceController to validate the data before passing it to the protected addItem or updateItem methods.
+The validate method is called by the default add or update methods in the ResourceController to validate the data before passing it to the protected addItem or updateItem methods.
 
 #### ResourceController Request Patterns
 The resource controller provides default implementations for common CRUD operations.
@@ -932,37 +985,39 @@ public function all(Request $request): object
 - `modifyUpdateItem(object &$data, Request $request)` - called BEFORE `updateItem()`, modifies data by reference
 - `modifyFilter(?object $filter, Request $request)` - called in `all()` to customize filter
 
-**Access Route Parameters**:
-Use Request object methods to access route input parameters. Available methods by type:
+**Access Request Parameters**:
+Use Request object methods to access query/body parameters and route parameters separately:
+
+**Query & Body Parameters** (from `$_REQUEST` — GET query string and POST body):
 - `input($key)` - Get string parameter
 - `getInt($key)` - Get integer parameter
 - `getBool($key)` - Get boolean parameter
 - `json($key)` - Get JSON parameter
 - `raw($key)` - Get raw parameter
 
-**CRITICAL**: `route()` method does NOT exist. Use the methods above.
+**Route Parameters** (from the URL path, e.g. `/communities/:communityId/groups`):
+- `params()` - Returns object with all route parameters as properties
+
+**CRITICAL**: `route()` method does NOT exist. `getInt()` / `input()` read query/body params only — for route params in the URL path, use `$request->params()`.
 - The case should be camelCase for parameters in the route path and data keys in the resource objects.
 
 ```php
-// ✅ CORRECT
-$communityId = $request->getInt('communityId');
+// ✅ CORRECT — query/body parameters
 $name = $request->input('name');
 $isActive = $request->getBool('active');
+$limit = $request->getInt('limit');
+$data = $request->json('item');
 
-// ❌ WRONG - route() doesn't exist
-$communityId = $request->route('communityId');
-```
-**Params in the url**
-The route parameters that are found in the request uri are available in the request object using the params method. This will return an object with the route parameters as properties.
-
-```php
-// ✅ CORRECT
+// ✅ CORRECT — route parameters from URL path
 // path /communities/:communityId/groups
 $params = $request->params();
 $communityId = (int)($params->communityId ?? 0);
 
 // ❌ WRONG - route() doesn't exist
 $communityId = $request->route('communityId');
+
+// ❌ WRONG - getInt reads query/body, NOT route params from URL path
+$communityId = $request->getInt('communityId'); // Won't find route param
 ```
 
 ```php
@@ -976,24 +1031,24 @@ protected function addItem(object $data): object
 // ✅ CORRECT Option 1: Use hook method which is preferred as this allows the defaluts to do their work
 protected function modifyAddItem(object &$data, Request $request): void
 {
-    $communityId = $request->getInt('communityId');
-    if (!$communityId)
+    $group = $request->getInt('group'); //body or query parameter, NOT route parameter
+    if (!$group)
     {
-        $this->setError('Community ID required');
+        $this->setError('Group ID required');
         return;
     }
 
     $data->id = $this->getResourceId($request);
-    $data->communityId = (int)$communityId;
+    $data->groupId = (int)$group;
 }
 
 // ✅ CORRECT Option 2: Override public method, good but the default methods do a lot of work
 public function add(Request $request): object
 {
-    $communityId = $request->getInt('communityId');
-    if (!$communityId)
+    $group = $request->getInt('group'); //body or query parameter, NOT route parameter
+    if (!$group)
     {
-        return $this->error('Community ID required');
+        return $this->error('Group ID required');
     }
 
     $data = $this->getRequestItem($request);
@@ -1004,7 +1059,7 @@ public function add(Request $request): object
 
     $file = $request->file('file');
 
-    $data->communityId = (int)$communityId;
+    $data->groupId = (int)$group;
     $this->modifyAddItem($data, $request);
     if (!$this->validateItem($data, false))
     {
@@ -1017,10 +1072,10 @@ public function add(Request $request): object
 // ✅ CORRECT Option 3: Create custom endpoint
 public function create(Request $request): object
 {
-    $communityId = $request->getInt('communityId');
-    if (!$communityId)
+    $group = $request->getInt('group'); //body or query parameter, NOT route parameter
+    if (!$group)
     {
-        return $this->error('Community ID required');
+        return $this->error('Group ID required');
     }
 
     $userId = session()->user->id ?? null;
@@ -1028,7 +1083,7 @@ public function create(Request $request): object
     $data = $this->getRequestItem($request);
     $group = $this->service->createGroup(
         (int)$userId,
-        (int)$communityId,
+        (int)$group,
         $data
     );
 
@@ -1049,7 +1104,7 @@ use Proto\Utils\Strings;
 // Add route parameter to data
 protected function modifyAddItem(object &$data, Request $request): void
 {
-    $clientId = $request->getInt('clientId');
+    $clientId = $request->getInt('clientId'); //body or query parameter, NOT route parameter
     if ($clientId)
     {
         $data->clientId = $clientId;
@@ -1074,7 +1129,7 @@ protected function modifyUpdateItem(object &$data, Request $request): void
 // Modify filter for all() queries
 protected function modifyFilter(?object $filter, Request $request): ?object
 {
-    $clientId = $request->getInt('clientId');
+    $clientId = $request->getInt('clientId'); //body or query parameter, NOT route parameter
     if ($clientId)
     {
         $filter->clientId = (int)$clientId;
@@ -1195,7 +1250,7 @@ For complex many-to-many relationships, chain `belongsToMany` calls:
 protected static function joins(object $builder): void
 {
     // Chain 1: User → Roles → Permissions
-    // Joins user_roles, then roles, then permission_roles, then permissions
+    // Joins role_users, then roles, then permission_roles, then permissions
     $builder
         ->belongsToMany(Role::class, pivotFields: ['organizationId'])
         ->belongsToMany(Permission::class);
@@ -1203,9 +1258,17 @@ protected static function joins(object $builder): void
     // Chain 2: User → Organizations
     // Joins organization_users, then organizations
     $builder
-        ->belongsToMany(Organization::class, ['id', 'name']);
+        ->belongsToMany(Organization::class, fields: ['id', 'name']);
 }
 ```
+
+**Pivot Table Naming Convention**:
+When `belongsToMany` auto-infers the pivot table name, it sorts the two singular model names alphabetically and pluralizes the last word:
+- `Role` + `User` → `role_users` (`role` < `user` alphabetically, last word plural)
+- `Permission` + `Role` → `permission_roles` (`permission` < `role`, last word plural)
+- `Organization` + `User` → `organization_users` (`organization` < `user`, last word plural)
+
+Always verify the auto-inferred name matches your migration table name, or pass the pivot table explicitly.
 
 **Key Points**:
 - `on()` takes `[parent_key, foreign_key]` order
@@ -1213,6 +1276,7 @@ protected static function joins(object $builder): void
 - EXCLUDE 'id' from `fields()` in `belongsTo` to avoid conflicts
 - Use named parameters: `fields: ['name']` NOT positional
 - Chained `belongsToMany` automatically handles pivot tables
+- Pivot table name is auto-inferred: alphabetical singular names, last word plural (e.g., `role_users` for Role ↔ User)
 
 #### Lazy Relationships
 
@@ -1235,13 +1299,14 @@ class User extends Model
         return $this->hasOne(Profile::class);
     }
 
-    // Many-to-many: User has many roles through user_roles pivot
+    // Many-to-many: User has many roles through role_users pivot
+    // Pivot name auto-inferred: sort singular names alphabetically → role + user → role_users
     public function roles(): \Proto\Models\Relations\BelongsToMany
     {
         // Params: related model, pivot table, foreign pivot key, related pivot key, parent key, related key
         return $this->belongsToMany(
             Role::class,
-            'user_roles',  // pivot table (optional, auto-inferred)
+            'role_users',  // pivot table (optional, auto-inferred as role_users: role < user alphabetically, last word plural)
             'user_id',     // foreign key in pivot (optional)
             'role_id',     // related key in pivot (optional)
             'id',          // parent key (optional)
@@ -1269,7 +1334,7 @@ $user = User::get(1); // Includes eager-joined roles automatically
 $user = User::get(1);
 $posts = $user->posts;     // SELECT * FROM posts WHERE user_id = 1
 $profile = $user->profile; // SELECT * FROM profiles WHERE user_id = 1
-$roles = $user->roles;     // SELECT * FROM roles r INNER JOIN user_roles p...
+$roles = $user->roles;     // SELECT * FROM roles r INNER JOIN role_users p...
 ```
 
 **BelongsToMany Helper Methods**:
@@ -1404,6 +1469,36 @@ public function posts(): \Proto\Models\Relations\HasMany
 - `delete()` is instance method NOT static:
   - ❌ WRONG: `User::delete(5)`
   - ✅ CORRECT: `User::remove(5)` or `$user = User::get(5); $user->delete();`
+- **CRITICAL - `getBy()` / `fetchWhere()` return plain `stdClass`, NOT model instances**:
+  - `Model::get($id)` → returns `?static` (model instance) — `->update()` and `->delete()` work ✅
+  - `Model::getBy([...])` → returns `?object` (plain stdClass) — `->update()` throws `Call to undefined method stdClass::update()` ❌
+  - `Model::fetchWhere([...])` → returns `?array` of plain objects — same limitation ❌
+  - To update after a `getBy()`, use the query builder directly:
+  ```php
+  // ✅ CORRECT - query builder update after getBy()
+  $row = Model::getBy(['key' => $value]);
+  if ($row)
+  {
+      Model::builder()
+          ->update()
+          ->set(['field' => 'value'])
+          ->where('id = ?')
+          ->execute([(int)$row->id]);
+  }
+
+  // ✅ CORRECT - or use get() when you have an ID and need to call instance methods
+  $model = Model::get($id);
+  if ($model)
+  {
+      $model->field = 'value';
+      $model->update();
+  }
+
+  // ❌ WRONG - getBy() returns stdClass, not a model instance
+  $row = Model::getBy(['key' => $value]);
+  $row->field = 'value';
+  $row->update(); // Call to undefined method stdClass::update()
+  ```
 - **Eager joins**: Define in `joins()` method using JoinBuilder (`Role::one()`, `->belongsTo()`, etc.)
 - **Lazy relationships**: Define as public methods returning `HasMany`, `HasOne`, `BelongsTo`, or `BelongsToMany`
 - In eager `belongsTo`: ALWAYS use named parameter `fields: [...]` and EXCLUDE 'id' field
@@ -1439,8 +1534,8 @@ class UserAuthedLocation extends Model
         'id',
         'city',
         'position',
-        [['X(`position`)'], 'latitude'],  // Extract X coordinate
-        [['Y(`position`)'], 'longitude'], // Extract Y coordinate
+        [['X(`position`)'], 'longitude'], // X = longitude in MySQL spatial
+        [['Y(`position`)'], 'latitude'],  // Y = latitude in MySQL spatial
     ];
 
     /**
@@ -1456,29 +1551,41 @@ class UserAuthedLocation extends Model
 ```php
 $location = new UserAuthedLocation();
 
-// String format (space-separated lat/lon)
-$location->position = '37.7749 -122.4194';
+// CRITICAL: PointType stores POINT(x, y) where MySQL treats X=longitude, Y=latitude.
+// ALWAYS pass longitude first, then latitude.
+
+// String format (space-separated lon lat — longitude FIRST)
+$location->position = '-122.4194 37.7749'; // lon lat
 $location->city = 'San Francisco';
 $location->add(); // Automatically converts to POINT(?, ?)
 
-// Array format
-$location->position = [37.7749, -122.4194];
+// Array format [lon, lat]
+$location->position = [-122.4194, 37.7749];
 $location->add();
 
 // Object format
-$location->position = (object)['lat' => 37.7749, 'lon' => -122.4194];
+$location->position = (object)['lon' => -122.4194, 'lat' => 37.7749];
 $location->add();
 
 // Update works the same way
 $location = UserAuthedLocation::get(1);
-$location->position = '37.8044 -122.2712'; // Berkeley
+$location->position = '-122.2712 37.8044'; // lon lat — Berkeley
 $location->update(); // Automatically handles SET position = POINT(?, ?)
 
-// Querying by location (if needed, in custom Storage)
+// Querying by location with ST_Distance_Sphere
+// POINT(?, ?) params must also be in lon, lat order
 $nearbyLocations = UserAuthedLocation::fetchWhere([
     ["ST_Distance_Sphere(position, POINT(?, ?)) < ?", [-122.4194, 37.7749, 10000]]
 ]);
 ```
+
+**CRITICAL — PointType coordinate order**:
+- MySQL `POINT(x, y)` stores X as **longitude** and Y as **latitude**
+- `ST_Distance_Sphere` validates Y as latitude: values outside `[-90, 90]` throw "Out of range error"
+- `X(position)` extracts **longitude** — map to `'longitude'` in `$fields`
+- `Y(position)` extracts **latitude** — map to `'latitude'` in `$fields`
+- **ALWAYS pass longitude first**: `[lon, lat]`, `'lon lat'`, or `(object)['lon'=>..., 'lat'=>...]`
+- **NEVER** pass `[lat, lon]` — a longitude value like `-111.758` stored as Y will fail ST_Distance_Sphere
 
 #### JSON Data
 
@@ -1590,6 +1697,108 @@ $rows = User::fetchWhere($filter);   // many`
 - `where()`, `in()`, `orderBy()`, `groupBy()`, `having()`, `distinct()`, `limit()`
 - `union()` - combine queries
 
+**CRITICAL - Query Builder Joins**:
+
+`join()` accepts **only** a `callable` or an `array`. Passing a raw SQL string will throw a fatal error. There are two forms:
+
+**Form 1 — Closure with JoinBuilder** (preferred for multiple joins or `fields()`):
+```php
+->join(function($joins)
+{
+    // LEFT JOIN
+    $joins->left('table_name', 'alias')
+        ->on('alias.user_id = u.id');
+
+    // INNER JOIN (default type)
+    $joins->join('other_table', 'ot')
+        ->on('ot.id = u.org_id', 'ot.deleted_at IS NULL');
+
+    // RIGHT / OUTER / CROSS
+    $joins->right('table', 'alias')->on('...');
+    $joins->outer('table', 'alias')->on('...');
+    $joins->cross('table', 'alias')->on('...');
+})
+```
+
+The `->on()` method accepts one or more raw SQL strings (joined with `AND`). Any `?` placeholders in `on()` conditions are bound via the `fetch()` / `execute()` params array — order matters, so list join params before WHERE params:
+```php
+->join(function($joins)
+{
+    $joins->left('user_location_preferences', 'ulp')
+        ->on(
+            'ulp.user_id = u.id',
+            'ulp.position IS NOT NULL',
+            'ST_Distance_Sphere(ulp.position, POINT(?, ?)) <= ?'
+        );
+})
+->where('u.enabled = 1', 'u.deleted_at IS NULL', 'u.id != ?')
+->fetch([$lon, $lat, $radiusMeters, $userId]); // ON params first, then WHERE params
+```
+
+To also SELECT fields from the joined table, chain `->fields()` on the `Join` object:
+```php
+->join(function($joins)
+{
+    $joins->left('users', 'u')
+        ->on('cp.user_id = u.id')
+        ->fields('first_name', 'last_name', 'email');
+})
+```
+
+**Form 2 — Array** (for simple single joins, no `fields()`):
+```php
+->leftJoin([
+    'table' => 'users',
+    'alias' => 'u',
+    'on' => ['cp.user_id = u.id', 'u.deleted_at IS NULL']
+])
+
+->rightJoin(['table' => 'roles', 'alias' => 'r', 'on' => ['u.role_id = r.id']])
+->outerJoin(['table' => 'orgs', 'alias' => 'o', 'on' => ['u.org_id = o.id']])
+
+// INNER JOIN via join() with type key
+->join([
+    'type' => 'inner join',
+    'table' => 'posts',
+    'alias' => 'p',
+    'on' => ['p.user_id = u.id']
+])
+```
+
+**Ambiguous columns**: When joined tables share column names (e.g., `status`, `created_at`, `id`), always prefix every reference with the table alias in `where()`, `orderBy()`, `select()`, and `on()`:
+```php
+// ✅ CORRECT - fully qualified with alias
+->where('u.status = ?', 'u.deleted_at IS NULL', 'vmo.make_id = ?')
+->orderBy('u.created_at DESC')
+
+// ❌ WRONG - ambiguous, MySQL rejects these when multiple joined tables have the same column
+->where('status = ?', 'deleted_at IS NULL')
+->orderBy('created_at DESC')
+```
+
+**CRITICAL - `limit()` Argument Order**:
+Proto's `limit(a, b)` generates `LIMIT a, b`. MySQL interprets this as "skip `a` rows, take `b` rows". ALWAYS pass offset first:
+```php
+// ✅ CORRECT - offset first, count second
+->limit(0, 20)         // LIMIT 0, 20 → returns 20 rows
+->limit($offset, $limit) // correct order
+
+// ❌ WRONG - reversed: with offset=0 this returns 0 rows every time
+->limit(20, 0)         // LIMIT 20, 0 → skips 20 rows, takes 0
+->limit($limit, $offset) // ALWAYS WRONG
+```
+
+**CRITICAL - `select()` Raw Expressions**:
+Proto's `select()` with a plain string prepends the table alias, producing invalid SQL. Use array format `[['EXPR'], 'alias']` for raw expressions:
+```php
+// ✅ CORRECT - array format bypasses alias prefix
+->select([['COUNT(*)'], 'total'])       // generates: SELECT COUNT(*) AS total
+->select([['MAX(created_at)'], 'last']) // generates: SELECT MAX(created_at) AS last
+
+// ❌ WRONG - plain string gets alias prepended, breaking SQL
+->select('COUNT(*) as total')   // generates: SELECT un.COUNT(*) as total — INVALID SQL
+```
+
 **Query Builder**:
 ```php
 class UserStorage extends Storage
@@ -1676,7 +1885,7 @@ protected function setCustomWhere($sql, &$params, $options)
 // In Model static methods
 public static function getActiveUsers(): array
 {
-    return static::builder()
+    return static::builder() // not static::table() because we want to use the builder for custom queries
         ->select()
         ->where('status = ?', 'deleted_at IS NULL')
         ->fetch(['active']);
@@ -1697,7 +1906,6 @@ $users = User::storage()->findAll(
 - Chain multiple where conditions in single call
 - Use `first()` not `fetchOne()`
 - ALWAYS use builder methods, NEVER raw SQL with table names
-- NO `getTableName()` method exists - always use builder
 
 ### Migrations
 
@@ -1722,7 +1930,7 @@ date +"%Y-%m-%dT%H.%M.%S.%6N"
 
 use Proto\Database\Migrations\Migration;
 
-class CreateUsersTable extends Migration
+class User extends Migration
 {
     public function up(): void
     {
@@ -1908,6 +2116,34 @@ class CarMaintenanceRecord extends Migration
 - Use `up()` and `down()` NOT `run()` and `revert()`
 - Use `foreign()` NOT `foreignKey()` or `foreignId()`
 - DO NOT specify `$connection` unless non-default DB
+- **ALL migration column names must be snake_case** — The Proto ORM converts camelCase `$fields` names to snake_case automatically when building SQL. The DB columns must match. `userId` in `$fields` → `user_id` in the table. Always use snake_case in migrations for ALL custom columns:
+  ```php
+  // ✅ CORRECT — snake_case in migration
+  $table->integer('user_id', 30);
+  $table->varchar('step_key', 50);
+  $table->datetime('occurred_at');
+  $table->foreign('user_id')->references('id')->on('users')->onDelete('CASCADE');
+
+  // ❌ WRONG — camelCase in migration (ORM will query user_id but column is userId)
+  $table->integer('userId', 30);
+  $table->varchar('stepKey', 50);
+  $table->datetime('occurredAt');
+  $table->foreign('userId')->references('id')->on('users')->onDelete('CASCADE');
+  ```
+  The model `$fields` stays camelCase — only migrations use snake_case.
+- **Audit columns are snake_case in the DB** — `timestamps()`, `createdAt()`, `updatedAt()`, `deletedAt()` create columns named `created_at`, `updated_at`, `deleted_at`. When referencing them in `->fields()` for an index use the snake_case DB name, NOT the camelCase model field name:
+  ```php
+  // ✅ CORRECT
+  $table->index('idx_user_created')->fields('user_id', 'created_at');
+
+  // ❌ WRONG — 'createdAt' column does not exist in the DB
+  $table->index('idx_user_created')->fields('user_id', 'createdAt');
+  ```
+- **FK constraint names have a 64-character MySQL limit** — Proto auto-generates names in the format `fk_{table}_{col}_{ref_table}_{ref_col}`. Long table names easily exceed this. **Before adding a foreign key, calculate the name length**:
+  ```
+  fk_ + {source_table} + _ + {local_col} + _ + {target_table} + _ + {target_col} ≤ 64 chars
+  ```
+  If it exceeds 64 chars, shorten the **source table name** in both the migration and the model's `$tableName`. There is no API to set a custom constraint name.
 
 ### Services
 
@@ -2066,7 +2302,7 @@ protected function incrementCommunityGroupCount(int $communityId): void
 'image' => 'image:1024|required|mimes:jpeg,png'
 
 // Direct validation
-use Proto\Utils\Validation\ImageValidator;
+use Proto\Api\ImageValidator;
 $result = ImageValidator::validate($uploadFile, $maxSizeKB, $mimeTypes);
 ```
 
@@ -2103,8 +2339,8 @@ $auth->user->isUser(1); // Use anywhere
 ```
 
 **Policies** (Authorization):
-The Common policy adds a type proprety to identify the policy type and uses a request method to
-check if the user is authorized to perform the action by the typer and request action method.
+The Common policy adds a type property to identify the policy type and uses a request method to
+check if the user is authorized to perform the action by the type and request action method.
 
 Module policies extend the Common policy and define per-action methods as needed.
 
@@ -2126,7 +2362,7 @@ class UserPolicy extends Policy
     {
         return (auth()->user->isAdmin());
 
-        // or to check if they use ris signed in
+        // or to check if they are signed in
         // return $this->isSignedIn();
     }
 
@@ -2312,7 +2548,7 @@ The text has 4 levels of emphasis:
 **Common Patterns**:
 ```javascript
 // Buttons
-Button({ variant: 'default' }, [...])     // bg-primary text-primary-foreground
+Button({ variant: 'primary' }, [...])     // bg-primary text-primary-foreground
 Button({ variant: 'secondary' }, [...])   // bg-secondary text-secondary-foreground
 Button({ variant: 'destructive' }, [...]) // bg-destructive text-destructive-foreground
 Button({ variant: 'warning' }, [...])     // bg-warning text-warning-foreground
@@ -2326,16 +2562,22 @@ Card({ class: 'bg-card text-card-foreground border-border' }, [...])
 ```
 
 ### File Organization
-Files should be organized by feature/module. Each module contains its own components, models, and pages. Shared components can be placed in a common directory if needed. Folders should be structures in nested levels of organisms, molecules, and atoms to reflect component complexity and reusability. Nested folders can be created for specific atoms, molecules, or organisms if needed for organization.
 
-e.g.
+**CRITICAL**: Every meaningful visual section must live in its own file. Never write large blocks of inline markup directly inside a page component. Pages only compose named organisms and molecules — they do not contain markup themselves.
+
+Files should be organized by feature/module. Each module contains its own components, models, and pages. Shared components can be placed in a common directory if needed. Folders should be structured in nested levels of organisms, molecules, and atoms to reflect component complexity and reusability. Nested folders can be created for specific atoms, molecules, or organisms if needed for organization.
+
+**Atom sub-folder grouping** (group by visual concern, not just by type):
 ```
 atoms/
-    /cards
-        post-card.js
-        user-card.js
-    /buttons
-        primary-button.js
+    cards/
+        post-header.js       # Avatar + name + time row inside a card
+        post-actions.js      # Like / comment / share button row
+    media/
+        post-image.js        # Full-width image with aspect ratio
+        video-thumbnail.js   # Thumbnail + play overlay + duration badge
+    text/
+        post-content.js      # Username bold + body text block
 ```
 
 **Module Structure**:
@@ -2348,52 +2590,140 @@ apps/{crm,main}/src/modules/
         {name}-model.js
       pages/                     # Full page components
         {pageName}/
-          {pageName}-page.js
-          organisms/             # Complex composite components
+          {pageName}-page.js     # Imports organisms — NO inline markup
+          organisms/             # Full stand-alone sections
             {name}.js
-          molecules/             # Mid-level components
+          molecules/             # Mid-level composites
             {name}.js
-          atoms/                 # Simple reusable components
-            {name}.js
+          atoms/                 # Single-purpose elements, grouped in sub-folders
+            cards/
+            media/
+            text/
       organisms/                 # Shared organisms across module
       molecules/                 # Shared molecules across module
       atoms/                     # Shared atoms across module
 ```
 
-**Example Structure**:
+**Real-world example — home feed** (correct factoring):
 ```
-apps/main/src/modules/
-  home/
-    module.js
-    components/
-      models/
-        feed-model.js
-      pages/
-        home/
-          home-page.js           # Main page component
-          organisms/
-            feed-section.js
-            assistant-panel.js
-          molecules/
-            post-card.js
-            quick-actions-bar.js
-          atoms/
-            post-header.js
-            action-button.js
+home/
+  home-page.js                   # Only imports and sequences organisms/molecules
+  organisms/
+    rally-header.js
+    feed-post-modern.js          # Orchestrates PostHeader, PostImage, PostActions, PostContent
+    community-poll.js
+  molecules/
+    greeting-section.js
+    cards/
+      assistant-card.js
+      feed-event-card.js
+      feed-partner-card.js
+      market-alert-card.js
+  atoms/
+    cards/
+      post-header.js             # Avatar + user name + time
+      post-actions.js            # Like / comment buttons
+    media/
+      post-image.js
+      video-thumbnail.js
+    text/
+      post-content.js
 ```
+
+### Component Decomposition Rules
+
+**CRITICAL**: Apply these rules every time you write a component. If you are not following them, refactor before committing.
+
+**Rule 1 — One visual section = one file**
+Every named visual section (a card header, an image area, an action row, a stats block) must be extracted to its own file. If you can give it a descriptive name, it belongs in its own file.
+
+**Rule 2 — Pages contain zero markup**
+Page components (`*-page.js`) only import and compose organisms. They must not contain any `Div`, `P`, `Span`, etc. inline. All layout lives in organisms or molecules.
+
+```javascript
+// ✅ CORRECT — page only sequences named pieces
+export const HomePage = () => (
+    new BlankPage([
+        RallyHeader(),
+        GreetingSection({ userName: 'Alex' }),
+        FeedPostModern({ post }),
+        AssistantCard(cardData)
+    ])
+);
+
+// ❌ WRONG — page contains inline markup
+export const HomePage = () => (
+    new BlankPage([
+        Div({ class: 'flex items-center gap-3 p-4' }, [
+            Avatar({ src: user.avatar }),
+            P({ class: 'font-bold' }, user.name)
+        ])
+    ])
+);
+```
+
+**Rule 3 — Organisms orchestrate, they don't inline**
+Organisms compose molecules and atoms. Any block inside an organism that could be named (a header row, an image section, an action bar) must be extracted to a molecule or atom.
+
+```javascript
+// ✅ CORRECT — FeedPostModern orchestrates extracted atoms
+export const FeedPostModern = Atom(({ post }) => (
+    Article({ class: 'flex flex-col bg-background pt-4 mt-6' }, [
+        PostHeader({ user: post.user, timeAgo: post.timeAgo }),
+        post.image && PostImage({ src: post.image }),
+        post.video && VideoThumbnail({ thumbnail: post.video.thumbnail, duration: post.video.duration }),
+        Div({ class: 'px-4 py-3 flex flex-col gap-2' }, [
+            PostActions({ likes: post.likes, comments: post.comments }),
+            PostContent({ username: post.user.username, content: post.content })
+        ])
+    ])
+));
+
+// ❌ WRONG — all markup inlined in the organism
+export const FeedPostModern = Atom(({ post }) => (
+    Article({ class: 'flex flex-col' }, [
+        Div({ class: 'flex items-center gap-3 p-4' }, [
+            Avatar({ src: post.user.avatar }),
+            Div({ class: 'flex-1' }, [
+                P({ class: 'font-semibold' }, post.user.name),
+                P({ class: 'text-sm text-muted-foreground' }, post.timeAgo)
+            ])
+        ]),
+        Img({ src: post.image, class: 'w-full aspect-video object-cover' }),
+        Div({ class: 'px-4' }, [
+            P({}, post.content)
+        ])
+    ])
+));
+```
+
+**Rule 4 — Molecules factor out their sub-sections**
+Molecules that have distinct named sub-sections (header, body, footer, stats row, button group) must extract each to a helper atom or private function within the file or a sub-atom file.
+
+**Rule 5 — Atoms are single-purpose**
+An atom does exactly one thing: render a header row, render an image, render a button group. It has one clear name. If it does two things, split it.
+
+**Rule 6 — 20-line threshold**
+If a component function exceeds ~20 lines of markup, extract sub-sections until it fits. Use named helper functions (private atoms within the file) as a first step, then move to separate files if shared elsewhere.
 
 ### Common Mistakes (READ FIRST)
 
 1. ❌ DON'T use templates or JSX
 2. ❌ DON'T pass children in props: `Div({ children: [...] })`
-3. ❌ DON'T use `new` with Atoms: `new Button()`
-4. ❌ DON'T forget `new` with Components: `MyComponent()`
-5. ❌ DON'T use `.map()` for reactive lists - use `map` or `for` directive
-6. ❌ DON'T use `Import('./file.js')` - use function form
-7. ❌ DON'T call `render()` directly
-8. ❌ DON'T access DOM before `afterSetup()`
-9. ❌ DON'T use hardcoded colors - use theme variables
-10. ❌ DON'T put opening braces on same line (except inline Atom returns)
+3. ❌ DON'T build custom avatars with raw `Img`/`Div` — use `Avatar` from `@base-framework/ui/molecules`
+4. ❌ DON'T import `Avatar` from `@base-framework/ui/atoms` — it lives in `@base-framework/ui/molecules`
+5. ❌ DON'T use `new` with Atoms: `new Button()`, `new CircleButton()`, `new LoadingButton()`
+6. ❌ DON'T forget `new` with Components: `ToggleButton({...})`, `CircleToggleButton({...})` — these require `new`
+7. ❌ DON'T use `variant: 'default'` — it doesn't exist; use `variant: 'primary'` for the primary CTA button
+8. ❌ DON'T write inline markup inside page components — extract every named section to its own organism/molecule/atom file
+9. ❌ DON'T dump all markup into a single large file — if a component exceeds ~20 lines, extract sub-sections
+10. ❌ DON'T write organisms that inline all their markup — extract headers, image areas, action rows, etc. to separate atoms
+11. ❌ DON'T use `.map()` for reactive lists - use `map` or `for` directive
+12. ❌ DON'T use `Import('./file.js')` - use function form
+13. ❌ DON'T call `render()` directly
+14. ❌ DON'T access DOM before `afterSetup()`
+15. ❌ DON'T use hardcoded colors - use theme variables
+16. ❌ DON'T put opening braces on same line (except inline Atom returns)
 
 ### Modules System
 
@@ -2504,7 +2834,7 @@ const Props =
             loading: true,
             filter: {}
         });
-    }
+    },
 
     /**
      * Set up local state
@@ -2517,7 +2847,7 @@ const Props =
             isOpen: false,
             view: 'grid'
         };
-    }
+    },
 
     /**
      * After DOM is created
@@ -2525,7 +2855,7 @@ const Props =
     afterSetup()
     {
         this.loadFeed();
-    }
+    },
 
     /**
      * Load feed data from API
@@ -2536,11 +2866,13 @@ const Props =
         {
             if (response.success)
             {
-                this.data.set('posts', response.data);
-                this.data.set('loading', false);
+                this.data.set({
+                    posts: response.rows,
+                    loading: false
+                });
             }
         });
-    }
+    },
 
     /**
      * Cleanup before destroy
@@ -2560,7 +2892,7 @@ const Props =
  */
 export const HomePage = () => (
     new BlankPage(Props, [
-        BlankPage({ class: 'home-page' }, [
+        Div({ class: 'home-page' }, [
             FeedSection()
         ])
     ])
@@ -2635,7 +2967,7 @@ const UserHeader = (post) => (
         Avatar({
             src: post.user.avatar,
             alt: post.user.name,
-            fallback: post.user.name[0]
+            fallbackText: post.user.name[0]
         }),
         UserName(post),
         Button({
@@ -2767,7 +3099,6 @@ export default QuickAction;
 **Available Base UI Components**:
 ```javascript
 import {
-    Avatar,
     Badge,
     Button,
     Card,
@@ -2780,6 +3111,70 @@ import {
     Tabs,
     Textarea
 } from '@base-framework/ui/atoms';
+
+// Molecules (more complex components)
+import { Avatar, StaticStatusIndicator, StatusIndicator } from '@base-framework/ui/molecules';
+```
+
+### Avatar
+
+**CRITICAL**: ALWAYS use the Base UI `Avatar` from `@base-framework/ui/molecules`. Never build custom avatar markup with raw `Img` + `Div` elements.
+
+**Import**:
+```javascript
+import { Avatar, StaticStatusIndicator, StatusIndicator } from '@base-framework/ui/molecules';
+```
+
+**Basic Usage**:
+```javascript
+// src: image URL, alt: alt text, fallbackText: initials shown when image fails, size: xs|sm|md|lg|xl|2xl|3xl
+Avatar({ src: user.avatar, alt: user.name, fallbackText: 'CN', size: 'md' })
+```
+
+**Sizes**: `xs`, `sm`, `md` (default), `lg`, `xl`, `2xl`, `3xl`
+
+**Reactive / watcher fallback** (binds to data/state):
+```javascript
+// src, alt, and watcherFallback all accept [[watcher]] syntax
+// watcherFallback converts a full name to initials automatically
+Avatar({ src: '[[user.image]]', alt: '[[user.name]]', watcherFallback: '[[user.name]]', size: 'sm' })
+```
+
+**All Sizes**:
+```javascript
+Avatar({ src: url, alt: name, fallbackText: 'CN', size: 'xs' })   // extra small — compact lists
+Avatar({ src: url, alt: name, fallbackText: 'CN', size: 'sm' })   // small — tight layouts
+Avatar({ src: url, alt: name, fallbackText: 'CN', size: 'md' })   // medium — standard
+Avatar({ src: url, alt: name, fallbackText: 'CN', size: 'lg' })   // large — profile rows
+Avatar({ src: url, alt: name, fallbackText: 'CN', size: 'xl' })   // extra large — profile sections
+Avatar({ src: url, alt: name, fallbackText: 'CN', size: '2xl' })  // 2x large
+Avatar({ src: url, alt: name, fallbackText: 'CN', size: '3xl' })  // 3x large — hero profiles
+```
+
+**Avatar with name and subtitle**:
+```javascript
+Div({ class: 'flex items-center gap-3' }, [
+    Avatar({ src: user.avatar, alt: user.name, fallbackText: 'CN', size: 'lg' }),
+    Div({}, [
+        Span({ class: 'text-sm font-semibold text-foreground' }, user.name),
+        P({ class: 'text-xs text-muted-foreground' }, user.email)
+    ])
+])
+```
+
+**Status Indicators** (reactive — binds to parent `status` state/data key):
+```javascript
+// StatusIndicator: reactive, reads 'status' from parent component state or data
+Div({ class: 'relative', addState() { return { status: 'online' }; } }, [
+    Avatar({ src: url, alt: name, size: 'md' }),
+    StatusIndicator()  // automatically reflects status: 'online'|'offline'|'busy'|'away'
+])
+
+// StaticStatusIndicator: fixed status, no binding
+Div({ class: 'relative' }, [
+    Avatar({ src: url, alt: name, size: 'md' }),
+    StaticStatusIndicator('online')  // 'online'|'offline'|'busy'|'away'
+])
 ```
 
 ### Universal Icon System
@@ -2894,18 +3289,50 @@ CustomCard({ icon: 'star' }, [...]);
 ```
 
 **Button Variants**:
-```javascript
-import { Button } from '@base-framework/ui/atoms';
 
-// Use Base UI Button variants
-Button({ variant: 'default' }, 'Default');
-Button({ variant: 'secondary' }, 'Secondary');
-Button({ variant: 'outline' }, 'Outline');
-Button({ variant: 'ghost' }, 'Ghost');
-Button({ variant: 'link' }, 'Link');
-Button({ variant: 'destructive' }, 'Delete');
-Button({ variant: 'icon' }, [Icon({ size: 'sm' }, Icons.settings)]);
-Button({ variant: 'withIcon', icon: Icons.plus }, 'Add New');
+CRITICAL: There is no `variant: 'default'`. The primary CTA button uses `variant: 'primary'`. Always pick the semantically correct variant below.
+
+```javascript
+import { Button, CircleButton, CircleToggleButton, LoadingButton, ToggleButton } from '@base-framework/ui/atoms';
+import { Icons } from '@base-framework/ui/icons';
+
+// Standard variants — use Button() (Atom, no `new`)
+Button({ variant: 'primary' }, 'Submit');                      // Primary CTA
+Button({ variant: 'secondary' }, 'Cancel');                    // Secondary action
+Button({ variant: 'outline' }, 'Outline');                     // Bordered, transparent bg
+Button({ variant: 'ghost' }, 'Ghost');                         // No border, no bg
+Button({ variant: 'link' }, 'Link');                           // Looks like a hyperlink
+Button({ variant: 'destructive' }, 'Delete');                  // Destructive / danger
+Button({ variant: 'warning' }, 'Warning');                     // Warning action
+
+// Icon variants — icon prop accepts Heroicon SVG, MaterialSymbol, or a symbol name string
+Button({ variant: 'icon', icon: Icons.settings });             // Icon only (square)
+Button({ variant: 'withIcon', icon: Icons.plus }, 'Add New');  // Icon + label
+
+// Circle icon — semi-transparent circular button; sizes: xs | sm | md | lg | xl
+Button({ variant: 'circleIcon', icon: Icons.home, size: 'md' });
+
+// Back button — navigates back in history
+Button({ variant: 'back', class: 'ghost', allowHistory: false });
+
+// Loading button — shows a spinner; use directly (Atom, no `new`)
+LoadingButton('Saving…');
+
+// Toggle button — social-action style with active/inactive state (Component, use `new`)
+new ToggleButton({ icon: Icons.heart, value: 234, toggle: (active) => {} });
+new ToggleButton({ icon: Icons.heart, active: true, value: 234 });   // starts active
+new ToggleButton({ icon: 'bookmark', activeIcon: 'bookmarkSolid' }); // swap icon
+new ToggleButton({ icon: Icons.heart, dataKey: 'likeCount', toggle: (active) => {} }); // reactive count
+
+// Circle button — frosted-glass, non-toggling; sizes: xs | sm | md | lg | xl | 2xl (Atom, no `new`)
+CircleButton({ icon: Icons.arrows.left, size: 'sm' });
+CircleButton({ icon: Icons.share, size: 'md', click: () => {} });
+
+// Circle toggle button — frosted-glass with active/inactive toggle (Component, use `new`)
+new CircleToggleButton({ icon: Icons.heart, size: 'md', toggle: (active) => {} });
+new CircleToggleButton({ icon: Icons.heart, size: 'md', active: true }); // starts active
+new CircleToggleButton({ icon: Icons.star, size: 'md', activeClass: 'text-yellow-400' });
+new CircleToggleButton({ icon: 'bookmark', activeIcon: 'bookmarkSolid', size: 'md' });
 ```
 
 **Card Variants**:
@@ -3015,67 +3442,74 @@ Div({ children: items.map(item => ItemCard(item)) })
 
 **Purpose**: Handle API communication and data management.
 
-**Structure**:
+#### Built-in XHR Methods (CRITICAL — Read Before Adding Custom Methods)
+
+Every model gets a full set of built-in methods on its `xhr` object via `ModelService`. **NEVER override these unless the behavior genuinely differs** — they already handle URL construction, parameter encoding, and serialization correctly.
+
+| Method | What it does |
+|--------|--------------|
+| `get(instanceParams, cb)` | GET `/{id}` — fetches by model `id` |
+| `add(instanceParams, cb)` | POST — encodes full model data, uses `/{id}` if `id` is set |
+| `update(instanceParams, cb)` | PATCH `/{id}` — encodes full model data |
+| `setup(instanceParams, cb)` | PUT `/{id}` — add-or-update (upsert) |
+| `delete(instanceParams, cb)` | DELETE `/{id}` — uses model `id` |
+| `all(instanceParams, cb, offset, limit, lastCursor, since)` | GET with full listing params — reads keys from model data (see below) |
+
+**The `all()` method and the `getAllInputs()` contract**
+
+`all()` reads these keys from model data and sends them as query params that `ResourceController::all()` parses automatically — **no backend changes needed**:
+
+| Model data key | Backend picks it up as |
+|----------------|------------------------|
+| `filter` | `$inputs->filter` — passed to `Model::all()` |
+| `search` | `$inputs->modifiers['search']` |
+| `dates` | `$inputs->modifiers['dates']` |
+| `orderBy` | `$inputs->modifiers['orderBy']` |
+| `groupBy` | `$inputs->modifiers['groupBy']` |
+
+**CORRECT pattern — filter and search using built-in `all()`**:
+```javascript
+// Seed model data with filter/search keys
+return new PostModel({ filter: { status: 'active' }, search: '', orderBy: { field: 'createdAt', direction: 'DESC' } });
+
+// Change filter and reload — no custom xhr method needed
+filterByType(type) { this.data.filter = { type }; this.data.xhr.all({}, (r) => { ... }); }
+onSearch(q) { this.data.search = q; this.data.xhr.all({}, (r) => { ... }); }
+```
+
+**Create a custom xhr method ONLY when:**
+- The endpoint is at a different URL path than the model base URL
+- The request requires FormData / file uploads
+- The response needs special post-processing
+
+**Do NOT create a custom method for:** filtering, searching, sorting, date ranges, or pagination — use built-in `all()` with model data keys.
+
+**Minimal model example** (only legitimately custom methods shown):
 ```javascript
 import { Model } from "@base-framework/base";
 
 /**
- * FeedModel
- *
- * Handles feed API operations
+ * PostModel
  *
  * @type {typeof Model}
  */
-export const FeedModel = Model.extend({
-    /**
-     * Base API URL
-     */
-    url: '/api/feed',
+export const PostModel = Model.extend({
+    url: '/api/post',
 
-    /**
-     * Custom API methods
-     */
     xhr: {
         /**
-         * Get all posts with filters
+         * Add a post with optional file attachments (FormData — legitimately custom).
          *
          * @param {object} instanceParams
          * @param {function} callBack
+         * @param {FileList|File[]} [files]
          * @returns {XMLHttpRequest}
          */
-        all(instanceParams, callBack)
+        addWithFiles(instanceParams, callBack, files)
         {
             const data = this.model.get();
-            const params = {
-                filter: data.filter || {},
-                limit: data.limit || 20,
-                offset: data.offset || 0
-            };
-
-            return this._get('', params, instanceParams, callBack);
-        },
-
-        /**
-         * Add a new post
-         *
-         * @param {object} instanceParams
-         * @param {function} callBack
-         * @param {FileList|File[]} [files] - Optional file attachments
-         * @returns {XMLHttpRequest}
-         */
-        add(instanceParams, callBack, files)
-        {
-            const data = this.model.get();
-
-            // Without files - send JSON
-            if (!files || files.length === 0)
-            {
-                const params = this.setupObjectData(data);
-                return this._post('', params, instanceParams, callBack);
-            }
-
-            // With files - use FormData
             const formData = new FormData();
+
             Object.keys(data).forEach(key =>
             {
                 if (key !== 'attachments')
@@ -3084,47 +3518,13 @@ export const FeedModel = Model.extend({
                 }
             });
 
-            Array.from(files).forEach(file =>
-            {
-                formData.append('attachments[]', file);
-            });
+            Array.from(files).forEach(file => formData.append('attachments[]', file));
 
             return this._post('', formData, instanceParams, callBack);
         },
 
         /**
-         * Update existing post
-         *
-         * @param {object} instanceParams
-         * @param {function} callBack
-         * @returns {XMLHttpRequest}
-         */
-        update(instanceParams, callBack)
-        {
-            const params = this.setupObjectData();
-            const id = this.model.id;
-            const url = id ? `/${id}` : '';
-
-            return this._patch(url, params, instanceParams, callBack);
-        },
-
-        /**
-         * Delete post
-         *
-         * @param {object} instanceParams
-         * @param {function} callBack
-         * @returns {XMLHttpRequest}
-         */
-        delete(instanceParams, callBack)
-        {
-            const id = this.model.id;
-            if (!id) return false;
-
-            return this._delete(`/${id}`, {}, instanceParams, callBack);
-        },
-
-        /**
-         * Real-time sync using Server-Sent Events
+         * Real-time sync via Server-Sent Events (different protocol — legitimately custom).
          *
          * @param {object} instanceParams
          * @param {function} callBack
@@ -3143,10 +3543,11 @@ export const FeedModel = Model.extend({
 
 **Usage in Component**:
 ```javascript
-import { Component } from '@base-framework/base';
+import { Component, Jot } from '@base-framework/base';
 import { FeedModel } from '../../models/feed-model.js';
+import { Div, H1 } from '@base-framework/atoms';
 
-export class FeedPage extends Component
+export const FeedPage = Jot(
 {
     setData()
     {
@@ -3155,17 +3556,19 @@ export class FeedPage extends Component
             loading: true,
             filter: { type: 'all' }
         });
-    }
+    },
 
-    afterSetup()
+    after()
     {
         // Load initial data
         this.data.xhr.all({}, (response) =>
         {
             if (response.success)
             {
-                this.data.set('posts', response.data);
-                this.data.set('loading', false);
+                this.data.set({
+                    posts: response.rows,
+                    loading: false
+                });
             }
         });
 
@@ -3188,21 +3591,100 @@ export class FeedPage extends Component
                 console.log('Sync connected');
             }
         );
-    }
+    },
 
-    beforeDestroy()
+    render()
+    {
+        return Div({ class: 'feed-page' }, [
+            // access a component or jot property that was passed in
+            H1({ class: 'feed-title' }, this.title),
+            // Render feed posts,
+
+            // access the children
+            ...(this.children ?? [])
+        ]);
+    },
+
+    destroy()
     {
 
     }
-}
+});
+
+// create new instance of the page component with props if needed
+const props = {
+    // initial props if needed
+    title: 'My Feed'
+};
+
+new FeedPage(props, [
+    // children if needed
+]);
+```
+### Hybrid Atoms
+In base 3.5 and later, atoms can be created as hybrid atoms that combine the simplicity of atoms with the power of components. These atoms get wrapped in a component automatically and can have their own state or data.
+
+The children of the hybrid atom inherit the scope of the hybrid atom component. The parent property of the hybrid atom will point to the hybrid atom component instance.
+
+```javascript
+import { Atom, OnState, IfState, On, If, Div } from "@base-framework/atoms";
+import { State, Data } from "@base-framework/base";
+import { UnresolveButton, ResolveButton } from "@components/atoms";
+
+/**
+ * this will convert the layout to it's own component
+ * and assign the scope to the data.
+ */
+export const ResultButton = ({ id, resolved }) =>
+{
+	const data = new Data({
+		resolved
+	});
+
+	return Div({ data }, [
+		On('resolved', (resolved) => resolved === 1
+		? UnresolveButton({ id })
+		: ResolveButton({ id })),
+
+		If('resolved', 1, () => UnresolveButton({ id }))
+	])
+};
+
+/**
+ * Hybrid atoms can have custom methods added to the component. The methods will be added to the component instance.
+ */
+export const ResultButtonWithMethods = ({ id, resolved }) =>
+{
+	const data = new Data({
+		resolved
+	});
+
+	return Div({
+            data,
+
+            // Custom methods can be added to the component instance
+            methods: {
+                toggleResolved: () => data.resolved = data.resolved === 1 ? 0 : 1
+            }
+        }, [
+		On('resolved', (resolved) => resolved === 1
+		? UnresolveButton({ id })
+		: ResolveButton({ id })),
+
+		If('resolved', 1, () => UnresolveButton({ id }))
+	])
+};
 ```
 
 ### State Management
 
 **Component Data**:
+Base has a few bindable types that can be used to bind or watch on updated. Data, SimpleData, StateTarget, Route, Model. These all use the same interface from the BasicData parent.
+
 ```javascript
 setData()
 {
+    // this can be any bindable data source but usually it's a generic Data or a Custom extended Model
     return new Data({
         count: 0,
         items: [],
@@ -3228,12 +3710,21 @@ setupStates()
 }
 
 // Update
+this.state.isOpen = true;
 this.state.set('isOpen', true);
 this.state.toggle('isOpen');
 this.state.increment('count');
+
+// batch set to reduce the amount of times you need to write this.state or this.data
+this.state.set({
+    isOpen: true,
+    loading: true
+});
 ```
 
 ### HTTP Requests
+
+Base comes with an Ajax module that creates xhr requests. It will also pass any registed base xhr settings added globally with each request which can help keep CSRF tokens set.
 
 ```javascript
 import { Ajax } from '@base-framework/base';
@@ -3270,6 +3761,8 @@ Ajax({
     }
 });
 ```
+
+Using Ajax is fine for one off requests but to keep the system scalable and maintainable, using an extended base model is preferred.
 
 ### Routing
 
@@ -3331,11 +3824,7 @@ const routes = Module.convertRoutes(
 ]);
 
 // Conditional import in component
-{
-    children: [
-        condition && Import(() => import('./components/heavy-component.js'))
-    ]
-}
+condition && Import(() => import('./components/heavy-component.js'))
 
 // ❌ WRONG - String path doesn't work with Vite
 Import('./file.js')
@@ -3358,17 +3847,17 @@ setData()
 render()
 {
     // Dynamic class with watcher for active state in class string
-    return Div({ class: 'page', class: 'is-[[activeClass]]' }, [
+    return Div({ class: 'page is-[[activeClass]]' }, [
 
         // Dynamic text with watcher for data title
         H1('[[title]]'),
 
         // reactive when using bindable data sources
-        If('loading', true, () => LoadingSpinner()),
-        If('loading', false, () => ContentSection(this.data)),
+        If('loading', true, (loading, element, parent) => LoadingSpinner()),
+        If('loading', false, (loading, element, parent) => ContentSection(this.data)),
 
         // On uses the Data, or context Data, or state in that order of priority
-        On('loading', (loading) =>
+        On('loading', (loading, ele, parent) =>
         {
             return (loading)
             ? LoadingSpinner()
@@ -3393,7 +3882,7 @@ render()
         this.data.items.length === 0 && EmptyState({
             message: 'No items found',
             icon: Icons.inbox
-        })
+        }),
 
         something && EmptyState() // Simple static conditional rendering
     ]);
@@ -3408,7 +3897,7 @@ afterSetup()
     {
         if (response.success)
         {
-            this.data.set('items', response.data);
+            this.data.items = response.rows;
         }
         else
         {
@@ -3449,7 +3938,7 @@ handleSubmit(e)
 {
     e.preventDefault();
 
-    const formData = this.data.get('form');
+    const formData = this.data.form;
 
     this.data.xhr.add({}, (response) =>
     {
@@ -3480,10 +3969,9 @@ handleSubmit(e)
 | `->fetchOne()` | `->first()` |
 | `$this->request` in `addItem()` | Use `modifyAddItem($data, $request)` hook |
 | Override `addItem()` for route params | Use `modifyAddItem()` or override `add()` |
-| `protected function modifyAddItem()` | `protected function modifyAddItem()` (typo) |
 | `\Modules\User\Models\User::get()` | `use Modules\User\Models\User; User::get()` |
 | `$factory = 'Modules\\Post\\...\\PostFactory';` | `use ...\PostFactory; $factory = PostFactory::class;` |
-| `$request->route('id')` | `$request->getInt('id')` or `$request->input('id')` |
+| `$request->route('id')` | `$request->getInt('id')` for query/body, or `$request->params()->id` for route params |
 | `if (!$userId) return error()` in controller | Remove check - policy handles auth |
 | `$userId = session()->user->id ?? null;` | `$userId = session()->user->id;` after policy |
 | `throw new \Exception()` in controller | `$this->setError()` or `$this->error()` |
@@ -3491,22 +3979,46 @@ handleSubmit(e)
 | `$builder->belongsTo(Org::class, ['name'])` | `$builder->belongsTo(Org::class, fields: ['name'])` |
 | `Role::one($builder)->on(['roleId', 'id'])` | `Role::one($builder)->on(['id', 'userId'])` (parent first) |
 | `$builder->belongsTo(Org::class, fields: ['id', 'name'])` | Exclude 'id': `fields: ['name']` |
+| Padding object/array properties with spaces to align values into columns | Write each property with a single space after `:` — no extra padding ever |
 | `return $this->hasMany(Post::class)` in `joins()` | Use JoinBuilder methods in `joins()` |
 | `Post::one($this)->fields('title')` outside `joins()` | Use lazy relationships: `hasMany()` |
 | `CreateEventsTable.php` migration filename | `2026-01-21T04.14.30.800125_Event.php` |
 | `class CreateEventsTable extends Migration` | Class name must match filename after underscore: `class Event` |
 | `$this->faker->email()` in factory | `$this->faker()->email()` (method call not property) |
-| `$this->faker->latitude(25, 50)` | `$this->faker()->floatBetween(25.0, 50.0, 6)` |
-| `$this->faker->longitude(-125, -65)` | `$this->faker()->floatBetween(-125.0, -65.0, 6)` |
-| `$this->faker->optional(0.7)->value` | `$this->faker()->boolean(70) ? value : null` |
-| `$this->faker->randomFloat(2, 10, 100)` | `$this->faker()->floatBetween(10.0, 100.0, 2)` |
-| `$this->faker->paragraphs(3, true)` | `$this->faker()->paragraph(3)` |
-| `$this->faker->dateTimeThisMonth()` | `$this->faker()->dateTimeBetween('-1 month', 'now')` |
+| `$this->faker->latitude(25, 50)` | `$this->faker()->latitude(25, 50)` — method call not property |
+| `$this->faker->longitude(-125, -65)` | `$this->faker()->longitude(-125, -65)` — method call not property |
+| `$this->faker->optional(0.7)->value` | `$this->faker()->optional(0.7)->value` or `$this->faker()->boolean(70) ? value : null` |
+| `$this->faker->randomFloat(2, 10, 100)` | `$this->faker()->randomFloat(2, 10, 100)` or `$this->faker()->floatBetween(10.0, 100.0, 2)` |
+| `$this->faker->paragraphs(3, true)` | `$this->faker()->paragraphs(3, true)` or `$this->faker()->paragraph(3)` |
+| `$this->faker->dateTimeThisMonth()` | `$this->faker()->dateTimeThisMonth()` or `$this->faker()->dateTimeBetween('-1 month', 'now')` |
 | Manual POINT handling in Storage | Use `$dataTypes = ['position' => PointType::class]` in model |
 | Custom Storage for JSON encoding | Use `$dataTypes = ['metadata' => JsonType::class]` in model |
-| `$location->position = 'lat,lon'` (comma) | `$location->position = 'lat lon'` (space) or array `[lat, lon]` |
+| `$location->position = 'lat,lon'` (comma) | `$location->position = 'lon lat'` (space, **longitude first**) or array `[lon, lat]` |
+| `$location->position = [lat, lon]` or `'lat lon'` | **WRONG order** — MySQL POINT stores X=longitude, Y=latitude. `ST_Distance_Sphere` validates Y as latitude; passing a longitude value like `-111` as Y throws "Out of range error: Latitude [-90,90]". ALWAYS pass longitude first: `[lon, lat]` or `'lon lat'` |
+| `[['X(\`position\`)'], 'latitude']` in model `$fields` | `[['X(\`position\`)'], 'longitude']` — MySQL `X()` returns the X coordinate which is longitude per spatial convention |
+| `[['Y(\`position\`)'], 'longitude']` in model `$fields` | `[['Y(\`position\`)'], 'latitude']` — MySQL `Y()` returns the Y coordinate which is latitude |
 | `$_FILES['upload']` in controller | `$request->file('upload')` |
 | `new UploadFile($_FILES['upload'])` | `$request->file('upload')` or `$request->validateFile('upload', [...])` |
+| `->fields('userId', 'createdAt')` in index after `timestamps()` | `->fields('user_id', 'created_at')` — ALL migration fields are snake_case, including indexes |
+| FK name `fk_very_long_table_name_col_other_table_col` (>64 chars) | Shorten source table name — Proto has no custom constraint name API; verify length before adding FK |
+| `$table->integer('userId', 30)` in migration | `$table->integer('user_id', 30)` — ALL migration columns must be snake_case; ORM converts camelCase `$fields` to snake_case in SQL |
+| `$table->varchar('stepKey', 50)` in migration | `$table->varchar('step_key', 50)` — same rule: snake_case in DB, camelCase in model `$fields` |
+| `$table->foreign('userId')` in migration | `$table->foreign('user_id')` — FK column name must match the snake_case DB column |
+| `$this->state(['role' => 'admin'])` in factory | `$this->state(fn() => ['role' => 'admin'])` — `state()` requires a callable, NOT a plain array |
+| `->limit($limit, $offset)` in query builder | `->limit($offset, $limit)` — Proto generates `LIMIT a, b` = skip a, take b; wrong order returns 0 rows |
+| `->select('COUNT(*) as total')` | `->select([['COUNT(*)'], 'total'])` — plain string gets table alias prepended → invalid SQL |
+| `->join('INNER JOIN table ON ...', null)` | `join()` only accepts callable or array — NEVER a plain SQL string. Use closure: `->join(function($joins) { $joins->join('table', 'alias')->on('...'); })` |
+| `->join(['INNER JOIN ...'])` with a raw SQL string as value | Raw SQL strings are invalid join values — use `'type'`, `'table'`, `'alias'`, `'on'` keys in the array, or use the closure form |
+| `->where('status = ?')` when joined tables both have `status` | Prefix every column with its table alias to avoid ambiguous column errors: `->where('u.status = ?')` |
+| `->orderBy('created_at DESC')` in a join query | Prefix with alias: `->orderBy('u.created_at DESC')` — joined tables often share `created_at`, `updated_at`, `id`, `status` |
+| `$joins->left('table', 'alias')` without `->on(...)` | Always call `->on(...)` after defining a join — omitting it generates invalid SQL |
+| Passing `?` params for ON conditions separately from WHERE params in `fetch()` | ON `?` params go **first** in the `fetch()` array, then WHERE params: `->fetch([$joinParam1, $joinParam2, $whereParam])` |
+| `$builder->hasMany(Model::class, ...)` inside `joins()` | Extract as lazy relationship method: `public function items(): HasMany { return $this->hasMany(Model::class); }` — `hasMany()` is NOT a JoinBuilder method |
+| `$row = Model::getBy([...]); $row->update()` | `getBy()` returns `stdClass`, not a model instance — use query builder: `Model::builder()->update()->set([...])->where('id = ?')->execute([$row->id])` |
+| `$rows = Model::fetchWhere([...]); $rows[0]->update()` | `fetchWhere()` returns plain objects — use query builder for updates, or `Model::get($id)` to get an instance |
+| `randomElement(['tech', 'culture'])` for an enum field | Always match migration enum values exactly: `randomElement(['technology', 'community'])` — invalid enum values cause `Failed to create model` at runtime |
+| `$this->assertDatabaseCount('table', 1)` in idempotency test | `assertDatabaseCount` counts ALL rows globally and picks up live data — use `Model::fetchWhere(['userId' => $id])` + `assertCount(1, $rows)` to scope to the test user |
+| `assertDatabaseHas('user_vehicle_type_preferences', ...)` | Always check `$tableName` in the model class — shortened names like `user_vtype_preferences` differ from the class name; class name is NOT the table name |
 
 ### Frontend (Base)
 
@@ -3515,6 +4027,9 @@ handleSubmit(e)
 | `Div({ children: [...] })` | `Div({}, [...])` |
 | `Ul([items.map(...)])` | `Ul({ map: [items, ...] })` or `Ul({ for: ['items', ...] })` |
 | `new Button()` | `Button()` (Atoms don't use `new`) |
+| `ToggleButton({...})` without `new` | `new ToggleButton({...})` (ToggleButton is a Component) |
+| `CircleToggleButton({...})` without `new` | `new CircleToggleButton({...})` (CircleToggleButton is a Component) |
+| `Button({ variant: 'default' }, ...)` | `Button({ variant: 'primary' }, ...)` (`default` variant does not exist) |
 | `Icon(Icons.home)` | `Icon({ size: 'sm' }, Icons.home)` |
 | `Import('./file.js')` | `Import(() => import('./file.js'))` |
 | `Icon({ icon: Icons.home })` | `Icon({ size: 'sm' }, Icons.home)` |
@@ -3531,6 +4046,25 @@ handleSubmit(e)
 | Module not in `imported-modules.js` | Add `import "./module/module.js";` |
 | Files in `src/modules/home/` | Organize: `src/modules/home/components/pages/home/` |
 | Custom button without Base UI | Use `Button` from `@base-framework/ui/atoms` first |
+| Custom avatar with `Img` + `Div` | Use `Avatar` from `@base-framework/ui/molecules` |
+| `import { Avatar } from '@base-framework/ui/atoms'` | `import { Avatar } from '@base-framework/ui/molecules'` |
+| `Div` with hardcoded initials as fallback | Use `Avatar` with `fallbackText` or `watcherFallback` prop |
+| Hardcoded online dot `Div` for status | Use `StaticStatusIndicator('online')` or `StatusIndicator()` from `@base-framework/ui/molecules` |
+| Inline markup (`Div`, `P`, `Span`) inside a page component | Extract to named organisms/molecules — pages contain zero markup |
+| Large organism with all markup inlined | Extract headers, image areas, action rows to separate atom files |
+| All post/card markup in one file | Split: header → `post-header.js`, image → `post-image.js`, actions → `post-actions.js` |
+| Component function exceeding ~20 lines | Extract named sub-sections into helper atoms or separate files |
+| Unnamed helper `Div` blocks inside a component | Give them a name and extract them |
+| Padding object/array properties with spaces to align values into columns | Write each property with a single space after `:` — no extra padding ever |
+| Padding `@param`/`@type` doc block columns with spaces | Write type and name immediately after the tag — no column alignment |
+| Overriding `add()` in xhr to replicate built-in POST behavior | Use the built-in `add()` — it already encodes model data and handles the URL |
+| Overriding `update()` in xhr to replicate built-in PATCH behavior | Use the built-in `update()` — it already encodes model data and patches `/{id}` |
+| Overriding `delete()` in xhr to replicate built-in DELETE behavior | Use the built-in `delete()` — it already deletes by model `id` |
+| Overriding `all()` in xhr with a stripped-down version | Use the built-in `all()` — it already sends filter, search, dates, orderBy, groupBy, cursor, since |
+| Creating a custom `search(query, cb)` xhr method | Set `this.model.search = query` and call the built-in `xhr.all()` |
+| Creating `byType(type, cb)`, `filterByStatus(status, cb)`, etc. when only a filter value differs | Set `this.model.filter = { type }` (or `{ status }`) and call the built-in `xhr.all()` |
+| Creating a custom `filterByDateRange(from, to, cb)` xhr method | Set `this.model.dates = { field: 'createdAt', from, to }` and call the built-in `xhr.all()` |
+| Building filter/search query params manually inside a custom xhr method | Let built-in `all()` read them from model data — set keys on the model, not in the method |
 
 ## 6. Testing (Backend)
 
@@ -3650,6 +4184,30 @@ $this->assertEquals('test@example.com', $user->email);
 - Connection caching is enabled automatically in tests (`dbCaching=true`)
 - Don't disable foreign key checks unless absolutely necessary
 - Don't manually create separate database connections (use Proto's connection methods)
+
+**CRITICAL - Idempotency Tests**:
+`assertDatabaseCount()` counts ALL rows in the table globally, including rows created by live API calls or other tests. For idempotency assertions, always scope to the test user:
+```php
+// ❌ WRONG - picks up pre-existing rows from live API calls
+$this->assertDatabaseCount('user_sessions', 1);
+
+// ✅ CORRECT - scoped to the test user
+$sessions = UserSession::fetchWhere(['userId' => $user->id]);
+$this->assertCount(1, $sessions);
+```
+
+**CRITICAL - Table Name vs Class Name**:
+Shortened table names (e.g., to avoid 64-char FK limit) differ from the model class name. ALWAYS check `protected static ?string $tableName` in the model class before using a table name in `assertDatabaseHas` / `assertDatabaseMissing`:
+```php
+// Model class: UserVehicleTypePreference
+// $tableName = 'user_vtype_preferences' ← shortened to avoid >64-char FK name
+
+// ❌ WRONG - derived from class name
+$this->assertDatabaseHas('user_vehicle_type_preferences', [...]);
+
+// ✅ CORRECT - matches actual $tableName
+$this->assertDatabaseHas('user_vtype_preferences', [...]);
+```
 
 ### Models with Eager Joins - Testing Considerations
 
@@ -3784,7 +4342,8 @@ Proto provides a powerful event system for decoupled communication between appli
 use Proto\Events\Events;
 
 // Subscribe to an event
-Events::on('user.created', function($payload) {
+Events::on('user.created', function($payload)
+{
     // Handle the event
     EmailService::sendWelcome($payload->email);
 });
@@ -3804,7 +4363,8 @@ events()->emit('user.created', $data);
 Prefix event names with `redis:` to broadcast across all application instances:
 ```php
 // Subscribe on ALL instances
-Events::on('redis:cache.cleared', function($data) {
+Events::on('redis:cache.cleared', function($data)
+{
     Logger::info('Cache cleared globally');
 });
 
@@ -3816,12 +4376,14 @@ Events::update('redis:cache.cleared', ['timestamp' => time()]);
 The storage layer automatically publishes events for CRUD operations:
 ```php
 // Listen for model add operations
-Events::on('User:add', function($payload) {
+Events::on('User:add', function($payload)
+{
     // $payload contains: args, data
 });
 
 // Listen to ALL storage events
-Events::on('Storage', function($payload) {
+Events::on('Storage', function($payload)
+{
     // $payload contains: target (model name), method, data
 });
 ```
@@ -4023,7 +4585,7 @@ export const ConversationModel = Model.extend({
             return this.setupEventSource('/sync', params, callBack, onOpenCallBack);
         },
 
-        addFiles(data, formData)
+        addFiles(data, formData, files)
         {
             Object.keys(data).forEach(key =>
             {
@@ -4077,7 +4639,7 @@ export const ConversationModel = Model.extend({
 
             // With files, use FormData
             const formData = new FormData();
-            this.addFiles(data, formData);
+            this.addFiles(data, formData, files);
 
             return this._post(url, formData, instanceParams, callBack);
         },
