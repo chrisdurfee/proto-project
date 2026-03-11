@@ -5,6 +5,9 @@
     max-height: -webkit-fill-available;
     padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
     @apply shadow-xl md:rounded-md rounded-md;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+	scroll-behavior: smooth;
 }
 .modal:after {
     content: "";
@@ -36,11 +39,11 @@
 }
 .modal .modal-header {
     padding-top: calc(1rem + env(safe-area-inset-top));
-    top: calc(-0px - env(safe-area-inset-top));
+    top: max(calc(env(safe-area-inset-top), 0px));
 }
 .modal .modal-footer {
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-    bottom: calc(-0px - env(safe-area-inset-bottom));
+    bottom: max(calc(env(safe-area-inset-bottom), 0px));
 }
 
 @media (min-width: 1024px) {
@@ -89,13 +92,15 @@
     bottom: 0 !important;
     margin: 0 !important;
     /* Use dvh (dynamic viewport height) for iOS Safari */
-    max-height: 90dvh !important;
+    max-height: 95dvh !important;
     max-height: -webkit-fill-available !important;
     border-top-left-radius: 1rem;
     border-top-right-radius: 1rem;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     animation: slideUpIn 0.3s ease-out;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
     --backdrop-opacity: 1;
 }
 
@@ -108,7 +113,9 @@
     border-top-left-radius: 1rem;
     border-top-right-radius: 1rem;
     /* Add extra padding for drag handle on mobile */
-    padding-top: calc(2rem + env(safe-area-inset-top));
+    position: sticky;
+    top: 0px;
+    padding-top: calc(2rem);
     /* Prevent text selection during drag */
     user-select: none;
     -webkit-user-select: none;
@@ -118,7 +125,7 @@
 .modal.drawer .modal-header::before {
     content: '';
     position: absolute;
-    top: calc(0.75rem + env(safe-area-inset-top));
+    top: calc(0.75rem);
     left: 50%;
     transform: translateX(-50%);
     width: 2.5rem;
@@ -128,6 +135,7 @@
     border-radius: 9999px;
     /* Clickable area for better UX */
     cursor: grab;
+    z-index: 100;
 }
 
 .modal.drawer .modal-content {
@@ -162,7 +170,7 @@
     .modal.drawer .modal-header {
         border-top-left-radius: 0.5rem;
         border-top-right-radius: 0.5rem;
-        padding-top: calc(1rem + env(safe-area-inset-top));
+        padding-top: calc(1rem);
     }
 
     .modal.drawer .modal-header::before {

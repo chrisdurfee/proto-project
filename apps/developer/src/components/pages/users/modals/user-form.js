@@ -281,6 +281,18 @@ const AccessFieldset = (isEditing) => (
 			]
 		),
 		new FormField(
+			{ name: "verified", label: "Verified", description: "Sets the user's verified status." },
+			[
+				Select({
+					bind: "verified",
+					options: [
+						{ value: 0, label: "Unverified" },
+						{ value: 1, label: "Verified" }
+					]
+				})
+			]
+		),
+		new FormField(
 			{ name: "status", label: "Status", description: "Sets the user's status." },
 			[
 				Select({

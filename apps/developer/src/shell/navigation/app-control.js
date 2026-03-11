@@ -1,4 +1,4 @@
-import { Atom, Component, Data } from "@base-framework/base";
+import { Atom, Component } from "@base-framework/base";
 import { Configs } from "../../configs.js";
 import { MainNavigation } from "./main-navigation.js";
 import { getMobileOptions } from "./mobile-options.js";
@@ -75,7 +75,7 @@ export class AppControl extends Component
 	/**
 	 * This will set the app controll state to be stored in the local storage.
 	 *
-	 * @returns {Data}
+	 * @returns {void}
 	 */
 	afterSetup()
 	{
@@ -93,7 +93,6 @@ export class AppControl extends Component
 		 * This will resume the data from the local storage.
 		 */
 		data.resume();
-		return data;
 	}
 
 	/**

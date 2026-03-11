@@ -1,5 +1,5 @@
 import { Div, OnState, Span } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Jot } from "@base-framework/base";
 import { Skeleton } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { FormField, Toggle } from "@base-framework/ui/molecules";
@@ -100,7 +100,7 @@ const RoleFields = ({ hasRole, toggleRole }) => (
  *
  * Displays the skeleton placeholder while the roles loads.
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const UserRoleFieldset = Jot(
 {

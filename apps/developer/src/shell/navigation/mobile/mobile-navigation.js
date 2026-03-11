@@ -1,5 +1,5 @@
 import { Button, I, Li, Nav, Span, Ul } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Jot } from "@base-framework/base";
 import { Icons } from "@base-framework/ui/icons";
 import { MobileLink } from "./mobile-link.js";
 import { PopOverContainer } from "./popover-container.js";
@@ -47,7 +47,7 @@ const separateOptions = (options) =>
  *
  * A mobile navigation component that displays a list of links in a dropdown.
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const MobileNavigation = Jot(
 {

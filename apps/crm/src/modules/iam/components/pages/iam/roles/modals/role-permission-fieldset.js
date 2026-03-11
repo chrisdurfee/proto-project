@@ -1,5 +1,5 @@
 import { Div, OnState, Span } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Jot } from "@base-framework/base";
 import { Toggle } from "@base-framework/ui";
 import { Skeleton } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
@@ -101,7 +101,7 @@ const PermissionFields = ({ hasPermission, togglePermission }) => (
  *
  * Displays the skeleton placeholder while the permissions load.
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const RolePermissionFieldset = Jot(
 {

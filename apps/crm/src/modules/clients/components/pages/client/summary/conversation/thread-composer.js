@@ -181,7 +181,7 @@ export const ThreadComposer = Jot(
 	{
 		return Div({ class: "fadeIn p-4 w-full lg:max-w-5xl m-auto sticky bg-background/80 backdrop-blur-md z-10 bottom-0" }, [
 			// @ts-ignore
-			Form({ class: "relative flex border rounded-lg p-3 bg-surface", submit: () => this.submit() }, [
+			Form({ class: "relative flex border rounded-lg p-3 bg-muted", submit: () => this.submit() }, [
 				// Hidden file input
 				Input({
 					type: "file",

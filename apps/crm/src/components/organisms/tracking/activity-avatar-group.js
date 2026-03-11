@@ -1,5 +1,5 @@
 import { A, Div } from '@base-framework/atoms';
-import { Component, Data, Jot } from '@base-framework/base';
+import { Data, Jot } from '@base-framework/base';
 import { Avatar } from '@base-framework/ui/molecules';
 import { getSavedToken } from '../../../csrf-token';
 import { Env } from '../../../shell/env.js';
@@ -93,7 +93,7 @@ const Group = () => Div({
  * @property {string} type - Resource type
  * @property {string|number} refId - Resource reference ID
  * @property {string|number} userId - Current user ID
- * @type {typeof Component}
+ * @returns {object}
  */
 export const ActivityAvatarGroup = Jot(
 {

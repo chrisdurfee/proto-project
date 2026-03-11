@@ -100,7 +100,7 @@ const MessageContent = (isUser, streamData, content) => Div({
 	class: `rounded-lg px-4 py-3 ${
 		isUser
 			? 'bg-primary text-primary-foreground'
-			: 'bg-surface border'
+			: 'bg-muted border'
 	}`
 }, [
 	Pre({

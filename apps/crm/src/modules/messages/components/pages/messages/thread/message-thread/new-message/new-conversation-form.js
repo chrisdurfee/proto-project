@@ -1,5 +1,5 @@
 import { Div, H2, Header } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Jot } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Button, Card } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
@@ -103,7 +103,7 @@ const handleUserClick = (user, parent) =>
  *
  * A searchable list to select a user and start a new conversation.
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const NewConversationForm = Jot(
 {

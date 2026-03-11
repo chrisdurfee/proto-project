@@ -1,5 +1,5 @@
 import { Div, On } from "@base-framework/atoms";
-import { Component, Data, Jot } from "@base-framework/base";
+import { Data, Jot } from "@base-framework/base";
 import { AttachmentPreviewGrid } from "./attachment-preview-grid.js";
 import { AttachmentPreviewHeader } from "./attachment-preview-header.js";
 
@@ -9,7 +9,7 @@ import { AttachmentPreviewHeader } from "./attachment-preview-header.js";
  * Container for attachment previews above the composer
  * Displays selected files before sending with ability to remove them
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const AttachmentPreview = Jot(
 {

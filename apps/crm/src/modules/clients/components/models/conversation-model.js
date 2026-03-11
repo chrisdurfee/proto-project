@@ -30,6 +30,7 @@ export const ConversationModel = Model.extend({
 			const params = lastId ? `lastId=${lastId}` : '';
 			return this.setupEventSource('/sync', params, callBack, onOpenCallBack);
 		},
+
 		/**
 		 * Add a new conversation message with optional file attachments.
 		 *

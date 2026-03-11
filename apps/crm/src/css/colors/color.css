@@ -11,11 +11,11 @@
 
     *::-webkit-scrollbar-thumb,
     ::-webkit-scrollbar-corner {
-        @apply bg-accent;
+        @apply bg-muted;
     }
 
     ::selection {
-        @apply bg-accent;
+        @apply bg-muted;
     }
 
     *:not(:hover)::-webkit-scrollbar-thumb,

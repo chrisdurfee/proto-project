@@ -1,5 +1,5 @@
 import { OnState } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Jot } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { ErrorModel } from "../models/error-model.js";
@@ -13,14 +13,14 @@ import { ErrorModel } from "../models/error-model.js";
  */
 const updateResolveStatus = (id, resolved) =>
 {
-    const data = new ErrorModel({
-        id,
-        resolved
-    });
+	const data = new ErrorModel({
+		id,
+		resolved
+	});
 
-    data.xhr.updateResolved('', (response) =>
-    {
-    });
+	data.xhr.updateResolved('', (response) =>
+	{
+	});
 };
 
 /**
@@ -29,19 +29,19 @@ const updateResolveStatus = (id, resolved) =>
  * @param {object} props
  * @returns {object}
  */
-const ResolveButton = (props) => (
+const ResolveButton = ({ id, row }) => (
 	Button({
 		variant: 'withIcon',
 		class: 'outline',
 		icon: Icons.circleCheck,
-		click(e, parent)
+		click(e, { state })
 		{
 			e.preventDefault();
 			e.stopPropagation();
 
-			updateResolveStatus(props.id, 1);
-			parent.state.resolved = 1;
-			props.row.resolved = 1;
+			updateResolveStatus(id, 1);
+			state.resolved = 1;
+			row.resolved = 1;
 		}
 	}, 'Resolve')
 );
@@ -52,19 +52,19 @@ const ResolveButton = (props) => (
  * @param {object} props
  * @returns {object}
  */
-const UnresolveButton = (props) => (
+const UnresolveButton = ({ id, row }) => (
 	Button({
 		variant: 'withIcon',
 		class: 'outline',
 		icon: Icons.circleX,
-		click(e, parent)
+		click(e, { state })
 		{
 			e.preventDefault();
 			e.stopPropagation();
 
-			updateResolveStatus(props.id, 0);
-			parent.state.resolved = 0;
-			props.row.resolved = 0;
+			updateResolveStatus(id, 0);
+			state.resolved = 0;
+			row.resolved = 0;
 		}
 	}, 'Unresolve')
 );
@@ -72,7 +72,7 @@ const UnresolveButton = (props) => (
 /**
  * This will render the button.
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const ResultButtons = Jot(
 {

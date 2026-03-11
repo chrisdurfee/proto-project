@@ -155,7 +155,7 @@ export const ThreadComposer = VeilJot(
 	 */
 	render()
 	{
-		return Div({ class: "w-full sticky z-10 bottom-0" }, [
+		return Div({ class: "w-full sticky z-10 bottom-[-1px]" }, [
 			// Attachment preview section (above composer)
 			new AttachmentPreview({ cache: 'attachmentPreview' }),
 
@@ -172,7 +172,7 @@ export const ThreadComposer = VeilJot(
 					change: (e) => this.handleFileSelect(e)
 				}),
 				// @ts-ignore
-				Form({ class: "relative flex border rounded-lg p-3 bg-surface max-h-40 overflow-y-auto overflow-x-hidden lg:max-w-5xl m-auto", submit: () => this.submit(this.textareaComponent.getValue()) }, [
+				Form({ class: "relative flex border rounded-lg p-3 bg-muted max-h-40 overflow-y-auto overflow-x-hidden lg:max-w-5xl m-auto", submit: () => this.submit(this.textareaComponent.getValue()) }, [
 					Div({ class: 'flex flex-col sticky top-0' }, [
 						Button({
 							variant: "icon",

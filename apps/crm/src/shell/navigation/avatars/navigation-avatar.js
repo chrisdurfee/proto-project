@@ -1,5 +1,5 @@
 import { Div, Span } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Jot } from "@base-framework/base";
 import { Avatar, StatusIndicator } from "@base-framework/ui/molecules";
 import { UserLoginStatus } from "../../user-status/user-login-status.js";
 
@@ -25,7 +25,7 @@ const status = new UserLoginStatus();
  *
  * This will create the NavigationAvatar molecule.
  *
- * @type {typeof Component} NavigationAvatar
+ * @returns {object} NavigationAvatar
  */
 export const NavigationAvatar = Jot(
 {

@@ -90,11 +90,33 @@ export const ConversationMessages = Jot(
 
 		// @ts-ignore
 		this.readTracker = new MessageReadTracker(this.conversationId, {
-			threshold: 0.5,
+			// Use the scroll container as root so intersection is measured
+			// relative to the visible message area, not the whole viewport.
+			// @ts-ignore
+			root: this.scrollContainer || null,
+			threshold: 0.1,
 			debounceDelay: 1000
 		});
 		// @ts-ignore
 		this.observer = this.readTracker.observer;
+	},
+
+	/**
+	 * Mark all messages in this conversation as read using this component's
+	 * already-initialised model (avoids standalone URL-template resolution issues).
+	 *
+	 * @returns {void}
+	 */
+	markAllRead()
+	{
+		// @ts-ignore
+		if (!this.data)
+		{
+			return;
+		}
+
+		// @ts-ignore
+		this.data.xhr.markAsRead({}, () => {});
 	},
 
 	/**
@@ -120,6 +142,18 @@ export const ConversationMessages = Jot(
 				// @ts-ignore
 				this.handleSyncUpdate(data);
 			});
+
+	},
+
+	/**
+	 * Mark messages as read once the component and its data model are ready.
+	 *
+	 * @returns {void}
+	 */
+	afterSetup()
+	{
+		// @ts-ignore
+		this.markAllRead();
 	},
 
 	/**
@@ -156,6 +190,10 @@ export const ConversationMessages = Jot(
 			{
 				// @ts-ignore
 				this.scrollToBottom();
+
+				// User is at the bottom and seeing the new messages — mark as read
+				// @ts-ignore
+				this.markAllRead();
 			}
 		}
 

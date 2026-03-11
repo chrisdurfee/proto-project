@@ -1,5 +1,5 @@
 import { Textarea } from "@base-framework/atoms";
-import { Veil, VeilJot } from "@base-framework/ui";
+import { VeilJot } from "@base-framework/ui";
 import { Icons } from "@base-framework/ui/icons";
 
 /**
@@ -32,7 +32,7 @@ const filterNewlines = (text) =>
  * - Submit on Ctrl+Enter
  * - Input validation
  *
- * @type {typeof Veil}
+ * @returns {object}
  */
 export const ThreadTextarea = VeilJot(
 {
@@ -138,11 +138,15 @@ export const ThreadTextarea = VeilJot(
 	resizeTextarea()
 	{
 		const startHeight = 48;
-		let height = startHeight;
+
+		// Reset to auto so the browser recalculates scrollHeight correctly.
+		// @ts-ignore
+		this.panel.style.height = 'auto';
 
 		const text = this.panel.value;
 		const normalizedText = filterNewlines(text);
-		// @ts-ignore
+		let height = startHeight;
+
 		if (normalizedText !== '')
 		{
 			// @ts-ignore
@@ -151,7 +155,7 @@ export const ThreadTextarea = VeilJot(
 		}
 
 		// @ts-ignore
-		this.panel.style = 'height:' + height + 'px;';
+		this.panel.style.height = height + 'px';
 	},
 
 	/**
@@ -210,7 +214,7 @@ export const ThreadTextarea = VeilJot(
 			class: "w-full border-none bg-transparent overflow-hidden resize-none focus:outline-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground",
 			// @ts-ignore
 			placeholder: this.placeholder,
-			input: updateCharCount,
+			input: (e) => { updateCharCount(e); this.resizeTextarea(); },
 			// @ts-ignore
 			bind: this.bind,
 			required: true,

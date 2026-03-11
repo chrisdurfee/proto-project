@@ -74,20 +74,36 @@
     }
 }
 
+@layer utilities {
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+}
+
 @utility top-safe {
-	top: max(var(--safe-top), 0px);
+    top: max(var(--safe-top), 0px);
 }
 
 @utility bottom-safe {
-	bottom: max(var(--safe-bottom), 0px);
+    bottom: max(var(--safe-bottom), 0px);
 }
 
 @utility left-safe {
-	left: max(var(--safe-left), 0px);
+    left: max(var(--safe-left), 0px);
 }
 
 @utility right-safe {
-	right: max(var(--safe-right), 0px);
+    right: max(var(--safe-right), 0px);
 }
 
 @utility pt-safe-top {
@@ -120,19 +136,28 @@
 
 /* Dynamic viewport height utilities for iOS Safari */
 @utility h-screen-dynamic {
-    height: 100vh; /* Fallback */
-    height: 100dvh; /* Dynamic viewport height */
-    height: -webkit-fill-available; /* iOS fallback */
+    height: 100vh;
+    /* Fallback */
+    height: 100dvh;
+    /* Dynamic viewport height */
+    height: -webkit-fill-available;
+    /* iOS fallback */
 }
 
 @utility min-h-screen-dynamic {
-    min-height: 100vh; /* Fallback */
-    min-height: 100dvh; /* Dynamic viewport height */
-    min-height: -webkit-fill-available; /* iOS fallback */
+    min-height: 100vh;
+    /* Fallback */
+    min-height: 100dvh;
+    /* Dynamic viewport height */
+    min-height: -webkit-fill-available;
+    /* iOS fallback */
 }
 
 @utility max-h-screen-dynamic {
-    max-height: 100vh; /* Fallback */
-    max-height: 100dvh; /* Dynamic viewport height */
-    max-height: -webkit-fill-available; /* iOS fallback */
+    max-height: 100vh;
+    /* Fallback */
+    max-height: 100dvh;
+    /* Dynamic viewport height */
+    max-height: -webkit-fill-available;
+    /* iOS fallback */
 }

@@ -2,4 +2,18 @@
 	input, select, textarea {
 		@apply border bg-input rounded-sm p-2;
 	}
+
+	select {
+		accent-color: var(--color-primary);
+	}
+
+	select option {
+		background-color: var(--color-background);
+		color: var(--color-foreground);
+	}
+
+	select option:checked {
+		background-color: var(--color-primary);
+		color: var(--color-primary-foreground);
+	}
 }

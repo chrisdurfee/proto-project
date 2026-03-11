@@ -19,7 +19,7 @@ const DocHeader = Atom(({ title, description}) => (
  * This will create a body for the documentation.
  *
  * @param {object} props
- * @param {object} children
+ * @param {Array<any>} children
  * @returns {object}
  */
 const DocBody = Atom((props, children) => (
@@ -35,7 +35,7 @@ const DocBody = Atom((props, children) => (
  * This will create a full page.
  *
  * @param {object} props
- * @param {object} children
+ * @param {Array<any>} children
  * @returns {CenterPage}
  */
 export const DocPage = Atom((props, children) => (

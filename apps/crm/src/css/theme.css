@@ -11,6 +11,9 @@
 @theme {
     --color-background: hsl(0 0% 92%);
     --color-foreground: hsl(240 10% 3.9%);
+    --color-foreground-secondary: hsl(240 5% 55%);
+    --color-foreground-tertiary: hsl(240 2% 77%);
+    --color-foreground-quaternary: hsl(240 2% 86%);
     --color-card: hsl(0 0% 95%);
     --color-card-foreground: hsl(240 10% 3.9%);
     --color-popover: hsl(0 0% 95%);
@@ -51,6 +54,9 @@
     :root:not(.light) {
         --color-background: hsl(240 10% 2.5%);
         --color-foreground: hsl(0 0% 98%);
+        --color-foreground-secondary: hsl(240 3% 56%);
+        --color-foreground-tertiary: hsl(240 2% 28%);
+        --color-foreground-quaternary: hsl(240 2% 17%);
         --color-card: hsl(240 10% 4%);
         --color-card-foreground: hsl(0 0% 98%);
         --color-popover: hsl(240 10% 4%);
@@ -74,20 +80,40 @@
     }
 }
 
+@layer utilities {
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+}
+
 @utility top-safe {
-	top: max(var(--safe-top), 0px);
+    top: max(var(--safe-top), 0px);
+}
+
+@utility top-header-safe {
+    top: calc(max(var(--safe-top), 0px) + 56px);
 }
 
 @utility bottom-safe {
-	bottom: max(var(--safe-bottom), 0px);
+    bottom: max(var(--safe-bottom), 0px);
 }
 
 @utility left-safe {
-	left: max(var(--safe-left), 0px);
+    left: max(var(--safe-left), 0px);
 }
 
 @utility right-safe {
-	right: max(var(--safe-right), 0px);
+    right: max(var(--safe-right), 0px);
 }
 
 @utility pt-safe-top {
@@ -118,21 +144,38 @@
     padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
 
+@utility h-safe-full {
+    height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+}
+
+@utility max-h-safe-full {
+    max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+}
+
 /* Dynamic viewport height utilities for iOS Safari */
 @utility h-screen-dynamic {
-    height: 100vh; /* Fallback */
-    height: 100dvh; /* Dynamic viewport height */
-    height: -webkit-fill-available; /* iOS fallback */
+    height: 100vh;
+    /* Fallback */
+    height: 100dvh;
+    /* Dynamic viewport height */
+    height: -webkit-fill-available;
+    /* iOS fallback */
 }
 
 @utility min-h-screen-dynamic {
-    min-height: 100vh; /* Fallback */
-    min-height: 100dvh; /* Dynamic viewport height */
-    min-height: -webkit-fill-available; /* iOS fallback */
+    min-height: 100vh;
+    /* Fallback */
+    min-height: 100dvh;
+    /* Dynamic viewport height */
+    min-height: -webkit-fill-available;
+    /* iOS fallback */
 }
 
 @utility max-h-screen-dynamic {
-    max-height: 100vh; /* Fallback */
-    max-height: 100dvh; /* Dynamic viewport height */
-    max-height: -webkit-fill-available; /* iOS fallback */
+    max-height: 100vh;
+    /* Fallback */
+    max-height: 100dvh;
+    /* Dynamic viewport height */
+    max-height: -webkit-fill-available;
+    /* iOS fallback */
 }

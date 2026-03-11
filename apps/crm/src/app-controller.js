@@ -51,6 +51,7 @@ export class AppController
 		this.getCsrfToken();
 		this.setupService();
 		this.setupRouter();
+		this.setupFontLoading();
 	}
 
 	/**
@@ -94,6 +95,46 @@ export class AppController
 	setupService()
 	{
 		setupServiceWorker(this);
+	}
+
+	/**
+	 * This will setup font loading detection to prevent FOUT.
+	 * Adds 'fonts-loaded' class to html element when Material Symbols fonts are ready.
+	 *
+	 * @protected
+	 * @returns {void}
+	 */
+	setupFontLoading()
+	{
+		// Check if Font Loading API is supported
+		if ('fonts' in document)
+		{
+			const fonts = [
+				'Material Symbols Outlined',
+				'Material Symbols Rounded',
+				'Material Symbols Sharp'
+			];
+
+			// Load all Material Symbol fonts
+			Promise.all(
+				fonts.map(font => document.fonts.load(`24px "${font}"`))
+			).then(() => {
+				// Add class to html element when fonts are loaded
+				document.documentElement.classList.add('fonts-loaded');
+			}).catch(() => {
+				// Fallback: show icons after a delay even if font loading fails
+				setTimeout(() => {
+					document.documentElement.classList.add('fonts-loaded');
+				}, 1000);
+			});
+		}
+		else
+		{
+			// Fallback for browsers without Font Loading API
+			setTimeout(() => {
+				document.documentElement.classList.add('fonts-loaded');
+			}, 1000);
+		}
 	}
 
 	/**

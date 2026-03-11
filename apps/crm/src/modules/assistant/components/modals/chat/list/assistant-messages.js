@@ -1,5 +1,5 @@
 import { Div, Span, UseParent } from "@base-framework/atoms";
-import { Component, DateTime, Jot } from "@base-framework/base";
+import { DateTime, Jot } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
@@ -36,7 +36,7 @@ const Divider =
  *
  * Renders AI assistant chat messages with real-time SSE sync.
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const AssistantMessages = Jot(
 {

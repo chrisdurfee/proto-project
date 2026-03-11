@@ -1,5 +1,5 @@
 import { Div } from '@base-framework/atoms';
-import { Atom, Component, Jot } from '@base-framework/base';
+import { Atom, Jot } from '@base-framework/base';
 import { Icons } from '@base-framework/ui/icons';
 import { InlineNavigation } from '@base-framework/ui/organisms';
 import { Configs } from '../../configs.js';
@@ -94,7 +94,7 @@ const AssistantChatButton = () => ({
  *
  * This will create the main navigation.
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const MainNavigation = Jot(
 {

@@ -1,5 +1,5 @@
 import { Div, OnState } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Jot } from "@base-framework/base";
 import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
@@ -14,7 +14,7 @@ import { HeaderSkeleton, ThreadSkeleton } from "./skeletons.js";
  * Displays a conversation with a header and list of messages using ScrollableList
  * to automatically fetch messages from the API.
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const ThreadDetail = Jot(
 {

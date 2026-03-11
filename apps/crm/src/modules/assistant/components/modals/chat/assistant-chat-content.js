@@ -1,5 +1,5 @@
 import { Div, OnLoad } from '@base-framework/atoms';
-import { Component, Jot } from '@base-framework/base';
+import { Jot } from '@base-framework/base';
 import { AssistantComposer } from './composer/assistant-composer.js';
 import { AssistantMessages } from './list/assistant-messages.js';
 
@@ -8,7 +8,7 @@ import { AssistantMessages } from './list/assistant-messages.js';
  *
  * The content component for the AI assistant chat modal.
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const AssistantChatContent = Jot(
 {
@@ -23,10 +23,8 @@ export const AssistantChatContent = Jot(
 	{
 		// @ts-ignore
 		const container = this.parent.panel;
-		// @ts-ignore
 		if (container)
 		{
-			// @ts-ignore
 			container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
 		}
 	},
@@ -41,9 +39,7 @@ export const AssistantChatContent = Jot(
 		const BOTTOM_GRACE = 60;
 		// @ts-ignore
 		const container = this.parent.panel;
-		// @ts-ignore
 		if (!container) return true;
-		// @ts-ignore
 		return container.scrollHeight - container.scrollTop - container.clientHeight <= BOTTOM_GRACE;
 	},
 
@@ -69,14 +65,6 @@ export const AssistantChatContent = Jot(
 					conversation: response,
 					conversationId: response.id
 				});
-
-				// Now that we have conversation ID, initialize the messages
-				// @ts-ignore
-				if (this.messages)
-				{
-					// @ts-ignore
-					this.messages.setConversationId(response.id);
-				}
 			}
 
 			// @ts-ignore
@@ -92,12 +80,10 @@ export const AssistantChatContent = Jot(
 	render()
 	{
 		return Div({ class: "flex flex-col h-full" }, [
-			OnLoad(() =>
-			{
-				return Div({ class: 'flex flex-auto flex-col ' }, [
+			OnLoad(() => (
+				Div({ class: 'flex flex-auto flex-col ' }, [
 					// Messages container with scroll
 					Div({ class: "flex-1" }, [
-						// @ts-ignore
 						new AssistantMessages({
 							cache: 'messages',
 							// @ts-ignore
@@ -112,7 +98,6 @@ export const AssistantChatContent = Jot(
 					]),
 
 					// Composer at bottom
-					// @ts-ignore
 					new AssistantComposer({
 						// @ts-ignore
 						conversationId: this.conversationId,
@@ -125,7 +110,7 @@ export const AssistantChatContent = Jot(
 						}
 					})
 				])
-			})
+			))
 		]);
 	}
 });

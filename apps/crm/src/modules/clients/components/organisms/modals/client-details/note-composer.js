@@ -1,5 +1,5 @@
 import { Div, Textarea } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Jot } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
@@ -10,7 +10,7 @@ import { ClientNoteModel } from "../../../models/client-note-model.js";
  *
  * Handles form submission for adding new client notes.
  *
- * @type {typeof Component} NoteComposer
+ * @returns {object} NoteComposer
  */
 export const NoteComposer = Jot(
 {
@@ -141,7 +141,7 @@ export const NoteComposer = Jot(
 	{
 		return Div({ class: "fadeIn p-4 w-full lg:max-w-5xl m-auto sticky bg-background/80 backdrop-blur-md z-10 bottom-0" }, [
 			// @ts-ignore
-			Form({ class: "relative flex border rounded-lg p-3 bg-surface", submit: () => this.submit() }, [
+			Form({ class: "relative flex border rounded-lg p-3 bg-muted", submit: () => this.submit() }, [
 				Div({ class: 'flex-1 flex' }, [
 					Textarea({
 						cache: 'textareaElement',

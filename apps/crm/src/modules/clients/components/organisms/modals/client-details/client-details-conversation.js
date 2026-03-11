@@ -126,7 +126,7 @@ export const ClientDetailsConversation = Jot(
 	 *
 	 * @returns {void}
 	 */
-	destroy()
+	beforeDestroy()
 	{
 		// @ts-ignore
 		if (this.eventSource)

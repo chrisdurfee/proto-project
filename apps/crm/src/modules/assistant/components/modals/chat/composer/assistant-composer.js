@@ -1,5 +1,5 @@
 import { Div, UseParent } from "@base-framework/atoms";
-import { Veil, VeilJot } from "@base-framework/ui";
+import { VeilJot } from "@base-framework/ui";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
@@ -39,7 +39,7 @@ const SendButton = () => (
  *
  * Input component for sending messages to the AI assistant.
  *
- * @type {typeof Veil}
+ * @type {object}
  */
 export const AssistantComposer = VeilJot(
 {
@@ -117,7 +117,7 @@ export const AssistantComposer = VeilJot(
 			Div({ class: "fadeIn p-4 w-full fadeIn bg-background/80 backdrop-blur-md" }, [
 				// @ts-ignore
 				Form({
-					class: "relative flex border rounded-lg p-3 bg-surface max-h-40 overflow-y-auto overflow-x-hidden lg:max-w-5xl m-auto",
+					class: "relative flex border rounded-lg p-3 bg-muted max-h-40 overflow-y-auto overflow-x-hidden lg:max-w-5xl m-auto",
 					// @ts-ignore
 					submit: () => this.submit(this.textareaComponent.getValue())
 				}, [

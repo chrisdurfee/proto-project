@@ -410,6 +410,38 @@ public function seed(): void
 				)
 			]),
 
+			// Running Seeders from Migrations
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'Running Seeders from Migrations'),
+				P({ class: 'text-muted-foreground' },
+					`Instead of writing inline seed logic inside a migration, you can delegate to dedicated Seeder classes
+					using runSeeder() and runManySeeders(). Each seeder class must extend Proto\\Database\\Seeders\\Seeder
+					and implement a run() method.`
+				),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li("runSeeder(string $seederClass) - Runs a single seeder by its fully qualified class name"),
+					Li("runManySeeders(array $seederClasses) - Runs an array of seeder classes in sequence")
+				]),
+				CodeBlock(
+`public function seed(): void
+{
+    // Run a single seeder
+    $this->runSeeder(\\Modules\\User\\Seeders\\UserSeeder::class);
+
+    // Run multiple seeders in sequence
+    $this->runManySeeders([
+        \\Modules\\Vehicle\\Taxonomy\\Seeders\\VehicleTypeSeeder::class,
+        \\Modules\\Vehicle\\Taxonomy\\Seeders\\VehicleMakeSeeder::class,
+    ]);
+}`
+				),
+				P({ class: 'text-muted-foreground' },
+					`Seeder classes are discoverable from modules/*/Seeders or common/Seeders.
+					Using dedicated seeders keeps migration files clean and allows the same seed logic to be reused
+					across migrations, tests, and manual seeding scripts.`
+				)
+			]),
+
 			// Creating a Migration
 			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
 				H4({ class: 'text-lg font-bold' }, 'Creating a Migration'),

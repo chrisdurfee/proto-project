@@ -1,5 +1,5 @@
 import { A, Div } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Jot } from "@base-framework/base";
 import { Avatar, StatusIndicator } from "@base-framework/ui/molecules";
 
 /**
@@ -7,7 +7,7 @@ import { Avatar, StatusIndicator } from "@base-framework/ui/molecules";
  *
  * This will create the MobileUserAvatar molecule.
  *
- * @type {typeof Component} MobileUserAvatar
+ * @returns {object} MobileUserAvatar
  */
 export const MobileUserAvatar = Jot(() =>
 	Div({ class: "flex items-center gap-4" }, [

@@ -36,7 +36,7 @@ const add = (data, destroyCallback = null) =>
 		}
 
 		// Navigate to the new conversation
-		app.navigate(`messages/${response.data.id}`);
+		app.navigate(`messages/${response.id}`);
 
 		app.notify({
 			title: "Conversation Started",

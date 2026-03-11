@@ -1,5 +1,5 @@
 import { Div, Textarea } from "@base-framework/atoms";
-import { Component, Jot } from "@base-framework/base";
+import { Jot } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
 import { Icons } from "@base-framework/ui/icons";
 
@@ -53,7 +53,7 @@ const SendButton = () => (
  *
  * Handles textarea-specific logic: character counting, auto-resize, and keyboard shortcuts.
  *
- * @type {typeof Component} ThreadTextarea
+ * @returns {object} ThreadTextarea
  */
 export const ThreadTextarea = Jot(
 {

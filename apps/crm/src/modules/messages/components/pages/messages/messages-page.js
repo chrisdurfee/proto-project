@@ -1,4 +1,4 @@
-import { Div, OnRoute, OnXs, UseParent } from "@base-framework/atoms";
+import { Div, OnRoute, UseParent } from "@base-framework/atoms";
 import { BlankPage } from "@base-framework/ui/pages";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
 import { MessagesSidebar } from "./messages-sidebar.js";
@@ -9,10 +9,14 @@ import { ThreadContentSwitch } from "./thread/thread-content-switch.js";
  * Sets up the thread list container.
  *
  * @param {object} data
+ * @param {boolean} [selected] - Whether a message thread is selected (hides list on mobile).
  * @returns {object}
  */
-const createList = (data) =>
-	Div({ class: "flex flex-auto w-full lg:max-w-[460px] lg:border-r", cache: "listContainer" }, [
+const createList = (data, selected = false) =>
+	Div({
+		class: `${selected ? 'hidden lg:flex' : 'flex'} flex-auto w-full lg:max-w-[460px] lg:border-r`,
+		cache: "listContainer"
+	}, [
 		ThreadList({ data })
 	]);
 
@@ -147,30 +151,11 @@ export const MessagesPage = () =>
 		Div({ class: "flex w-full flex-col lg:flex-row h-full" }, [
 
 			// Left: Thread List
-			OnXs((size) =>
-			{
-				if (size === "sm" || size === "xs")
-				{
-					/**
-					 * Tracks the route to add or remove the thread list
-					 * based on the selected message on small devices.
-					 */
-					return OnRoute('messageId', (messageId) =>
-					{
-						/**
-						 * If a message is selected, remove the thread list.
-						 */
-						return (typeof messageId !== "undefined")
-							? null
-							: createList(data);
-					});
-				}
-
-				/**
-				 * Large displays always show the thread list.
-				 */
-				return createList(data);
-			}),
+			// OnRoute fires reliably on initial render, and CSS lg:flex
+			// handles desktop visibility without JS size detection.
+			OnRoute('messageId', (messageId) =>
+				createList(data, typeof messageId !== "undefined")
+			),
 
 			// Right: Content Switch for actual chat messages
 			UseParent(({ list, route }) => (

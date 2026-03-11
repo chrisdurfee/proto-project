@@ -78,6 +78,7 @@ export const ConversationSection = Jot(
 				 */
 				// @ts-ignore
 				const isAtBottom = this.isAtBottom();
+
 				// @ts-ignore
 				this.list.mingle(response.merge);
 

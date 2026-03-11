@@ -1,5 +1,5 @@
 import { Textarea } from "@base-framework/atoms";
-import { Veil, VeilJot } from "@base-framework/ui";
+import { VeilJot } from "@base-framework/ui";
 import { Icons } from "@base-framework/ui/icons";
 
 /**
@@ -32,7 +32,7 @@ const filterNewlines = (text) =>
  * - Submit on Enter (without Shift)
  * - Input validation
  *
- * @type {typeof Veil}
+ * @type {object}
  */
 export const AssistantTextarea = VeilJot(
 {

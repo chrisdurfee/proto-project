@@ -77,7 +77,7 @@ export const ProfileSettings = () => (
 						description: "Your avatar, shown on your profile."
 					}, [
 						new ImageUploader({
-							src: "/files/users/profile/[[image]]",
+							src: app.data.user.image ? `/files/users/profile/${app.data.user.image}` : null,
 							onChange: (file, parent) =>
 							{
 								const userData = parent.parent.data;
@@ -150,7 +150,7 @@ export const ProfileSettings = () => (
 						label: "",
 						description: "Your birth date."
 					}, [
-						new DatePicker({ type: "date", bind: 'dob', required: true })
+						DatePicker({ type: "date", bind: 'dob', required: true })
 					])
 				]),
 				FormCardGroup({ label: "Gender", description: "", border: true }, [

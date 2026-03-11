@@ -1,5 +1,5 @@
 import { A, Div, H1, OnState, P } from '@base-framework/atoms';
-import { Component, Jot } from '@base-framework/base';
+import { Jot } from '@base-framework/base';
 import { Icon } from '@base-framework/ui/atoms';
 import { Icons } from '@base-framework/ui/icons';
 import { GoogleModel } from './models/google-model.js';
@@ -44,7 +44,7 @@ const ErrorScreen = (message) => (
  *
  * This component handles the Google OAuth callback.
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const GoogleCallback = Jot(
 {
