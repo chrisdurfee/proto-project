@@ -47,7 +47,7 @@ const CodeBlock = Atom((props, children) => (
  * on the router or per route. API routes are defined in an api.php file
  * inside the api folder of a module. Nested folders allow deep API paths.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const ApiPage = () =>
 	DocPage(

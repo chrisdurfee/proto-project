@@ -46,7 +46,7 @@ const CodeBlock = Atom((props, children) => (
  * It covers enhanced features including database testing utilities, model helpers,
  * HTTP testing, mocking, file system testing, and much more.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const TestsPage = () =>
 	DocPage(

@@ -44,7 +44,7 @@ const CodeBlock = Atom((props, children) => (
  * features, file structure, naming conventions, configuration, bootstrapping,
  * and global data management. It also includes UI examples.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const IntroPage = () => (
 	DocPage(

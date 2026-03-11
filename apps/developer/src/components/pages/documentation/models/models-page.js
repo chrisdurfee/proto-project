@@ -47,7 +47,7 @@ const CodeBlock = Atom((props, children) =>
  * for getting and setting data. They define columns, joins, table names, and aliases,
  * and they interact with storage layers to persist data without accessing the database directly.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const ModelsPage = () =>
 	DocPage(

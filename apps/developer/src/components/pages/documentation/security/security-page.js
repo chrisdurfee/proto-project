@@ -44,7 +44,7 @@ const CodeBlock = Atom((props, children) => (
  *
  * This page documents security concepts and best practices for Proto applications.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const SecurityPage = () =>
 	DocPage(

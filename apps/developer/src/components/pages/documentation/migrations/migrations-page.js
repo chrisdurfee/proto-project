@@ -47,7 +47,7 @@ const CodeBlock = Atom((props, children) => (
  * or revert database changes so that all changes can be tracked in Git. They allow you
  * to create new tables, modify columns, add indices, create views, and more.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const MigrationsPage = () =>
 	DocPage(

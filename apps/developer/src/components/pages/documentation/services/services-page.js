@@ -46,7 +46,7 @@ const CodeBlock = Atom((props, children) => (
  * in your configuration (.env file under "services") and loaded right after the application bootstraps.
  * They can listen for storage layer actions and perform activation tasks.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const ServicesPage = () =>
 	DocPage(

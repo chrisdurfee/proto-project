@@ -45,7 +45,7 @@ const CodeBlock = Atom((props, children) => (
  * This page documents Proto's validation system using Proto\Api\Validator
  * and Proto\Utils\Filter classes.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const ValidationPage = () =>
 	DocPage(

@@ -46,7 +46,7 @@ const CodeBlock = Atom((props, children) => (
  * This page documents Proto's gate and policy system for identity and access management.
  * It covers how to create gates, interact with the session, and define policies to secure API endpoints.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const AuthPage = () =>
 	DocPage(

@@ -48,7 +48,7 @@ const CodeBlock = Atom((props, children) => (
  * and dispatch notifications. Child controllers inherit all CRUD methods from a parent controller,
  * reducing repetitive code.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const ControllersPage = () =>
 	DocPage(

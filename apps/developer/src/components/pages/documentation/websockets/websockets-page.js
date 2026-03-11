@@ -45,7 +45,7 @@ const CodeBlock = Atom((props, children) => (
  * This page documents Proto's real-time communication features including
  * WebSockets, Server-Sent Events (SSE), and socket management.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const WebSocketsPage = () =>
 	DocPage(

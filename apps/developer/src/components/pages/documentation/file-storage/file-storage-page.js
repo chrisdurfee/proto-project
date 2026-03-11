@@ -48,7 +48,7 @@ const CodeBlock = Atom((props, children) => (
  * custom buckets, downloading, retrieving, and deleting files using both local
  * and remote drivers.
  *
- * @returns {DocPage}
+ * @returns {object}
  */
 export const FileStoragePage = () =>
 	DocPage(
