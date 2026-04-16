@@ -325,7 +325,7 @@ public function upload(Request $request): object
 
     $rules = [
         'name' => 'string:100|required',
-        'avatar' => 'image:2048|required|mimes:jpeg,png'
+        'avatar' => 'image:2048|required|mimes:jpeg,png,gif,bmp,tiff,webp,jxl,heic,heif,avif'
     ];
 
     $this->validateRules($data, $rules);
@@ -344,7 +344,7 @@ public function uploadMultiple(Request $request): object
     {
         // Validate each file
         $validator = Validator::create(['file' => $file], [
-            'file' => 'image:5120|mimes:jpeg,png,gif'
+            'file' => 'image:5120|mimes:jpeg,png,gif,bmp,tiff,webp,jxl,heic,heif,avif'
         ]);
 
         if ($validator->isValid())
@@ -361,7 +361,7 @@ public function uploadMultiple(Request $request): object
 ```php
 // Validate single file with rules
 $avatar = $request->validateFile('avatar', [
-    'avatar' => 'image:2048|required|mimes:jpeg,png'
+    'avatar' => 'image:2048|required|mimes:jpeg,png,gif,bmp,tiff,webp,jxl,heic,heif,avif'
 ]);
 
 // Validate file array
@@ -452,7 +452,8 @@ $user = User::get($userId);
 $class = User::class;
 
 // In model joins (JoinBuilder methods only)
-$builder->belongsTo(User::class, fields: ['name', 'email']);
+$builder->belongsTo(User::class, fields: ['name', 'email'])
+    ->on(['userId', 'id']);
 
 // In type hints
 public function getUser(User $user): User
@@ -468,7 +469,8 @@ $user = \Modules\User\Models\User::get($userId);
 $class = \Modules\User\Models\User::class;
 
 // ❌ WRONG - Inline fully qualified names in builder methods
-$builder->belongsTo(\Modules\User\Models\User::class, fields: ['name', 'email']);
+$builder->belongsTo(\Modules\User\Models\User::class, fields: ['name', 'email'])
+    ->on(['userId', 'id']);
 
 // ❌ WRONG - In type hints
 public function getUser(\Modules\User\Models\User $user): \Modules\User\Models\User
@@ -811,6 +813,32 @@ router()
     ]);
 ```
 
+**Default Mutation Middleware**:
+Proto **enables CSRF protection on all mutation routes by default**. The framework calls `router()->defaultMutationMiddleware([CrossSiteProtectionMiddleware::class])` automatically during `setupRouter()`. You do NOT need to set this up manually — all POST, PUT, PATCH, and DELETE routes are protected out of the box.
+
+To opt out specific routes (webhooks, OAuth callbacks, etc.):
+
+```php
+// Opt out for specific routes (webhooks, OAuth callbacks)
+router()->withoutMutationMiddleware()->post('webhook', [WebhookController::class, 'handle']);
+```
+
+If you need to customize the default middleware list, you can override it explicitly:
+
+```php
+use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
+use Proto\Http\Middleware\AnotherMiddleware;
+
+// Override the default mutation middleware with a custom set
+router()->defaultMutationMiddleware([CrossSiteProtectionMiddleware::class, AnotherMiddleware::class]);
+```
+
+**CRITICAL**:
+- CSRF protection is enabled by default — no manual setup required
+- `defaultMutationMiddleware()` only affects routes registered AFTER the call
+- GET routes are never affected (they are safe/idempotent)
+- Use `withoutMutationMiddleware()` to opt out the next registered route
+
 **CRITICAL**:
 - Module routes MUST start with module name: `'garage/...'` NOT `'user/:id/garage/...'`
 - Controller methods: ALWAYS wrap in array `[Controller::class, 'method']`
@@ -822,6 +850,20 @@ router()
 **Base Classes**:
 - `Proto\Controllers\ResourceController` (Has support for CRUD. Add, Update, Delete, Get, All, Search, etc. with default implementations and hooks)
 - `Proto\Controllers\ApiController` (custom endpoints)
+- `Proto\Controllers\SyncController` (SSE/Redis streaming base class)
+
+**Query Limit Cap** (`$maxLimit`):
+All controllers inherit a `$maxLimit` property (default: `1000`) from `ApiController`. The `getAllInputs()` method caps the client-supplied `limit` parameter to this value, preventing unbounded queries.
+
+```php
+class VehicleController extends ResourceController
+{
+    // Override to allow larger result sets for specific endpoints
+    protected int $maxLimit = 2000;
+}
+```
+
+**CRITICAL**: Never remove `$maxLimit` or set it to an unreasonably high value. It protects against denial-of-service via large `limit` parameters.
 
 **Example**:
 ```php
@@ -849,8 +891,176 @@ class UserController extends ResourceController
 ***Route Requests***:
 Controllers receive `use Proto\Http\Router\Request` objects in public methods and hook methods.
 
+#### User-Scoped Controllers
+
+When a controller's resources are always owned by the authenticated user, use `$scopeToUser` to automatically:
+1. **On add**: Inject `userId` (or custom field) into the data from the session
+2. **On list/all**: Filter results to only the authenticated user's records
+
+```php
+class BookmarkController extends ResourceController
+{
+    protected ?string $policy = BookmarkPolicy::class;
+    protected bool $scopeToUser = true; // Auto-injects and auto-filters by userId
+
+    public function __construct(protected ?string $model = Bookmark::class)
+    {
+        parent::__construct();
+    }
+}
+```
+
+By default, `$scopeToUser` uses `userId` as the field name. Override with `$userScopeField` if the model uses a different column:
+```php
+class EventController extends ResourceController
+{
+    protected bool $scopeToUser = true;
+    protected string $userScopeField = 'hostId'; // Uses hostId instead of userId
+
+    public function __construct(protected ?string $model = Event::class)
+    {
+        parent::__construct();
+    }
+}
+```
+
+**CRITICAL**: `$scopeToUser` requires a policy to be set (since it reads `session()->user->id`). Without a policy, the session user may not be available.
+
+#### Route Parameter Auto-Injection
+
+Set `$routeParams` to auto-inject route parameters into add data and auto-filter on `all()`. This eliminates the most common `modifyAddItem()`/`modifyFilter()` override pattern:
+
+```php
+/**
+ * Route parameters to auto-inject on add and auto-filter on all().
+ * Keys are the route param name, values control behavior:
+ *   - true: required (setError if missing)
+ *   - false: optional (apply only if present)
+ */
+protected array $routeParams = [];
+```
+
+```php
+// ✅ CORRECT - Zero-override nested resource controller
+class ForumPostController extends ResourceController
+{
+    protected array $routeParams = [
+        'forumId' => true,  // Required, auto-injected on add, auto-filtered on all()
+    ];
+
+    public function __construct(protected ?string $model = ForumPost::class)
+    {
+        parent::__construct();
+    }
+
+    // No modifyAddItem() or modifyFilter() needed for forumId!
+}
+```
+
+```php
+// Override hooks when extra logic is needed beyond route params
+protected function modifyAddItem(object &$data, Request $request): void
+{
+    parent::modifyAddItem($data, $request); // Handles scopeToUser + routeParams
+
+    // Additional custom logic
+    $data->slug = Strings::slug($data->title);
+}
+```
+
+#### Query String Filter Params
+
+Set `$filterParams` for declarative query-string-to-filter mapping. Combined with `$routeParams`, this eliminates 90%+ of `modifyFilter()` overrides:
+
+```php
+/**
+ * Query string parameters to auto-apply as filter conditions.
+ * Maps param name to type ('int', 'string', 'bool').
+ */
+protected array $filterParams = [];
+```
+
+```php
+// ✅ CORRECT - Both route and query params auto-applied
+class ForumPostController extends ResourceController
+{
+    protected array $routeParams = ['forumId' => true];  // From URL path
+    protected array $filterParams = ['topicId' => 'int']; // From query string
+
+    // Zero modifyFilter() override needed
+}
+```
+
+#### Enrich User Fields
+
+Set `$enrichUserFields` to auto-attach session user fields to add/update responses so the UI can render the author's name/avatar without a refetch:
+
+```php
+/**
+ * Session user fields to attach to add/update responses.
+ */
+protected array $enrichUserFields = [];
+```
+
+```php
+class ForumPostController extends ResourceController
+{
+    protected array $enrichUserFields = ['firstName', 'lastName', 'image', 'username', 'verified'];
+
+    // After add/update, response automatically includes:
+    // { id: 123, firstName: 'John', lastName: 'Doe', image: '...', ... }
+}
+```
+
+#### File Upload Helpers
+
+ResourceController provides built-in helpers for single and batch file uploads:
+
+```php
+/**
+ * Validate and store an uploaded file, returning the new filename.
+ *
+ * @param Request $request The request object.
+ * @param string $fieldName The form field name for the file input.
+ * @param string $disk The storage disk (e.g., 'local', 's3').
+ * @param string $directory The subdirectory within the disk.
+ * @param string $rules Validation rules (e.g., 'image:2048|mimes:jpeg,png,gif,bmp,tiff,webp,jxl,heic,heif,avif').
+ * @return string|null New filename, or null if no file uploaded.
+ */
+protected function handleFileUpload(
+    Request $request,
+    string $fieldName,
+    string $disk = 'local',
+    string $directory = '',
+    string $rules = 'image:2048'
+): ?string
+```
+
+**Usage**:
+```php
+// Single file upload — returns new filename or null
+$data->coverImage = $this->handleFileUpload($request, 'coverImage', 'local', 'vehicles', 'image:2048|mimes:jpeg,png,gif,bmp,tiff,webp,jxl,heic,heif,avif')
+    ?? $data->coverImage;
+
+// Batch file upload — returns array of metadata objects
+$media = $this->handleMediaUpload($request, 'media', 'local', 'forum', 'image:5120');
+if (!empty($media))
+{
+    $data->media = json_encode($media);
+}
+// Each item: { fileName, originalName, mimeType, size }
+```
+
+**CRITICAL**:
+- `handleFileUpload()` returns `null` when no file is uploaded, making it safe for conditional assignment with `??`
+- `handleMediaUpload()` returns an array of metadata objects for batch uploads
+- Standardizes file handling across all controllers
+- Use in both `modifyAddItem()` and `modifyUpdateItem()` hooks to eliminate duplicate upload logic
+
 **Exceptions**:
 Do not throw exceptions in controllers. Use `$this->setError('message')` in hook methods or `$this->error('message')` in public methods to fail gracefully.
+
+**CRITICAL**: `setError()` halts execution (return type is `never`) — do NOT place code after a `setError()` call; it will not run.
 ```php
 // ✅ CORRECT - Graceful error handling in hook
 protected function modifyUpdateItem(object &$data, Request $request): void
@@ -980,10 +1190,18 @@ public function all(Request $request): object
 - `updateItem(object $data)` - performs the actual update operation
 - `deleteItem(object $data)` - performs the actual delete operation
 
+These methods also add the auditing fields for the session user like userId, createdBy, authorId, updatedBy, editedBy, deletedBy, removedBy, archivedBy automatically if the model has those fields defined.
+
 **Hook Methods** (receive `Request $request` parameter):
 - `modifyAddItem(object &$data, Request $request)` - called BEFORE `addItem()`, modifies data by reference
 - `modifyUpdateItem(object &$data, Request $request)` - called BEFORE `updateItem()`, modifies data by reference
 - `modifyFilter(?object $filter, Request $request)` - called in `all()` to customize filter
+
+**Enrichment Hooks** (post-fetch decoration):
+- `enrichRow(object &$row, Request $request)` - called AFTER `get()` fetches a single row. By default, delegates to `enrichRows()` so you only need to implement the batch version.
+- `enrichRows(array &$rows, Request $request)` - called AFTER `all()` fetches multiple rows. Override to batch-append computed properties. Always use a single IN-query per related table rather than per-row lookups to avoid N+1 queries.
+
+**enrichRow() auto-delegates to enrichRows()**: You only need to implement `enrichRows()`. The single-item `get()` path automatically wraps the row in an array and calls `enrichRows()`. Override `enrichRow()` individually only if the single-item path genuinely needs different logic.
 
 **Access Request Parameters**:
 Use Request object methods to access query/body parameters and route parameters separately:
@@ -1157,6 +1375,423 @@ protected function modifyFilter(?object $filter, Request $request): ?object
    - Adding post-persistence operations
    - NOT for accessing request data (use hooks instead)
 
+4. **Use enrichment hooks** (`enrichRow`, `enrichRows`) when:
+   - Appending user-specific flags (isFavorited, isBookmarked, isFollowing)
+   - Adding computed properties that don't exist in the model (displayName, distance)
+   - Decorating rows with data from related tables without overriding `get()` or `all()`
+   - **NEVER** override `get()` or `all()` just to append flags — use enrichment hooks instead
+
+**Enrichment Hook Examples**:
+
+```php
+use Modules\Bookmark\Models\Bookmark;
+use Modules\Vehicle\Favorite\Models\UserFavoriteVehicle;
+use Proto\Controllers\Traits\BatchEnrichmentTrait;
+use Proto\Http\Router\Request;
+
+class VehicleController extends ResourceController
+{
+    use BatchEnrichmentTrait;
+
+    /**
+     * Batch-enrich vehicle rows with user-specific flags using BatchEnrichmentTrait.
+     * Only implement enrichRows() — enrichRow() auto-delegates.
+     *
+     * @param array $rows
+     * @param Request $request
+     * @return void
+     */
+    protected function enrichRows(array &$rows, Request $request): void
+    {
+        $userId = session()->user->id ?? null;
+        if (!$userId || empty($rows))
+        {
+            return;
+        }
+
+        // Boolean: user favorited?
+        $this->batchMapExists(
+            $rows, UserFavoriteVehicle::class,
+            'vehicleId', 'isFavorited',
+            [['userId', $userId]]
+        );
+
+        // Boolean: user bookmarked?
+        $this->batchMapExists(
+            $rows, Bookmark::class,
+            'itemId', 'isBookmarked',
+            [['userId', $userId], ['itemType', 'vehicle']]
+        );
+    }
+}
+```
+
+**Manual enrichment** (when you need more control than BatchEnrichmentTrait provides):
+
+```php
+/**
+ * Batch-enrich vehicle rows with user-specific flags.
+ * Uses IN-queries to avoid N+1 lookups.
+ *
+ * @param array $rows
+ * @param Request $request
+ * @return void
+ */
+protected function enrichRows(array &$rows, Request $request): void
+{
+    $userId = session()->user->id ?? null;
+    if (!$userId || empty($rows))
+    {
+        return;
+    }
+
+    $vehicleIds = array_map(fn($r) => (int)$r->id, $rows);
+
+    $favorites = UserFavoriteVehicle::fetchWhere([
+        'userId' => $userId,
+        ['vehicleId', 'IN', $vehicleIds]
+    ]);
+    $favSet = array_flip(array_map(fn($f) => (int)$f->vehicleId, $favorites ?? []));
+
+    $bookmarks = Bookmark::fetchWhere([
+        'userId' => $userId,
+        'itemType' => 'vehicle',
+        ['itemId', 'IN', $vehicleIds]
+    ]);
+    $bmSet = array_flip(array_map(fn($b) => (int)$b->itemId, $bookmarks ?? []));
+
+    foreach ($rows as &$row)
+    {
+        $vid = (int)$row->id;
+        $row->isFavorited = isset($favSet[$vid]);
+        $row->isBookmarked = isset($bmSet[$vid]);
+    }
+}
+```
+
+#### List Endpoints MUST Use getAllInputs() (CRITICAL)
+
+Any backend endpoint that returns paginated rows consumed by a frontend list component (`ScrollableList`, `ScrollableDataTable`, `DataList`, `DynamicList`, or the built-in `all()` xhr method) **MUST** use `$this->getAllInputs($request)` and pass ALL of its properties to `Model::all()`. The frontend `ModelService.all()` sends filter, offset, limit, search, dates, orderBy, groupBy, lastCursor, and since as query params. The backend's `getAllInputs()` parses ALL of these into a structured `$inputs` object — `$inputs->filter`, `$inputs->offset`, `$inputs->limit`, and `$inputs->modifiers` (which contains search, dates, orderBy, groupBy, lastCursor, since).
+
+If a custom controller method hardcodes `$limit`, `$offset`, or builds its own `$modifiers` array instead of using `getAllInputs()`, the list component will be unable to paginate, sort, search, filter by date, or scroll correctly.
+
+**The contract**: every list-serving endpoint must follow this pattern:
+
+```php
+public function myListEndpoint(Request $request): object
+{
+    $inputs = $this->getAllInputs($request);
+
+    // Build your server-side filter — prepend required conditions
+    $filter = [
+        ['v.is_public', 1],
+        ['v.status', 'active']
+    ];
+
+    // Optionally merge client-supplied filter keys
+    if ($inputs->filter)
+    {
+        foreach ((array)$inputs->filter as $key => $value)
+        {
+            $filter[] = [$key, $value];
+        }
+    }
+
+    // ALWAYS pass $inputs->offset, $inputs->limit, $inputs->modifiers
+    $result = Model::all($filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+    return $this->response($result);
+}
+```
+
+**Common agent mistakes** — ALL of these break list pagination/sorting/searching:
+```php
+// ❌ WRONG — hardcoded limit/offset ignores scroll position and page size
+$limit = $request->getInt('limit') ?: 20;
+$offset = $request->getInt('offset') ?: 0;
+$vehicles = Vehicle::all($filter, $offset, $limit);
+
+// ❌ WRONG — hardcoded modifiers ignores search, dates, orderBy, groupBy, cursor
+$modifiers = ['orderBy' => 'v.created_at DESC'];
+$vehicles = Vehicle::all($filter, 0, $limit, $modifiers);
+
+// ❌ WRONG — extracting search manually instead of letting getAllInputs() handle it
+$query = $request->input('query') ?: '';
+$modifiers = ['search' => $query];
+
+// ❌ WRONG — missing modifiers entirely (no search, sort, dates, cursor support)
+$vehicles = Vehicle::all($filter, $inputs->offset, $inputs->limit);
+
+// ✅ CORRECT — getAllInputs() handles everything
+$inputs = $this->getAllInputs($request);
+$vehicles = Vehicle::all($filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+```
+
+**When custom modifiers are needed**: If you need to force a server-side modifier (e.g., a default orderBy), merge it INTO `$inputs->modifiers` rather than replacing it:
+```php
+$inputs = $this->getAllInputs($request);
+
+// Merge a default orderBy only if the client didn't send one
+if (empty($inputs->modifiers['orderBy']))
+{
+    $inputs->modifiers['orderBy'] = 'v.created_at DESC';
+}
+
+$vehicles = Vehicle::all($filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+```
+
+**The corresponding frontend model** must use the built-in `all()` xhr method (which sends all params automatically) — do NOT create custom xhr methods that strip params:
+```javascript
+// ✅ CORRECT — built-in all() sends filter, search, dates, orderBy, groupBy, cursor, since
+ScrollableList({
+    data: new VehicleModel({ filter: { type: 'sedan' } }),
+    key: 'id',
+    rowItem: VehicleCard
+})
+
+// ❌ WRONG — custom xhr method that only sends some params
+xhr: {
+    byType(instanceParams, callBack) {
+        return this._get('/by-type?type=' + this.model.filter.type, '', instanceParams, callBack);
+    }
+}
+```
+
+#### BatchEnrichmentTrait
+
+**Location**: `Proto\Controllers\Traits\BatchEnrichmentTrait`
+
+Use this trait in controllers that need to batch-fetch related data in `enrichRows()`. It provides two declarative helpers that eliminate manual map-building:
+
+```php
+use Proto\Controllers\Traits\BatchEnrichmentTrait;
+
+class ForumPostController extends ResourceController
+{
+    use BatchEnrichmentTrait;
+
+    protected function enrichRows(array &$rows, Request $request): void
+    {
+        $userId = session()->user->id;
+
+        // Map topic names: topicId → topicName
+        $this->batchMapField(
+            $rows, ForumTopic::class,
+            'id', 'name', 'topicName', '',
+            [], 'topicId'
+        );
+
+        // Map user votes: postId → voteType
+        $this->batchMapField(
+            $rows, ForumPostVote::class,
+            'postId', 'voteType', 'userVote', null,
+            [['userId', $userId]]
+        );
+
+        // Boolean: user bookmarked?
+        $this->batchMapExists(
+            $rows, Bookmark::class,
+            'itemId', 'bookmarked',
+            [['userId', $userId], ['itemType', 'forum_post']]
+        );
+    }
+}
+```
+
+**Available methods**:
+- `batchMapField($rows, $modelClass, $foreignKey, $valueField, $targetField, $default, $extraFilter, $sourceKey)` — batch-fetch a value from related records and map onto rows
+- `batchMapExists($rows, $modelClass, $foreignKey, $targetField, $extraFilter, $sourceKey)` — batch-check existence and set a boolean flag
+
+Both methods set defaults first (safe for unauthenticated users), then do a single `IN` query per call.
+
+**CRITICAL**: The `get()` method now calls `getData()` internally, so `result->row` is always a plain object (consistent with `all()`). Never call `->getData()` on `result->row` in controller overrides — the framework handles this.
+
+#### SyncController (SSE Base Class)
+
+**Base**: `Proto\Controllers\SyncController`
+
+Eliminates SSE/Redis streaming boilerplate. Subclasses define a channel name and a message handler:
+
+```php
+<?php declare(strict_types=1);
+namespace Modules\Post\Controllers;
+
+use Proto\Controllers\SyncController;
+use Proto\Http\Router\Request;
+use Modules\Post\Models\Post;
+
+class PostSyncController extends SyncController
+{
+    protected function getChannel(Request $request): string
+    {
+        $postId = $request->getInt('postId');
+        return "post:{$postId}";
+    }
+
+    protected function handleMessage(string $channel, array $message, Request $request): array|null|false
+    {
+        $messageId = $message['id'] ?? null;
+        if (!$messageId)
+        {
+            return null;
+        }
+
+        $data = Post::get($messageId);
+        return ['merge' => [$data], 'deleted' => []];
+    }
+}
+```
+
+**Methods to implement**:
+- `getChannel(Request $request): string|array` — Redis channel name(s) from route params
+- `handleMessage(string $channel, array $message, Request $request): array|null|false` — return SSE data, null to skip, false to terminate
+
+**Route registration**:
+```php
+router()->get('post/sync', [PostSyncController::class, 'sync']);
+```
+
+#### SyncableTrait (SSE for ResourceControllers)
+
+**Trait**: `Proto\Controllers\Traits\SyncableTrait`
+
+When an SSE endpoint lives on a `ResourceController` that also handles CRUD, creating a separate `SyncController` subclass adds friction (new class, new routes, test updates). Use `SyncableTrait` instead to add sync support directly:
+
+```php
+use Proto\Controllers\ResourceController;
+use Proto\Controllers\Traits\SyncableTrait;
+use Proto\Http\Router\Request;
+
+class NotificationController extends ResourceController
+{
+    use SyncableTrait;
+
+    protected function getSyncChannel(Request $request): string
+    {
+        return "user:" . session()->user->id . ":notifications";
+    }
+
+    protected function handleSyncMessage(string $channel, array $message, Request $request): ?array
+    {
+        return ['merge' => $message, 'deleted' => []];
+    }
+}
+
+// Route registration:
+router()
+    ->get('notification/sync', [NotificationController::class, 'sync'])
+    ->resource('notification', NotificationController::class);
+```
+
+**Multi-Channel Support**:
+```php
+protected function getSyncChannel(Request $request): string|array
+{
+    $userId = session()->user->id;
+    return ["user:{$userId}:notifications", "global:announcements"];
+}
+```
+
+**Methods to implement**:
+- `getSyncChannel(Request $request): string|array` — Redis channel name(s)
+- `handleSyncMessage(string $channel, array $message, Request $request): array|null|false` — return SSE data, null to skip, false to terminate
+
+**When to use which**:
+- **SyncableTrait**: SSE endpoint on an existing `ResourceController` — avoids new classes and routes
+- **SyncController**: Standalone sync-only endpoint with no CRUD — cleaner separation of concerns
+
+#### Service Delegation
+
+When controllers need multi-step business logic (e.g., creating related records, external API calls), delegate to a service class instead of putting that logic in the controller.
+
+**Declare a service class** with `$serviceClass` — the controller auto-instantiates it and delegates `addItem`/`updateItem`/`deleteItem` to the service's `add`/`update`/`delete` methods when they exist. Audit fields (`createdBy`, `userId`, `updatedBy`, etc.) are automatically injected before delegation.
+
+```php
+// ✅ CORRECT - Declare service class, auto-instantiated
+class GroupPostController extends ResourceController
+{
+    protected ?string $serviceClass = GroupPostService::class;
+    protected ?string $policy = GroupPostPolicy::class;
+
+    public function __construct(protected ?string $model = GroupPost::class)
+    {
+        parent::__construct();
+    }
+
+    // addItem() automatically delegates to $this->service->add($data)
+    // updateItem() automatically delegates to $this->service->update($data)
+    // deleteItem() automatically delegates to $this->service->delete($data)
+
+    // Custom actions still use $this->service directly
+    public function like(Request $request): object
+    {
+        $id = $this->getResourceId($request);
+        $userId = session()->user->id;
+        $result = $this->service->toggleLike($id, $userId);
+        return $this->serviceResponse($result, 'Failed to toggle like');
+    }
+}
+```
+
+**Service methods** should return `ServiceResult`, `false`, an array/object, or a scalar ID:
+
+```php
+use Proto\Services\Service;
+use Proto\Services\ServiceResult;
+
+class GroupPostService extends Service
+{
+    public function add(object $data): ServiceResult
+    {
+        $post = new GroupPost($data);
+        $post->add();
+        if (!$post->id)
+        {
+            return ServiceResult::failure('Failed to create post');
+        }
+
+        // Multi-step: create related records, send notifications, etc.
+        $this->createDefaultTags($post->id);
+        $this->notifyGroupMembers($post);
+
+        return ServiceResult::success(['id' => $post->id]);
+    }
+
+    public function update(object $data): ServiceResult
+    {
+        $post = GroupPost::get($data->id);
+        if (!$post)
+        {
+            return ServiceResult::failure('Post not found');
+        }
+
+        $post->merge($data);
+        $post->update();
+
+        return ServiceResult::success(['id' => $post->id]);
+    }
+}
+```
+
+**`serviceResponse()`** is available for custom public methods that call the service:
+- `ServiceResult` → auto-handles success/error
+- `false` → returns the default error message
+- `array`/`object` → wraps in success response
+- Scalar (e.g., ID) → wraps as `['id' => $result]`
+
+**Custom service instantiation**: Override `initializeService()` if the service needs constructor arguments:
+
+```php
+protected function initializeService(): void
+{
+    $this->service = new GroupPostService($this->someDependency);
+}
+```
+
+**CRITICAL**:
+- Service `add`/`update`/`delete` methods receive data with audit fields already injected
+- Only define the service methods you need — missing methods fall back to default model behavior
+- Use `$serviceClass` property (NOT manual `$this->service = new ...()` in constructor)
+
 ### Models
 
 **Base**: `Proto\Models\Model`
@@ -1166,6 +1801,8 @@ protected function modifyFilter(?object $filter, Request $request): ?object
 - `get($id)` - returns object|null
 - `remove($id)` - returns bool
 - `fetchWhere([...])` - returns array
+- `atomicIncrement($id, $field, $amount = 1)` - atomic counter increment
+- `atomicDecrement($id, $field, $amount = 1, $floor = true)` - atomic counter decrement
 
 **Instance Methods** (operate on object):
 - `add()` - persists new instance
@@ -1182,9 +1819,11 @@ class User extends Model
     // camelCase fields that get converted to snake_case in storage layer
     protected static array $fields = ['id', 'name', 'email', 'status'];
     protected static array $fieldsBlacklist = ['password']; // Exclude from JSON output (optional)
+    protected static array $immutableFields = ['createdBy', 'createdAt']; // Fields that cannot change after creation (optional)
     protected static string $idKeyName = 'id'; // Default, only set if different
 
     // Pre-persist hook - sanitize/transform before save (optional)
+    // NOTE: For JSON encoding, use $dataTypes with JsonType instead of augment()
     protected static function augment(mixed $data = null): mixed
     {
         if ($data && isset($data->email))
@@ -1195,6 +1834,7 @@ class User extends Model
     }
 
     // Post-fetch hook - shape API output (optional)
+    // NOTE: For JSON decoding, use $dataTypes with JsonType instead of format()
     protected static function format(?object $data): ?object
     {
         if ($data)
@@ -1205,6 +1845,42 @@ class User extends Model
     }
 }
 ```
+
+#### Immutable Fields
+
+Models can declare fields that should never change after creation using `$immutableFields`. Both `ResourceController` and the `Storage` layer automatically strip these fields from update data — defense in depth. No manual `restrictFields()` call needed in `modifyUpdateItem()`.
+
+```php
+class Event extends Model
+{
+    // These fields are stripped automatically on update by both ResourceController and Storage
+    protected static array $immutableFields = ['hostId', 'createdBy', 'createdAt', 'currentAttendees'];
+}
+```
+
+To read immutable fields programmatically (e.g., in policies):
+```php
+$immutable = Event::immutableFields(); // Returns ['hostId', 'createdBy', 'createdAt', 'currentAttendees']
+```
+
+**CRITICAL**: When `$immutableFields` is set on the model, you do NOT need to manually call `$this->restrictFields()` in `modifyUpdateItem()` for those fields — the framework enforces it at both the controller and storage layers.
+
+#### Fetching Without Eager Joins
+
+Models with eager joins (via `joins()`) can bypass their joins when the related data isn't needed. This is especially useful in tests where join queries may not see uncommitted transaction data:
+
+```php
+// Fetch by ID without triggering eager joins
+$event = Event::getWithoutJoins($id); // Returns model instance without joined fields
+
+// Fetch with filter without triggering eager joins
+$events = Event::fetchWhereWithoutJoins(['hostId' => $userId]); // Returns array of plain objects
+```
+
+**WHEN TO USE**:
+- In tests where eager-joined models return null due to uncommitted transaction data
+- When you only need base model fields and want to skip the join overhead
+- In service methods that update a model without needing related data
 
 ### Model Relationships: Eager vs Lazy
 
@@ -1227,14 +1903,26 @@ protected static function joins(object $builder): void
         ->on(['id', 'userId'])  // [parent_key, foreign_key]
         ->fields('role');  // Fields to select from roles table
 
+    $builder->one(Role::class, fields: ['role']) // Alternative syntax for one-to-one
+        ->on(['id', 'userId']);
+
+    $builder
+        ->many(
+            MessageAttachment::class,
+            fields: ['id', 'messageId', 'fileUrl', 'fileType', 'fileName', 'fileSize', 'createdAt']
+        )
+        ->on(['id', 'messageId'])
+        ->as('attachments');
+
     // One-to-many through bridge table
     UserRole::bridge($builder)
         ->many(Role::class)
         ->on(['roleId', 'id'])
         ->fields('id', 'name', 'slug', 'description', 'permissions');
 
-    // belongsTo (inverse one-to-one)
-    $builder->belongsTo(Organization::class, fields: ['name', 'slug']);
+    // belongsTo (inverse one-to-one) — ->on() auto-inferred from related model's FK; shown explicitly here for clarity
+    $builder->belongsTo(Organization::class, fields: ['name', 'slug'])
+        ->on(['organizationId', 'id']);
 
     // Raw table join
     $builder->left('permission', 'p')
@@ -1271,10 +1959,14 @@ When `belongsToMany` auto-infers the pivot table name, it sorts the two singular
 Always verify the auto-inferred name matches your migration table name, or pass the pivot table explicitly.
 
 **Key Points**:
-- `on()` takes `[parent_key, foreign_key]` order
+- `on()` takes `[ownerTableCol, targetTableCol]` order — first key is from the owner/base model's table, second is from the joined/target table
+- `on()` keys are **camelCase model field names**, NOT snake_case DB columns — the ORM converts automatically. Use `->on(['id', 'userId'])` NOT `->on(['id', 'user_id'])`
 - `fields()` specifies which columns to select from related table
 - EXCLUDE 'id' from `fields()` in `belongsTo` to avoid conflicts
 - Use named parameters: `fields: ['name']` NOT positional
+- `belongsTo()` auto-infers the FK from the **related model**: `belongsTo(User::class)` automatically sets `on(['userId', 'id'])` — no `->on()` needed when the local table has a `{relatedModel}Id` FK column by convention
+- `one()` and `many()` can omit `->on()` ONLY when the target model's table has a `{ownerModelClass}Id` column following the naming convention (e.g., `User::one($builder)` from within a model named `Foo` auto-infers `foo.id = user.foo_id`)
+- Always chain `->on()` explicitly when the local FK column does not follow the `{relatedModel}Id` naming convention
 - Chained `belongsToMany` automatically handles pivot tables
 - Pivot table name is auto-inferred: alphabetical singular names, last word plural (e.g., `role_users` for Role ↔ User)
 
@@ -1325,16 +2017,25 @@ class Post extends Model
 }
 ```
 
-**Usage**:
+**Usage — Property Access vs Method Call**:
+
+Accessing a lazy relationship as a **property** triggers the query and returns the result data. Calling it as a **method** returns the relation object itself, which exposes helper methods like `attach()`, `detach()`, `sync()`, and `toggle()`.
+
 ```php
 // Eager join: All data in one query
 $user = User::get(1); // Includes eager-joined roles automatically
 
-// Lazy load: Separate queries fired on access
+// Lazy load: Property access fires separate queries and returns results
 $user = User::get(1);
 $posts = $user->posts;     // SELECT * FROM posts WHERE user_id = 1
 $profile = $user->profile; // SELECT * FROM profiles WHERE user_id = 1
 $roles = $user->roles;     // SELECT * FROM roles r INNER JOIN role_users p...
+
+// Method call: Returns the relation object for attach/detach/sync/toggle
+$user->roles()->attach(3);      // Add pivot record
+$user->roles()->detach(3);      // Remove pivot record
+$user->roles()->sync([2, 4]);   // Replace all with these
+$user->roles()->toggle([2, 6]); // Flip state of each
 ```
 
 **BelongsToMany Helper Methods**:
@@ -1362,7 +2063,8 @@ class User extends Model
     // Eager join for organization (always needed)
     protected static function joins(object $builder): void
     {
-        $builder->belongsTo(Organization::class, fields: ['name', 'slug']);
+        $builder->belongsTo(Organization::class, fields: ['name', 'slug'])
+            ->on(['organizationId', 'id']);
     }
 
     // Lazy relationship for posts (conditionally needed)
@@ -1383,16 +2085,33 @@ class User extends Model
 
 ```php
 // ❌ WRONG - Including 'id' in belongsTo fields causes conflicts
-$builder->belongsTo(Organization::class, fields: ['id', 'name']);
+$builder->belongsTo(Organization::class, fields: ['id', 'name'])->on(['organizationId', 'id']);
 
 // ✅ CORRECT - Exclude 'id' field
-$builder->belongsTo(Organization::class, fields: ['name', 'slug']);
+$builder->belongsTo(Organization::class, fields: ['name', 'slug'])
+    ->on(['organizationId', 'id']);
 
-// ❌ WRONG - Wrong parameter order in on()
-Role::one($builder)->on(['roleId', 'id']); // Wrong order
+// ✅ CORRECT - standard FK (local table has 'user_id'): ->on() auto-inferred as on(['userId', 'id'])
+$builder->belongsTo(User::class, fields: ['firstName', 'lastName']);
 
-// ✅ CORRECT - [parent_key, foreign_key]
+// ✅ ALSO CORRECT - explicit ->on() always works; required when local FK is non-standard
+$builder->belongsTo(User::class, fields: ['firstName', 'lastName'])
+    ->on(['authorId', 'id']); // use this when the local FK is 'author_id' instead of 'user_id'
+
+// ❌ WRONG - Using snake_case DB column names in on()
+Role::one($builder)->on(['id', 'user_id']); // Won't match model field
+
+// ✅ CORRECT - Use camelCase model field names
+Role::one($builder)->on(['id', 'userId']); // ORM converts to snake_case
+
+// ❌ WRONG - Wrong parameter order in on() — on() is [ownerTableCol, targetTableCol]
+Role::one($builder)->on(['userId', 'id']); // Wrong order for one()
+
+// ✅ CORRECT - one(): [ownerTableCol, targetTableCol] where owner.id matches target.userId
 Role::one($builder)->on(['id', 'userId']);
+
+// ✅ CORRECT - belongsTo(): owner holds the FK, so owner.userId = target.id
+$builder->belongsTo(User::class, fields: ['name'])->on(['userId', 'id']);
 
 // ❌ WRONG - Missing fields() call
 Role::one($builder)->on(['id', 'userId']); // No fields selected
@@ -1404,7 +2123,8 @@ Role::one($builder)->on(['id', 'userId'])->fields('role', 'name');
 $builder->belongsTo(Organization::class, ['name', 'slug']);
 
 // ✅ CORRECT - Use named parameter 'fields:'
-$builder->belongsTo(Organization::class, fields: ['name', 'slug']);
+$builder->belongsTo(Organization::class, fields: ['name', 'slug'])
+    ->on(['organizationId', 'id']);
 
 // ❌ WRONG - Defining joins() method with lazy relationships syntax
 protected static function joins(object $builder): void
@@ -1415,7 +2135,8 @@ protected static function joins(object $builder): void
 // ✅ CORRECT - Use JoinBuilder methods in joins()
 protected static function joins(object $builder): void
 {
-    $builder->belongsTo(Category::class, fields: ['name']);
+    $builder->belongsTo(Category::class, fields: ['name'])
+        ->on(['categoryId', 'id']);
 }
 
 // ❌ WRONG - Trying to use JoinBuilder methods outside joins()
@@ -1469,6 +2190,51 @@ public function posts(): \Proto\Models\Relations\HasMany
 - `delete()` is instance method NOT static:
   - ❌ WRONG: `User::delete(5)`
   - ✅ CORRECT: `User::remove(5)` or `$user = User::get(5); $user->delete();`
+#### Atomic Counter Operations
+
+Use `atomicIncrement()` and `atomicDecrement()` for race-condition-safe counter updates:
+
+```php
+// ✅ CORRECT - Atomic SQL: SET like_count = like_count + 1
+Post::atomicIncrement($postId, 'likeCount');
+Post::atomicDecrement($postId, 'likeCount');
+
+// Custom amount
+Post::atomicIncrement($postId, 'viewCount', 5);
+
+// Allow negative values (default floors at zero)
+Post::atomicDecrement($postId, 'score', 1, false);
+
+// ❌ WRONG - Race-condition prone fetch-modify-write
+$post = Post::get($postId);
+$post->likeCount++;
+$post->update();
+```
+
+**CRITICAL**: Always use `atomicIncrement()`/`atomicDecrement()` for counters. Never use the fetch-modify-write pattern — it causes race conditions under concurrent requests.
+
+#### PivotModel (Write-Once Base)
+
+**Base**: `Proto\Models\PivotModel`
+
+For write-once pivot/junction tables (likes, bookmarks, follows, memberships):
+
+```php
+<?php declare(strict_types=1);
+namespace Modules\Post\Models;
+
+use Proto\Models\PivotModel;
+
+class PostLike extends PivotModel
+{
+    protected static ?string $tableName = 'post_likes';
+    protected static ?string $alias = 'pl';
+    protected static array $fields = ['id', 'postId', 'userId', 'createdAt'];
+}
+```
+
+`PivotModel` extends `Model` with default `$immutableFields = ['userId', 'createdAt', 'createdBy']`. Use it instead of `Model` for any pivot/junction table that should not be modified after creation.
+
 - **CRITICAL - `getBy()` / `fetchWhere()` return plain `stdClass`, NOT model instances**:
   - `Model::get($id)` → returns `?static` (model instance) — `->update()` and `->delete()` work ✅
   - `Model::getBy([...])` → returns `?object` (plain stdClass) — `->update()` throws `Call to undefined method stdClass::update()` ❌
@@ -1619,11 +2385,18 @@ class Event extends Model
 
 **Usage**:
 ```php
+// Write: arrays are automatically encoded to JSON strings before storage
 $event = new Event();
 $event->name = 'Conference 2026';
 $event->metadata = ['speakers' => ['John', 'Jane'], 'capacity' => 500];
 $event->tags = ['tech', 'conference', 'ai'];
 $event->add(); // Arrays automatically encoded to JSON strings
+
+// Read: JSON strings are automatically decoded back to PHP arrays on fetch
+$event = Event::get($id);
+$event->metadata; // ['speakers' => ['John', 'Jane'], 'capacity' => 500] — already decoded
+$event->tags;     // ['tech', 'conference', 'ai'] — already decoded
+// No augment() or format() overrides needed for JSON columns
 ```
 
 #### Multiple Custom Types
@@ -1661,11 +2434,100 @@ class Location extends Model
 **CRITICAL**:
 - Declare custom types in `protected static array $dataTypes = [...]`
 - Use `PointType::class` for geographic coordinates (POINT type)
-- Use `JsonType::class` for JSON fields (auto-encodes arrays/objects)
-- POINT fields accept string `'lat lon'`, array `[lat, lon]`, or object formats
-- JSON fields accept arrays or objects (auto-encoded during insert/update)
-- Extract coordinates using SQL functions: `[['X(`field`)'], 'latitude']`
+- Use `JsonType::class` for JSON fields (auto-encodes on write, auto-decodes on read)
+- POINT fields accept string `'lon lat'`, array `[lon, lat]`, or object formats
+- JSON fields accept arrays or objects — encoded during insert/update, decoded back to PHP arrays on fetch
+- No `augment()` or `format()` overrides needed for JSON columns — `fromDb()` handles decoding automatically
+- Extract coordinates using SQL functions: `[['X(`field`)'], 'longitude']`, `[['Y(`field`)'], 'latitude']`
 - NO custom Storage class needed - base Storage handles everything automatically
+- Zero overhead when no custom types are defined (falls back to standard insert/update)
+- DataType instances are cached per model for reuse
+
+#### Creating Custom Data Types
+
+Create custom data type handlers by extending the `DataType` base class for specialized SQL functions or custom formatting logic:
+
+```php
+<?php declare(strict_types=1);
+namespace Proto\Storage\DataTypes;
+
+class GeometryType extends DataType
+{
+    /**
+     * Return the SQL placeholder for prepared statements
+     */
+    public function getPlaceholder(): string
+    {
+        return 'ST_GeomFromText(?)';
+    }
+
+    /**
+     * Convert the model value to parameter array
+     */
+    public function toParams(mixed $value): array
+    {
+        return [$value]; // e.g., "POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))"
+    }
+
+    /**
+     * Decode the raw DB value back to a PHP representation on read
+     */
+    public function fromDb(mixed $value): mixed
+    {
+        return $value;
+    }
+
+    /**
+     * Optional: Customize UPDATE clause
+     */
+    public function getUpdateClause(string $column): string
+    {
+        return "`{$column}` = ST_GeomFromText(?)";
+    }
+
+    /**
+     * Optional: Control when to use this handler
+     */
+    public function shouldHandle(mixed $value): bool
+    {
+        return $value !== null && is_string($value);
+    }
+}
+```
+
+**Key methods to implement**:
+- `getPlaceholder()` - Returns the SQL placeholder (e.g., `"POINT(?, ?)"`, `"ST_GeomFromText(?)"`)
+- `toParams()` - Converts model value to array of parameters for binding
+- `fromDb()` - Decodes the raw database value back to a PHP value on read (e.g., JSON string → array)
+- `getUpdateClause()` - Optional: Custom SET clause for UPDATE statements
+- `shouldHandle()` - Optional: Determines if the handler should process this value
+
+**How It Works** (bidirectional pipeline):
+
+*Write pipeline (insert/update)*:
+1. You declare which fields use custom types in `$dataTypes`
+2. When `insert()` or `update()` is called, Storage checks if any custom types are defined
+3. ParamsBuilder iterates through data and calls `getPlaceholder()` and `toParams()` for custom type fields
+4. Builds the full SQL with proper placeholders and executes with flattened params
+
+*Read pipeline (get/fetchWhere/all)*:
+1. The database returns raw values (e.g., a JSON string for a JSON column)
+2. The model automatically calls `fromDb()` on each declared `$dataTypes` field
+3. The decoded data is then passed through the optional `format()` hook before being returned
+
+#### Custom Instance Configuration
+
+You can pass configured instances instead of class names for advanced customization:
+
+```php
+class Document extends Model
+{
+    protected static array $dataTypes = [
+        'position' => new PointType(),
+        'metadata' => new CustomJsonType(['pretty' => true, 'depth' => 10])
+    ];
+}
+```
 
 ### Storage
 
@@ -1691,11 +2553,122 @@ $row = User::getBy($filter);   // one
 $rows = User::fetchWhere($filter);   // many`
 ```
 
+**IN / NOT IN with arrays** (auto-generates placeholders):
+```php
+$filter = [
+    ['userId', 'IN', [1, 2, 3]],          // user_id IN (?, ?, ?)
+    ['status', 'NOT IN', ['banned', 'deleted']], // status NOT IN (?, ?)
+    ['a.replyId', 'IN', $replyIds],        // works with table aliases
+];
+```
+
+Combine with other filter formats:
+```php
+// In UserFavoriteVehicle model
+public static function getIdsForUser(int $userId, array $vehicleIds): array
+{
+    if (empty($vehicleIds))
+    {
+        return [];
+    }
+
+    $results = static::fetchWhere([
+        ['userId', $userId],
+        ['vehicleId', 'IN', $vehicleIds]
+    ]);
+    return array_column($results, 'vehicleId');
+}
+
+// In Bookmark model
+public static function getIdsForUser(int $userId, string $itemType, array $itemIds): array
+{
+    if (empty($itemIds))
+    {
+        return [];
+    }
+
+    $results = static::fetchWhere([
+        ['userId', $userId],
+        ['itemType', $itemType],
+        ['itemId', 'IN', $itemIds]
+    ]);
+    return array_column($results, 'itemId');
+}
+```
+
+**Filter Helper Methods** (`Proto\Storage\Filter`):
+
+Proto provides static helper methods on the `Filter` class to eliminate raw SQL strings from filter arrays. These generate parameterized, sanitized filter entries.
+
+```php
+use Proto\Storage\Filter;
+
+// EXISTS subquery — replaces raw "EXISTS (SELECT 1 FROM ...)" strings
+// Returns [sql, [params]] — a filter-array-compatible entry
+Filter::exists(
+    'event_attendees',       // table name
+    'ea',                    // alias for subquery
+    'ea.event_id = e.id',    // join condition linking to parent
+    [                        // additional parameterized conditions
+        ['ea.user_id', $userId],
+        ['ea.status', 'IN', ['registered', 'waitlist']]
+    ]
+);
+
+// NOT EXISTS — same API, generates NOT EXISTS
+Filter::notExists(
+    'event_attendees', 'ea', 'ea.event_id = e.id',
+    [['ea.user_id', $userId]]
+);
+
+// Aliased filter — replaces ['e.column', value] with sanitized alias + column
+// Converts column to snake_case automatically
+Filter::aliased('e', 'status', 'published');
+// → ['e.status', 'published']
+
+Filter::aliased('e', 'startDate', $date, '>=');
+// → ['e.start_date', '>=', $date]
+
+// Static condition — replaces raw SQL like 'e.start_date > NOW()'
+// Only whitelisted expressions allowed: IS NULL, IS NOT NULL, > NOW(), >= NOW(), < NOW(), <= NOW(), = NOW()
+Filter::condition('e', 'deletedAt', 'IS NULL');
+// → 'e.deleted_at IS NULL'
+
+Filter::condition('e', 'startDate', '> NOW()');
+// → 'e.start_date > NOW()'
+```
+
+**Building a complete filter with helpers**:
+```php
+use Proto\Storage\Filter;
+
+$filter = [
+    Filter::aliased('e', 'status', 'published'),
+    Filter::condition('e', 'deletedAt', 'IS NULL'),
+    Filter::condition('e', 'startDate', '> NOW()'),
+    Filter::exists('event_attendees', 'ea', 'ea.event_id = e.id', [
+        ['ea.user_id', $userId],
+        ['ea.status', 'IN', ['registered', 'waitlist']]
+    ])
+];
+
+$events = Event::all($filter, $offset, $limit, $modifiers);
+```
+
+**Raw SQL filter deprecation**: In development mode, Proto logs a deprecation warning when raw SQL strings are used as filter values (e.g., `"e.status = 'active'"`). Safe static conditions like `e.deleted_at IS NULL` are skipped. Use the Filter helpers above to migrate away from raw SQL filters.
+
+**CRITICAL**:
+- `Filter::exists()` / `Filter::notExists()` return `[sql, [params]]` — add directly to any filter array
+- `Filter::aliased()` returns a filter entry `['alias.column', value]` or `['alias.column', op, value]`
+- `Filter::condition()` returns a safe static SQL string — only whitelisted expressions are allowed; unrecognized expressions return `'1=1'` and trigger a warning
+- Always prefer these helpers over raw SQL strings in filters
+
 **Query Builder Methods**:
 - `select()`, `insert()`, `update()`, `delete()`
 - `join()`, `leftJoin()`, `rightJoin()`, `outerJoin()`
 - `where()`, `in()`, `orderBy()`, `groupBy()`, `having()`, `distinct()`, `limit()`
-- `union()` - combine queries
+- `union()`, `unionAll()` - combine queries
+- `UnionQuery::make($this->db)` - build multi-segment `UNION ALL` queries with merged params and paginated envelope
 
 **CRITICAL - Query Builder Joins**:
 
@@ -1798,6 +2771,38 @@ Proto's `select()` with a plain string prepends the table alias, producing inval
 // ❌ WRONG - plain string gets alias prepended, breaking SQL
 ->select('COUNT(*) as total')   // generates: SELECT un.COUNT(*) as total — INVALID SQL
 ```
+
+**CRITICAL - UNION Ordering and Pagination**:
+When unions are present, `ORDER BY` and `LIMIT` must be applied after all union clauses so they affect the full result set.
+
+Proto now renders union queries correctly in `Select::render()`:
+```sql
+SELECT ...
+UNION ALL SELECT ...
+ORDER BY sortDate DESC
+LIMIT 0, 20
+```
+
+**CRITICAL - Prefer `UnionQuery` for Multi-Segment Unions**:
+Use `UnionQuery` instead of manually building `UNION ALL` SQL strings and merging param arrays.
+
+```php
+use Proto\Storage\UnionQuery;
+
+return UnionQuery::make($this->db)
+    ->segment($logsSql, $logsParams)
+    ->segment($planSql, $planParams)
+    ->orderBy('sortDate DESC')
+    ->limit($offset, $limit)
+    ->fetch(); // {rows, lastCursor}
+```
+
+`UnionQuery` benefits:
+- No manual `array_merge($logsParams, $planParams)`
+- No confusion about where `orderBy()` and `limit()` should be placed
+- Returns standard `{rows, lastCursor}` envelope automatically
+
+`UNION ALL` still requires symmetric field lists (same column count and order) across all segments.
 
 **Query Builder**:
 ```php
@@ -1905,6 +2910,7 @@ $users = User::storage()->findAll(
 - Use builder's `fetch()` directly: `->fetch($params)` NOT `$this->fetch($sql, $params)`
 - Chain multiple where conditions in single call
 - Use `first()` not `fetchOne()`
+- Prefer `UnionQuery` for multi-segment unions instead of manual SQL string composition and manual param merging
 - ALWAYS use builder methods, NEVER raw SQL with table names
 
 ### Migrations
@@ -2151,6 +3157,100 @@ class CarMaintenanceRecord extends Migration
 
 **Pattern**: Services coordinate business logic, models handle data access.
 
+#### Built-in Service Traits
+
+Proto provides reusable traits for common patterns. Use these instead of duplicating logic.
+
+**ToggleLikeTrait** — standardizes like/toggle with atomic counters:
+```php
+use Proto\Services\Traits\ToggleLikeTrait;
+
+class PostMainService extends Service
+{
+    use ToggleLikeTrait;
+
+    public function togglePostLike(int $userId, int $postId): object
+    {
+        return $this->toggleLike(
+            PostLike::class,
+            Post::class,
+            $userId,
+            $postId,
+            'postId',
+            'likeCount'
+        );
+        // Returns: {liked: bool, likeCount: int}
+    }
+}
+```
+
+**TogglePivotTrait** — generic pivot toggle for bookmarks, favorites, follows:
+```php
+use Proto\Services\Traits\TogglePivotTrait;
+
+class BookmarkService extends Service
+{
+    use TogglePivotTrait;
+
+    public function toggle(int $userId, string $itemType, int $itemId): object
+    {
+        return $this->togglePivot(Bookmark::class, [
+            'userId' => $userId,
+            'itemType' => $itemType,
+            'itemId' => $itemId
+        ]);
+        // Returns: {active: bool, record: ?object}
+    }
+}
+```
+
+**VoteableTrait** — up/down voting with toggle-off, vote-switching, and atomic scores:
+```php
+use Proto\Services\Traits\VoteableTrait;
+
+class ForumService extends Service
+{
+    use VoteableTrait;
+
+    public function voteOnPost(int $userId, int $postId, string $direction): object
+    {
+        return $this->vote(
+            ForumPostVote::class,
+            ForumPost::class,
+            $userId,
+            $postId,
+            'postId',
+            $direction, // 'up' or 'down'
+            'score'
+        );
+        // Returns: {direction: ?string, score: int}
+    }
+}
+```
+
+**AudienceTargetingTrait** — multi-dimensional targeting (brands, vehicle types, interests, etc.):
+```php
+use Proto\Services\Traits\AudienceTargetingTrait;
+
+class EventAudienceService extends Service
+{
+    use AudienceTargetingTrait;
+
+    protected function getTargetingConfig(): array
+    {
+        return [
+            'brands' => ['model' => EventBrandTarget::class, 'fk' => 'eventId'],
+            'vehicleTypes' => ['model' => EventVehicleTypeTarget::class, 'fk' => 'eventId'],
+            'interests' => ['model' => EventInterestTarget::class, 'fk' => 'eventId', 'valueField' => 'interestId'],
+        ];
+    }
+}
+
+// Usage:
+$service->getTargeting($eventId);           // Returns object with all dimensions
+$service->saveTargets($eventId, $targets);  // Delete-then-insert for each dimension
+```
+
 **Single Responsibility Principle**:
 - Methods should do ONE thing well
 - Break complex methods into smaller, focused helper methods
@@ -2290,6 +3390,110 @@ protected function incrementCommunityGroupCount(int $communityId): void
 - Extract repeated logic into focused helper methods
 - Helper methods should be protected unless needed elsewhere
 
+#### ServiceResult (Standardized Returns)
+
+**Location**: `Proto\Services\ServiceResult`
+
+**Purpose**: Eliminates ambiguity between returning `false`, `null`, or error objects from service methods. Controllers consistently check `$result->success` and access `$result->data` or `$result->error`.
+
+**Usage in Services**:
+```php
+use Proto\Services\ServiceResult;
+
+public function createGroup(int $userId, int $communityId, array $data): ServiceResult
+{
+    if (!$this->isGroupSlugUnique($communityId, $data['slug']))
+    {
+        return ServiceResult::failure('Group slug already exists');
+    }
+
+    $group = $this->createGroupRecord($userId, $communityId, $data);
+    if (!$group)
+    {
+        return ServiceResult::failure('Failed to create group', 'CREATE_FAILED');
+    }
+
+    return ServiceResult::success($group);
+}
+```
+
+**Usage in Controllers**:
+```php
+public function create(Request $request): object
+{
+    $result = $this->service->createGroup($userId, $communityId, $data);
+    if (!$result->success)
+    {
+        return $this->error($result->error);
+    }
+    return $this->response($result->data);
+}
+```
+
+**API**:
+- `ServiceResult::success(mixed $data = null)` — creates a successful result
+- `ServiceResult::failure(string $message, ?string $code = null)` — creates a failure result
+- `$result->success` (bool) — whether the operation succeeded
+- `$result->data` (mixed) — the result data on success, null on failure
+- `$result->error` (?string) — the error message on failure
+- `$result->code` (?string) — optional error code for programmatic handling
+- `$result->failed()` (bool) — convenience method, inverse of `$result->success`
+
+#### Location / Proximity Filtering (LocationFilterTrait)
+
+**Location**: `Proto\Services\Traits\LocationFilterTrait`
+
+Use this trait in services that need to filter records by geographic proximity. It builds `ST_Distance_Sphere` conditions compatible with Proto's filter array pattern so callers never write raw SQL distance expressions.
+
+```php
+use Proto\Services\Traits\LocationFilterTrait;
+
+class VehicleService extends Service
+{
+    use LocationFilterTrait;
+
+    // Direct filter on the queried table's POINT column
+    public function addLocationFilter(float $lat, float $lon, array &$filter): void
+    {
+        $this->filterByProximity($filter, [
+            'latitude' => $lat,
+            'longitude' => $lon,
+            'radius' => 50,          // miles (default)
+            'alias' => 'v',          // table alias
+            'column' => 'position',  // POINT column (default)
+        ]);
+    }
+
+    // Subquery filter against a related table
+    public function addUserLocationFilter(int $userId, array &$filter): void
+    {
+        $userLocation = UserLocationPreference::getBy(['userId' => $userId]);
+        if (!$userLocation || empty($userLocation->longitude) || empty($userLocation->latitude))
+        {
+            return;
+        }
+
+        $this->filterByProximitySubquery($filter, [
+            'latitude' => $userLocation->latitude,
+            'longitude' => $userLocation->longitude,
+            'radius' => $userLocation->radiusMiles ?? 50,
+            'table' => 'user_location_preferences',
+            'joinColumn' => 'user_id',
+            'parentColumn' => 'v.user_id',
+        ]);
+    }
+}
+```
+
+**Available methods**:
+- `filterByProximity(array &$filter, array $options)` — appends a direct proximity condition on a POINT column
+- `filterByProximitySubquery(array &$filter, array $options)` — appends an EXISTS subquery proximity condition against a related table
+- `buildProximityCondition(array $options)` — returns a standalone `[sql, params]` condition without appending
+- `buildProximitySubqueryCondition(array $options)` — returns a standalone subquery condition
+- `convertToMeters(float|int $radius, string $unit)` — utility to convert radius to meters (`'miles'` or `'km'`)
+
+**Options**: `latitude`, `longitude`, `radius` (default 50), `unit` (`'miles'`|`'km'`), `column` (default `'position'`), `alias` (table alias for direct), `table`/`joinColumn`/`parentColumn`/`tableAlias` (for subquery variant).
+
 ### Validation
 
 **Format**: `'type[:max]|required'`
@@ -2299,14 +3503,14 @@ protected function incrementCommunityGroupCount(int $communityId): void
 **Image Validation**:
 ```php
 // In validation rules
-'image' => 'image:1024|required|mimes:jpeg,png'
+'image' => 'image:1024|required|mimes:jpeg,png,gif,bmp,tiff,webp,jxl,heic,heif,avif'
 
 // Direct validation
 use Proto\Api\ImageValidator;
 $result = ImageValidator::validate($uploadFile, $maxSizeKB, $mimeTypes);
 ```
 
-**Supported image MIME types**: jpeg, jpg, png, gif, webp, bmp, tiff
+**Supported image MIME types**: jpeg, jpg, png, gif, webp, bmp, tiff, jxl, heic, heif, avif
 
 **Examples**:
 - `'string:255|required'`
@@ -2344,6 +3548,13 @@ check if the user is authorized to perform the action by the type and request ac
 
 Module policies extend the Common policy and define per-action methods as needed.
 
+**Built-in Policy Helpers** (available on `Common\Auth\Policies\Policy`):
+- `$this->isSignedIn()` — checks if a user is logged in via session
+- `$this->getUserId()` — returns `session()->user->id` or `null`
+- `$this->getResourceId(Request $request)` — extracts the resource ID from the request
+- `$this->ownsResource(mixed $ownerId)` — compares the given owner ID to the session user; returns `true` if they match (admins always pass)
+- `$this->matchesRouteUser(Request $request, string $paramName = 'userId')` — checks if the route parameter (e.g., `:userId` in the URL) matches the session user ID
+
 ```php
 use Proto\Http\Router\Request;
 // Create in Modules/ModuleName/Auth/Policies extending Common\Auth\Policies\Policy
@@ -2376,14 +3587,16 @@ class UserPolicy extends Policy
     public function get(Request $request): bool
     {
         $id = $this->getResourceId($request);
-        return auth()->user->isUser($id);
+        $user = User::get($id);
+        if (!$user) { return false; }
+        return $this->ownsResource($user->id);
     }
 
     // after method hook example
     public function afterGet(mixed $result): bool
     {
         // check the result object if needed
-        $userId = session()->user->id ?? null;
+        $userId = $this->getUserId();
         if (!$userId)
         {
             return false;
@@ -2395,7 +3608,9 @@ class UserPolicy extends Policy
     public function update(Request $request): bool
     {
         $id = $this->getResourceId($request);
-        return auth()->user->isUser($id);
+        $user = User::get($id);
+        if (!$user) { return false; }
+        return $this->ownsResource($user->id);
     }
 }
 
@@ -2408,6 +3623,87 @@ class UserController extends ResourceController
 // Routes with dynamic params
 router()->resource('user/:userId/account', UserController::class);
 ```
+
+**Policy Helper Usage Patterns**:
+```php
+// ✅ CORRECT — Use built-in helpers
+public function get(Request $request): bool
+{
+    $id = $this->getResourceId($request);
+    $event = Event::get($id);
+    if (!$event) { return false; }
+    return $this->ownsResource($event->hostId);
+}
+
+public function add(Request $request): bool
+{
+    return $this->isSignedIn();
+}
+
+public function update(Request $request): bool
+{
+    return $this->matchesRouteUser($request, 'userId');
+}
+
+// ❌ WRONG — Manual session checks
+public function get(Request $request): bool
+{
+    $userId = session()->user->id ?? null;
+    if (!$userId) return false;
+    $id = $this->getResourceId($request);
+    $event = Event::get($id);
+    return $event && $event->userId === $userId;
+}
+```
+
+**Policy Validation**:
+Proto validates policies in **all environments** (not just development):
+- **Method signatures**: Warns if a policy method doesn't accept `(Request $request): bool`. In development, triggers `E_USER_WARNING`. In production, logs via `error_log()`.
+- **Policy `$type`**: Auto-detects `$type` from the class name if not explicitly set (e.g., `EventPolicy` → `'event'`). Always set `$type` explicitly for clarity.
+
+**CRITICAL — Policy Checklist** (prevent common mistakes found in audit):
+1. **Always extend `Common\Auth\Policies\Policy`** — NOT `Proto\Auth\Policies\Policy` directly. The Common base adds `$type`, `ownsResource()`, `hasPermission()`, and other project-level helpers.
+2. **Always set `protected ?string $type`** — e.g., `'post'`, `'group'`, `'event'`. The Common Policy uses `$type` for dispatch. Missing `$type` breaks authorization. Note: Proto auto-infers `$type` from the class name if not explicitly set (e.g., `EventPolicy` → `'event'`, `GroupPostPolicy` → `'groupPost'`). Always set `$type` explicitly for clarity.
+3. **Every method MUST accept `(Request $request): bool`** — policy dispatch passes a `Request` object. A method with no parameters (e.g., `public function get(): bool`) is now detected and logged as a warning in all environments.
+4. **Use `add()` not `create()`** — the framework dispatches HTTP POST to `add`, not `create`. Defining both `create()` and `add()` in the same policy is dead code.
+5. **Use built-in helpers** — `$this->isSignedIn()` for auth checks, `$this->ownsResource($ownerId)` for ownership, `$this->hasPermission()` for permission checks. Avoid raw `auth()->user` calls.
+6. **Every `ResourceController` MUST have `protected ?string $policy`** — controllers without a policy are an authorization gap. Even public-read endpoints should have a policy that returns `true` for `get`/`all` and restricts mutations.
+
+**CRITICAL — Controller Hook Patterns** (standardize `modifyAddItem` / `modifyUpdateItem`):
+
+When a controller creates or modifies resources owned by users, use hook methods to inject audit fields:
+```php
+// ✅ CORRECT — Standard modifyAddItem pattern
+protected function modifyAddItem(object &$data, Request $request): void
+{
+    $userId = session()->user->id;
+    $data->createdBy = $userId;
+}
+
+// ✅ CORRECT — Standard modifyUpdateItem pattern (when model has $immutableFields)
+// Framework auto-strips immutable fields — just set audit fields
+protected function modifyUpdateItem(object &$data, Request $request): void
+{
+    $data->updatedBy = (int)session()->user->id;
+}
+
+// ✅ CORRECT — modifyUpdateItem when model does NOT have $immutableFields
+// Manually restrict fields that shouldn't change
+protected function modifyUpdateItem(object &$data, Request $request): void
+{
+    $userId = session()->user->id;
+    $data->updatedBy = $userId;
+
+    // Restrict immutable fields manually
+    $id = $data->id ?? null;
+    $restrictedFields = ['id', 'createdBy', 'createdAt'];
+    $this->restrictFields($data, $restrictedFields);
+    $data->id = $id;
+}
+```
+If the model has `createdBy` / `updatedBy` fields, ALWAYS set them via hooks. Inconsistent audit fields make data integrity queries unreliable.
+
+**CRITICAL**: Prefer declaring `$immutableFields` on the model over manual `restrictFields()` in controllers. This keeps field restrictions co-located with the model definition and ensures consistency across all controllers that use the model.
 
 ## 4. Frontend Development (Base Framework)
 
@@ -2430,7 +3726,7 @@ All new layouts should be built as close to pixel-perfect as possible to the des
 **Opening braces ALWAYS on new line** (methods, classes, if/else, loops):
 ```javascript
 import { BlankPage } from "@base-framework/ui/pages";
-import { Div } from "@base-framework/atoms";
+import { Div, Button } from "@base-framework/atoms";
 import { Component, Atom, Data } from "@base-framework/base";
 
 // ✅ CORRECT
@@ -2533,7 +3829,6 @@ The text has 4 levels of emphasis:
 
 **Borders & Inputs**:
 - `border-border` - Default border color
-- `border-input` / `bg-input` - Input field borders and backgrounds
 - `ring-ring` - Focus ring color
 
 **Text Sizes**:
@@ -2700,11 +3995,162 @@ export const FeedPostModern = Atom(({ post }) => (
 **Rule 4 — Molecules factor out their sub-sections**
 Molecules that have distinct named sub-sections (header, body, footer, stats row, button group) must extract each to a helper atom or private function within the file or a sub-atom file.
 
-**Rule 5 — Atoms are single-purpose**
+**Rule 5 — Atoms, Molecules, Pages and Organisms are single-purpose**
 An atom does exactly one thing: render a header row, render an image, render a button group. It has one clear name. If it does two things, split it.
+
+Layouts should be simple and small. When a layout gets complicated, that is a sign that it should be broken down into smaller pieces. If you find yourself writing a component that has multiple distinct sections, stop and extract each section to its own file. This keeps components focused, reusable, and easier to maintain.
 
 **Rule 6 — 20-line threshold**
 If a component function exceeds ~20 lines of markup, extract sub-sections until it fits. Use named helper functions (private atoms within the file) as a first step, then move to separate files if shared elsewhere.
+
+### Shared Components Library (`@components/`)
+
+**Location**: `apps/main/src/components/` (aliased as `@components/`)
+
+**Purpose**: App-level reusable components shared across modules. Always check here BEFORE building a new component — if a shared version exists, use it.
+
+**Structure**:
+```
+components/
+  atoms/
+    pills/
+      pill-tab.js              # Single pill tab (state-driven active highlight)
+      pill-link.js             # Single pill link (route-driven active highlight)
+    skeletons/
+      row-skeleton.js          # Generic avatar + text lines skeleton row
+  molecules/
+    pills/
+      pill-tab-bar.js          # Scrollable row of PillTab items
+      pill-link-bar.js         # Scrollable row of PillLink items
+    users/
+      user-avatar.js           # Avatar with optional status indicator
+      user-info.js             # Name + username + verified badge
+      follow-button.js         # Follow/unfollow toggle
+      user-actions.js          # Follow button + options menu
+      user-row.js              # Complete horizontal user card
+  organisms/
+    sticky-filter-bar.js       # Frosted-glass sticky container for pill bars
+```
+
+#### Skeleton Components (CRITICAL)
+
+**ALWAYS use the Base UI `Skeleton` atom** for loading placeholders. NEVER use raw `Div` with `bg-muted animate-pulse` classes.
+
+```javascript
+import { Skeleton } from '@base-framework/ui/atoms';
+
+// ✅ CORRECT — Base UI Skeleton
+Skeleton({ shape: 'circle', width: 'size-10', height: 'size-10' })
+Skeleton({ class: 'rounded-full', width: 'w-32' })
+Skeleton({ class: 'aspect-square rounded-sm', width: 'w-full', height: 'h-auto' })
+
+// ❌ WRONG — raw Div with skeleton classes
+Div({ class: 'size-10 rounded-full bg-muted animate-pulse' })
+Div({ class: 'h-4 w-32 rounded-full bg-muted animate-pulse' })
+```
+
+**RowSkeleton** — shared composition for the common avatar + text lines pattern:
+```javascript
+import { RowSkeleton } from '@components/atoms/skeletons/row-skeleton.js';
+
+// Default: size-10 circle + two text lines (w-32, w-24)
+RowSkeleton()
+
+// Custom avatar size and line widths
+RowSkeleton({ avatarSize: 'size-12', lines: ['w-48', 'w-32', 'w-12'] })
+
+// With extra container classes
+RowSkeleton({ class: 'border-b border-border/50' })
+RowSkeleton({ avatarSize: 'size-12', lines: ['w-32', 'w-48'], class: 'rounded-xl border border-border' })
+```
+
+Use `RowSkeleton` for any skeleton that follows the avatar + text lines pattern. For bespoke layouts (cards with badges, timeline items, grid thumbnails), compose `Skeleton` atoms directly.
+
+#### Pill Filter Bars
+
+Use the shared pill bar components instead of building one-off filter navigations.
+
+**PillTabBar** — state-driven (highlights based on a reactive data key):
+```javascript
+import { PillTabBar } from '@components/molecules/pills/pill-tab-bar.js';
+
+PillTabBar({
+    tabs: [
+        { label: 'All', value: 'all' },
+        { label: 'Following', value: 'following' },
+        { label: 'Groups', value: 'groups' }
+    ],
+    watchKey: 'activeFilter',
+    onTabClick: (value) => this.data.activeFilter = value
+})
+```
+
+**PillLinkBar** — route-driven (highlights based on URL, each tab navigates):
+```javascript
+import { PillLinkBar } from '@components/molecules/pills/pill-link-bar.js';
+
+PillLinkBar({
+    tabs: [
+        { label: 'Followers', value: 'followers', href: './followers' },
+        { label: 'Following', value: 'following', href: './following' }
+    ],
+    watchKey: 'activeTab'
+})
+```
+
+**StickyFilterBar** — frosted-glass sticky wrapper for any pill bar:
+```javascript
+import { StickyFilterBar } from '@components/organisms/sticky-filter-bar.js';
+
+// Default (top-0)
+StickyFilterBar([
+    PillTabBar({ tabs, watchKey: 'filter', onTabClick })
+])
+
+// Custom top offset
+StickyFilterBar({ top: 'top-header-safe' }, [
+    PillLinkBar({ tabs, watchKey: 'activeTab' })
+])
+```
+
+#### User Display Components
+
+**ALWAYS use the shared user components** when displaying user rows, avatars with status, or follow actions. NEVER rebuild these patterns inline.
+
+```javascript
+import { UserAvatar } from '@components/molecules/users/user-avatar.js';
+import { UserInfo } from '@components/molecules/users/user-info.js';
+import { UserActions } from '@components/molecules/users/user-actions.js';
+import { UserRow } from '@components/molecules/users/user-row.js';
+
+// Complete user row (avatar + info + follow button) — the most common pattern
+UserRow({ id: user.id, name: user.name, username: user.username, avatar: user.avatar, status: user.status, isFollowing: user.isFollowing })
+
+// Individual pieces when composing custom layouts
+UserAvatar({ src: '/files/users/profile/img.jpg', alt: 'Name', status: 'online', size: 'lg', fallbackText: 'JD' })
+UserInfo({ name: 'Jane Doe', username: 'janedoe', verified: true, mutualConnections: 5 })
+UserActions({ userId: 1, isFollowing: false })
+```
+
+#### Status Color Tokens (CRITICAL)
+
+**ALWAYS use semantic theme tokens for status colors**, NEVER hardcoded Tailwind color classes. This ensures consistent theming across light/dark modes.
+
+```javascript
+// ✅ CORRECT — semantic tokens
+'bg-success/15 text-success border-success/30'       // active, approved, online
+'bg-warning/15 text-warning border-warning/30'       // pending, scheduled
+'bg-destructive/15 text-destructive border-destructive/30'  // rejected, expired, error
+'bg-info/15 text-info border-info/30'                // draft, info, neutral
+
+// ❌ WRONG — hardcoded Tailwind colors
+'bg-green-500/15 text-green-600 border-green-500/30'
+'bg-yellow-500/15 text-yellow-600 border-yellow-500/30'
+'bg-red-500/15 text-red-600 border-red-500/30'
+'bg-blue-500/15 text-blue-600 border-blue-500/30'
+```
+
+**Available status tokens**: `success` (+ `success-foreground`), `warning` (+ `warning-foreground`), `info` (+ `info-foreground`), `destructive` (+ `destructive-foreground`)
 
 ### Common Mistakes (READ FIRST)
 
@@ -2724,6 +4170,12 @@ If a component function exceeds ~20 lines of markup, extract sub-sections until 
 14. ❌ DON'T access DOM before `afterSetup()`
 15. ❌ DON'T use hardcoded colors - use theme variables
 16. ❌ DON'T put opening braces on same line (except inline Atom returns)
+17. ❌ DON'T use raw `Div` with `bg-muted animate-pulse` — use `Skeleton` from `@base-framework/ui/atoms`
+18. ❌ DON'T build skeleton rows with inline `Div` circles + lines — use `RowSkeleton` from `@components/atoms/skeletons/row-skeleton.js`
+19. ❌ DON'T build one-off pill filter navigations — use `PillTabBar` or `PillLinkBar` from `@components/molecules/pills/`
+20. ❌ DON'T build custom user avatar + name + follow rows — use `UserRow` from `@components/molecules/users/user-row.js`
+21. ❌ DON'T use hardcoded Tailwind status colors (`bg-green-500`, `text-red-600`) — use semantic tokens (`bg-success`, `text-destructive`)
+22. ❌ DON'T use `border-white/5` or `border-white/10` — use `border-border/50` (theme-aware)
 
 ### Modules System
 
@@ -2971,12 +4423,11 @@ const UserHeader = (post) => (
         }),
         UserName(post),
         Button({
-            variant: 'ghost',
-            size: 'icon',
-            click: () => handleOptions(post)
-        }, [
-            UniversalIcon({ size: 'sm' }, 'more_vert')
-        ])
+            variant: 'icon',
+            class: 'outline',
+            click: () => handleOptions(post),
+            icon: 'more_vert'
+        })
     ])
 );
 
@@ -3024,15 +4475,15 @@ const ButtonGroup = ({ likes, comments, onLike, onComment }) => (
     Div({ class: 'flex items-center gap-6 px-4 pb-4 text-muted-foreground' }, [
         Button({
             variant: 'withIcon',
-            class: 'flex items-center gap-2',
+            class: 'flex',
             click: onLike,
-            icon: Icons.hand.thumb.up
+            icon: 'thumb_up'
         }, String(likes)),
         Button({
             variant: 'withIcon',
-            class: 'flex items-center gap-2',
+            class: 'flex',
             click: onComment,
-            icon: Icons.chat
+            icon: 'mode_comment'
         }, String(comments))
     ])
 );
@@ -3248,13 +4699,12 @@ import { Icons, MaterialSymbols } from '@base-framework/ui/icons';
 
 // All work automatically - no configuration needed:
 Button({ variant: 'withIcon', icon: Icons.plus }, 'Add Item');          // Heroicon
-Button({ variant: 'withIcon', icon: MaterialSymbols.add }, 'Add Item');  // Material Symbol
 Button({ variant: 'withIcon', icon: 'add' }, 'Add Item');               // Material Symbol name
 Button({ variant: 'withIcon', icon: { name: 'favorite', variant: 'filled' } }, 'Like'); // With variant
 
 // Works the same in Alert, Modal, Navigation, etc.
 Alert({ type: 'success', icon: Icons.check, title: 'Done!' });
-Alert({ type: 'success', icon: MaterialSymbols.status.success, title: 'Done!' });
+Alert({ type: 'success', icon: 'check', title: 'Done!' });
 ```
 
 **Helper Functions** (for custom components):
@@ -3262,7 +4712,7 @@ Alert({ type: 'success', icon: MaterialSymbols.status.success, title: 'Done!' })
 import { isMaterialIcon, isHeroicon } from '@base-framework/ui/atoms';
 
 isMaterialIcon('home');              // true
-isMaterialIcon(MaterialSymbols.add); // true
+isMaterialIcon('add'); // true
 isMaterialIcon(Icons.home);          // false (SVG string)
 
 isHeroicon(Icons.home);              // true
@@ -3307,10 +4757,10 @@ Button({ variant: 'warning' }, 'Warning');                     // Warning action
 
 // Icon variants — icon prop accepts Heroicon SVG, MaterialSymbol, or a symbol name string
 Button({ variant: 'icon', icon: Icons.settings });             // Icon only (square)
-Button({ variant: 'withIcon', icon: Icons.plus }, 'Add New');  // Icon + label
+Button({ variant: 'withIcon', icon: 'add' }, 'Add New');  // Icon + label
 
 // Circle icon — semi-transparent circular button; sizes: xs | sm | md | lg | xl
-Button({ variant: 'circleIcon', icon: Icons.home, size: 'md' });
+Button({ variant: 'circleIcon', icon: 'home', size: 'md' });
 
 // Back button — navigates back in history
 Button({ variant: 'back', class: 'ghost', allowHistory: false });
@@ -3319,19 +4769,19 @@ Button({ variant: 'back', class: 'ghost', allowHistory: false });
 LoadingButton('Saving…');
 
 // Toggle button — social-action style with active/inactive state (Component, use `new`)
-new ToggleButton({ icon: Icons.heart, value: 234, toggle: (active) => {} });
-new ToggleButton({ icon: Icons.heart, active: true, value: 234 });   // starts active
+new ToggleButton({ icon: 'heart', value: 234, toggle: (active) => {} });
+new ToggleButton({ icon: 'heart', active: true, value: 234 });   // starts active
 new ToggleButton({ icon: 'bookmark', activeIcon: 'bookmarkSolid' }); // swap icon
-new ToggleButton({ icon: Icons.heart, dataKey: 'likeCount', toggle: (active) => {} }); // reactive count
+new ToggleButton({ icon: 'heart', dataKey: 'likeCount', toggle: (active) => {} }); // reactive count
 
 // Circle button — frosted-glass, non-toggling; sizes: xs | sm | md | lg | xl | 2xl (Atom, no `new`)
-CircleButton({ icon: Icons.arrows.left, size: 'sm' });
-CircleButton({ icon: Icons.share, size: 'md', click: () => {} });
+CircleButton({ icon: 'arrows.left', size: 'sm' });
+CircleButton({ icon: 'share', size: 'md', click: () => {} });
 
 // Circle toggle button — frosted-glass with active/inactive toggle (Component, use `new`)
-new CircleToggleButton({ icon: Icons.heart, size: 'md', toggle: (active) => {} });
-new CircleToggleButton({ icon: Icons.heart, size: 'md', active: true }); // starts active
-new CircleToggleButton({ icon: Icons.star, size: 'md', activeClass: 'text-yellow-400' });
+new CircleToggleButton({ icon: 'heart', size: 'md', toggle: (active) => {} });
+new CircleToggleButton({ icon: 'heart', size: 'md', active: true }); // starts active
+new CircleToggleButton({ icon: 'star', size: 'md', activeClass: 'text-yellow-400' });
 new CircleToggleButton({ icon: 'bookmark', activeIcon: 'bookmarkSolid', size: 'md' });
 ```
 
@@ -3397,6 +4847,13 @@ Ul([items.map(item => Li(item))])
 
 // ❌ WRONG
 Div({ children: items.map(item => ItemCard(item)) })
+```
+
+### For vs htmlFor
+The "for:" is a reactive directive. If oyu need to add a "for" attribute to a label, use "htmlFor" to avoid conflicts:
+```javascript
+Label({ htmlFor: 'inputId' }, 'Label Text')
+Input({ id: 'inputId' })
 ```
 
 **Watchers & Computed**:
@@ -3470,7 +4927,7 @@ Every model gets a full set of built-in methods on its `xhr` object via `ModelSe
 **CORRECT pattern — filter and search using built-in `all()`**:
 ```javascript
 // Seed model data with filter/search keys
-return new PostModel({ filter: { status: 'active' }, search: '', orderBy: { field: 'createdAt', direction: 'DESC' } });
+return new PostModel({ filter: { status: 'active' }, search: '', orderBy: { createdAt: 'desc' } });
 
 // Change filter and reload — no custom xhr method needed
 filterByType(type) { this.data.filter = { type }; this.data.xhr.all({}, (r) => { ... }); }
@@ -3664,7 +5121,23 @@ export const ResultButtonWithMethods = ({ id, resolved }) =>
 
             // Custom methods can be added to the component instance
             methods: {
-                toggleResolved: () => data.resolved = data.resolved === 1 ? 0 : 1
+                toggleResolved: () => data.resolved = data.resolved === 1 ? 0 : 1,
+
+                before()
+                {
+                    console.log('Component is about to be created with resolved:', data.resolved);
+                },
+
+                // shorthand jot methods work with hybrid
+                after()
+                {
+                    console.log('Component created with resolved:', data.resolved);
+                },
+
+                destroy()
+                {
+                    console.log('Component destroyed');
+                }
             }
         }, [
 		On('resolved', (resolved) => resolved === 1
@@ -3803,6 +5276,127 @@ new NavLink({
     exact: true,
     activeClass: 'active'
 });
+```
+
+## TimeFrame
+When you need to show how long it will be or has been since a date, use the `TimeFrame` component from Base UI. It accepts a date and will automatically update as time passes.
+
+```javascript
+import { TimeFrame } from '@base-framework/ui/molecules';
+
+// This will show how long it will be or has been since the dattime and update automatically as time passes
+TimeFrame({ dateTime: '2014-02-11T11:30:00' });
+```
+
+## Lists
+When rendering lists, always use the `for` or `map` for small lists that do not need a lot of performance. If a list needs to be very reactive, or update dynamically, or update on scroll, BaseUI has many lists that can be used for different use cases. Always try to use a Base UI list before building a custom one.
+
+```javascript
+import { ScrollableList, List, DataList, DynamicList, DataTableBody, ScrollableTableBody, TableBody } from "@base-framework/organisms";
+import { A, Div, P, Span, Td, Thead, Tr } from "@base-framework/atoms";
+import { Checkbox } from "@base-framework/ui/atoms";
+import { Icons } from "@base-framework/ui/icons";
+import { Avatar, EmptyState, StaticStatusIndicator } from "@base-framework/ui/molecules";
+import { CheckboxCol, HeaderCol, ScrollableDataTable, DynamicDataTable } from "@base-framework/ui/organisms";
+
+ScrollableList({
+    data: // add a data source to automatically handle loading, pagination, and reactivity, it must support the getAllInputs contract for pagination, filtering, and searching,
+    cache: `listName`, // optional cache key for scroll position and loaded data
+    key: 'id', // required unique key for each item, used for caching and reactivity
+    xhrMethod: 'all', // optional custom xhr method on the data source (defaults to 'all')
+    class: 'flex flex-col w-full',
+    skeleton: { // optional skeleton config for loading state
+        number: 4,
+        row: BookmarkRowSkeleton
+    },
+    rowItem: BookmarkCard, // required row component for rendering each item
+    emptyState: () => BookmarkEmptyState({ activeFilter: activeFilter || 'all' }) // optional empty state component when there are no items
+})
+
+/**
+ * This will create a following user avatar.
+ *
+ * @param {object} row
+ * @return {object}
+ */
+const FollowingUserAvatar = (row) => (
+	A({
+		href: `users/${row.id}`,
+		class: 'flex items-center gap-x-4 no-underline text-inherit hover:text-primary'
+	}, [
+		Div({ class: 'relative' }, [
+			Avatar({
+				src: '/files/users/profile/' + row.image,
+				alt: row.username,
+				fallbackText: `${row.firstName} ${row.lastName}`
+			}),
+			StaticStatusIndicator(row.status)
+		]),
+		Div({ class: 'min-w-0 flex-auto' }, [
+			Div({ class: 'flex items-center gap-2' }, [
+				Span({ class: 'text-base font-semibold leading-6 capitalize' }, `${row.firstName} ${row.lastName}`),
+			]),
+			P({ class: 'truncate text-sm leading-5 text-muted-foreground m-0' }, row.username)
+		])
+	])
+);
+
+/**
+ * HeaderRow
+ *
+ * Renders the header row for the following table.
+ *
+ * @returns {object}
+ */
+const HeaderRow = () =>
+	Thead([
+		Tr({ class: 'text-muted-foreground border-b' }, [
+			CheckboxCol({ class: 'hidden md:table-cell' }),
+			HeaderCol({ key: 'user', label: 'User' }),
+			HeaderCol({ key: 'email', label: 'Email', class: 'hidden md:table-cell' }),
+			HeaderCol({ key: 'createdAt', label: 'Following Since', class: 'hidden md:table-cell' })
+		])
+	]);
+
+/**
+ * FollowingRow
+ *
+ * Renders a single following entry row.
+ *
+ * @param {object} row - The following entry data
+ * @param {function} onSelect - Callback when the row is selected
+ * @returns {object}
+ */
+export const FollowingRow = (row, onSelect) =>
+	Tr({ class: 'items-center px-4 py-2 hover:bg-muted/50' }, [
+		Td({ class: 'p-4 hidden md:table-cell' }, [
+			new Checkbox({ checked: row.selected, class: 'mr-2', onChange: () => onSelect(row) })
+		]),
+		Td({ class: 'p-4' }, [
+			FollowingUserAvatar(row)
+		]),
+		Td({ class: 'p-4 max-w-[200px] truncate hidden md:table-cell' }, [
+			A({ href: `mailto:${row.email}`, class: 'text-muted-foreground', 'data-cancel-route': true }, row.email)
+		]),
+		Td({ class: 'p-4 hidden md:table-cell' }, [
+			A({ href: `users/${row.id}`, class: 'text-muted-foreground' }, row.createdAt)
+		])
+	]);
+
+ScrollableDataTable({
+    data, // the fetch method needs to work with the getALlInputs params sent by the list for pagination, filtering, and searching
+    cache: 'list',
+    limit: 50,
+    customHeader: HeaderRow(), // optional custom header row component
+    skeleton: true, // simple skeleton when true, or custom skeleton config
+    rowItem: FollowingRow, // required row component for rendering each item
+    key: 'id', // required unique key for each item
+    emptyState: () => EmptyState({
+        title: 'Not Following Anyone',
+        description: 'Start following users to see them here.',
+        icon: 'favorite'
+    })
+})
 ```
 
 ### Dynamic Imports
@@ -3969,6 +5563,9 @@ handleSubmit(e)
 | `->fetchOne()` | `->first()` |
 | `$this->request` in `addItem()` | Use `modifyAddItem($data, $request)` hook |
 | Override `addItem()` for route params | Use `modifyAddItem()` or override `add()` |
+| Overriding `get()` to append flags (isFavorited, isBookmarked, etc.) | Use `enrichRow()` hook — no need to duplicate `get()` logic |
+| Overriding `all()` to append flags per row | Use `enrichRows()` hook with batch IN-queries to avoid N+1 |
+| Calling `$result->row->getData()` in controller | `get()` now calls `getData()` internally — `result->row` is already a plain object |
 | `\Modules\User\Models\User::get()` | `use Modules\User\Models\User; User::get()` |
 | `$factory = 'Modules\\Post\\...\\PostFactory';` | `use ...\PostFactory; $factory = PostFactory::class;` |
 | `$request->route('id')` | `$request->getInt('id')` for query/body, or `$request->params()->id` for route params |
@@ -3976,11 +5573,14 @@ handleSubmit(e)
 | `$userId = session()->user->id ?? null;` | `$userId = session()->user->id;` after policy |
 | `throw new \Exception()` in controller | `$this->setError()` or `$this->error()` |
 | `$m = new Model(); $m->x = 1; $m->add();` | `$m = new Model((object)['x' => 1]); $m->add();` |
-| `$builder->belongsTo(Org::class, ['name'])` | `$builder->belongsTo(Org::class, fields: ['name'])` |
-| `Role::one($builder)->on(['roleId', 'id'])` | `Role::one($builder)->on(['id', 'userId'])` (parent first) |
+| `$builder->belongsTo(Org::class, ['name'])` | `$builder->belongsTo(Org::class, fields: ['name'])` — use named param |
+| `$builder->belongsTo(X::class, fields: [...])` without `->on()` when FK is non-standard | `belongsTo()` auto-infers `on(['{relatedModel}Id', 'id'])` — only override with `->on()` when the local FK column doesn't follow the `{relatedModel}Id` convention (e.g., use `->on(['authorId', 'id'])` when the column is `author_id` instead of `user_id`) |
+| `Role::one($builder)->on(['userId', 'id'])` (wrong order for one()) | `Role::one($builder)->on(['id', 'userId'])` — `on()` is `[ownerTableCol, targetTableCol]`; for `one()`/`many()` the owner holds the PK, target holds the FK |
+| `$builder->belongsTo(User::class, ...)->on(['id', 'userId'])` (wrong order for belongsTo()) | `->on(['userId', 'id'])` — for `belongsTo()` the owner holds the FK, target holds the PK |
 | `$builder->belongsTo(Org::class, fields: ['id', 'name'])` | Exclude 'id': `fields: ['name']` |
 | Padding object/array properties with spaces to align values into columns | Write each property with a single space after `:` — no extra padding ever |
 | `return $this->hasMany(Post::class)` in `joins()` | Use JoinBuilder methods in `joins()` |
+| Manual `Model::fetchWhere(['parentId' => $this->id])` inside a model method for related data | Define a lazy relationship: `return $this->hasMany(Model::class)` — access via property `$model->relation` triggers the query automatically |
 | `Post::one($this)->fields('title')` outside `joins()` | Use lazy relationships: `hasMany()` |
 | `CreateEventsTable.php` migration filename | `2026-01-21T04.14.30.800125_Event.php` |
 | `class CreateEventsTable extends Migration` | Class name must match filename after underscore: `class Event` |
@@ -3993,6 +5593,8 @@ handleSubmit(e)
 | `$this->faker->dateTimeThisMonth()` | `$this->faker()->dateTimeThisMonth()` or `$this->faker()->dateTimeBetween('-1 month', 'now')` |
 | Manual POINT handling in Storage | Use `$dataTypes = ['position' => PointType::class]` in model |
 | Custom Storage for JSON encoding | Use `$dataTypes = ['metadata' => JsonType::class]` in model |
+| Manual `json_encode()` in `augment()` for JSON columns | Use `$dataTypes = ['field' => JsonType::class]` — encoding is automatic |
+| Manual `json_decode()` in `format()` for JSON columns | Use `$dataTypes = ['field' => JsonType::class]` — `fromDb()` decodes automatically on read |
 | `$location->position = 'lat,lon'` (comma) | `$location->position = 'lon lat'` (space, **longitude first**) or array `[lon, lat]` |
 | `$location->position = [lat, lon]` or `'lat lon'` | **WRONG order** — MySQL POINT stores X=longitude, Y=latitude. `ST_Distance_Sphere` validates Y as latitude; passing a longitude value like `-111` as Y throws "Out of range error: Latitude [-90,90]". ALWAYS pass longitude first: `[lon, lat]` or `'lon lat'` |
 | `[['X(\`position\`)'], 'latitude']` in model `$fields` | `[['X(\`position\`)'], 'longitude']` — MySQL `X()` returns the X coordinate which is longitude per spatial convention |
@@ -4007,6 +5609,8 @@ handleSubmit(e)
 | `$this->state(['role' => 'admin'])` in factory | `$this->state(fn() => ['role' => 'admin'])` — `state()` requires a callable, NOT a plain array |
 | `->limit($limit, $offset)` in query builder | `->limit($offset, $limit)` — Proto generates `LIMIT a, b` = skip a, take b; wrong order returns 0 rows |
 | `->select('COUNT(*) as total')` | `->select([['COUNT(*)'], 'total'])` — plain string gets table alias prepended → invalid SQL |
+| Putting `ORDER BY` / `LIMIT` on one union segment instead of the full union | Apply ordering and pagination after all `UNION ALL` clauses so it affects the complete result set |
+| Manual union param juggling like `array_merge($logsParams, $planParams)` | Use `UnionQuery::make($this->db)->segment(...)->segment(...)->orderBy(...)->limit(...)->fetch()` |
 | `->join('INNER JOIN table ON ...', null)` | `join()` only accepts callable or array — NEVER a plain SQL string. Use closure: `->join(function($joins) { $joins->join('table', 'alias')->on('...'); })` |
 | `->join(['INNER JOIN ...'])` with a raw SQL string as value | Raw SQL strings are invalid join values — use `'type'`, `'table'`, `'alias'`, `'on'` keys in the array, or use the closure form |
 | `->where('status = ?')` when joined tables both have `status` | Prefix every column with its table alias to avoid ambiguous column errors: `->where('u.status = ?')` |
@@ -4014,11 +5618,60 @@ handleSubmit(e)
 | `$joins->left('table', 'alias')` without `->on(...)` | Always call `->on(...)` after defining a join — omitting it generates invalid SQL |
 | Passing `?` params for ON conditions separately from WHERE params in `fetch()` | ON `?` params go **first** in the `fetch()` array, then WHERE params: `->fetch([$joinParam1, $joinParam2, $whereParam])` |
 | `$builder->hasMany(Model::class, ...)` inside `joins()` | Extract as lazy relationship method: `public function items(): HasMany { return $this->hasMany(Model::class); }` — `hasMany()` is NOT a JoinBuilder method |
+| Manual `fetchWhere` in model method for related data: `public function posts() { return Post::fetchWhere(['groupId' => $this->id]); }` | Use lazy relationship: `public function posts(): HasMany { return $this->hasMany(Post::class); }` then access via `$model->posts` (property) — Proto auto-resolves the FK and fires the query on access |
 | `$row = Model::getBy([...]); $row->update()` | `getBy()` returns `stdClass`, not a model instance — use query builder: `Model::builder()->update()->set([...])->where('id = ?')->execute([$row->id])` |
 | `$rows = Model::fetchWhere([...]); $rows[0]->update()` | `fetchWhere()` returns plain objects — use query builder for updates, or `Model::get($id)` to get an instance |
 | `randomElement(['tech', 'culture'])` for an enum field | Always match migration enum values exactly: `randomElement(['technology', 'community'])` — invalid enum values cause `Failed to create model` at runtime |
+| Manual `$placeholders = implode(',', array_fill(0, count($ids), '?'))` for IN queries | `['field', 'IN', $array]` shorthand in filter arrays — auto-generates placeholders and binds values |
+| Raw `"EXISTS (SELECT 1 FROM table ...)"` in filter arrays | `Filter::exists('table', 'alias', 'join_condition', [...conditions])` — parameterized, sanitized |
+| Raw `"NOT EXISTS (...)"` in filter arrays | `Filter::notExists('table', 'alias', 'join_condition', [...conditions])` — same API as `exists()` |
+| Raw `['e.status', $value]` with inline alias in filter | `Filter::aliased('e', 'status', $value)` — sanitizes alias + column, auto-converts to snake_case |
+| Raw `'e.start_date > NOW()'` static condition in filter | `Filter::condition('e', 'startDate', '> NOW()')` — whitelisted expressions only, auto snake_case |
 | `$this->assertDatabaseCount('table', 1)` in idempotency test | `assertDatabaseCount` counts ALL rows globally and picks up live data — use `Model::fetchWhere(['userId' => $id])` + `assertCount(1, $rows)` to scope to the test user |
 | `assertDatabaseHas('user_vehicle_type_preferences', ...)` | Always check `$tableName` in the model class — shortened names like `user_vtype_preferences` differ from the class name; class name is NOT the table name |
+| `ResourceController` without `protected ?string $policy` | Every `ResourceController` MUST have a `$policy` property — unprotected controllers are an authorization gap |
+| `->on(['id', 'user_id'])` in model `joins()` | `->on(['id', 'userId'])` — JoinBuilder `on()` keys use **camelCase** model field names, NOT snake_case DB columns; the ORM converts automatically |
+| Policy method `public function get(): bool` (no Request param) | `public function get(Request $request): bool` — policy dispatch passes a Request object; wrong signature is logged as a warning in all environments |
+| Policy without `protected ?string $type` | Set `$type` explicitly or let the framework auto-infer from class name (e.g., `EventPolicy` → `'event'`, `GroupPostPolicy` → `'groupPost'`) |
+| Policy extending `Proto\Auth\Policies\Policy` directly | Extend `Common\Auth\Policies\Policy` — it adds `$type`, `ownsResource()`, `hasPermission()`, and other project helpers |
+| Both `create()` and `add()` in the same policy | Only define `add()` — framework dispatches POST requests to `add`, not `create`; having both causes confusion |
+| Manual `auth()->user` calls in policy methods | Use `$this->isSignedIn()` for auth checks and `$this->ownsResource()` for ownership — these are built into `Common\Auth\Policies\Policy` |
+| Manual auth check in controller when `$policy` is set | Remove — the policy already enforces authentication before the controller method runs |
+| `modifyUpdateItem` without setting `updatedBy` | Always set `$data->updatedBy = session()->user->id;` in `modifyUpdateItem` if the model has an `updatedBy` field |
+| Manual `restrictFields()` in `modifyUpdateItem` when model has `$immutableFields` | Remove `restrictFields()` call — the framework auto-strips immutable fields on update at both controller and storage layers. Just set audit fields like `updatedBy` |
+| `session()->user->id ?? null` in policy methods | Use `$this->getUserId()` — cleaner and consistent with framework helpers |
+| Manual ownership check in policy (`Model::get($id)` + compare userId) | Fetch the resource, then call `$this->ownsResource($item->userId)` — cleaner and handles admin bypass |
+| Manual route param check in policy for user matching | Use `$this->matchesRouteUser($request, 'paramName')` — cleaner and consistent |
+| `Model::get($id)` in tests when model has eager joins | Use `$this->safeGet(Model::class, $id)` or `Model::getWithoutJoins($id)` — bypasses joins that may not see uncommitted transaction data |
+| `Model::fetchWhere($filter)` in tests when model has eager joins | Use `Model::fetchWhereWithoutJoins($filter)` — avoids join-related null results in transactions |
+| Re-fetching a model after update to verify changes in tests | Use `$this->refreshModelWithoutJoins($model)` — transaction-safe re-read bypassing eager joins |
+| Debug `echo`/`print`/`var_dump` left in test files | Remove all debug output before committing — tests must run cleanly with `--testdox` |
+| Model without a factory class | Every model should have a factory in `Models/Factories/` — factories enable consistent test data and seeders |
+| Module without any test files | Every module should have at least one feature test in `Tests/Feature/` covering core CRUD operations |
+| Fetch-modify-write for counters: `$post = Post::get($id); $post->likeCount++; $post->update();` | `Post::atomicIncrement($id, 'likeCount')` — atomic SQL, no race conditions |
+| Duplicating like-toggle logic (check existing → remove/add → update counter) | Use `ToggleLikeTrait` from `Proto\Services\Traits\ToggleLikeTrait` |
+| Duplicating pivot toggle logic (check exists → delete/create) | Use `TogglePivotTrait` from `Proto\Services\Traits\TogglePivotTrait` |
+| Duplicating vote up/down logic with score calculation | Use `VoteableTrait` from `Proto\Services\Traits\VoteableTrait` |
+| Duplicating audience targeting get/save across services | Use `AudienceTargetingTrait` from `Proto\Services\Traits\AudienceTargetingTrait` |
+| Copy-pasting SSE/Redis streaming boilerplate in controllers | Extend `Proto\Controllers\SyncController` or use `SyncableTrait` on existing `ResourceController` |
+| Creating a separate `SyncController` subclass just to add SSE to an existing `ResourceController` | Use `SyncableTrait` — add `use SyncableTrait;` + two methods, no new class or routes needed |
+| Duplicating validate → store → getNewName file upload logic in controller hooks | Use `$this->handleFileUpload($request, 'field', 'disk', 'dir', 'rules')` — returns filename or null |
+| Manual file loop for batch uploads | Use `$this->handleMediaUpload($request, 'field', 'disk', 'dir', 'rules')` — returns array of metadata objects |
+| Extending `Model` for write-once pivot tables (likes, bookmarks, follows) | Extend `Proto\Models\PivotModel` — provides default `$immutableFields` for pivot records |
+| `$this->service = new XService()` in constructor | `protected ?string $serviceClass = XService::class;` — auto-instantiated by `initializeService()` |
+| Putting multi-step business logic in controller `addItem()`/`updateItem()` | Declare `$serviceClass` and put logic in the service's `add()`/`update()` methods |
+| Writing raw `ST_Distance_Sphere` SQL in services | Use `LocationFilterTrait` — `filterByProximity()` / `filterByProximitySubquery()` build the conditions |
+| Override `addItem()` for route params | Use `$routeParams` property or `modifyAddItem()` hook |
+| `modifyAddItem` just to inject a route param | Use `protected array $routeParams = ['forumId' => true];` — auto-injects on add, auto-filters on all() |
+| `modifyFilter` just for query params | Use `protected array $filterParams = ['topicId' => 'int'];` — declarative query-string-to-filter mapping |
+| Manual user fields on add/update response | Use `protected array $enrichUserFields = ['firstName', 'lastName', 'image'];` |
+| Duplicate `enrichRow`/`enrichRows` logic | Only implement `enrichRows()` — `enrichRow()` auto-delegates by default |
+| Manual map-building in `enrichRows()` for batch lookups | Use `BatchEnrichmentTrait` — `batchMapField()` / `batchMapExists()` helpers |
+| Hardcoded `$limit = $request->getInt('limit') ?: 20` in list endpoint | Use `$inputs = $this->getAllInputs($request)` — it parses limit, offset, filter, search, dates, orderBy, groupBy, lastCursor, since |
+| Hardcoded `$modifiers = ['orderBy' => '...']` in list endpoint | Use `$inputs->modifiers` from `getAllInputs()` — merge defaults via `if (empty($inputs->modifiers['orderBy']))` |
+| Calling `Model::all($filter, $offset, $limit)` without modifiers | ALWAYS pass `$inputs->modifiers` as the 4th arg — without it, search/sort/dates/cursor are silently ignored |
+| Building `$modifiers = ['search' => $request->input('query')]` manually | `getAllInputs()` already parses `search` into `$inputs->modifiers['search']` — don't reconstruct it |
+| Custom list endpoint that ignores `lastCursor`/`since` params | Use `getAllInputs()` + `$inputs->modifiers` — cursor-based pagination requires these params to flow through |
 
 ### Frontend (Base)
 
@@ -4030,9 +5683,9 @@ handleSubmit(e)
 | `ToggleButton({...})` without `new` | `new ToggleButton({...})` (ToggleButton is a Component) |
 | `CircleToggleButton({...})` without `new` | `new CircleToggleButton({...})` (CircleToggleButton is a Component) |
 | `Button({ variant: 'default' }, ...)` | `Button({ variant: 'primary' }, ...)` (`default` variant does not exist) |
-| `Icon(Icons.home)` | `Icon({ size: 'sm' }, Icons.home)` |
+| `Icon(Icons.home)` | `Icon({ size: 'sm' }, 'home')` |
 | `Import('./file.js')` | `Import(() => import('./file.js'))` |
-| `Icon({ icon: Icons.home })` | `Icon({ size: 'sm' }, Icons.home)` |
+| `Icon({ icon: Icons.home })` | `Icon({ size: 'sm' }, 'home')` |
 | `class: 'text-white'` | `class: 'text-foreground'` |
 | `class: 'text-blue-500'` | `class: 'text-primary'` |
 | `class: 'border-gray-300'` | `class: 'border-border'` |
@@ -4065,6 +5718,20 @@ handleSubmit(e)
 | Creating `byType(type, cb)`, `filterByStatus(status, cb)`, etc. when only a filter value differs | Set `this.model.filter = { type }` (or `{ status }`) and call the built-in `xhr.all()` |
 | Creating a custom `filterByDateRange(from, to, cb)` xhr method | Set `this.model.dates = { field: 'createdAt', from, to }` and call the built-in `xhr.all()` |
 | Building filter/search query params manually inside a custom xhr method | Let built-in `all()` read them from model data — set keys on the model, not in the method |
+| `Div({ class: 'size-10 rounded-full bg-muted animate-pulse' })` for skeleton | `Skeleton({ shape: 'circle', width: 'size-10', height: 'size-10' })` from `@base-framework/ui/atoms` |
+| `Div({ class: 'h-4 w-32 rounded-full bg-muted animate-pulse' })` | `Skeleton({ class: 'rounded-full', width: 'w-32' })` — always use Base UI `Skeleton` atom |
+| Building avatar + text lines skeleton inline | `RowSkeleton()` from `@components/atoms/skeletons/row-skeleton.js` — configurable via `avatarSize`, `lines`, `class` |
+| Building a custom pill filter bar for page tabs | Use `PillTabBar` (state-driven) or `PillLinkBar` (route-driven) from `@components/molecules/pills/` |
+| Building a custom sticky container for filter pills | Use `StickyFilterBar` from `@components/organisms/sticky-filter-bar.js` |
+| Building custom avatar + name + follow button row | Use `UserRow` from `@components/molecules/users/user-row.js` — includes avatar, info, and actions |
+| Building custom avatar with status dot inline | Use `UserAvatar` from `@components/molecules/users/user-avatar.js` — wraps Base UI Avatar + StaticStatusIndicator |
+| `class: 'bg-green-500 text-white'` for status | `class: 'bg-success text-success-foreground'` — use semantic status tokens |
+| `class: 'bg-yellow-500/15 text-yellow-600'` for pending | `class: 'bg-warning/15 text-warning'` — semantic tokens ensure light/dark consistency |
+| `class: 'bg-red-500/15 text-red-600'` for error | `class: 'bg-destructive/15 text-destructive'` — semantic tokens |
+| `class: 'bg-blue-500/15 text-blue-600'` for info | `class: 'bg-info/15 text-info'` — semantic tokens |
+| `class: 'border-white/5'` or `'border-white/10'` | `class: 'border-border/50'` — use theme border token, not hardcoded white |
+| Custom xhr method for a list endpoint: `byType(params, cb) { return this._get('/by-type?type=...', '', params, cb); }` | Use built-in `xhr.all()` — set `this.model.filter = { type }` and call `xhr.all({}, cb)`. Custom methods strip pagination/search/sort/cursor params |
+| `ScrollableList` with a custom `xhrMethod` that bypasses built-in `all()` params | If using a custom `xhrMethod`, it MUST send all `ModelService.all()` params (filter, offset, limit, search, dates, orderBy, groupBy, lastCursor, since) or the list can't paginate/sort/search |
 
 ## 6. Testing (Backend)
 
@@ -4310,12 +5977,29 @@ $this->assertDatabaseHas('partners', [
 ]);
 ```
 
+**Test Helper Methods** (available on `Proto\Tests\Test` via `ModelTestHelpers` trait):
+
+```php
+// safeGet — tries Model::get() first, falls back to getWithoutJoins()
+$event = $this->safeGet(Event::class, $eventId);
+$this->assertNotNull($event);
+
+// refreshModelWithoutJoins — re-reads a model from DB without eager joins
+$updated = $this->refreshModelWithoutJoins($event);
+$this->assertEquals('updated_title', $updated->title);
+```
+
+- `$this->safeGet(string $modelClass, mixed $id)` — tries `Model::get()` first, falls back to `getWithoutJoins()` if joins cause null
+- `$this->refreshModelWithoutJoins(Model $model)` — re-fetches a model from DB bypassing eager joins (transaction-safe)
+
 **Summary - Testing Models with Eager Joins**:
 1. Use the object returned by `factory()->create()` directly
 2. Verify persistence with `assertDatabaseHas()` instead of re-fetching
-3. Write static update methods using query builder, not fetch-then-update
-4. In tests, create models directly instead of calling service methods that fetch
-5. Always use camelCase for field names, both in code and database assertions
+3. Use `$this->safeGet()` or `Model::getWithoutJoins($id)` to bypass joins when re-fetching in tests
+4. Use `$this->refreshModelWithoutJoins($model)` to re-read updated model data without join interference
+5. Write static update methods using query builder, not fetch-then-update
+6. In tests, create models directly instead of calling service methods that fetch
+7. Always use camelCase for field names, both in code and database assertions
 
 ## 7. Configuration
 
@@ -4324,6 +6008,55 @@ $this->assertDatabaseHas('partners', [
 **Access**: `env('key')` or `env('key.nested')`
 
 **Docker Sync**: `./infrastructure/scripts/run.sh sync-config`
+
+### Trusted Proxies
+
+When running behind a load balancer or reverse proxy, configure trusted proxies so Proto reads the correct client IP from forwarded headers:
+
+```json
+"trustedProxies": [
+    "10.0.0.0/8",
+    "172.16.0.0/12",
+    "192.168.0.0/16"
+]
+```
+
+Supports individual IPs and CIDR ranges. Common providers:
+- **AWS ALB/ELB**: VPC CIDR (e.g., `10.0.0.0/8`)
+- **Cloudflare**: Published IP ranges
+- **Docker internal**: `172.16.0.0/12`
+
+### CORS Origin Whitelist
+
+Restrict which origins can make cross-origin requests:
+
+```json
+"cors": {
+    "allowedOrigins": [
+        "https://yourdomain.com",
+        "https://app.yourdomain.com"
+    ]
+}
+```
+
+Only origins in this list receive CORS headers. Requests from unlisted origins are rejected. For local development, the Vite dev server origins are automatically allowed.
+
+### CSRF Token Rotation
+
+Proto provides `csrf()->rotate()` to regenerate the CSRF token. Call this on security-sensitive transitions:
+
+```php
+// After login
+csrf()->rotate();
+
+// After logout
+csrf()->rotate();
+
+// After privilege escalation (e.g., entering admin mode)
+csrf()->rotate();
+```
+
+**CRITICAL**: Always rotate the CSRF token on login and logout to prevent session fixation attacks.
 
 ## 8. Events & Dispatch System
 
@@ -4677,6 +6410,22 @@ export const ConversationModel = Model.extend({
 - Config flow: `common/Config/.env` (JSON) → `infrastructure/scripts/sync-config.js` → root `.env`
 
 ### Debugging & Gotchas
+
+**Backend Error Log**:
+Proto automatically logs all backend errors to the `proto_error_log` database table. When investigating a backend error, query this table first — it contains the error message, file, line number, stack trace, URL, IP address, and timestamp for every error that occurred.
+
+```sql
+-- View recent errors
+SELECT * FROM proto_error_log ORDER BY added DESC LIMIT 20;
+
+-- Filter by URL
+SELECT * FROM proto_error_log WHERE url LIKE '%/api/vehicle%' ORDER BY added DESC;
+
+-- Filter by date
+SELECT * FROM proto_error_log WHERE added >= '2026-03-23' ORDER BY added DESC;
+```
+
+This is the fastest way to diagnose issues — check `proto_error_log` before inspecting code or logs.
 
 **Docker Issues**:
 - If `vendor/` missing: Container runs `composer install` automatically. Check: `docker-compose logs -f web`
