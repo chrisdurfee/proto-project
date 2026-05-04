@@ -18,6 +18,9 @@ export default {
 			},
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'sans-serif'],
+			},
 			spacing: {
 				'safe-top': 'env(safe-area-inset-top)',
 				'safe-bottom': 'env(safe-area-inset-bottom)',
@@ -45,6 +48,14 @@ export default {
 				warning: {
 					DEFAULT: "hsl(var(--warning))",
 					foreground: "hsl(var(--warning-foreground))",
+				},
+				success: {
+					DEFAULT: "hsl(var(--success))",
+					foreground: "hsl(var(--success-foreground))",
+				},
+				info: {
+					DEFAULT: "hsl(var(--info))",
+					foreground: "hsl(var(--info-foreground))",
 				},
 				muted: {
 					DEFAULT: "hsl(var(--muted))",

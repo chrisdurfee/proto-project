@@ -49,6 +49,9 @@ export default defineConfig({
 		} : {})
 		// Note: Proxy is handled by http2ProxyPlugin above
 	},
+	optimizeDeps: {
+		include: ['mapbox-gl']
+	},
 	build: {
 		outDir: path.resolve(__dirname, '../../public/main'),
 		emptyOutDir: true

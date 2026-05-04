@@ -32,8 +32,9 @@
 		"@tailwindcss/vite": "^4.1.16",
 		"d3": "^7.9.0",
 		"http-proxy-middleware": "^3.0.5",
+		"mapbox-gl": "^3.21.0",
 		"typescript": "^5.9.3",
-		"vite": "7.1.12"
+		"vite": "^7.3.2"
 	},
 	"files": [
 		"package.json",
