@@ -88,14 +88,14 @@ export const UserData = Model.extend({
 			}
 
 			// Validate file type client-side
-			const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+			const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/jxl', 'image/heic', 'image/heif', 'image/avif'];
 			const fileType = imageFile.type.toLowerCase();
 			if (!allowedTypes.includes(fileType))
 			{
 				app.notify({
 					type: "destructive",
 					title: "Error",
-					description: "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.",
+					description: "Invalid file type. Only JPEG, PNG, GIF, WebP, BMP, TIFF, JXL, HEIC, HEIF, and AVIF images are allowed.",
 					icon: Icons.shield
 				});
 				return;

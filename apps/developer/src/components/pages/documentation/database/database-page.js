@@ -45,7 +45,7 @@ const CodeBlock = Atom((props, children) => (
  * This page documents Proto's database system including connections,
  * query builder, ORM features, and database management.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const DatabasePage = () =>
 	DocPage(

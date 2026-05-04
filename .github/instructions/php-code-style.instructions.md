@@ -1,0 +1,158 @@
+---
+description: "Use when writing or editing PHP - strict types declaration, opening braces on new lines, use-statement imports (no inline FQNs), tabs+4-space alignment, doc blocks, error handling with setError/error in controllers, session access patterns, and succinct model instantiation via constructor with object cast"
+applyTo: "**/*.php"
+---
+
+# PHP Code Style (CRITICAL)
+
+## Doc Blocks
+Always use doc blocks for classes, properties, members, functions, types, and methods.
+
+## Strict Types
+**ALWAYS** declare strict types:
+```php
+<?php declare(strict_types=1);
+```
+
+## Braces
+**Opening braces ALWAYS on new line** (methods, classes, if/else, loops):
+```php
+// ✅ CORRECT
+public function getUserCars(int $userId): array
+{
+    return CarProfile::fetchWhere(['userId' => $userId]);
+}
+
+if ($condition)
+{
+    // code
+}
+
+// ❌ WRONG
+public function getUserCars(int $userId): array {
+    return CarProfile::fetchWhere(['userId' => $userId]);
+}
+```
+
+## References
+**CRITICAL**: ALWAYS use `use` statements at the top of the file, NOT fully qualified names inline. This applies to ALL contexts: method parameters, return types, builder methods, static calls, model properties.
+
+```php
+// ✅ CORRECT - Import at top of file
+use Modules\User\Models\User;
+use Modules\Post\Media\Models\PostMedia;
+
+$user = User::get($userId);
+$class = User::class;
+
+// In type hints
+public function getUser(User $user): User { ... }
+
+// In model joins
+$builder->belongsTo(User::class, fields: ['name']);
+
+// In model properties
+protected static ?string $factory = PostFactory::class;
+
+// ❌ WRONG - Inline fully qualified names
+$user = \Modules\User\Models\User::get($userId);
+$builder->belongsTo(\Modules\User\Models\User::class, fields: ['name']);
+public function getUser(\Modules\User\Models\User $user): \Modules\User\Models\User { ... }
+```
+
+**Key Rule**: If you need to reference a class, add it to the `use` statements at the top FIRST, then use the short name everywhere.
+
+## Spacing
+Use tabs for indentation, 4 spaces for alignment.
+
+**NO blank lines** between variable assignment and immediate condition check:
+```php
+// ✅ CORRECT
+$carProfile = CarProfile::get($carProfileId);
+if (!$carProfile)
+{
+    return false;
+}
+
+// ❌ WRONG
+$carProfile = CarProfile::get($carProfileId);
+
+if (!$carProfile)
+{
+    return false;
+}
+```
+
+## Error Handling in Controllers
+Do not throw exceptions. Use `$this->setError('message')` in hook methods or `$this->error('message')` in public methods.
+
+**CRITICAL**: `setError()` halts execution (return type is `never`) — do NOT place code after it.
+
+```php
+// ✅ CORRECT - Hook method
+protected function modifyUpdateItem(object &$data, Request $request): void
+{
+    $post = GroupPost::get($data->id);
+    if (!$post)
+    {
+        $this->setError('Post not found');
+        return; // won't run but documents intent
+    }
+    $data->modifiedBy = session()->user->id;
+}
+
+// ✅ CORRECT - Public method
+public function customAction(Request $request): object
+{
+    $id = $request->getInt('id');
+    if (!$id)
+    {
+        return $this->error('ID required');
+    }
+    // ...
+}
+
+// ❌ WRONG
+throw new \Exception('Post not found');
+```
+
+## Session Access
+```php
+// General context (outside controllers with policies)
+$user = session()->user ?? null;
+$userId = session()->user->id ?? null;
+
+// Or
+getSession('user');
+setSession('key', 'value');
+```
+
+**In controllers with a policy applied**, null checks are unnecessary — policy handles auth:
+```php
+// ✅ CORRECT (after policy)
+$userId = session()->user->id;
+
+// ❌ WRONG (after policy — redundant null check)
+$userId = session()->user->id ?? null;
+if (!$userId) { return $this->error('Not authenticated'); }
+```
+
+## Model Instantiation
+Always use constructor with object for efficiency:
+```php
+// ✅ CORRECT
+$user = new User((object)['name' => 'John', 'email' => 'john@example.com']);
+$user->add();
+
+// ✅ CORRECT - With conditional data
+$data = ['groupId' => $groupId, 'userId' => $userId];
+if ($invitedBy) { $data['invitedBy'] = $invitedBy; }
+$member = new GroupMember((object)$data);
+$member->add();
+
+// ❌ WRONG - Verbose
+$user = new User();
+$user->name = 'John';
+$user->email = 'john@example.com';
+$user->add();
+```

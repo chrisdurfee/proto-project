@@ -44,7 +44,7 @@ const CodeBlock = Atom((props, children) => (
  *
  * This page documents basic caching concepts and patterns for Proto applications.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const CachingPage = () =>
 	DocPage(

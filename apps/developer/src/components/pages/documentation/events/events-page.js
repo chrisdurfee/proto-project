@@ -46,7 +46,7 @@ const CodeBlock = Atom((props, children) => (
  * This page documents Proto's event system, detailing how to register and publish both
  * storage events (triggered automatically by the storage layer) and custom events.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const EventsPage = () =>
 	DocPage(

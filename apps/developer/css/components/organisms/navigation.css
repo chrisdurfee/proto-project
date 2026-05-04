@@ -42,7 +42,7 @@
 .navigation li.option:hover > *,
 .navigation li.option:active > *,
 .mobile-link .active i {
-	@apply bg-accent;
+	@apply bg-muted;
 }
 
 .navigation li.option:hover,
@@ -53,7 +53,9 @@
 
 .navigation li .icon.selected,
 .navigation li i.selected,
-.mobile-link .active i {
+.mobile-link .active i,
+.mobile-link .active .material-symbols-outlined,
+.mobile-link .active .material-symbols-filled {
 	@apply text-primary;
 }
 
@@ -75,6 +77,7 @@
 }
 .navigation li.option .selected .label,
 .mobile-navigation .active span,
+.mobile-link .active span,
 .navigation li.option .active .label {
 	@apply text-primary;
 }
@@ -86,7 +89,7 @@
 }
 
 .navigation li.option .selected {
-	@apply bg-accent;
+	@apply bg-muted;
 }
 
 .aside-container .drawer h4 {

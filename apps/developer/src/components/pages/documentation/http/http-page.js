@@ -47,7 +47,7 @@ const CodeBlock = Atom((props, children) => (
  * This page documents how to work with HTTP requests, responses, and routing in Proto.
  * Covers request handling, response generation, routing patterns, and middleware.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const HttpPage = () =>
 	DocPage(

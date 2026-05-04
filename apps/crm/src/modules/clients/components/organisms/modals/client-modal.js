@@ -1,5 +1,4 @@
 import { Div, UseParent } from '@base-framework/atoms';
-import { Icons } from '@base-framework/ui/icons';
 import { DropdownMenu, Modal } from '@base-framework/ui/molecules';
 import { ClientModel } from '../../models/client-model.js';
 import { ClientForm } from './client-form.js';
@@ -13,13 +12,13 @@ const NOTIFICATIONS = {
 			type: 'success',
 			title: 'Client Added',
 			description: 'The client has been added.',
-			icon: Icons.check
+			icon: 'check'
 		},
 		error: {
 			type: 'destructive',
 			title: 'Error',
 			description: 'An error occurred while adding the client.',
-			icon: Icons.shield
+			icon: 'shield'
 		}
 	},
 	update: {
@@ -27,13 +26,13 @@ const NOTIFICATIONS = {
 			type: 'success',
 			title: 'Client Updated',
 			description: 'The client has been updated.',
-			icon: Icons.check
+			icon: 'check'
 		},
 		error: {
 			type: 'destructive',
 			title: 'Error',
 			description: 'An error occurred while updating the client.',
-			icon: Icons.shield
+			icon: 'shield'
 		}
 	},
 	delete: {
@@ -41,13 +40,13 @@ const NOTIFICATIONS = {
 			type: 'success',
 			title: 'Client Deleted',
 			description: 'The client has been deleted.',
-			icon: Icons.check
+			icon: 'check'
 		},
 		error: {
 			type: 'destructive',
 			title: 'Error',
 			description: 'An error occurred while deleting the client.',
-			icon: Icons.shield
+			icon: 'shield'
 		}
 	}
 };
@@ -134,10 +133,10 @@ const HeaderOptions = (data, closeCallback) =>
 	return () => [
 		UseParent((parent) => (
 			new DropdownMenu({
-				icon: Icons.ellipsis.vertical,
+				icon: 'more_vert',
 				groups: [
 					[
-						{ icon: Icons.trash, label: 'Delete Client', value: 'delete-client' }
+						{ icon: 'delete', label: 'Delete Client', value: 'delete-client' }
 					]
 				],
 				onSelect: (selected) =>
@@ -198,7 +197,7 @@ export const ClientModal = (props = {}) =>
 	return new Modal({
 		data,
 		title: isEditing ? 'Edit Client' : 'Add Client',
-		icon: isEditing ? Icons.pencil.square : Icons.user.plus,
+		icon: isEditing ? 'edit_square' : 'user_plus',
 		description: isEditing ? 'Update client details.' : 'Create a new client.',
 		size: 'md',
 		type: 'right',

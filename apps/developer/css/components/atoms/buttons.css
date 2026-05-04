@@ -31,7 +31,7 @@ a.warning {
 button.outline,
 .bttn.outline,
 a.outline {
-    @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border outline-none bg-transparent hover:bg-accent hover:text-accent-foreground min-h-10 px-4 py-2 cursor-pointer;
+    @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border outline-none bg-transparent hover:bg-muted hover:text-accent-foreground min-h-10 px-4 py-2 cursor-pointer;
 }
 .bg-card button.outline,
 .bg-card .bttn.outline,
@@ -42,7 +42,7 @@ a.outline {
 button.ghost,
 .bttn.ghost,
 a.ghost {
-    @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground min-h-10 px-4 py-2 cursor-pointer;
+    @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-muted hover:text-accent-foreground min-h-10 px-4 py-2 cursor-pointer;
 }
 
 .button.link,
@@ -54,7 +54,7 @@ a.link {
 button.icon,
 .bttn.icon,
 a.icon {
-    @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground min-h-10 w-10 cursor-pointer;
+    @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-muted hover:text-accent-foreground min-h-10 w-10 cursor-pointer;
 }
 button.icon.primary,
 .bttn.icon.primary,
@@ -76,7 +76,7 @@ a.icon.warning {
 button.icon.outline,
 .bttn.icon.outline,
 a.icon.outline {
-    @apply inline-flex items-center justify-center p-0 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border outline-none bg-transparent hover:bg-accent hover:text-accent-foreground min-h-10 w-10 cursor-pointer;
+    @apply inline-flex items-center justify-center p-0 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border outline-none bg-transparent hover:bg-muted hover:text-accent-foreground min-h-10 w-10 cursor-pointer;
 }
 
 button.with-icon,
@@ -106,7 +106,7 @@ a.with-icon.warning {
 button.with-icon.outline,
 .bttn.with-icon.outline,
 a.with-icon.outline {
-    @apply inline-flex items-center justify-center gap-2 p-0 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border outline-none bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground min-h-10 px-4 py-2 cursor-pointer;
+    @apply inline-flex items-center justify-center gap-2 p-0 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border outline-none bg-transparent text-foreground hover:bg-muted hover:text-accent-foreground min-h-10 px-4 py-2 cursor-pointer;
 }
 
 button.with-icon.ghost,

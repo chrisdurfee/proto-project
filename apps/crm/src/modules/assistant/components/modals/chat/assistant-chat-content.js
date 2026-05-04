@@ -17,15 +17,16 @@ export const AssistantChatContent = Jot(
 	/**
 	 * Scroll the message panel to the bottom.
 	 *
+	 * @param {boolean} smoothScroll - Whether to use smooth scrolling.
 	 * @returns {void}
 	 */
-	scrollToBottom()
+	scrollToBottom(smoothScroll = false)
 	{
 		// @ts-ignore
-		const container = this.parent.panel;
+		const container = this.parent.modalContent;
 		if (container)
 		{
-			container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+			container.scrollTo({ top: container.scrollHeight, behavior: smoothScroll ? 'smooth' : 'auto' });
 		}
 	},
 
@@ -38,7 +39,7 @@ export const AssistantChatContent = Jot(
 	{
 		const BOTTOM_GRACE = 60;
 		// @ts-ignore
-		const container = this.parent.panel;
+		const container = this.parent.modalContent;
 		if (!container) return true;
 		return container.scrollHeight - container.scrollTop - container.clientHeight <= BOTTOM_GRACE;
 	},
@@ -93,7 +94,7 @@ export const AssistantChatContent = Jot(
 							// @ts-ignore
 							scrollToBottom: () => this.scrollToBottom(),
 							// @ts-ignore
-							scrollContainer: this.parent.panel
+							scrollContainer: this.parent.modalContent
 						})
 					]),
 

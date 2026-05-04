@@ -45,7 +45,7 @@ const CodeBlock = Atom((props, children) => (
  * This page documents Proto's automation system including jobs, processes,
  * background tasks, cron jobs, and the server automation system.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const AutomationPage = () =>
 	DocPage(

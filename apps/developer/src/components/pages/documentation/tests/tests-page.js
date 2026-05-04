@@ -46,7 +46,7 @@ const CodeBlock = Atom((props, children) => (
  * It covers enhanced features including database testing utilities, model helpers,
  * HTTP testing, mocking, file system testing, and much more.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const TestsPage = () =>
 	DocPage(
@@ -812,6 +812,48 @@ class UserServiceTest extends Test
         ]);
     }
 }`
+				)
+			]),
+
+			// Testing Models with Eager Joins
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Testing Models with Eager Joins"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Models that use eager joins (via \`joins()\` with \`belongsTo()\`, \`belongsToMany()\`, etc.)
+					have a known limitation when re-fetching data within the same test transaction. The joins create
+					separate queries that may not see uncommitted data. Proto provides helper methods to work
+					around this.`
+				),
+				CodeBlock(
+`// safeGet — tries Model::get() first, falls back to getWithoutJoins()
+$event = $this->safeGet(Event::class, $eventId);
+$this->assertNotNull($event);
+
+// refreshModelWithoutJoins — re-reads a model from DB without eager joins
+$updated = $this->refreshModelWithoutJoins($event);
+$this->assertEquals('updated_title', $updated->title);
+
+// Direct usage on models:
+// Fetch by ID without triggering eager joins
+$event = Event::getWithoutJoins($id);
+
+// Fetch with filter without triggering eager joins
+$events = Event::fetchWhereWithoutJoins(['hostId' => $userId]);`
+				),
+				P(
+					{ class: "text-muted-foreground font-semibold" },
+					`When to use:`
+				),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li("In tests where eager-joined models return null due to uncommitted transaction data"),
+					Li("When you only need base model fields and want to skip the join overhead"),
+					Li("In service methods that update a model without needing related data")
+				]),
+				P(
+					{ class: "text-muted-foreground" },
+					`Prefer using the returned factory object directly and \`assertDatabaseHas()\` for verification
+					instead of re-fetching wherever possible.`
 				)
 			]),
 

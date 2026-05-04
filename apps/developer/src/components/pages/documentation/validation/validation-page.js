@@ -45,7 +45,7 @@ const CodeBlock = Atom((props, children) => (
  * This page documents Proto's validation system using Proto\Api\Validator
  * and Proto\Utils\Filter classes.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const ValidationPage = () =>
 	DocPage(
@@ -189,9 +189,9 @@ class ImageController extends ApiController
 
         // Validation rules for image uploads
         $rules = [
-            'profile_image' => 'image:1024|required|mimes:jpeg,png',
-            'thumbnail' => 'image:512|mimes:jpeg,jpg,png,gif,webp',
-            'gallery_image' => 'image:2048|required|mimes:jpeg,jpg,png,gif',
+            'profile_image' => 'image:1024|required|mimes:jpeg,png,jpg,gif,webp,bmp,tiff,jxl,heic,heif,avif',
+            'thumbnail' => 'image:512|mimes:jpeg,jpg,png,gif,webp,bmp,tiff,jxl,heic,heif,avif',
+            'gallery_image' => 'image:2048|required|mimes:jpeg,jpg,png,gif,webp,bmp,tiff,jxl,heic,heif,avif',
             'avatar' => 'image:256|required|mimes:png'
         ];
 
@@ -353,7 +353,7 @@ class FileController extends ApiController
 				),
 				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground mt-2' }, [
 					Li("Documents: pdf, doc, docx, xls, xlsx, ppt, pptx, txt, csv"),
-					Li("Images: jpeg, jpg, png, gif, webp, bmp"),
+					Li("Images: jpeg, jpg, png, gif, webp, bmp, tiff, jxl, heic, heif, avif"),
 					Li("Archives: zip, rar, 7z, tar, gz"),
 					Li("Audio: mp3, wav, ogg"),
 					Li("Video: mp4, mpeg, mov, avi")
@@ -384,9 +384,9 @@ $rules = [
     'active' => 'bool',                 // Boolean value
 
     // Images (use with $request->file())
-    'image' => 'image:2048|required|mimes:jpeg,jpg,png,gif',
-    'avatar' => 'image:512|required|mimes:png',
-    'thumbnail' => 'image:256|mimes:jpeg,png,webp',
+    'image' => 'image:2048|required|mimes:jpeg,jpg,png,gif,webp,bmp,tiff,jxl,heic,heif,avif',
+    'avatar' => 'image:512|required|mimes:png,jpg,jpeg,gif,webp,bmp,tiff,jxl,heic,heif,avif',
+    'thumbnail' => 'image:256|mimes:jpeg,png,webp,bmp,tiff,jxl,heic,heif,avif',
 
     // Files (use with $request->file())
     'document' => 'file:5120|required|mimes:pdf,doc,docx',
@@ -427,7 +427,11 @@ $imageMimeTypes = [
     'image/gif',
     'image/webp',
     'image/bmp',
-    'image/tiff'
+    'image/tiff',
+    'image/jxl',
+    'image/heic',
+    'image/heif',
+    'image/avif'
 ];
 
 // Supported file formats (FileValidator defaults):
@@ -452,10 +456,10 @@ $fileMimeTypes = [
 // Example validation rules for different use cases:
 $rules = [
     // Profile image: strict requirements
-    'profile_image' => 'image:1024|required|mimes:jpeg,png',
+    'profile_image' => 'image:1024|required|mimes:jpeg,png,jpg,gif,webp,bmp,tiff,jxl,heic,heif,avif',
 
     // Gallery images: larger size, more formats
-    'gallery_images' => 'image:5120|mimes:jpeg,jpg,png,gif,webp',
+    'gallery_images' => 'image:5120|mimes:jpeg,jpg,png,gif,webp,bmp,tiff,jxl,heic,heif,avif',
 
     // Avatar: small size, PNG only for transparency
     'avatar' => 'image:256|required|mimes:png',
@@ -573,7 +577,7 @@ public function store(Request $request): object
     $rules = [
         'name' => 'string:100|required',
         'email' => 'email:255|required',
-        'profile_image' => 'image:1024|required|mimes:jpeg,png'
+        'profile_image' => 'image:1024|required|mimes:jpeg,png,jpg,gif,webp,bmp,tiff,jxl,heic,heif,avif'
     ];
 
     $validator = Validator::create($data, $rules);
@@ -625,7 +629,7 @@ public function upload(Request $request): object
         'name' => 'string:100|required',  // Missing required field
         'email' => 'email:255|required',  // Invalid email
         'age' => 'int:3',                 // Invalid integer
-        'image' => 'image:1024|required|mimes:jpeg,png' // Invalid image
+        'image' => 'image:1024|required|mimes:jpeg,png,jpg,gif,webp,bmp,tiff,jxl,heic,heif,avif' // Invalid image
     ];
 
     $validator = new Validator($data, $rules);
@@ -640,7 +644,7 @@ public function upload(Request $request): object
         //   'The value email is not correct.',
         //   'The value age is not correct.',
         //   'The image image: File size exceeds maximum allowed size of 1024KB',
-        //   'The image image: File type not allowed. Allowed types: jpeg, png'
+        //   'The image image: File type not allowed. Allowed types: jpeg, png, jpg, gif, webp, bmp, tiff, jxl, heic, heif, avif'
         // ]
 
         // Get concatenated error string
@@ -701,8 +705,8 @@ class UserController extends ApiController
             'password' => 'string:255|required',
             'bio' => 'string:1000',
             'website' => 'url:255',
-            'profile_image' => 'image:1024|required|mimes:jpeg,png',
-            'avatar' => 'image:256|mimes:png'
+            'profile_image' => 'image:1024|required|mimes:jpeg,png,jpg,gif,webp,bmp,tiff,jxl,heic,heif,avif',
+            'avatar' => 'image:256|mimes:png,jpg,jpeg,gif,webp,bmp,tiff,jxl,heic,heif,avif'
         ];
 
         // Use controller's validateRules method
@@ -762,7 +766,7 @@ class UserController extends ApiController
             'email' => 'email:255',
             'bio' => 'string:1000',
             'website' => 'url:255',
-            'profile_image' => 'image:1024|mimes:jpeg,png' // Optional
+            'profile_image' => 'image:1024|mimes:jpeg,png,jpg,gif,webp,bmp,tiff,jxl,heic,heif,avif' // Optional
         ];
 
         $this->validateRules($data, $rules);

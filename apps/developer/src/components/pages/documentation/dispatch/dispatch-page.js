@@ -46,7 +46,7 @@ const CodeBlock = Atom((props, children) => (
  * This page documents Proto’s dispatch system for sending email, SMS, and web push notifications.
  * Dispatches can be sent immediately or enqueued for delayed sending.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const DispatchPage = () =>
 	DocPage(

@@ -1,0 +1,336 @@
+---
+description: "Use when working with Proto Framework models, storage, ORM, joins, or queries - covers Model basics (create returns BOOL, getBy returns stdClass), $immutableFields, $fieldsBlacklist, atomic counters, PivotModel, factory annotation, eager joins via JoinBuilder (belongsTo auto-infers FK, on() uses camelCase), lazy relationships (hasMany/hasOne/belongsToMany), custom data types (PointType longitude-first, JsonType), Filter helpers (aliased/condition/exists/notExists), query builder joins (closure or array, NEVER raw SQL), limit(offset, count), [['expr'], 'alias'] for raw select, UnionQuery, searchByJoin, and static::builder()"
+applyTo: "{modules/**/Models/*.php,common/**/Models/*.php,modules/**/Storage/*.php}"
+---
+
+# Proto Models & Storage
+
+## Model Basics
+
+**Base**: `Proto\Models\Model`
+
+**Static Methods**: `create((object)$data)` (returns BOOL), `get($id)`, `remove($id)`, `fetchWhere([...])`, `getBy([...])`, `atomicIncrement($id, $field, $amount)`, `atomicDecrement($id, $field, $amount, $floor)`
+
+**Instance Methods**: `add()`, `update()`, `delete()`, `merge($data)`
+
+**Without Joins**: `getWithoutJoins($id)`, `fetchWhereWithoutJoins($filter)` — bypass eager joins
+
+```php
+class User extends Model
+{
+    protected static ?string $tableName = 'users';
+    protected static ?string $alias = 'u';
+    protected static array $fields = ['id', 'name', 'email', 'status'];
+    protected static array $fieldsBlacklist = ['password']; // Exclude from JSON output
+    protected static array $immutableFields = ['createdBy', 'createdAt']; // Auto-stripped on update
+    protected static string $idKeyName = 'id'; // Default, only set if different
+
+    protected static function augment(mixed $data = null): mixed { /* pre-persist hook */ }
+    protected static function format(?object $data): ?object { /* post-fetch hook */ }
+}
+```
+
+**CRITICAL**:
+- `create()` takes OBJECT not array: `User::create((object)['name' => 'John'])`
+- `create()` returns BOOL not object. Use instance approach:
+  ```php
+  $user = new User((object)$data);
+  $user->add(); // now $user->id is available
+  ```
+- `delete()` is instance method: `$user->delete()` or `User::remove(5)`, NOT `User::delete(5)`
+- `getBy()` / `fetchWhere()` return plain `stdClass`, NOT model instances — `->update()` won't work on them
+- Use constructor with object: `new Model((object)[...])`, not property-by-property
+- `$immutableFields` auto-stripped at both controller and storage layers — no manual `restrictFields()` needed
+
+### Atomic Counter Operations
+```php
+Post::atomicIncrement($postId, 'likeCount');
+Post::atomicDecrement($postId, 'likeCount');
+Post::atomicIncrement($postId, 'viewCount', 5); // custom amount
+Post::atomicDecrement($postId, 'score', 1, false); // allow negative
+// ❌ NEVER use fetch-modify-write: $post->likeCount++; $post->update();
+```
+
+### PivotModel (Write-Once Base)
+For pivot/junction tables (likes, bookmarks, follows):
+```php
+use Proto\Models\PivotModel;
+
+class PostLike extends PivotModel
+{
+    protected static ?string $tableName = 'post_likes';
+    protected static array $fields = ['id', 'postId', 'userId', 'createdAt'];
+}
+```
+Default `$immutableFields = ['userId', 'createdAt', 'createdBy']`.
+
+### Factory Support
+```php
+use Modules\User\Models\Factories\UserFactory;
+
+/**
+ * @method static UserFactory factory(int $count = 1, array $attributes = [])
+ */
+class User extends Model
+{
+    protected static ?string $factory = UserFactory::class;
+}
+```
+
+## Eager Joins (JoinBuilder)
+
+Define in `joins()` method — loaded in a single query via SQL JOIN:
+
+```php
+protected static function joins(object $builder): void
+{
+    // belongsTo — auto-infers on(['userId', 'id']) if local table has user_id
+    $builder->belongsTo(User::class, fields: ['firstName', 'lastName']);
+
+    // Explicit on() when FK is non-standard
+    $builder->belongsTo(User::class, fields: ['firstName', 'lastName'])
+        ->on(['authorId', 'id']);
+
+    // one-to-one
+    Role::one($builder)
+        ->on(['id', 'userId'])
+        ->fields('role');
+
+    // one-to-many
+    $builder->many(MessageAttachment::class, fields: ['id', 'fileUrl', 'fileName'])
+        ->on(['id', 'messageId'])
+        ->as('attachments');
+
+    // bridge (many-to-many via pivot)
+    UserRole::bridge($builder)
+        ->many(Role::class)
+        ->on(['roleId', 'id'])
+        ->fields('id', 'name', 'slug');
+
+    // belongsToMany chaining: User → Roles → Permissions
+    $builder
+        ->belongsToMany(Role::class, pivotFields: ['organizationId'])
+        ->belongsToMany(Permission::class);
+
+    // Raw table join
+    $builder->left('permission', 'p')
+        ->on(['id', 'permissionId'])
+        ->fields('name');
+}
+```
+
+**Pivot Table Naming**: Auto-inferred by sorting singular names alphabetically, pluralizing last: `Role` + `User` → `role_users`.
+
+**CRITICAL**:
+- `on()` keys are **camelCase** model field names, NOT snake_case DB columns
+- `on()` order: `[ownerTableCol, targetTableCol]`
+- `belongsTo()` auto-infers FK: `belongsTo(User::class)` → `on(['userId', 'id'])` automatically — only override when FK is non-standard
+- `one()`/`many()` auto-infer if target has `{ownerModel}Id` column
+- EXCLUDE 'id' from `fields()` in `belongsTo` to avoid conflicts
+- Use named parameter: `fields: ['name']` NOT positional
+- NEVER use `hasMany()` inside `joins()` — that's a lazy relationship method
+
+## Lazy Relationships
+
+Define as methods returning relation objects — loaded on-demand:
+
+```php
+class User extends Model
+{
+    public function posts(): \Proto\Models\Relations\HasMany
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    public function profile(): \Proto\Models\Relations\HasOne
+    {
+        return $this->hasOne(Profile::class);
+    }
+
+    public function roles(): \Proto\Models\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'role_users', 'user_id', 'role_id');
+    }
+}
+
+// Property access triggers query and returns result data
+$posts = $user->posts;     // SELECT * FROM posts WHERE user_id = 1
+$roles = $user->roles;     // SELECT via pivot table
+
+// Method call returns relation object for attach/detach/sync/toggle
+$user->roles()->attach(3);
+$user->roles()->detach(3);
+$user->roles()->sync([2, 4]);
+$user->roles()->toggle([2, 6]);
+```
+
+## Custom Data Types
+
+Declaratively handle complex SQL types — no custom Storage needed:
+
+```php
+use Proto\Storage\DataTypes\PointType;
+use Proto\Storage\DataTypes\JsonType;
+
+class Event extends Model
+{
+    protected static array $fields = [
+        'id', 'name', 'position', 'metadata',
+        [['X(`position`)'], 'longitude'], // X = longitude
+        [['Y(`position`)'], 'latitude'],  // Y = latitude
+    ];
+
+    protected static array $dataTypes = [
+        'position' => PointType::class,
+        'metadata' => JsonType::class,
+    ];
+}
+```
+
+**PointType**: MySQL POINT stores X=longitude, Y=latitude. ALWAYS pass longitude first: `[lon, lat]`, `'lon lat'`, or `(object)['lon'=>..., 'lat'=>...]`
+
+**JsonType**: Auto-encodes on write, auto-decodes on read. No `augment()` or `format()` needed.
+
+**Creating Custom Data Types**:
+```php
+class GeometryType extends DataType
+{
+    public function getPlaceholder(): string { return 'ST_GeomFromText(?)'; }
+    public function toParams(mixed $value): array { return [$value]; }
+    public function fromDb(mixed $value): mixed { return $value; }
+}
+```
+
+## Storage & Query Builder
+
+**Create ONLY if custom queries needed**. Otherwise use model methods.
+
+### Filter Arrays
+```php
+$filter = [
+    ['a.id', $user->id],                    // auto bind
+    ['a.id', '>', $user->id],               // with operator
+    ['userId', 'IN', [1, 2, 3]],            // IN query (auto-generates placeholders)
+    ['status', 'NOT IN', ['banned']],        // NOT IN
+    ["a.created_at BETWEEN ? AND ?", ['2021-02-02', '2021-02-28']], // manual bind
+];
+```
+
+### Filter Helpers (`Proto\Storage\Filter`)
+```php
+use Proto\Storage\Filter;
+
+$filter = [
+    Filter::aliased('e', 'status', 'published'),           // sanitized alias + column
+    Filter::aliased('e', 'startDate', $date, '>='),         // with operator
+    Filter::condition('e', 'deletedAt', 'IS NULL'),          // whitelisted static condition
+    Filter::condition('e', 'startDate', '> NOW()'),
+    Filter::exists('event_attendees', 'ea', 'ea.event_id = e.id', [
+        ['ea.user_id', $userId],
+        ['ea.status', 'IN', ['registered', 'waitlist']]
+    ]),
+    Filter::notExists('table', 'alias', 'join_condition', [...]),
+];
+```
+
+### Query Builder Joins
+
+`join()` accepts ONLY callable or array. NEVER raw SQL string.
+
+**Closure form** (preferred):
+```php
+->join(function($joins)
+{
+    $joins->left('users', 'u')
+        ->on('cp.user_id = u.id')
+        ->fields('first_name', 'last_name', 'email');
+
+    $joins->join('other_table', 'ot') // INNER JOIN
+        ->on('ot.id = u.org_id', 'ot.deleted_at IS NULL');
+})
+```
+
+**Array form** (simple single joins):
+```php
+->leftJoin([
+    'table' => 'users',
+    'alias' => 'u',
+    'on' => ['cp.user_id = u.id', 'u.deleted_at IS NULL']
+])
+```
+
+**Parameterized ON conditions**: `?` placeholders in `on()` go FIRST in `fetch()` array, then WHERE params:
+```php
+->join(function($joins)
+{
+    $joins->left('user_location_preferences', 'ulp')
+        ->on('ulp.user_id = u.id', 'ST_Distance_Sphere(ulp.position, POINT(?, ?)) <= ?');
+})
+->where('u.enabled = 1', 'u.id != ?')
+->fetch([$lon, $lat, $radiusMeters, $userId]); // ON params first, then WHERE
+```
+
+### Query Builder
+
+```php
+class UserStorage extends Storage
+{
+    public function getActiveUsers(int $limit = 10): array
+    {
+        return $this->table()
+            ->select()
+            ->where('status = ?', 'deleted_at IS NULL')
+            ->orderBy('created_at DESC')
+            ->limit(0, $limit)  // offset first, count second
+            ->fetch(['active']);
+    }
+}
+```
+
+**CRITICAL**:
+- `limit(a, b)` → `LIMIT a, b` → skip `a` rows, take `b` rows. ALWAYS offset first
+- `select()` raw expressions: use `[['COUNT(*)'], 'total']`, NOT `'COUNT(*) as total'` (plain string gets alias prepended)
+- Prefix all columns with table alias when joins are present to avoid ambiguous column errors
+- Use `first()` not `fetchOne()`
+- Chain multiple where conditions in single call: `->where('a', 'b')` not `->where('a')->where('b')`
+
+### UnionQuery (Multi-Segment Unions)
+```php
+use Proto\Storage\UnionQuery;
+
+return UnionQuery::make($this->db)
+    ->segment($logsSql, $logsParams)
+    ->segment($planSql, $planParams)
+    ->orderBy('sortDate DESC')
+    ->limit($offset, $limit)
+    ->fetch(); // returns {rows, lastCursor}
+```
+
+Prefer `UnionQuery` over manual `array_merge()` of params and raw UNION SQL.
+
+### searchByJoin() Method
+Auto-generates EXISTS subqueries for searching within nested join data:
+```php
+protected function setCustomWhere($sql, &$params, $options)
+{
+    if (!empty($options['search']))
+    {
+        $sql->where(
+            $this->searchByJoin('participants', ['firstName', 'lastName'], $options['search'], $params)
+        );
+    }
+}
+```
+
+### Ad-hoc Queries (no custom Storage needed)
+```php
+public static function getActiveUsers(): array
+{
+    return static::builder()
+        ->select()
+        ->where('status = ?')
+        ->fetch(['active']);
+}
+```
+
+**Debugging**: `echo $sql;` prints SQL string. `$sql->debug();` shows with params.

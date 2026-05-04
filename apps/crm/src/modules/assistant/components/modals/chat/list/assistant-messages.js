@@ -119,7 +119,7 @@ export const AssistantMessages = Jot(
 			if (isAtBottom && typeof this.scrollToBottom === 'function')
 			{
 				// @ts-ignore
-				this.scrollToBottom();
+				this.scrollToBottom(true);
 			}
 		}
 

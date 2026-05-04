@@ -46,7 +46,7 @@ const CodeBlock = Atom((props, children) => (
  * databases with test data, initial data, or sample data. It covers the abstract
  * base seeder class, seeder manager, database operations, and integration with testing.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const SeedersPage = () =>
 	DocPage(

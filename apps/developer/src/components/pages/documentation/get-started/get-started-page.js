@@ -46,7 +46,7 @@ const CodeBlock = Atom((props, children) => (
  * It covers prerequisites, folder structure, auto-bootstrapping, modules, gateways, and
  * the developer app in public/developer.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const GetStartedPage = () =>
 	DocPage(

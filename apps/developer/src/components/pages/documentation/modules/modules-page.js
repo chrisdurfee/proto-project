@@ -47,7 +47,7 @@ const CodeBlock = Atom((props, children) => (
  * communicate with other modules through gateways. They can be generated via the developer code generator
  * and must be registered in the configuration.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const ModulesPage = () =>
 	DocPage(

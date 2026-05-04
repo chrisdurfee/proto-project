@@ -56,8 +56,7 @@ export const AppShell = Jot(
 						import: () => import('./email-unsubscribe/email-unsubscribe-page.js')
 					},
 					{
-						import: () => import('./app-content.js'),
-						preventScroll: true
+						import: () => import('./app-content.js')
 					}
 				]
 			})

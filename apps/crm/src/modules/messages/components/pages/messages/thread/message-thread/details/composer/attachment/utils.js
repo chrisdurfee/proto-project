@@ -31,5 +31,5 @@ export const getFileExtension = (fileName) =>
  */
 export const isImageFile = (ext) =>
 {
-	return ['jpg', 'jpeg', 'png', 'gif', 'tiff', 'bmp', 'webp'].includes(ext);
+	return ['jpg', 'jpeg', 'png', 'gif', 'tiff', 'bmp', 'webp', 'heic', 'heif', 'avif', 'jxl'].includes(ext);
 };

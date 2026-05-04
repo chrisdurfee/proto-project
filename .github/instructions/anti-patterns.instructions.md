@@ -1,0 +1,160 @@
+---
+description: "Use when reviewing or writing any code — comprehensive WRONG vs CORRECT anti-pattern reference for backend (PHP/Proto: model methods, controllers, joins, migrations, services, policies, queries, traits) and frontend (Base Framework: components, atoms, theme tokens, icons, lists, models, design tokens). Consult this when unsure if a pattern is correct"
+applyTo: "**"
+---
+
+# Anti-Patterns (What NOT to Do)
+
+## Backend (PHP/Proto)
+
+| ❌ WRONG | ✅ CORRECT |
+|---|-----|
+| `User::delete(1)` | `User::remove(1)` or `$user->delete()` |
+| `new UserStorage()` in Controller | `User::fetchWhere([...])` |
+| `$table->foreignKey('user_id')` | `$table->foreign('user_id')` |
+| `function test() {` | `function test()\n{` (brace on new line) |
+| `$user = User::create($data);` (expects object back) | `$user = new User(); $user->add();` (`create()` returns bool) |
+| `\Modules\User\Models\User::get()` | `use Modules\User\Models\User; User::get()` |
+| `$factory = 'Modules\\Post\\...\\PostFactory';` | `use ...\PostFactory; $factory = PostFactory::class;` |
+| `$request->route('id')` | `$request->getInt('id')` for query/body, `$request->params()->id` for route |
+| `$request->getInt('communityId')` for route param | `$request->params()->communityId` — getInt reads query/body NOT route params |
+| `if (!$userId) return error()` in controller with policy | Remove — policy handles auth |
+| `$userId = session()->user->id ?? null;` after policy | `$userId = session()->user->id;` — safe after policy check |
+| `throw new \Exception()` in controller | `$this->setError()` or `$this->error()` |
+| `$m = new Model(); $m->x = 1; $m->add();` | `$m = new Model((object)['x' => 1]); $m->add();` |
+| `$builder->belongsTo(Org::class, ['name'])` | `$builder->belongsTo(Org::class, fields: ['name'])` |
+| `$builder->belongsTo(X::class, fields: ['id', 'name'])` | Exclude 'id': `fields: ['name']` |
+| `Role::one($builder)->on(['userId', 'id'])` | `->on(['id', 'userId'])` (owner key first) |
+| `$builder->belongsTo(User::class)->on(['id', 'userId'])` | `->on(['userId', 'id'])` — belongsTo: owner holds FK first |
+| `->on(['id', 'user_id'])` in model joins | `->on(['id', 'userId'])` — use camelCase, NOT snake_case |
+| `$this->faker->email()` (property) | `$this->faker()->email()` (method call) |
+| `$this->state(['role' => 'admin'])` | `$this->state(fn() => ['role' => 'admin'])` (callable required) |
+| `->limit($limit, $offset)` | `->limit($offset, $limit)` (offset first) |
+| `->select('COUNT(*) as total')` | `->select([['COUNT(*)'], 'total'])` |
+| `->join('INNER JOIN table ON ...')` | `->join(function($j) { ... })` (closure or array only) |
+| `->join(['INNER JOIN ...'])` with raw SQL | Use `'type'`, `'table'`, `'alias'`, `'on'` keys in array |
+| Manual `json_encode` in `augment()` | `$dataTypes = ['field' => JsonType::class]` |
+| Manual `json_decode` in `format()` | `$dataTypes = ['field' => JsonType::class]` — fromDb() auto-decodes |
+| Manual POINT handling in Storage | `$dataTypes = ['position' => PointType::class]` |
+| `$location->position = [lat, lon]` | `[lon, lat]` (longitude first for MySQL POINT) |
+| `[['X(\`position\`)'], 'latitude']` in fields | `[['X(\`position\`)'], 'longitude']` — X() is longitude |
+| `[['Y(\`position\`)'], 'longitude']` in fields | `[['Y(\`position\`)'], 'latitude']` — Y() is latitude |
+| `$table->integer('userId', 30)` in migration | `$table->integer('user_id', 30)` (snake_case in DB) |
+| `$table->varchar('stepKey', 50)` in migration | `$table->varchar('step_key', 50)` |
+| `$table->foreign('userId')` in migration | `$table->foreign('user_id')` — must match snake_case column |
+| `->fields('userId', 'createdAt')` in migration index | `->fields('user_id', 'created_at')` — snake_case in DB |
+| `$table->modifyColumn()->enum(...)` in alter migration | `$table->alter('col')->enum(...)` — `modifyColumn()` does not exist |
+| `$table->raw('coordinates POINT NULL')` for a column | `$table->point('coordinates')->nullable()` — `raw()` is silently dropped via `__call`; column is never created |
+| `CreateEventsTable.php` migration filename | `2026-01-21T04.14.30.800125_Event.php` |
+| Routes for `/api/marketplace/recommended` etc. living in `modules/Marketplace/Browse/Api/api.php` | Place in `modules/Marketplace/Api/api.php` BEFORE `->resource(...)` — Proto loads only ONE api.php per request (the one the URL resolves to); sibling feature folders are never loaded |
+| Sub-route registered AFTER `->resource('marketplace', ...)` in fluent chain | Register sub-routes BEFORE `->resource()` — the resource adds `:id?` catch-all that swallows literal sub-paths |
+| Override `get()`/`all()` to append flags | Use `enrichRow()`/`enrichRows()` hooks |
+| `$row = Model::getBy([...]); $row->update()` | `getBy()` returns stdClass — use query builder |
+| `$rows = Model::fetchWhere([...]); $rows[0]->update()` | `fetchWhere()` returns plain objects — use `Model::get($id)` |
+| Fetch-modify-write for counters | `Model::atomicIncrement($id, 'field')` |
+| Hardcoded `$limit`/`$modifiers` in list endpoint | Use `$inputs = $this->getAllInputs($request)` |
+| `$this->service = new XService()` in constructor | `protected ?string $serviceClass = XService::class;` |
+| Override `addItem()` for route params | Use `$routeParams` property or `modifyAddItem()` hook |
+| `modifyAddItem` just to inject route param | Use `protected array $routeParams = ['forumId' => true];` |
+| `modifyFilter` just for query params | Use `protected array $filterParams = ['topicId' => 'int'];` |
+| Manual user fields on add/update response | Use `protected array $enrichUserFields = ['firstName', ...];` |
+| Manual `restrictFields()` when model has `$immutableFields` | Framework auto-strips — just set audit fields |
+| Duplicate `enrichRow`/`enrichRows` logic | Only implement `enrichRows()` — `enrichRow()` auto-delegates |
+| Manual map-building in `enrichRows()` | Use `BatchEnrichmentTrait` — `batchMapField()` / `batchMapExists()` |
+| Extending `Model` for pivot tables | Extend `Proto\Models\PivotModel` |
+| `$this->assertDatabaseCount('table', 1)` in idempotency test | Scope: `Model::fetchWhere(['userId' => $id])` + `assertCount(1, $rows)` |
+| `Model::get($id)` in tests with eager joins | `$this->safeGet(Model::class, $id)` or `Model::getWithoutJoins($id)` |
+| `$_FILES['upload']` in controller | `$request->file('upload')` |
+| Duplicating like-toggle logic | Use `ToggleLikeTrait` from `Proto\Services\Traits\ToggleLikeTrait` |
+| Duplicating pivot toggle logic | Use `TogglePivotTrait` from `Proto\Services\Traits\TogglePivotTrait` |
+| Duplicating vote logic | Use `VoteableTrait` from `Proto\Services\Traits\VoteableTrait` |
+| Duplicating audience targeting | Use `AudienceTargetingTrait` |
+| Copy-pasting SSE/Redis boilerplate | Extend `SyncController` or use `SyncableTrait` |
+| Separate `SyncController` on existing ResourceController | Use `SyncableTrait` — add two methods, no new class needed |
+| Duplicating file upload logic in hooks | Use `$this->handleFileUpload()` / `$this->handleMediaUpload()` |
+| Raw `ST_Distance_Sphere` SQL in services | Use `LocationFilterTrait` — `filterByProximity()` |
+| Raw `"EXISTS (SELECT 1 FROM ...)"` in filter | `Filter::exists('table', 'alias', 'join', [...conditions])` |
+| Raw `"NOT EXISTS (...)"` in filter | `Filter::notExists('table', 'alias', 'join', [...conditions])` |
+| Raw `['e.status', $value]` with inline alias | `Filter::aliased('e', 'status', $value)` |
+| Raw `'e.start_date > NOW()'` condition | `Filter::condition('e', 'startDate', '> NOW()')` |
+| `->where('status = ?')` in join query | Prefix with alias: `->where('u.status = ?')` — avoid ambiguous columns |
+| `->orderBy('created_at DESC')` in join | `->orderBy('u.created_at DESC')` — prefix with alias |
+| `$joins->left('table', 'alias')` without `->on()` | Always call `->on()` — omitting generates invalid SQL |
+| Manual IN placeholder: `implode(',', array_fill(...))` | `['field', 'IN', $array]` shorthand in filter arrays |
+| Manual union param merge: `array_merge($p1, $p2)` | `UnionQuery::make($this->db)->segment(...)->fetch()` |
+| ORDER BY/LIMIT on one union segment | Apply after all UNION ALL clauses |
+| `->where('a')->where('b')` | `->where('a', 'b')` chain in single call |
+| `->fetchOne()` | `->first()` |
+| `$this->request` in `addItem()` | Use `modifyAddItem($data, $request)` hook |
+| `Calling $result->row->getData()` in controller | `get()` calls `getData()` internally — row is already plain |
+| Hardcoded `$modifiers = ['orderBy' => '...']` | Merge into `$inputs->modifiers` from `getAllInputs()` |
+| `Model::all($filter, $offset, $limit)` without modifiers | ALWAYS pass `$inputs->modifiers` as 4th arg |
+| `$builder->hasMany(Model::class)` inside `joins()` | Use lazy relationship method outside `joins()` |
+| Manual `Model::fetchWhere(['parentId' => $this->id])` for related data | Define lazy relationship: `return $this->hasMany(Model::class)` |
+| `randomElement(['tech', 'culture'])` for enum field | Match migration enum values exactly |
+| ResourceController without `protected ?string $policy` | Every ResourceController MUST have a policy |
+| Policy extending `Proto\Auth\Policies\Policy` directly | Extend `Common\Auth\Policies\Policy` |
+| Policy method `public function get(): bool` (no param) | `public function get(Request $request): bool` |
+| Policy without `protected ?string $type` | Set explicitly or let framework auto-infer from class name |
+| Both `create()` and `add()` in same policy | Only define `add()` — POST dispatches to `add` |
+| Manual `auth()->user` calls in policy | Use `$this->isSignedIn()`, `$this->ownsResource()` |
+| `modifyUpdateItem` without setting `updatedBy` | Set `$data->updatedBy = session()->user->id;` |
+| `session()->user->id ?? null` in policy methods | Use `$this->getUserId()` |
+| Debug `echo`/`print`/`var_dump` left in tests | Remove before committing |
+
+## Frontend (Base)
+
+| ❌ WRONG | ✅ CORRECT |
+|---|-----|
+| `Div({ children: [...] })` | `Div({}, [...])` |
+| `new Button()` | `Button()` (Atoms don't use `new`) |
+| `ToggleButton({...})` without `new` | `new ToggleButton({...})` (Component) |
+| `CircleToggleButton({...})` without `new` | `new CircleToggleButton({...})` (Component) |
+| `Button({ variant: 'default' })` | `Button({ variant: 'primary' })` |
+| `Import('./file.js')` | `Import(() => import('./file.js'))` |
+| `class: 'text-white'` | `class: 'text-foreground'` |
+| `class: 'text-blue-500'` | `class: 'text-primary'` |
+| `class: 'bg-green-500'` (status) | `class: 'bg-success'` (semantic token) |
+| `class: 'bg-yellow-500/15 text-yellow-600'` | `class: 'bg-warning/15 text-warning'` |
+| `class: 'bg-red-500/15 text-red-600'` | `class: 'bg-destructive/15 text-destructive'` |
+| `class: 'bg-blue-500/15 text-blue-600'` | `class: 'bg-info/15 text-info'` |
+| `class: 'border-white/5'` | `class: 'border-border/50'` |
+| `import { Avatar } from '@base-framework/ui/atoms'` | `from '@base-framework/ui/molecules'` |
+| `import { MaterialIcon } from '@components/material-icon.js'` | `from '@base-framework/ui/atoms'` |
+| `import { MaterialIcons } from '@components/material-icon.js'` | `from '@base-framework/ui/icons'` as `MaterialSymbols` |
+| `MaterialIcon({ icon: 'home' })` | `MaterialIcon({ name: 'home', size: 'sm' })` (use `name`) |
+| `UniversalIcon('home')` | `UniversalIcon({ size: 'sm' }, 'home')` (icon is 2nd arg) |
+| Custom avatar with raw `Img`/`Div` | Use `Avatar` from Base UI |
+| Hardcoded online dot `Div` for status | Use `StaticStatusIndicator` / `StatusIndicator` |
+| `Div` with `bg-muted animate-pulse` | Use `Skeleton` from Base UI |
+| Building skeleton rows with inline circles + lines | Use `RowSkeleton` from `@components/atoms/skeletons/` |
+| Building custom pill filter bar | Use `PillTabBar`/`PillLinkBar` |
+| Building custom user avatar + name + follow row | Use `UserRow` |
+| Inline markup in page components | Extract to named organisms/molecules |
+| Component exceeding ~20 lines | Extract sub-sections |
+| Vertical alignment with padding spaces | Single space after `:` — no column alignment |
+| Custom xhr `byType()` / `filterByStatus()` | Set `this.model.filter = { type }` + built-in `all()` |
+| Custom xhr for search/sort/dates | Set model data keys + built-in `all()` |
+| Custom xhr that strips pagination params | Built-in `all()` sends filter, search, dates, orderBy, cursor, since |
+| Override `add()` in xhr to replicate built-in POST | Use built-in `add()` |
+| Override `update()` in xhr to replicate built-in PATCH | Use built-in `update()` |
+| Override `all()` in xhr with stripped-down version | Use built-in `all()` |
+| `Icon(Icons.home)` | `Icon({ size: 'sm' }, 'home')` |
+| `Icon({ icon: Icons.home })` | `Icon({ size: 'sm' }, 'home')` |
+| `export class Page extends Component {` | Brace on new line: `extends Component\n{` |
+| `const data = new Data({})` | `const data = new Data({});` (semicolon required) |
+| Module not in `imported-modules.js` | Add `import "./module/module.js";` |
+| `Ul([items.map(...)])` for reactive lists | `Ul({ for: ['items', ...] })` or `map` directive |
+| `.map()` for reactive lists | Use `for` or `map` directive |
+| `import { ... } from '@components/atoms/editorial/...'` | Folder removed — use `@components/atoms/typography/...` |
+| `import { SectionHeader } from '@components/molecules/editorial/...'` | Use `@components/molecules/headers/section-header.js` |
+| New file or token prefixed with `rally-` | This **is** the base design system — never prefix |
+| Hardcoded hex like `#0b0b0c` or `bg-zinc-900` | Use theme tokens: `bg-background`, `bg-card`, `bg-surface-2`, `bg-surface-3` |
+| Hairline borders via `border-white/10` | Use `border-border` / `border-border-strong` |
+| Custom shimmer with bespoke keyframes | Use the `.sheen` utility on a relative element |
+| Custom striped image placeholder | Use `PlaceholderImage` from `@components/atoms/placeholder-image.js` |
+| Inline mono uppercase label | Use `MonoLabel` from `@components/atoms/typography/mono-label.js` |
+| Inline serif italic title | Use `SerifDisplay` from `@components/atoms/typography/serif-display.js` |
+| Bespoke pill CTA | Use `CTA` from `@components/atoms/cta.js` |
+| Bespoke filter/tag pill | Use `Chip` from `@components/atoms/chip.js` |
+| Bespoke section divider | Use `SectionDivider` from `@components/atoms/section-divider.js` |

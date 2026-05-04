@@ -47,7 +47,7 @@ const CodeBlock = Atom((props, children) =>
  * for getting and setting data. They define columns, joins, table names, and aliases,
  * and they interact with storage layers to persist data without accessing the database directly.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const ModelsPage = () =>
 	DocPage(
@@ -144,6 +144,50 @@ $result = static::$storageType::methodName();`
 				)
 			]),
 
+			// Immutable Fields
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Immutable Fields"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Models can declare fields that should never change after creation using \`$immutableFields\`.
+					When set, the ResourceController automatically strips these fields from update data — no
+					manual \`restrictFields()\` call is needed in \`modifyUpdateItem()\`.`
+				),
+				CodeBlock(
+`class Event extends Model
+{
+	// These fields are stripped automatically on update by ResourceController
+	protected static array $immutableFields = ['hostId', 'createdBy', 'createdAt', 'currentAttendees'];
+}`
+				),
+				P(
+					{ class: "text-muted-foreground" },
+					`To read immutable fields programmatically (e.g., in policies or services):`
+				),
+				CodeBlock(
+`$immutable = Event::immutableFields();
+// Returns ['hostId', 'createdBy', 'createdAt', 'currentAttendees']`
+				)
+			]),
+
+			// Fetching Without Eager Joins
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Fetching Without Eager Joins"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Models with eager joins (via \`joins()\`) can bypass their joins when the related data
+					isn't needed. This is especially useful in tests where join queries may not see uncommitted
+					transaction data, or when you only need base model fields and want to skip join overhead.`
+				),
+				CodeBlock(
+`// Fetch by ID without triggering eager joins
+$event = Event::getWithoutJoins($id);
+
+// Fetch with filter without triggering eager joins
+$events = Event::fetchWhereWithoutJoins(['hostId' => $userId]);`
+				)
+			]),
+
 			// Field Formatting
 			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				H4({ class: "text-lg font-bold" }, "Field Formatting"),
@@ -222,6 +266,13 @@ protected static function format(?object $data): ?object
 		->on(['id', 'permissionId'])
 		->fields('name');
 }`
+				),
+
+				P(
+					{ class: "text-muted-foreground font-semibold" },
+					`Important: \`on()\` keys must be camelCase model field names, NOT snake_case DB columns. The ORM
+					converts automatically. Use \`->on(['id', 'userId'])\` NOT \`->on(['id', 'user_id'])\`.
+					The order is always \`[parent_key, foreign_key]\`.`
 				),
 
 				// Subsection: JoinBuilder – belongsToMany chaining
@@ -452,6 +503,49 @@ $author = $post->user;`
 
 			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
 				P({ class: "text-muted-foreground" }, `Both styles can be used together in a single model, allowing you to mix and match as needed. For example, you might use JoinBuilder for eager joins and lazy relationships for simpler ones. Eager and lazy belongs to many relationships can also be used to attach, detach, sync, or toggle related records.`),
+
+				P({ class: "text-muted-foreground font-semibold mt-4" }, `Property Access vs Method Call`),
+				P(
+					{ class: "text-muted-foreground" },
+					`Accessing a lazy relationship as a property triggers the query and returns the result data. Calling it as a method returns the relation object itself, which exposes helper methods like attach(), detach(), sync(), and toggle().`
+				),
+				CodeBlock(
+`// Property access → fires the query, returns data
+$user = User::get(1);
+$posts = $user->posts;     // Returns array of Post objects
+$profile = $user->profile; // Returns single Profile object or null
+$roles = $user->roles;     // Returns array of Role objects
+
+// Method call → returns the Relation object for attach/detach/sync/toggle
+$user->roles()->attach(3);      // Add pivot record
+$user->roles()->detach(3);      // Remove pivot record
+$user->roles()->sync([2, 4]);   // Replace all with these
+$user->roles()->toggle([2, 6]); // Flip state of each`
+				),
+
+				P({ class: "font-semibold mt-4 text-destructive" }, `Anti-Pattern: Manual fetchWhere for Related Data`),
+				P(
+					{ class: "text-muted-foreground" },
+					`Never use fetchWhere() inside a model method to load related data. Use a lazy relationship instead — Proto auto-resolves the foreign key and fires the query when the property is accessed.`
+				),
+				CodeBlock(
+`// ❌ WRONG — manual fetchWhere in model method
+public function members(): array
+{
+	return GroupMember::fetchWhere(['groupId' => $this->id]);
+}
+
+// ✅ CORRECT — lazy relationship
+public function members(): \\Proto\\Models\\Relations\\HasMany
+{
+	return $this->hasMany(GroupMember::class);
+}
+
+// Then access via property:
+$group = Group::get(1);
+$members = $group->members; // Fires query automatically`
+				),
+
 				P({ class: "text-muted-foreground" }, `Belongs to many examples:`),
 				CodeBlock(
 `// Belongs to many helper methods can be used to manage relationships:
@@ -518,8 +612,8 @@ class UserAuthedLocation extends Model
 		'id',
 		'city',
 		'position',
-		[\\['X(\`position\`)'], 'latitude'],  // Extract X coordinate
-		[\\['Y(\`position\`)'], 'longitude'], // Extract Y coordinate
+		[\\['X(\`position\`)'], 'longitude'], // X = longitude in MySQL spatial
+		[\\['Y(\`position\`)'], 'latitude'],  // Y = latitude in MySQL spatial
 	];
 
 	/**
@@ -530,22 +624,25 @@ class UserAuthedLocation extends Model
 	];
 }
 
+// CRITICAL: PointType stores POINT(x, y) where MySQL treats X=longitude, Y=latitude.
+// ALWAYS pass longitude first, then latitude.
+
 // Usage examples:
 $location = new UserAuthedLocation();
 
-// String format (space-separated lat/lon)
-$location->position = '37.7749 -122.4194';
+// String format (space-separated lon lat — longitude FIRST)
+$location->position = '-122.4194 37.7749'; // lon lat
 
-// Array format
-$location->position = [37.7749, -122.4194];
+// Array format [lon, lat]
+$location->position = [-122.4194, 37.7749];
 
 // Object format
-$location->position = (object)['lat' => 37.7749, 'lon' => -122.4194];
+$location->position = (object)['lon' => -122.4194, 'lat' => 37.7749];
 
 $location->add(); // Automatically converts to POINT(?, ?)
 
 // Update works the same way
-$location->position = '37.8044 -122.2712';
+$location->position = '-122.2712 37.8044'; // lon lat — Berkeley
 $location->update(); // Automatically handles SET position = POINT(?, ?)`
 				),
 
@@ -553,13 +650,16 @@ $location->update(); // Automatically handles SET position = POINT(?, ?)`
 				H4({ class: "text-base font-semibold mt-6" }, "JsonType"),
 				P(
 					{ class: "text-muted-foreground" },
-					`Handles automatic JSON encoding for metadata and configuration fields:`
+					`Handles automatic JSON encoding and decoding for metadata and configuration fields.
+					Arrays and objects are encoded to JSON strings on write, and automatically decoded back
+					to PHP arrays when fetched — no manual \`augment\` or \`format\` overrides needed.`
 				),
 				CodeBlock(
 `<?php declare(strict_types=1);
 namespace Modules\\Events\\Models;
 
 use Proto\\Models\\Model;
+use Proto\\Storage\\DataTypes\\JsonType;
 
 class Event extends Model
 {
@@ -578,11 +678,16 @@ class Event extends Model
 	];
 }
 
-// Usage:
+// Write: arrays are automatically encoded to JSON strings before storage
 $event = new Event();
 $event->metadata = ['key' => 'value', 'count' => 42];
 $event->tags = ['php', 'proto', 'framework'];
-$event->add(); // Arrays automatically encoded to JSON strings`
+$event->add();
+
+// Read: JSON strings are automatically decoded back to PHP arrays on fetch
+$event = Event::get($id);
+$event->metadata; // ['key' => 'value', 'count' => 42] — already decoded
+$event->tags;     // ['php', 'proto', 'framework'] — already decoded`
 				)
 			]),
 
@@ -620,7 +725,7 @@ class Location extends Model
 // Usage:
 $location = new Location();
 $location->name = 'Golden Gate Bridge';
-$location->coordinates = '37.8199 -122.4783';
+$location->coordinates = '-122.4783 37.8199'; // lon lat
 $location->metadata = ['visitors' => 10000000, 'opened' => 1937];
 $location->properties = ['type' => 'bridge', 'length' => 2737];
 $location->add();`
@@ -659,6 +764,15 @@ class GeometryType extends DataType
 	}
 
 	/**
+	 * Decode the raw DB value back to a PHP representation on read
+	 */
+	public function fromDb(mixed $value): mixed
+	{
+		// Return as-is, or parse WKT into a structured format
+		return $value;
+	}
+
+	/**
 	 * Optional: Customize UPDATE clause
 	 */
 	public function getUpdateClause(string $column): string
@@ -691,6 +805,7 @@ class GeoLocation extends Model
 					{ class: "text-muted-foreground" },
 					`• \`getPlaceholder()\` - Returns the SQL placeholder (e.g., "POINT(?, ?)", "ST_GeomFromText(?)")
 					• \`toParams()\` - Converts model value to array of parameters for binding
+					• \`fromDb()\` - Decodes the raw database value back to a PHP value on read (e.g., JSON string → array)
 					• \`getUpdateClause()\` - Optional: Custom SET clause for UPDATE statements
 					• \`shouldHandle()\` - Optional: Determines if the handler should process this value`
 				)
@@ -811,14 +926,26 @@ class UserAuthedLocation extends Model
 				H4({ class: "text-lg font-bold" }, "How It Works"),
 				P(
 					{ class: "text-muted-foreground" },
-					`The custom data types system works through a simple pipeline:`
+					`The custom data types system works through a bidirectional pipeline — one for writes and one for reads:`
 				),
+				H4({ class: "text-base font-semibold mt-4" }, "Write pipeline (insert / update)"),
 				P(
 					{ class: "text-muted-foreground" },
 					`1. **Model Declaration**: You declare which fields use custom types in \`$dataTypes\`
 					2. **Storage Detection**: When \`insert()\` or \`update()\` is called, Storage checks if any custom types are defined
 					3. **ParamsBuilder**: If custom types exist, ParamsBuilder iterates through data and calls \`getPlaceholder()\` and \`toParams()\` for custom type fields
 					4. **Query Building**: Builds the full SQL with proper placeholders and executes with flattened params`
+				),
+				H4({ class: "text-base font-semibold mt-4" }, "Read pipeline (get / fetchWhere / all)"),
+				P(
+					{ class: "text-muted-foreground" },
+					`1. **Raw DB value**: The database returns raw values (e.g., a JSON string for a JSON column)
+					2. **applyDataTypeDecoding**: The model automatically calls \`fromDb()\` on each declared \`$dataTypes\` field
+					3. **format()**: The decoded data is then passed through the optional \`format()\` hook before being returned`
+				),
+				P(
+					{ class: "text-muted-foreground" },
+					`This means \`JsonType\` fields are encoded to a JSON string before storage and decoded back to a PHP array/object on every fetch — completely transparently. No \`augment\` or \`format\` overrides are needed for JSON columns.`
 				),
 				P(
 					{ class: "text-muted-foreground" },
@@ -951,6 +1078,53 @@ $dataReadonly = $model->getReadOnlyData();`
 					{ class: "text-muted-foreground" },
 					`When encoding a model as JSON, only public, non-blacklisted fields are included.
 					This ensures that sensitive data is not inadvertently exposed.`
+				)
+			]),
+
+			// Atomic Counter Operations
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "Atomic Counter Operations"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Use atomicIncrement() and atomicDecrement() for race-condition-safe counter updates. These use SQL SET field = field + ? to avoid the fetch-modify-write pattern that causes race conditions under concurrent requests.`
+				),
+				CodeBlock(
+`// Atomic increment — SQL: SET like_count = like_count + 1
+Post::atomicIncrement($postId, 'likeCount');
+Post::atomicDecrement($postId, 'likeCount');
+
+// Custom amount
+Post::atomicIncrement($postId, 'viewCount', 5);
+
+// Allow negative values (default floors at zero)
+Post::atomicDecrement($postId, 'score', 1, false);
+
+// WRONG - Race-condition prone fetch-modify-write
+$post = Post::get($postId);
+$post->likeCount++;
+$post->update();`
+				)
+			]),
+
+			// PivotModel
+			Section({ class: "flex flex-col gap-y-4 mt-12" }, [
+				H4({ class: "text-lg font-bold" }, "PivotModel (Write-Once Base)"),
+				P(
+					{ class: "text-muted-foreground" },
+					`Proto provides a PivotModel base class for write-once pivot/junction tables like likes, bookmarks, follows, and memberships. It extends Model with default immutableFields = ['userId', 'createdAt', 'createdBy'], preventing accidental modification of pivot records after creation.`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+namespace Modules\\Post\\Models;
+
+use Proto\\Models\\PivotModel;
+
+class PostLike extends PivotModel
+{
+	protected static ?string $tableName = 'post_likes';
+	protected static ?string $alias = 'pl';
+	protected static array $fields = ['id', 'postId', 'userId', 'createdAt'];
+}`
 				)
 			])
 		]

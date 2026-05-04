@@ -31,7 +31,7 @@ const getNavBottom = () => isStandalone()
  *
  * @returns {string}
  */
-const getHoverClass = () => Configs.useShortNav ? '' : 'lg:max-w-[330px] lg:hover:w-[330px] lg:transition-[width] lg:duration-200 lg:delay-100 lg:ease-in-out lg:will-change-[width]';
+const getHoverClass = () => Configs.useShortNav ? '' : 'lg:max-w-[330px] lg:hover:w-[330px] lg:transition-[width] lg:duration-200 lg:delay-100 lg:ease-in-out';
 
 /**
  * This will create the app container.

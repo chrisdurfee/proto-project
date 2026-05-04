@@ -1,20 +1,24 @@
-import { Div, OnRoute, UseParent } from "@base-framework/atoms";
+import { Div, OnRoute, OnXs, UseParent } from "@base-framework/atoms";
 import { BlankPage } from "@base-framework/ui/pages";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
 import { MessagesSidebar } from "./messages-sidebar.js";
 import { ThreadList } from "./thread/list/thread-list.js";
 import { ThreadContentSwitch } from "./thread/thread-content-switch.js";
 
+const listClass = 'flex-auto w-full lg:max-w-[460px] lg:border-r';
+
 /**
- * Sets up the thread list container.
+ * ThreadListContainer
  *
- * @param {object} data
- * @param {boolean} [selected] - Whether a message thread is selected (hides list on mobile).
+ * Responsive wrapper for the thread list panel.
+ * Hides on mobile when a conversation is selected.
+ *
+ * @param {object} data - ConversationModel instance.
  * @returns {object}
  */
-const createList = (data, selected = false) =>
+const ThreadListContainer = (data) =>
 	Div({
-		class: `${selected ? 'hidden lg:flex' : 'flex'} flex-auto w-full lg:max-w-[460px] lg:border-r`,
+		class: [`[[messageId]]`, (messageId) => messageId ? 'hidden lg:flex ' + listClass : 'flex ' + listClass],
 		cache: "listContainer"
 	}, [
 		ThreadList({ data })
@@ -33,6 +37,7 @@ export const MessagesPage = () =>
 	const userId = app.data.user.id;
 	const data = new ConversationModel({
 		userId: userId,
+		messageId: null,
 		search: '',
 		filter: {
 			view: 'all',
@@ -147,15 +152,19 @@ export const MessagesPage = () =>
 		}
 	};
 
+	data.messageId = null;
+
 	return new BlankPage(Props, [
 		Div({ class: "flex w-full flex-col lg:flex-row h-full" }, [
 
-			// Left: Thread List
-			// OnRoute fires reliably on initial render, and CSS lg:flex
-			// handles desktop visibility without JS size detection.
 			OnRoute('messageId', (messageId) =>
-				createList(data, typeof messageId !== "undefined")
-			),
+			{
+				data.messageId = messageId;
+				return null;
+			}),
+
+			// Left: Thread List
+			ThreadListContainer(data),
 
 			// Right: Content Switch for actual chat messages
 			UseParent(({ list, route }) => (

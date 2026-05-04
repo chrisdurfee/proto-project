@@ -1,6 +1,5 @@
 import { Textarea } from "@base-framework/atoms";
 import { VeilJot } from "@base-framework/ui";
-import { Icons } from "@base-framework/ui/icons";
 
 /**
  * This will check if the count is over the limit.
@@ -105,7 +104,7 @@ export const AssistantTextarea = VeilJot(
 		if (this.state.empty === true)
 		{
 			app.notify({
-				icon: Icons.warning,
+				icon: 'warning',
 				type: 'warning',
 				title: 'Missing Message',
 				description: 'Please enter a message.',
@@ -118,7 +117,7 @@ export const AssistantTextarea = VeilJot(
 		if (this.state.isOverLimit === true)
 		{
 			app.notify({
-				icon: Icons.warning,
+				icon: 'warning',
 				type: 'warning',
 				title: 'Message Too Long',
 				description: 'Your message exceeds the character limit.',

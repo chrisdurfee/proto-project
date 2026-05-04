@@ -47,7 +47,7 @@ const CodeBlock = Atom((props, children) => (
  * on the router or per route. API routes are defined in an api.php file
  * inside the api folder of a module. Nested folders allow deep API paths.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const ApiPage = () =>
 	DocPage(
@@ -440,6 +440,29 @@ router()
 			H4({ class: 'text-lg font-bold' }, 'Caching'),
 			P({ class: 'text-muted-foreground' },
 				`Proto supports server-side caching for API responses. It will automatically cache and invalidate cache for registered "resource" routes using Redis. The cache is handled by a Cache Proxy that will run after authentication. If the request is a "GET" request, it will check if the cache exists. If it does, it will return the cached response. If not, it will call the controller and cache the response. Non get methods will clear the cache.`
+			)
+		]),
+
+		Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+			H4({ class: 'text-lg font-bold' }, 'Default Mutation Middleware'),
+			P({ class: 'text-muted-foreground' },
+				`Proto enables CSRF protection on all mutation routes (POST, PUT, PATCH, DELETE) by default. The framework calls \`router()->defaultMutationMiddleware([CrossSiteProtectionMiddleware::class])\` automatically during \`setupRouter()\`. You do NOT need to set this up manually. GET routes are never affected. Use \`withoutMutationMiddleware()\` to opt out specific routes (webhooks, OAuth callbacks).`
+			),
+			CodeBlock(
+`use Proto\\Http\\Middleware\\CrossSiteProtectionMiddleware;
+
+// Auto-apply CSRF protection to all mutation routes
+router()->defaultMutationMiddleware([CrossSiteProtectionMiddleware::class]);
+
+// All subsequent mutation routes (POST/PUT/PATCH/DELETE) auto-include CSRF
+router()->resource('user', UserController::class);
+router()->post('post/like', [PostController::class, 'like']);
+
+// Opt out for specific routes (webhooks, OAuth callbacks)
+router()->withoutMutationMiddleware()->post('webhook', [WebhookController::class, 'handle']);`
+			),
+			P({ class: 'text-muted-foreground' },
+				`Note: defaultMutationMiddleware() only affects routes registered after the call. Use withoutMutationMiddleware() to opt out the next registered route.`
 			)
 		])
 	]);

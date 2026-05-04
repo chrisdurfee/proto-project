@@ -150,7 +150,7 @@ export const ProfileSettings = () => (
 						label: "",
 						description: "Your birth date."
 					}, [
-						DatePicker({ type: "date", bind: 'dob', required: true })
+						new DatePicker({ type: "date", bind: 'dob', required: true })
 					])
 				]),
 				FormCardGroup({ label: "Gender", description: "", border: true }, [

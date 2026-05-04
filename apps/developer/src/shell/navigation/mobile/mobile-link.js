@@ -26,7 +26,7 @@ const getMaxHeight = (props) =>
 export const MobileLink = (props) => (
 	Li({ class: `mobile-link flex flex-auto items-center justify-center ${getMaxHeight(props)}`, click: props.click }, [
 		new NavLink({
-			class: 'p-[4px] flex flex-col items-center justify-center rounded-md md:hover:bg-accent transition-colors duration-200',
+			class: 'p-[4px] flex flex-col items-center justify-center rounded-md md:hover:bg-muted transition-colors duration-200',
 			href: props.href ?? null,
 			exact: props.exact || false,
 		},
@@ -46,7 +46,7 @@ export const MobileLink = (props) => (
 export const MobileButton = (props) => (
 	Li({ class: `mobile-link flex flex-auto items-center justify-center ${getMaxHeight(props)} cursor-pointer`, click: props.click }, [
 		Div({
-			class: 'p-[4px] flex flex-col items-center justify-center rounded-md md:hover:bg-accent transition-colors duration-200',
+			class: 'p-[4px] flex flex-col items-center justify-center rounded-md md:hover:bg-muted transition-colors duration-200',
 		},
 		[
 			I({ class: 'flex items-center justify-center py-[2px] px-3 rounded-md', html: props.icon }),

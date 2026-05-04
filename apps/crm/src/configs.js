@@ -33,6 +33,6 @@ export const Configs =
 	 */
 	push: {
 		// TODO: Add your public key here
-		publicId: 'BLQ5dFCQWbjg4SwqEe1NNYm31aD4MMNXsflFsCc-TxbipA1eTqtX_XdJqpCGq8tTbqYtSCVJFLB4d0D4FOtTrS4'
+		publicId: 'BD5zJ57J0I4Jz4JnkyBizc5dUkrVsNEDs8EsvLVjyfg_QdhqLf9M1XG8Ze0uI1l7vpsrclRWgVe7HhKmbdj1WdU'
 	}
 };

@@ -1,7 +1,6 @@
 import { Div, UseParent } from "@base-framework/atoms";
 import { VeilJot } from "@base-framework/ui";
 import { Button } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
 import { AssistantMessageModel } from "../../../../models/assistant-message-model.js";
 import { AssistantTextarea } from "./assistant-textarea.js";
@@ -26,7 +25,7 @@ const SendButton = () => (
 			Button({
 				type: "submit",
 				variant: "icon",
-				icon: Icons.airplane,
+				icon: 'send',
 				class: "text-foreground hover:text-accent",
 				onSet: [parent.textareaComponent.state, 'empty', (empty, el) => el.disabled = empty]
 			})

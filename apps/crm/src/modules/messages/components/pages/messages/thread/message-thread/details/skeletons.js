@@ -9,7 +9,7 @@ import { Skeleton } from "@base-framework/ui/atoms";
  * @returns {object}
  */
 export const HeaderSkeleton = () =>
-	Div({ class: "flex items-center p-4" }, [
+	Div({ class: "flex items-center p-4 px-2" }, [
 		Div({ class: 'flex flex-auto items-center gap-3 lg:max-w-5xl m-auto' }, [
 			Div({ class: "flex lg:hidden" }, [
 				Skeleton({ width: "w-10", height: "h-10" })
@@ -28,8 +28,6 @@ export const HeaderSkeleton = () =>
  * @returns {object}
  */
 export const ThreadSkeleton = () =>
-	Div({ class: "flex flex-col gap-4 w-full h-full max-w-none lg:max-w-5xl m-auto p-4 pt-24" }, [
-		Skeleton({ width: "w-1/2", height: "h-8", class: "rounded" }),
-		Skeleton({ width: "w-2/3", height: "h-8", class: "rounded self-end" }),
-		Skeleton({ width: "w-1/4", height: "h-8", class: "rounded" }),
+	Div({ class: "flex flex-none flex-col gap-4 w-full max-w-none lg:max-w-5xl m-auto p-4 pt-24" }, [
+		Skeleton({ width: "w-1/2", height: "h-8", class: "rounded" + (Math.random() > 0.5 ? " self-end" : "") })
 	]);

@@ -45,7 +45,7 @@ const CodeBlock = Atom((props, children) => (
  * This page explains the Proto factory system for generating test data.
  * It covers factory creation, usage patterns, states, and integration with tests.
  *
- * @returns {object}
+ * @returns {DocPage}
  */
 export const FactoriesPage = () =>
 	DocPage(
