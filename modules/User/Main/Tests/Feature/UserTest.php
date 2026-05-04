@@ -73,7 +73,7 @@ class UserTest extends Test
 	 */
 	public function testCreateVerifiedUser(): void
 	{
-		$user = User::factory()->state('verified')->create();
+		$user = User::factory()->stateVerified()->create();
 
 		$this->assertNotNull($user->emailVerifiedAt);
 		$this->assertEquals(1, $user->verified); // Database returns integer 1
@@ -86,7 +86,7 @@ class UserTest extends Test
 	 */
 	public function testCreateAdminUser(): void
 	{
-		$user = User::factory()->state('admin')->create();
+		$user = User::factory()->stateAdmin()->create();
 
 		$this->assertEquals('online', $user->status);
 		$this->assertEquals(1, $user->enabled); // Database returns integer 1
@@ -100,7 +100,7 @@ class UserTest extends Test
 	 */
 	public function testCreateDisabledUser(): void
 	{
-		$user = User::factory()->state('disabled')->create();
+		$user = User::factory()->stateDisabled()->create();
 
 		// Database returns 0 (integer), not false (boolean)
 		$this->assertEquals(0, $user->enabled);
@@ -114,7 +114,7 @@ class UserTest extends Test
 	 */
 	public function testCreateTrialUser(): void
 	{
-		$user = User::factory()->state('trial')->create();
+		$user = User::factory()->stateTrial()->create();
 
 		$this->assertTrue($user->trialMode);
 		$this->assertGreaterThan(0, $user->trialDaysLeft);
@@ -128,7 +128,7 @@ class UserTest extends Test
 	 */
 	public function testCreateUserWithMfaEnabled(): void
 	{
-		$user = User::factory()->state('mfaEnabled')->create();
+		$user = User::factory()->stateMfaEnabled()->create();
 
 		$this->assertTrue($user->multiFactorEnabled);
 	}
@@ -140,7 +140,7 @@ class UserTest extends Test
 	 */
 	public function testCreateUserWithCompleteProfile(): void
 	{
-		$user = User::factory()->state('completeProfile')->create();
+		$user = User::factory()->stateCompleteProfile()->create();
 
 		$this->assertNotNull($user->bio);
 		$this->assertNotNull($user->dob);
@@ -158,7 +158,7 @@ class UserTest extends Test
 	 */
 	public function testCreateUserWithCustomDomain(): void
 	{
-		$user = User::factory()->state('withDomain', 'company.com')->create();
+		$user = User::factory()->stateWithDomain('company.com')->create();
 
 		$this->assertStringContainsString('@company.com', $user->email);
 	}
@@ -200,8 +200,8 @@ class UserTest extends Test
 	public function testCombineMultipleStates(): void
 	{
 		$user = User::factory()
-			->state('verified')
-			->state('completeProfile')
+			->stateVerified()
+			->stateCompleteProfile()
 			->create();
 
 		$this->assertNotNull($user->emailVerifiedAt);

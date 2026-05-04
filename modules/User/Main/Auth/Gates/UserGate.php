@@ -27,7 +27,7 @@ class UserGate extends Gate
 			return false;
 		}
 
-		return $user->id === $userId;
+		return (int)$user->id === (int)$userId;
 	}
 
 	/**

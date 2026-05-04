@@ -44,8 +44,6 @@ class EmailVerificationGate extends Gate
 	/**
 	 * This will update the request status.
 	 *
-	 * @param string $requestId
-	 * @param int $userId
 	 * @return bool
 	 */
 	public function updateRequest(): bool

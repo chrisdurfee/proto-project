@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Main\Services;
 
+use Common\Services\Service;
 use Modules\User\Main\Models\User;
 use Proto\Controllers\Response;
 use Proto\Http\UploadFile;
@@ -13,7 +14,7 @@ use Proto\Utils\Files\File;
  *
  * @package Modules\User\Services\User
  */
-class UserImageService
+class UserImageService extends Service
 {
 	/**
 	 * Stores the uploaded image file.
@@ -83,6 +84,66 @@ class UserImageService
 		{
 			return Response::invalid('Database update failed: ' . $e->getMessage());
 		}
+	}
+
+	/**
+	 * Updates the user's cover image field in the database.
+	 *
+	 * @param int $userId The user ID.
+	 * @param string $fileName The stored file name.
+	 * @return object Returns Response object with success/error data
+	 */
+	public function updateUserCoverImage(int $userId, string $fileName): object
+	{
+		try
+		{
+			$user = User::get($userId);
+			if (!$user)
+			{
+				return Response::invalid('User not found.');
+			}
+
+			$user->coverImageUrl = $fileName;
+			$result = $user->update();
+			if ($result)
+			{
+				return Response::success(['updated' => true]);
+			}
+
+			return Response::invalid('Failed to update user cover image reference.');
+		}
+		catch (\Exception $e)
+		{
+			return Response::invalid('Database update failed: ' . $e->getMessage());
+		}
+	}
+
+	/**
+	 * Uploads and processes a user cover image (complete workflow).
+	 *
+	 * @param UploadFile|null $uploadFile The uploaded file object.
+	 * @param int $userId The user ID.
+	 * @return object Returns Response object with success/error data
+	 */
+	public function uploadUserCoverImage(?UploadFile $uploadFile, int $userId): object
+	{
+		$storage = $this->storeImage($uploadFile, $userId);
+		if (!$storage->success)
+		{
+			return $storage;
+		}
+
+		$update = $this->updateUserCoverImage($userId, $storage->filename);
+		if (!$update->success)
+		{
+			return $update;
+		}
+
+		return Response::success([
+			'coverImageUrl' => $storage->filename,
+			'path' => $storage->path,
+			'message' => 'Cover image uploaded successfully.'
+		]);
 	}
 
 	/**
@@ -178,6 +239,10 @@ class UserImageService
 				'image/png' => 'png',
 				'image/gif' => 'gif',
 				'image/webp' => 'webp',
+				'image/heic' => 'heic',
+				'image/heif' => 'heif',
+				'image/avif' => 'avif',
+				'image/jxl' => 'jxl'
 			];
 			if ($mime && isset($map[$mime]))
 			{

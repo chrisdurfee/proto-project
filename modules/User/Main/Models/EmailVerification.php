@@ -41,6 +41,11 @@ class EmailVerification extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdAt', 'userId', 'requestId'];
+
+	/**
 	 * @var string $storageType
 	 */
 	protected static string $storageType = EmailVerificationStorage::class;

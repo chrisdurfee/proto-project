@@ -27,7 +27,7 @@ class ResourceGate extends Gate
 		}
 
 		$currentUserId = $currentUser->id;
-		return $ownerId === $currentUserId;
+		return (int)$ownerId === (int)$currentUserId;
 	}
 
 	/**

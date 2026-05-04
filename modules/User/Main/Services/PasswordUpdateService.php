@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Main\Services;
 
+use Common\Services\Service;
 use Modules\User\Main\Models\User;
 use Modules\User\Main\Email\Password\PasswordUpdatedEmail;
 use Proto\Dispatch\Dispatcher;
@@ -13,7 +14,7 @@ use Proto\Dispatch\Dispatcher;
  *
  * @package Modules\User\Services\User
  */
-class PasswordUpdateService
+class PasswordUpdateService extends Service
 {
 	/**
 	 * Update user credentials.

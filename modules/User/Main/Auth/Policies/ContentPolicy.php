@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Main\Auth\Policies;
 
+use Common\Auth\Policies\Policy;
 use Proto\Http\Router\Request;
 
 /**
@@ -37,10 +38,11 @@ class ContentPolicy extends Policy
 	}
 
 	/**
-	 * Determines if the user can edit an existing user.
+	 * Determines if the user can perform the given action.
 	 *
-	 * @param mixed $data User data or ID.
-	 * @return bool True if the user can edit users, otherwise false.
+	 * @param string $permission The permission to check.
+	 * @param Request $request The request object.
+	 * @return bool True if the user has permission, otherwise false.
 	 */
 	protected function can(string $permission, Request $request): bool
 	{

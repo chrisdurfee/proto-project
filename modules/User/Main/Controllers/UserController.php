@@ -1,9 +1,13 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Main\Controllers;
 
+use Modules\Garage\Vehicle\Models\GarageVehicle;
+use Modules\User\Blocked\Models\BlockUser;
+use Modules\User\Follower\Models\FollowerUser;
 use Modules\User\Main\Auth\Gates\EmailVerificationGate;
 use Modules\User\Main\Controllers\Helpers\UserHelper;
 use Modules\User\Main\Models\User;
+use Modules\User\Main\Models\UserPrivacySetting;
 use Modules\User\Main\Auth\Policies\UserPolicy;
 use Modules\User\Main\Services\PasswordUpdateService;
 use Modules\User\Main\Services\UnsubscribeService;
@@ -38,6 +42,38 @@ class UserController extends ResourceController
 	}
 
 	/**
+	 * Gets a user profile by ID and appends an isFollowing flag for the
+	 * currently authenticated session user.
+	 *
+	 * @param Request $request
+	 * @return object
+	 */
+	public function get(Request $request): object
+	{
+		$id = $this->getResourceId($request);
+		if ($id === null)
+		{
+			return $this->error('The ID is required to get the item.');
+		}
+
+		$user = User::get($id);
+		if (!$user)
+		{
+			return $this->response(['row' => null]);
+		}
+
+		$userData = $user->getData();
+		$sessionUserId = session()->user->id;
+		$userData->isFollowing = FollowerUser::isAdded((int)$id, (int)$sessionUserId);
+		$userData->isBlocked = BlockUser::isAdded((int)$sessionUserId, (int)$id);
+
+		$vehicles = GarageVehicle::fetchWhere(['gv.userId' => (int)$id]);
+		$userData->vehicleCount = is_array($vehicles) ? count($vehicles) : 0;
+
+		return $this->response(['row' => $userData]);
+	}
+
+	/**
 	 * This will return the validation rules for the model.
 	 *
 	 * @return array<string, string>
@@ -50,13 +86,20 @@ class UserController extends ResourceController
 			'email' => 'email:255|required',
 			'displayName' => 'string:150',
 			'image' => 'string:150',
+			'coverImageUrl' => 'string:255',
+			'bio' => 'string:2000',
+			'dob' => 'string:10',
+			'gender' => 'string:20',
 			'street1' => 'string:255',
 			'street2' => 'string:255',
 			'city' => 'string:255',
 			'state' => 'string:100',
 			'postalCode' => 'string:20',
 			'country' => 'string:100',
-			'mobile' => 'phone:14'
+			'mobile' => 'phone:14',
+			'timezone' => 'string:50',
+			'language' => 'string:10',
+			'currency' => 'string:3'
 		];
 	}
 
@@ -100,6 +143,21 @@ class UserController extends ResourceController
 			 * Restrict admin controls.
 			 */
 			unset($data->enabled);
+			unset($data->verified);
+		}
+
+		/**
+		 * Check if the email is already taken by another user.
+		 */
+		$email = $data->email ?? null;
+		if ($email)
+		{
+			$existing = User::getBy(['email' => $email]);
+			if ($existing && (int)$existing->id !== (int)$data->id)
+			{
+				$this->setError('Email is already taken.');
+				return (object)[];
+			}
 		}
 
 		/**
@@ -114,20 +172,112 @@ class UserController extends ResourceController
 		 */
 		$this->updateNotifications($data);
 
-		return parent::updateItem($data);
+		/**
+		 * This will update the user's privacy settings.
+		 */
+		$this->updatePrivacy($data);
+
+		$beingVerified = $this->isBeingVerified($data);
+
+		$response = parent::updateItem($data);
+
+		if ($beingVerified)
+		{
+			modules()->user()->achievement()->awardBySlug((int)$data->id, 'identity_verified');
+		}
+
+		if (!empty($response->success))
+		{
+			modules()->tracking()->userActivityLog()->log(
+				(int)$data->id,
+				'profile_updated',
+				'Updated your profile',
+				null,
+				(int)$data->id,
+				'user'
+			);
+		}
+
+		return $response;
 	}
 
 	/**
-	 * Updates the user's notification preferences.
+	 * Check whether the user is being granted the verified badge in this update.
+	 *
+	 * Returns true only when the incoming data sets verified = 1 and the user
+	 * does not already have the verified badge.
+	 *
+	 * @param object $data
+	 * @return bool
+	 */
+	protected function isBeingVerified(object $data): bool
+	{
+		if (empty($data->verified) || (int)$data->verified !== 1)
+		{
+			return false;
+		}
+
+		$user = User::getWithoutJoins((int)$data->id);
+		return $user !== null && (int)$user->verified !== 1;
+	}
+
+	/**
+	 * Updates the user's notification preferences via a dedicated endpoint.
+	 *
+	 * @param Request $request
+	 * @return object
+	 */
+	public function updateNotificationSettings(Request $request): object
+	{
+		$id = $this->getResourceId($request);
+		if (!$id)
+		{
+			return $this->error('User ID is required.');
+		}
+
+		$data = $this->getRequestItem($request);
+		if (empty($data))
+		{
+			return $this->error('No data provided.');
+		}
+
+		$this->validateRules((array)$data, [
+			'allowEmail' => 'int',
+			'allowSms' => 'int',
+			'allowPush' => 'int',
+			'marketingOptIn' => 'int'
+		]);
+
+		$settings = (object)[
+			'userId' => (int)$id,
+			'allowEmail' => $data->allowEmail ?? null,
+			'allowSms' => $data->allowSms ?? null,
+			'allowPush' => $data->allowPush ?? null
+		];
+		$service = new UnsubscribeService();
+		$service->updateNotificationPreferences($settings);
+
+		if (isset($data->marketingOptIn))
+		{
+			$user = User::get($id);
+			if ($user)
+			{
+				$user->marketingOptIn = (int)$data->marketingOptIn;
+				$user->update();
+			}
+		}
+
+		return $this->success();
+	}
+
+	/**
+	 * Updates the user's notification preferences from the full update flow.
 	 *
 	 * @param object $data
 	 * @return bool
 	 */
 	protected function updateNotifications(object $data): bool
 	{
-		/**
-		 * This will update the user's notification preferences.
-		 */
 		$settings = (object)[
 			'userId' => $data->id,
 			'allowEmail' => $data->allowEmail,
@@ -136,6 +286,105 @@ class UserController extends ResourceController
 		];
 		$service = new UnsubscribeService();
 		return $service->updateNotificationPreferences($settings);
+	}
+
+	/**
+	 * Updates the user's privacy settings via a dedicated endpoint.
+	 *
+	 * @param Request $request
+	 * @return object
+	 */
+	public function updatePrivacySettings(Request $request): object
+	{
+		$id = $this->getResourceId($request);
+		if (!$id)
+		{
+			return $this->error('User ID is required.');
+		}
+
+		$data = $this->getRequestItem($request);
+		if (empty($data))
+		{
+			return $this->error('No data provided.');
+		}
+
+		$this->validateRules((array)$data, [
+			'profileVisibility' => 'string:20',
+			'garageVisibility' => 'string:20',
+			'postVisibility' => 'string:20',
+			'nameDisplay' => 'string:20',
+			'contactSync' => 'int',
+			'showOnlineStatus' => 'int'
+		]);
+
+		$data->id = (int)$id;
+		$this->updatePrivacy($data);
+
+		return $this->success();
+	}
+
+	/**
+	 * Updates the user's privacy settings.
+	 *
+	 * @param object $data
+	 * @return bool
+	 */
+	protected function updatePrivacy(object $data): bool
+	{
+		$privacyFields = [
+			'profileVisibility',
+			'garageVisibility',
+			'postVisibility',
+			'nameDisplay',
+			'contactSync',
+			'showOnlineStatus'
+		];
+
+		$hasPrivacyData = false;
+		foreach ($privacyFields as $field)
+		{
+			if (isset($data->$field))
+			{
+				$hasPrivacyData = true;
+				break;
+			}
+		}
+
+		if (!$hasPrivacyData)
+		{
+			return true;
+		}
+
+		$userId = (int)$data->id;
+		$existing = UserPrivacySetting::getBy(['userId' => $userId]);
+
+		if (!$existing)
+		{
+			$privacy = new UserPrivacySetting((object)[
+				'userId' => $userId,
+				'profileVisibility' => $data->profileVisibility ?? 'public',
+				'garageVisibility' => $data->garageVisibility ?? 'public',
+				'postVisibility' => $data->postVisibility ?? 'public',
+				'nameDisplay' => $data->nameDisplay ?? 'full',
+				'contactSync' => $data->contactSync ?? 1,
+				'showOnlineStatus' => $data->showOnlineStatus ?? 1
+			]);
+			return $privacy->add();
+		}
+
+		return UserPrivacySetting::builder()
+			->update()
+			->set([
+				'profile_visibility' => $data->profileVisibility ?? $existing->profileVisibility,
+				'garage_visibility' => $data->garageVisibility ?? $existing->garageVisibility,
+				'post_visibility' => $data->postVisibility ?? $existing->postVisibility,
+				'name_display' => $data->nameDisplay ?? $existing->nameDisplay,
+				'contact_sync' => $data->contactSync ?? $existing->contactSync,
+				'show_online_status' => $data->showOnlineStatus ?? $existing->showOnlineStatus,
+				'updated_at' => date('Y-m-d H:i:s')
+			])
+			->where('user_id = ?')
+			->execute([$userId]);
 	}
 
 	/**
@@ -375,7 +624,7 @@ class UserController extends ResourceController
 		 */
 		$files = $request->files();
 		$this->validateRules($files, [
-			'image' => 'image:30000|required|mimes:jpeg,jpg,png,gif,webp'
+			'image' => 'image:30000|required|mimes:jpeg,jpg,png,gif,webp,heic,heif,avif,jxl'
 		]);
 
 		/**
@@ -391,6 +640,44 @@ class UserController extends ResourceController
 		 * Use the service to handle the complete upload workflow.
 		 */
 		$result = $imageService->uploadUserImage($uploadFile, $userId);
+		if ($result->success)
+		{
+			return $this->response($result);
+		}
+
+		return $this->error($result->message);
+	}
+
+	/**
+	 * Uploads and sets the user's cover image.
+	 *
+	 * @param Request $request The request object.
+	 * @param UserImageService $imageService The image service.
+	 * @return object The response.
+	 */
+	public function uploadCoverImage(
+		Request $request,
+		UserImageService $imageService = new UserImageService()
+	): object
+	{
+		$userId = $this->getResourceId($request);
+		if ($userId === null)
+		{
+			return $this->error('Invalid user ID.');
+		}
+
+		$files = $request->files();
+		$this->validateRules($files, [
+			'image' => 'image:30000|required|mimes:jpeg,jpg,png,gif,webp,heic,heif,avif,jxl'
+		]);
+
+		$uploadFile = $files['image'] ?? null;
+		if ($uploadFile === null)
+		{
+			return $this->error('No image file provided.');
+		}
+
+		$result = $imageService->uploadUserCoverImage($uploadFile, $userId);
 		if ($result->success)
 		{
 			return $this->response($result);

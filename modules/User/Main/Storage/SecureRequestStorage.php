@@ -36,8 +36,8 @@ class SecureRequestStorage extends Storage
 
 		return $this->select()
 			->where(
-				'requestId = ?',
-				'userId = ?',
+				'request_id = ?',
+				'user_id = ?',
 				'status = "pending"'
 			)
 			->first($params);

@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Main\Services;
 
+use Common\Services\Service;
 use Modules\User\Main\Controllers\Helpers\UserHelper;
 use Modules\User\Main\Email\Welcome\WelcomeVerificationEmail;
 use Modules\User\Main\Models\User;
@@ -15,7 +16,7 @@ use Proto\Dispatch\Dispatcher;
  *
  * @package Modules\User\Services\User
  */
-class NewUserService
+class NewUserService extends Service
 {
 	/**
 	 * Send verification email to new user.
@@ -33,28 +34,92 @@ class NewUserService
 	 * This will create a new user and send the verification email.
 	 *
 	 * @param object $data
-	 * @return User
+	 * @return User|null
 	 */
-	public function createUser(object $data): User
+	public function createUser(object $data): ?User
 	{
-		$username = $data->username ?? '';
-		if ($this->isUsernameTaken($username))
+		$email = $data->email ?? $data->username ?? '';
+		if ($this->isEmailTaken($email))
 		{
-			throw new \Exception('Username already taken.');
+			return null;
 		}
 
-		$data->email = $username;
+		$data->email = $email;
+		$data->username = $data->username ?? $this->generateUsername($email);
+		if (filter_var($data->username, FILTER_VALIDATE_EMAIL))
+		{
+			$data->username = $this->generateUsername($email);
+		}
+
 		// set a random password
 		$data->password = bin2hex(random_bytes(20)) . 'Aa1!';
 		$data->enabled = $data->enabled ?? 0;
 
 		$user = $this->addUser($data);
-		if (!$user)
+		if (!$user || !$user->id)
 		{
-			return $user;
+			return null;
 		}
 
+		modules()->tracking()->userActivityLog()->log(
+			(int)$user->id,
+			'account_created',
+			'Joined Rally',
+			'Welcome to the community',
+			(int)$user->id,
+			'user'
+		);
+
 		return $user;
+	}
+
+	/**
+	 * Check if the email is already registered.
+	 *
+	 * @param string $email
+	 * @return bool
+	 */
+	protected function isEmailTaken(string $email): bool
+	{
+		if (!$email)
+		{
+			return true;
+		}
+
+		return User::getBy(['email' => $email]) !== null;
+	}
+
+	/**
+	 * Generate a unique username slug from an email address or a first/last name pair.
+	 * When lastName is provided, uses "first_last" format.
+	 * When only an email is provided, uses the local part before the "@".
+	 *
+	 * @param string $emailOrFirst
+	 * @param string|null $lastName
+	 * @return string
+	 */
+	protected function generateUsername(string $emailOrFirst, ?string $lastName = null): string
+	{
+		if ($lastName !== null)
+		{
+			$base = strtolower(trim($emailOrFirst . '_' . $lastName));
+		}
+		else
+		{
+			$base = strtolower(explode('@', $emailOrFirst)[0]);
+		}
+
+		$base = preg_replace('/[^a-z0-9_]/', '_', $base);
+		$base = preg_replace('/_+/', '_', $base);
+		$base = trim($base, '_') ?: 'user';
+
+		$username = $base;
+		while ($this->isUsernameTaken($username))
+		{
+			$username = $base . '_' . rand(100, 9999);
+		}
+
+		return $username;
 	}
 
 	/**
@@ -112,6 +177,15 @@ class NewUserService
 				return $user;
 			}
 		}
+
+		modules()->tracking()->userActivityLog()->log(
+			(int)$user->id,
+			'profile_completed',
+			'Completed your profile',
+			null,
+			(int)$user->id,
+			'user'
+		);
 
 		return $user;
 	}

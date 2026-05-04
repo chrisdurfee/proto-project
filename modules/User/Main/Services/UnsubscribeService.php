@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Main\Services;
 
+use Common\Services\Service;
 use Modules\User\Main\Models\User;
 use Proto\Dispatch\Email\Unsubscribe\Models\Unsubscribe;
 use Modules\User\Main\Models\NotificationPreference;
@@ -12,7 +13,7 @@ use Modules\User\Main\Models\NotificationPreference;
  *
  * @package Modules\User\Services\User
  */
-class UnsubscribeService
+class UnsubscribeService extends Service
 {
 	/**
 	 * Update the user's notification preferences.
@@ -69,7 +70,7 @@ class UnsubscribeService
 	/**
 	 * This will verify the unsubscribe request and update the user's preferences.
 	 *
-	 * @param object $data
+	 * @param object $settings
 	 * @return bool
 	 */
 	public function unsubscribe(object $settings): bool

@@ -165,7 +165,8 @@ class UserStorage extends Storage
 	}
 
 	/**
-	 * This will authenticate the username and password.
+	 * This will authenticate the username/email and password.
+	 * Accepts either the username (@handle) or the email address.
 	 *
 	 * @param string $username
 	 * @param string $password
@@ -174,14 +175,13 @@ class UserStorage extends Storage
 	public function authenticate(string $username, string $password): int
 	{
 		$userId = -1;
-		$params = ['username' => $username];
 
 		$row = $this->select('id', 'password')
 			->where(
-				'username = ?',
+				'(username = ? OR email = ?)',
 				'enabled = 1'
 			)
-			->first($params);
+			->first([$username, $username]);
 
 		if (!$row)
 		{

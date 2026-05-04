@@ -41,4 +41,8 @@ class NotificationPreference extends Model
 		'allowPush'
 	];
 
+	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['userId', 'createdAt'];
 }

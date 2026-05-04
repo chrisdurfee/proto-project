@@ -45,7 +45,7 @@ class UserHelper
 	 */
 	public static function restrictData(object &$data): void
 	{
-		$fields = ['emailVerifiedAt', 'acceptedTermsAt', 'trialMode', 'trialDaysLeft', 'followerCount', 'deletedAt', 'verified'];
+		$fields = ['emailVerifiedAt', 'acceptedTermsAt', 'trialMode', 'trialDaysLeft', 'followerCount', 'deletedAt'];
 		self::restrictFields($data, $fields);
 	}
 }

@@ -61,93 +61,93 @@ class UserFactory extends Factory
 	/**
 	 * Define an admin user state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateAdmin(): array
+	public function stateAdmin(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'status' => 'online',
 			'enabled' => 1,
 			'emailVerifiedAt' => date('Y-m-d H:i:s')
-		];
+		]);
 	}
 
 	/**
 	 * Define a verified user state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateVerified(): array
+	public function stateVerified(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'emailVerifiedAt' => date('Y-m-d H:i:s'),
 			'verified' => 1
-		];
+		]);
 	}
 
 	/**
 	 * Define an unverified user state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateUnverified(): array
+	public function stateUnverified(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'emailVerifiedAt' => null,
 			'verified' => 0
-		];
+		]);
 	}
 
 	/**
 	 * Define a disabled user state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateDisabled(): array
+	public function stateDisabled(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'enabled' => 0,
 			'status' => 'offline'
-		];
+		]);
 	}
 
 	/**
 	 * Define a trial mode user state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateTrial(): array
+	public function stateTrial(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'trialMode' => true,
 			'trialDaysLeft' => $this->faker()->numberBetween(1, 30)
-		];
+		]);
 	}
 
 	/**
 	 * Define a user with MFA enabled
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateMfaEnabled(): array
+	public function stateMfaEnabled(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'multiFactorEnabled' => true
-		];
+		]);
 	}
 
 	/**
 	 * Define a user with complete profile
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateCompleteProfile(): array
+	public function stateCompleteProfile(): static
 	{
 		$streets = ['Main St', 'Oak Ave', 'Elm Street', 'Park Blvd', 'Maple Dr'];
 		$cities = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'];
 		$genders = ['male', 'female', 'other'];
 
-		return [
+		return $this->state(fn() => [
 			'image' => 'https://via.placeholder.com/150',
 			'coverImageUrl' => 'https://via.placeholder.com/800x200',
 			'bio' => $this->faker()->text(200),
@@ -157,23 +157,23 @@ class UserFactory extends Factory
 			'city' => $cities[$this->faker()->numberBetween(0, 4)],
 			'state' => ['CA', 'NY', 'TX', 'FL', 'IL'][$this->faker()->numberBetween(0, 4)],
 			'postalCode' => sprintf('%05d', $this->faker()->numberBetween(10000, 99999))
-		];
+		]);
 	}
 
 	/**
 	 * State with custom domain for email
 	 *
 	 * @param string $domain
-	 * @return array
+	 * @return static
 	 */
-	public function stateWithDomain(string $domain): array
+	public function stateWithDomain(string $domain): static
 	{
 		$firstName = $this->faker()->firstName();
 		$lastName = $this->faker()->lastName();
 		$username = strtolower($firstName . '.' . $lastName . $this->faker()->numberBetween(1, 999));
 
-		return [
+		return $this->state(fn() => [
 			'email' => $username . '@' . $domain
-		];
+		]);
 	}
 }

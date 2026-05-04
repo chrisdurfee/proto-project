@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Main\Auth\Policies;
 
+use Common\Auth\Policies\Policy;
 use Proto\Http\Router\Request;
 
 /**
@@ -12,6 +13,12 @@ use Proto\Http\Router\Request;
  */
 class AdminResourcePolicy extends Policy
 {
+	/**
+	 * The type of the policy.
+	 *
+	 * @var string|null
+	 */
+	protected ?string $type = 'admin';
 	/**
 	 * This will secure all non standard methods.
 	 *

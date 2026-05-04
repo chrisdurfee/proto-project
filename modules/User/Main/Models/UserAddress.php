@@ -28,8 +28,8 @@ class UserAddress extends Model
 		'createdAt',
 		'updatedAt',
 		'userId',
-		'street_1',
-		'street_2',
+		'street1',
+		'street2',
 		'city',
 		'state',
 		'postalCode',
@@ -37,4 +37,8 @@ class UserAddress extends Model
 		'isPrimary'
 	];
 
+	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdAt', 'userId'];
 }

@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Main\Auth\Policies;
 
+use Common\Auth\Policies\Policy;
 use Proto\Http\Router\Request;
 
 /**
@@ -17,13 +18,14 @@ class UserPolicy extends Policy
 	 *
 	 * @var string|null
 	 */
-	protected ?string $type = 'users';
+	protected ?string $type = 'user';
 
 	/**
 	 * Determines if the user can get a single user's information.
+	 * Any authenticated user may view a public profile.
 	 *
 	 * @param Request $request The request object.
-	 * @return bool True if the user can view users, otherwise false.
+	 * @return bool True if the user is signed in, otherwise false.
 	 */
 	public function get(Request $request): bool
 	{
@@ -33,7 +35,7 @@ class UserPolicy extends Policy
 			return false;
 		}
 
-		return $this->canAccess('users.view') || $this->ownsResource($id);
+		return $this->isSignedIn();
 	}
 
 	/**
@@ -44,7 +46,7 @@ class UserPolicy extends Policy
 	 */
 	protected function canEdit(mixed $data): bool
 	{
-		if ($this->canAccess('users.edit'))
+		if ($this->canAccess('user.edit'))
 		{
 			return true;
 		}
@@ -166,6 +168,28 @@ class UserPolicy extends Policy
 	}
 
 	/**
+	 * Determines if the user can update their notification settings.
+	 *
+	 * @param Request $request The request object.
+	 * @return bool True if the user can update notification settings.
+	 */
+	public function updateNotificationSettings(Request $request): bool
+	{
+		return $this->allowEdit($request);
+	}
+
+	/**
+	 * Determines if the user can update their privacy settings.
+	 *
+	 * @param Request $request The request object.
+	 * @return bool True if the user can update privacy settings.
+	 */
+	public function updatePrivacySettings(Request $request): bool
+	{
+		return $this->allowEdit($request);
+	}
+
+	/**
 	 * Determines if the user can update their credentials.
 	 *
 	 * @param Request $request
@@ -200,6 +224,19 @@ class UserPolicy extends Policy
 	 * @return bool True if the user can upload the image, otherwise false.
 	 */
 	public function uploadImage(
+		Request $request
+	): bool
+	{
+		return $this->allowEdit($request);
+	}
+
+	/**
+	 * Uploads and sets the user's cover image.
+	 *
+	 * @param Request $request The request object.
+	 * @return bool True if the user can upload the cover image, otherwise false.
+	 */
+	public function uploadCoverImage(
 		Request $request
 	): bool
 	{

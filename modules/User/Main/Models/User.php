@@ -19,6 +19,7 @@ use Modules\User\Organization\Models\Organization;
  * @property string $username
  * @property string $password
  * @property string $email
+ * @property string|null $mobile
  * @property int $multiFactorEnabled
  * @property string|null $lastPasswordChangeAt
  * @property string|null $firstName
@@ -55,6 +56,8 @@ use Modules\User\Organization\Models\Organization;
  * @property int $followingCount
  * @property int $verified
  *
+ * @method static UserFactory factory(int $count = 1, array $attributes = [])
+ *
  * @package Modules\User\Models
  */
 class User extends Model
@@ -89,6 +92,7 @@ class User extends Model
 		'username',
 		'password',
 		'email',
+		'mobile',
 		'multiFactorEnabled',
 		'lastPasswordChangeAt',
 
@@ -139,6 +143,11 @@ class User extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['uuid', 'createdAt', 'createdBy', 'followerCount', 'followingCount'];
+
+	/**
 	 * Fields to exclude when exporting.
 	 *
 	 * @var array
@@ -170,6 +179,16 @@ class User extends Model
 				[['IF(allow_email = 0, 0, 1)'], 'allowEmail'],
 				[['IF(allow_sms = 0, 0, 1)'], 'allowSms'],
 				[['IF(allow_push = 0, 0, 1)'], 'allowPush']
+			]);
+
+		$builder
+			->one(UserPrivacySetting::class, fields: [
+				'profileVisibility',
+				'garageVisibility',
+				'postVisibility',
+				'nameDisplay',
+				'contactSync',
+				'showOnlineStatus'
 			]);
 	}
 
