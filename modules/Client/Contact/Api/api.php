@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 
 use Modules\Client\Contact\Controllers\ClientContactController;
-use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * Client Contact Routes
@@ -10,7 +9,4 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * URL Pattern: /api/client/:clientId/contact
  */
 router()
-	->middleware(([
-		CrossSiteProtectionMiddleware::class
-	]))
 	->resource('client/:clientId/contact', ClientContactController::class);

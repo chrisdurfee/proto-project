@@ -6,7 +6,7 @@ use Proto\Database\QueryBuilder\Create;
 /**
  * SeedClientResource
  *
- * Seeds client.resource permissions and assigns them to roles.
+ * Seeds clientResource permissions and assigns them to roles.
  */
 class SeedClientResource extends Migration
 {
@@ -26,7 +26,7 @@ class SeedClientResource extends Migration
 	}
 
 	/**
-	 * Seed the database with client.resource permissions and role assignments.
+	 * Seed the database with clientResource permissions and role assignments.
 	 *
 	 * @return void
 	 */
@@ -36,25 +36,25 @@ class SeedClientResource extends Migration
 		$permissions = [
 			[
 				'name' => 'Create Client Resources',
-				'slug' => 'client.resource.create',
+				'slug' => 'clientResource.create',
 				'description' => 'Can create client resources',
 				'module' => 'client',
 			],
 			[
 				'name' => 'View Client Resources',
-				'slug' => 'client.resource.view',
+				'slug' => 'clientResource.view',
 				'description' => 'Can view client resources',
 				'module' => 'client',
 			],
 			[
 				'name' => 'Edit Client Resources',
-				'slug' => 'client.resource.edit',
+				'slug' => 'clientResource.edit',
 				'description' => 'Can edit client resources',
 				'module' => 'client',
 			],
 			[
 				'name' => 'Delete Client Resources',
-				'slug' => 'client.resource.delete',
+				'slug' => 'clientResource.delete',
 				'description' => 'Can delete client resources',
 				'module' => 'client',
 			],
@@ -96,10 +96,10 @@ class SeedClientResource extends Migration
 		// 4) Define which actions each role receives
 		// Note: "contributor: view, add" -> treat "add" as "create" to match action naming
 		$roleActions = [
-			'admin' => ['client.resource.create', 'client.resource.view', 'client.resource.edit', 'client.resource.delete'],
-			'manager' => ['client.resource.create', 'client.resource.edit', 'client.resource.delete', 'client.resource.view'],
-			'editor' => ['client.resource.create', 'client.resource.edit', 'client.resource.view'],
-			'contributor' => ['client.resource.view', 'client.resource.create'],
+			'admin' => ['clientResource.create', 'clientResource.view', 'clientResource.edit', 'clientResource.delete'],
+			'manager' => ['clientResource.create', 'clientResource.edit', 'clientResource.delete', 'clientResource.view'],
+			'editor' => ['clientResource.create', 'clientResource.edit', 'clientResource.view'],
+			'contributor' => ['clientResource.view', 'clientResource.create'],
 		];
 
 		// 5) Assign permissions to roles (idempotent)

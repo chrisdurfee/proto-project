@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 
 use Modules\Client\Note\Controllers\ClientNoteController;
-use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * Client Note Routes
@@ -10,7 +9,4 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * URL Pattern: /api/client/:clientId/note
  */
 router()
-    ->middleware(([
-		CrossSiteProtectionMiddleware::class
-	]))
     ->resource('client/:clientId/note', ClientNoteController::class);

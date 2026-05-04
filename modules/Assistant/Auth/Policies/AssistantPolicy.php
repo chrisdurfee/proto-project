@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Assistant\Auth\Policies;
 
-use Proto\Auth\Policies\Policy;
+use Common\Auth\Policies\Policy;
 use Proto\Http\Router\Request;
 use Modules\Assistant\Models\AssistantConversation;
 
@@ -16,14 +16,11 @@ use Modules\Assistant\Models\AssistantConversation;
 abstract class AssistantPolicy extends Policy
 {
 	/**
-	 * Get the current authenticated user ID.
+	 * The type of the policy.
 	 *
-	 * @return int|null
+	 * @var string|null
 	 */
-	protected function getUserId(): ?int
-	{
-		return session()->user->id ?? null;
-	}
+	protected ?string $type = 'assistant';
 
 	/**
 	 * Check if the user owns the conversation.

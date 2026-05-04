@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Client\Note\Controllers;
 
-use Modules\Client\Note\Auth\Policies\ClientResourcePolicy;
+use Modules\Client\Auth\Policies\ClientResourcePolicy;
 use Modules\Client\Note\Models\ClientNote;
 use Proto\Controllers\ResourceController;
 use Proto\Http\Router\Request;

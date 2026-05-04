@@ -12,6 +12,13 @@ use Modules\Assistant\Models\AssistantConversation;
 class AssistantConversationPolicy extends AssistantPolicy
 {
 	/**
+	 * The type of the policy.
+	 *
+	 * @var string|null
+	 */
+	protected ?string $type = 'assistantConversation';
+
+	/**
 	 * Check if the user owns the conversation.
 	 *
 	 * @param int $conversationId

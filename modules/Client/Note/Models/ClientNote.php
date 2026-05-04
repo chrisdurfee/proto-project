@@ -3,14 +3,21 @@ namespace Modules\Client\Note\Models;
 
 use Proto\Models\Model;
 use Modules\User\Main\Models\User;
+use Modules\Client\Note\Models\Factories\ClientNoteFactory;
 
 /**
  * ClientNote
  *
  * @package Modules\Client\Note\Models
+ * @method static ClientNoteFactory factory(int $count = 1, array $attributes = [])
  */
 class ClientNote extends Model
 {
+	/**
+	 * @var string|null $factory the factory class name
+	 */
+	protected static ?string $factory = ClientNoteFactory::class;
+
 	/**
 	 * @var string|null $tableName
 	 */
@@ -53,6 +60,11 @@ class ClientNote extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['clientId', 'createdAt', 'createdBy'];
+
+	/**
 	 * Get searchable fields for the model.
 	 *
 	 * @return array
@@ -82,7 +94,10 @@ class ClientNote extends Model
 				'firstName',
 				'lastName',
 				'displayName',
-				'image'
+				'image',
+				'username',
+				'status',
+				'verified'
 			])->on(['createdBy', 'id']);
 	}
 }

@@ -10,7 +10,7 @@ use Common\Auth\Policies\Policy;
  */
 class ClientPolicy extends Policy
 {
-    /**
+	/**
 	 * The type of the policy.
 	 *
 	 * @var string|null

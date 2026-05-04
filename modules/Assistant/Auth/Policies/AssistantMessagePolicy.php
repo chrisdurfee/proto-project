@@ -12,6 +12,13 @@ use Modules\Assistant\Models\AssistantMessage;
 class AssistantMessagePolicy extends AssistantPolicy
 {
 	/**
+	 * The type of the policy.
+	 *
+	 * @var string|null
+	 */
+	protected ?string $type = 'assistantMessage';
+
+	/**
 	 * Check if the user owns the message.
 	 *
 	 * @param int $messageId

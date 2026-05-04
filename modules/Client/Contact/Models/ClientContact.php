@@ -4,14 +4,21 @@ namespace Modules\Client\Contact\Models;
 use Modules\User\Main\Models\User;
 use Proto\Models\Model;
 use Proto\Models\Relations\HasOne;
+use Modules\Client\Contact\Models\Factories\ClientContactFactory;
 
 /**
  * ClientContact
  *
  * @package Modules\Client\Contact\Models
+ * @method static ClientContactFactory factory(int $count = 1, array $attributes = [])
  */
 class ClientContact extends Model
 {
+	/**
+	 * @var string|null $factory the factory class name
+	 */
+	protected static ?string $factory = ClientContactFactory::class;
+
 	/**
 	 * @var string|null $tableName
 	 */
@@ -53,6 +60,11 @@ class ClientContact extends Model
 	];
 
 	/**
+	 * @var array Fields that cannot be changed after creation
+	 */
+	protected static array $immutableFields = ['clientId', 'createdAt', 'createdBy', 'deletedAt'];
+
+	/**
 	 * Define joins for the ClientContact model.
 	 *
 	 * @param object $builder The query builder object
@@ -70,7 +82,8 @@ class ClientContact extends Model
 			'language',
 			'timezone',
 			'status',
-			'enabled'
+			'enabled',
+			'verified'
 		])->on(['userId', 'id']);
 	}
 

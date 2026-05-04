@@ -5,6 +5,7 @@ use Modules\Assistant\Auth\Policies\AssistantConversationPolicy;
 use Modules\Assistant\Models\AssistantConversation;
 use Modules\Assistant\Services\AssistantService;
 use Proto\Controllers\ResourceController;
+use Proto\Controllers\Traits\SyncableTrait;
 use Proto\Http\Router\Request;
 
 /**
@@ -14,10 +15,17 @@ use Proto\Http\Router\Request;
  */
 class AssistantConversationController extends ResourceController
 {
+	use SyncableTrait;
+
 	/**
 	 * @var string|null $policy
 	 */
 	protected ?string $policy = AssistantConversationPolicy::class;
+
+	/**
+	 * @var bool $scopeToUser
+	 */
+	protected bool $scopeToUser = true;
 
 	/**
 	 * Constructor
@@ -39,11 +47,7 @@ class AssistantConversationController extends ResourceController
 	 */
 	public function getActive(Request $request): object
 	{
-		$userId = session()->user->id ?? null;
-		if (!$userId)
-		{
-			return $this->error('Unauthorized', 401);
-		}
+		$userId = session()->user->id;
 
 		$assistantService = new AssistantService();
 		$conversation = $assistantService->getOrCreateConversation($userId);
@@ -57,75 +61,59 @@ class AssistantConversationController extends ResourceController
 	}
 
 	/**
-	 * Modifies the filter object based on the request.
+	 * Get the Redis channel for conversation sync.
 	 *
-	 * @param mixed $filter
 	 * @param Request $request
-	 * @return object|null
+	 * @return string
 	 */
-	protected function modifyFilter(?object $filter, Request $request): ?object
+	protected function getSyncChannel(Request $request): string
 	{
-		$userId = session()->user->id ?? null;
-		if ($userId)
-		{
-			$filter->{'ac.user_id'} = $userId;
-		}
-
-		return $filter;
+		$userId = session()->user->id;
+		return "assistant_user:{$userId}:conversations";
 	}
 
 	/**
-	 * Sync conversations via Redis-based SSE.
+	 * Handle incoming sync message for conversations.
 	 *
+	 * @param string $channel
+	 * @param array $message
 	 * @param Request $request
-	 * @return void
+	 * @return array|null|false
 	 */
-	public function sync(Request $request): void
+	protected function handleSyncMessage(string $channel, array $message, Request $request): array|null|false
 	{
-		$userId = session()->user->id ?? null;
-		if (!$userId)
+		$conversationId = $message['id'] ?? $message['conversationId'] ?? null;
+		if (!$conversationId)
 		{
-			return;
+			return null;
 		}
 
-		// Subscribe to user's conversation updates channel
-		$channel = "assistant_user:{$userId}:conversations";
-		redisEvent($channel, function($channel, $message) use ($userId): array|null
+		$action = $message['action'] ?? 'merge';
+		if ($action === 'delete')
 		{
-			// Message contains conversation ID from Redis publish
-			$conversationId = $message['id'] ?? $message['conversationId'] ?? null;
-			if (!$conversationId)
-			{
-				return null;
-			}
-
-			$action = $message['action'] ?? 'merge';
-			if ($action === 'delete')
-			{
-				return [
-					'merge' => [],
-					'deleted' => [$conversationId]
-				];
-			}
-
-			// Fetch the updated conversation data
-			$conversationData = AssistantConversation::get($conversationId);
-			if (!$conversationData)
-			{
-				return null;
-			}
-
-			// Verify this conversation belongs to this user
-			if ($conversationData->userId != $userId)
-			{
-				return null;
-			}
-
 			return [
-				'merge' => [$conversationData],
-				'deleted' => []
+				'merge' => [],
+				'deleted' => [$conversationId]
 			];
-		});
+		}
+
+		$conversationData = AssistantConversation::get($conversationId);
+		if (!$conversationData)
+		{
+			return null;
+		}
+
+		// Verify this conversation belongs to this user
+		$userId = session()->user->id;
+		if ($conversationData->userId != $userId)
+		{
+			return null;
+		}
+
+		return [
+			'merge' => [$conversationData],
+			'deleted' => []
+		];
 	}
 
 	/**

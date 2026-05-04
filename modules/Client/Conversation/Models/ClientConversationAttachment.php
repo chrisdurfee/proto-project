@@ -2,14 +2,21 @@
 namespace Modules\Client\Conversation\Models;
 
 use Proto\Models\Model;
+use Modules\Client\Conversation\Models\Factories\ClientConversationAttachmentFactory;
 
 /**
  * ClientConversationAttachment
  *
  * @package Modules\Client\Conversation\Models
+ * @method static ClientConversationAttachmentFactory factory(int $count = 1, array $attributes = [])
  */
 class ClientConversationAttachment extends Model
 {
+	/**
+	 * @var string|null $factory the factory class name
+	 */
+	protected static ?string $factory = ClientConversationAttachmentFactory::class;
+
 	/**
 	 * @var string|null $tableName
 	 */
@@ -43,4 +50,8 @@ class ClientConversationAttachment extends Model
 		'deletedAt'
 	];
 
+	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['conversationId', 'uploadedBy', 'createdAt'];
 }

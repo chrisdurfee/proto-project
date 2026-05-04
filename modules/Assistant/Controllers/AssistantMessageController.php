@@ -6,7 +6,9 @@ use Modules\Assistant\Models\AssistantMessage;
 use Modules\Assistant\Models\AssistantConversation;
 use Modules\Assistant\Services\AssistantService;
 use Proto\Controllers\ResourceController;
+use Proto\Controllers\Traits\SyncableTrait;
 use Proto\Http\Router\Request;
+use Proto\Utils\Strings;
 
 /**
  * AssistantMessageController
@@ -15,6 +17,8 @@ use Proto\Http\Router\Request;
  */
 class AssistantMessageController extends ResourceController
 {
+	use SyncableTrait;
+
 	/**
 	 * @var string|null $policy
 	 */
@@ -42,6 +46,8 @@ class AssistantMessageController extends ResourceController
 	 */
 	protected function modifyAddItem(object &$data, Request $request): void
 	{
+		parent::modifyAddItem($data, $request);
+
 		$data->conversationId = (int)($request->params()->conversationId ?? $data->conversationId ?? null);
 		$data->role = 'user';
 		$data->type = 'text';
@@ -50,7 +56,7 @@ class AssistantMessageController extends ResourceController
 		// Sanitize content - decode HTML entities and trim whitespace
 		if (isset($data->content))
 		{
-			$data->content = trim(html_entity_decode($data->content, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+			$data->content = Strings::prepareContent($data->content);
 		}
 	}
 
@@ -76,7 +82,7 @@ class AssistantMessageController extends ResourceController
 		$this->publishMessageCreated($data->conversationId, $messageId);
 
 		// Create AI placeholder message
-		$aiMessageId = $this->createAiPlaceholderMessage($data->conversationId, $data->userId ?? session()->user->id ?? null);
+		$aiMessageId = $this->createAiPlaceholderMessage($data->conversationId, $data->userId ?? session()->user->id);
 
 		// Include AI message ID in response
 		if ($aiMessageId)
@@ -213,59 +219,60 @@ class AssistantMessageController extends ResourceController
 	}
 
 	/**
-	 * Sync messages for a conversation via Redis-based SSE.
+	 * Get the Redis channel for message sync.
 	 *
 	 * @param Request $request
-	 * @return void
+	 * @return string
 	 */
-	public function sync(Request $request): void
+	protected function getSyncChannel(Request $request): string
 	{
-		$conversationId = (int)($request->params()->conversationId ?? null);
-		if (!$conversationId)
+		$conversationId = (int)($request->params()->conversationId ?? 0);
+		return "assistant_conversation:{$conversationId}:messages";
+	}
+
+	/**
+	 * Handle incoming sync message for assistant messages.
+	 *
+	 * @param string $channel
+	 * @param array $message
+	 * @param Request $request
+	 * @return array|null|false
+	 */
+	protected function handleSyncMessage(string $channel, array $message, Request $request): array|null|false
+	{
+		$messageId = $message['id'] ?? $message['messageId'] ?? null;
+		if (!$messageId)
 		{
-			return;
+			return null;
 		}
 
-		// Subscribe to conversation's message updates channel
-		$channel = "assistant_conversation:{$conversationId}:messages";
-		redisEvent($channel, function($channel, $message): array|null
+		$action = $message['action'] ?? 'merge';
+		if ($action === 'delete')
 		{
-			// Message contains message ID from Redis publish
-			$messageId = $message['id'] ?? $message['messageId'] ?? null;
-			if (!$messageId)
-			{
-				return null;
-			}
-
-			$action = $message['action'] ?? 'merge';
-			if ($action === 'delete')
-			{
-				return [
-					'merge' => [],
-					'deleted' => [$messageId]
-				];
-			}
-
-			// Fetch the updated message data
-			$messageData = AssistantMessage::get($messageId);
-			if (!$messageData && empty($message['dynamic']))
-			{
-				return null;
-			}
-
-			// Include dynamic property if present (for AI streaming messages)
-			$messageData = $messageData->getData();
-			$dynamic = $message['dynamic'] ?? null;
-			if ($dynamic)
-			{
-				$messageData->dynamic = (object)$dynamic;
-			}
-
 			return [
-				'merge' => [$messageData],
-				'deleted' => []
+				'merge' => [],
+				'deleted' => [$messageId]
 			];
-		});
+		}
+
+		$messageData = AssistantMessage::get($messageId);
+		if (!$messageData && empty($message['dynamic']))
+		{
+			return null;
+		}
+
+		// Include dynamic property if present (for AI streaming messages)
+		$messageData = $messageData->getData();
+		$dynamic = $message['dynamic'] ?? null;
+		if ($dynamic)
+		{
+			$messageData->dynamic = (object)$dynamic;
+		}
+
+		return [
+			'merge' => [$messageData],
+			'deleted' => []
+		];
 	}
 
 	/**

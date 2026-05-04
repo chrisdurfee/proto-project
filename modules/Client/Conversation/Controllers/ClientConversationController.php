@@ -2,10 +2,12 @@
 namespace Modules\Client\Conversation\Controllers;
 
 use Proto\Controllers\ResourceController as Controller;
+use Proto\Controllers\Traits\SyncableTrait;
 use Proto\Http\Router\Request;
 use Modules\Client\Conversation\Models\ClientConversation;
 use Modules\Client\Conversation\Services\ConversationAttachmentService;
-use Modules\Client\Conversation\Auth\Policies\ClientResourcePolicy;
+use Modules\Client\Auth\Policies\ClientResourcePolicy;
+use Proto\Utils\Strings;
 
 /**
  * ClientConversationController
@@ -14,21 +16,24 @@ use Modules\Client\Conversation\Auth\Policies\ClientResourcePolicy;
  */
 class ClientConversationController extends Controller
 {
+	use SyncableTrait;
+
 	/**
 	 * @var string|null $policy
 	 */
 	protected ?string $policy = ClientResourcePolicy::class;
 
 	/**
+	 * @var string|null $serviceClass
+	 */
+	protected ?string $serviceClass = ConversationAttachmentService::class;
+
+	/**
 	 * Initializes the model class.
 	 *
 	 * @param string|null $model The model class reference using ::class.
-	 * @param ConversationAttachmentService $service The attachment service.
 	 */
-	public function __construct(
-		protected ?string $model = ClientConversation::class,
-		protected ConversationAttachmentService $service = new ConversationAttachmentService()
-	)
+	public function __construct(protected ?string $model = ClientConversation::class)
 	{
 		parent::__construct();
 	}
@@ -63,7 +68,7 @@ class ClientConversationController extends Controller
 		// Decode HTML entities and URL encoding from the message
 		if (isset($data->message))
 		{
-			$data->message = trim(html_entity_decode($data->message, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+			$data->message = Strings::prepareContent($data->message);
 		}
 	}
 
@@ -140,46 +145,44 @@ class ClientConversationController extends Controller
 	}
 
 	/**
-	 * Stream conversation updates via Redis-based Server-Sent Events.
-	 * Listens to conversation updates published via Redis pub/sub.
+	 * Get the Redis channel for conversation sync.
 	 *
 	 * @param Request $request
-	 * @return void
+	 * @return string
 	 */
-	public function sync(Request $request): void
+	protected function getSyncChannel(Request $request): string
 	{
-		$clientId = (int)($request->params()->clientId ?? null);
-		if (!$clientId)
+		$clientId = (int)($request->params()->clientId ?? 0);
+		return "client:{$clientId}:conversations";
+	}
+
+	/**
+	 * Handle incoming sync message for conversations.
+	 *
+	 * @param string $channel
+	 * @param array $message
+	 * @param Request $request
+	 * @return array|null
+	 */
+	protected function handleSyncMessage(string $channel, array $message, Request $request): array|null|false
+	{
+		$conversationId = (int)($message['id'] ?? $message['conversationId'] ?? null);
+		if (!$conversationId)
 		{
-			return;
+			return null;
 		}
 
-		// Subscribe to client's conversation updates channel
-		$channel = "client:{$clientId}:conversations";
-		redisEvent($channel, function($channel, $message) use ($clientId)
+		$conversation = ClientConversation::get($conversationId);
+		if (!$conversation)
 		{
-			// Message contains conversation ID from Redis publish
-			$conversationId = (int)($message['id'] ?? $message['conversationId'] ?? null);
-			if (!$conversationId)
-			{
-				return null;
-			}
+			return null;
+		}
 
-			// Fetch the updated conversation data with all joins
-			$conversation = ClientConversation::get($conversationId);
-			if (!$conversation)
-			{
-				return null;
-			}
-
-			// Determine action type from message
-			$action = $message['action'] ?? 'merge';
-
-			return [
-				'merge' => $action === 'merge' ? [$conversation] : [],
-				'deleted' => $action === 'delete' ? [$conversationId] : []
-			];
-		});
+		$action = $message['action'] ?? 'merge';
+		return [
+			'merge' => $action === 'merge' ? [$conversation] : [],
+			'deleted' => $action === 'delete' ? [$conversationId] : []
+		];
 	}
 
 	/**

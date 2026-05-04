@@ -8,6 +8,18 @@ use Proto\Models\Model;
  * AssistantMessage Model
  *
  * @package Modules\Assistant\Models
+ *
+ * @property int $id
+ * @property string $createdAt
+ * @property string|null $updatedAt
+ * @property int $conversationId
+ * @property int $userId
+ * @property string $role
+ * @property string $content
+ * @property string $type
+ * @property bool $isStreaming
+ * @property bool $isComplete
+ * @property string|null $deletedAt
  */
 class AssistantMessage extends Model
 {
@@ -51,14 +63,14 @@ class AssistantMessage extends Model
 				AssistantConversation::class,
 				fields: ['title']
 			)
-			->on(['conversation_id', 'id']);
+			->on(['conversationId', 'id']);
 
 		$builder
 			->one(
 				User::class,
-				fields: ['displayName', 'firstName', 'lastName', 'email', 'image']
+				fields: ['displayName', 'firstName', 'lastName', 'email', 'image', 'username', 'status', 'verified']
 			)
-			->on(['user_id', 'id']);
+			->on(['userId', 'id']);
 	}
 
 	/**
@@ -78,7 +90,7 @@ class AssistantMessage extends Model
 	 */
 	public function user()
 	{
-		return $this->belongsTo(User::class, 'user_id');
+		return $this->belongsTo(User::class);
 	}
 
 	/**

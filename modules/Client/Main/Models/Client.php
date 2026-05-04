@@ -2,14 +2,21 @@
 namespace Modules\Client\Main\Models;
 
 use Proto\Models\Model;
+use Modules\Client\Main\Models\Factories\ClientFactory;
 
 /**
  * Client
  *
  * @package Modules\Client\Main\Models
+ * @method static ClientFactory factory(int $count = 1, array $attributes = [])
  */
 class Client extends Model
 {
+	/**
+	 * @var string|null $factory the factory class name
+	 */
+	protected static ?string $factory = ClientFactory::class;
+
 	/**
 	 * @var string|null $tableName
 	 */
@@ -82,6 +89,11 @@ class Client extends Model
 		'updatedBy',
 		'deletedAt'
 	];
+
+	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdByUserId', 'createdAt'];
 
 	/**
 	 * Get searchable fields for the model.

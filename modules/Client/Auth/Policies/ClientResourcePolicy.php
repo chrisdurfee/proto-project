@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace Modules\Client\Call\Auth\Policies;
+namespace Modules\Client\Auth\Policies;
 
 use Common\Auth\Policies\Policy;
 use Proto\Http\Router\Request;
@@ -7,16 +7,19 @@ use Proto\Http\Router\Request;
 /**
  * ClientResourcePolicy
  *
- * @package Modules\Client\Call\Auth\Policies
+ * Shared CRM resource policy for Client sub-modules (Call, Conversation, Note).
+ * Requires CRM access for all actions and ownership for mutations.
+ *
+ * @package Modules\Client\Auth\Policies
  */
 class ClientResourcePolicy extends Policy
 {
-    /**
+	/**
 	 * The type of the policy.
 	 *
 	 * @var string|null
 	 */
-	protected ?string $type = 'client.resource';
+	protected ?string $type = 'clientResource';
 
 	/**
 	 * Checks if the user can access the CRM.
@@ -28,7 +31,7 @@ class ClientResourcePolicy extends Policy
 		return $this->hasPermission('crm.access');
 	}
 
-    /**
+	/**
 	 * Default policy for methods that don't have an explicit policy method.
 	 *
 	 * @param Request $request

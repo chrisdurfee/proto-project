@@ -15,5 +15,5 @@ class ClientContactPolicy extends Policy
 	 *
 	 * @var string|null
 	 */
-	protected ?string $type = 'client.contact';
+	protected ?string $type = 'clientContact';
 }

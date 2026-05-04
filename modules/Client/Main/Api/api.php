@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 
 use Modules\Client\Main\Controllers\ClientController;
-use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * Client Main Routes
@@ -10,7 +9,4 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * URL Pattern: /api/client
  */
 router()
-	->middleware(([
-		CrossSiteProtectionMiddleware::class
-	]))
 	->resource('client', ClientController::class);

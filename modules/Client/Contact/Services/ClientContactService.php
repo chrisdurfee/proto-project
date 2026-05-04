@@ -3,6 +3,7 @@ namespace Modules\Client\Contact\Services;
 
 use Common\Services\Service;
 use Modules\Client\Contact\Models\ClientContact;
+use Proto\Services\ServiceResult;
 
 /**
  * ClientContactService
@@ -17,9 +18,9 @@ class ClientContactService extends Service
 	 * Add a new contact with optional user account creation/linking.
 	 *
 	 * @param object $data Contact data
-	 * @return object Result with contact and user data
+	 * @return ServiceResult
 	 */
-	public function add(object $data): object
+	public function add(object $data): ServiceResult
 	{
 		return $this->saveContact($data, null);
 	}
@@ -27,12 +28,16 @@ class ClientContactService extends Service
 	/**
 	 * Update an existing contact with optional user account creation/linking.
 	 *
-	 * @param object $data Contact data
-	 * @param int $contactId Existing contact ID
-	 * @return object Result with contact and user data
+	 * @param object $data Contact data (must include id)
+	 * @return ServiceResult
 	 */
-	public function update(object $data, int $contactId): object
+	public function update(object $data): ServiceResult
 	{
+		$contactId = (int)($data->id ?? 0);
+		if (!$contactId)
+		{
+			return ServiceResult::failure('Contact ID required');
+		}
 		return $this->saveContact($data, $contactId);
 	}
 
@@ -41,9 +46,9 @@ class ClientContactService extends Service
 	 *
 	 * @param object $data Contact data
 	 * @param int|null $contactId Existing contact ID (for updates)
-	 * @return object Result with contact and user data
+	 * @return ServiceResult
 	 */
-	protected function saveContact(object $data, ?int $contactId = null): object
+	protected function saveContact(object $data, ?int $contactId = null): ServiceResult
 	{
 		try
 		{
@@ -59,18 +64,15 @@ class ClientContactService extends Service
 
 			$contactData = ClientContact::get($contactId);
 
-			return (object)[
-				'success' => true,
+			return ServiceResult::success((object)[
+				'id' => $contactId,
 				'contact' => $contactData,
 				'userId' => $userId
-			];
+			]);
 		}
 		catch (\Exception $e)
 		{
-			return (object)[
-				'success' => false,
-				'error' => $e->getMessage()
-			];
+			return ServiceResult::failure($e->getMessage());
 		}
 	}
 

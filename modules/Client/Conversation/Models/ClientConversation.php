@@ -3,14 +3,21 @@ namespace Modules\Client\Conversation\Models;
 
 use Proto\Models\Model;
 use Modules\User\Main\Models\User;
+use Modules\Client\Conversation\Models\Factories\ClientConversationFactory;
 
 /**
  * ClientConversation
  *
  * @package Modules\Client\Conversation\Models
+ * @method static ClientConversationFactory factory(int $count = 1, array $attributes = [])
  */
 class ClientConversation extends Model
 {
+	/**
+	 * @var string|null $factory the factory class name
+	 */
+	protected static ?string $factory = ClientConversationFactory::class;
+
 	/**
 	 * @var string|null $tableName
 	 */
@@ -42,6 +49,11 @@ class ClientConversation extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['clientId', 'userId', 'parentId', 'createdAt'];
+
+	/**
 	 * Define joins for eager loading user data.
 	 *
 	 * @param object $builder The query builder object
@@ -56,7 +68,10 @@ class ClientConversation extends Model
 				'firstName',
 				'lastName',
 				'displayName',
-				'image'
+				'image',
+				'username',
+				'status',
+				'verified'
 			])->on(['userId', 'id']);
 
 		/**
