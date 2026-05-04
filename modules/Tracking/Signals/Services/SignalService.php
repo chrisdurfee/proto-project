@@ -31,11 +31,6 @@ class SignalService extends Service
 			'occurredAt' => date('Y-m-d H:i:s'),
 		]);
 		$signal->add();
-
-		if ($userId !== null)
-		{
-			modules()->user()->achievement()->check($userId, $type);
-		}
 	}
 
 	/**

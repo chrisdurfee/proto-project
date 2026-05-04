@@ -7,7 +7,6 @@ use Modules\User\Follower\Models\FollowerUser;
 use Modules\User\Main\Auth\Gates\EmailVerificationGate;
 use Modules\User\Main\Controllers\Helpers\UserHelper;
 use Modules\User\Main\Models\User;
-use Modules\User\Main\Models\UserPrivacySetting;
 use Modules\User\Main\Auth\Policies\UserPolicy;
 use Modules\User\Main\Services\PasswordUpdateService;
 use Modules\User\Main\Services\UnsubscribeService;
@@ -66,9 +65,6 @@ class UserController extends ResourceController
 		$sessionUserId = session()->user->id;
 		$userData->isFollowing = FollowerUser::isAdded((int)$id, (int)$sessionUserId);
 		$userData->isBlocked = BlockUser::isAdded((int)$sessionUserId, (int)$id);
-
-		$vehicles = GarageVehicle::fetchWhere(['gv.userId' => (int)$id]);
-		$userData->vehicleCount = is_array($vehicles) ? count($vehicles) : 0;
 
 		return $this->response(['row' => $userData]);
 	}
@@ -177,14 +173,7 @@ class UserController extends ResourceController
 		 */
 		$this->updatePrivacy($data);
 
-		$beingVerified = $this->isBeingVerified($data);
-
 		$response = parent::updateItem($data);
-
-		if ($beingVerified)
-		{
-			modules()->user()->achievement()->awardBySlug((int)$data->id, 'identity_verified');
-		}
 
 		if (!empty($response->success))
 		{
@@ -286,105 +275,6 @@ class UserController extends ResourceController
 		];
 		$service = new UnsubscribeService();
 		return $service->updateNotificationPreferences($settings);
-	}
-
-	/**
-	 * Updates the user's privacy settings via a dedicated endpoint.
-	 *
-	 * @param Request $request
-	 * @return object
-	 */
-	public function updatePrivacySettings(Request $request): object
-	{
-		$id = $this->getResourceId($request);
-		if (!$id)
-		{
-			return $this->error('User ID is required.');
-		}
-
-		$data = $this->getRequestItem($request);
-		if (empty($data))
-		{
-			return $this->error('No data provided.');
-		}
-
-		$this->validateRules((array)$data, [
-			'profileVisibility' => 'string:20',
-			'garageVisibility' => 'string:20',
-			'postVisibility' => 'string:20',
-			'nameDisplay' => 'string:20',
-			'contactSync' => 'int',
-			'showOnlineStatus' => 'int'
-		]);
-
-		$data->id = (int)$id;
-		$this->updatePrivacy($data);
-
-		return $this->success();
-	}
-
-	/**
-	 * Updates the user's privacy settings.
-	 *
-	 * @param object $data
-	 * @return bool
-	 */
-	protected function updatePrivacy(object $data): bool
-	{
-		$privacyFields = [
-			'profileVisibility',
-			'garageVisibility',
-			'postVisibility',
-			'nameDisplay',
-			'contactSync',
-			'showOnlineStatus'
-		];
-
-		$hasPrivacyData = false;
-		foreach ($privacyFields as $field)
-		{
-			if (isset($data->$field))
-			{
-				$hasPrivacyData = true;
-				break;
-			}
-		}
-
-		if (!$hasPrivacyData)
-		{
-			return true;
-		}
-
-		$userId = (int)$data->id;
-		$existing = UserPrivacySetting::getBy(['userId' => $userId]);
-
-		if (!$existing)
-		{
-			$privacy = new UserPrivacySetting((object)[
-				'userId' => $userId,
-				'profileVisibility' => $data->profileVisibility ?? 'public',
-				'garageVisibility' => $data->garageVisibility ?? 'public',
-				'postVisibility' => $data->postVisibility ?? 'public',
-				'nameDisplay' => $data->nameDisplay ?? 'full',
-				'contactSync' => $data->contactSync ?? 1,
-				'showOnlineStatus' => $data->showOnlineStatus ?? 1
-			]);
-			return $privacy->add();
-		}
-
-		return UserPrivacySetting::builder()
-			->update()
-			->set([
-				'profile_visibility' => $data->profileVisibility ?? $existing->profileVisibility,
-				'garage_visibility' => $data->garageVisibility ?? $existing->garageVisibility,
-				'post_visibility' => $data->postVisibility ?? $existing->postVisibility,
-				'name_display' => $data->nameDisplay ?? $existing->nameDisplay,
-				'contact_sync' => $data->contactSync ?? $existing->contactSync,
-				'show_online_status' => $data->showOnlineStatus ?? $existing->showOnlineStatus,
-				'updated_at' => date('Y-m-d H:i:s')
-			])
-			->where('user_id = ?')
-			->execute([$userId]);
 	}
 
 	/**

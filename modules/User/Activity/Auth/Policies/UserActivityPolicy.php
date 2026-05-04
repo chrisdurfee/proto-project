@@ -27,13 +27,4 @@ class UserActivityPolicy extends Policy
 	{
 		return $this->isSignedIn();
 	}
-
-	/**
-	 * @param Request $request
-	 * @return bool
-	 */
-	public function stats(Request $request): bool
-	{
-		return true;
-	}
 }

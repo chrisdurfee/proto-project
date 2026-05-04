@@ -2,8 +2,6 @@
 
 namespace Modules\Assistant\Gateway;
 
-use Modules\Assistant\Personalization\Gateway\Gateway as PersonalizationGateway;
-
 /**
  * Gateway
  *
@@ -13,13 +11,5 @@ use Modules\Assistant\Personalization\Gateway\Gateway as PersonalizationGateway;
  */
 class Gateway
 {
-    /**
-     * Access the Personalization feature gateway.
-     *
-     * @return PersonalizationGateway
-     */
-    public function personalization(): PersonalizationGateway
-    {
-        return new PersonalizationGateway();
-    }
+
 }

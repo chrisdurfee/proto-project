@@ -15,10 +15,6 @@ use Modules\User\Permission\Gateway\Gateway as PermissionGateway;
 use Modules\User\Role\Gateway\Gateway as RoleGateway;
 use Modules\User\Push\Gateway\Gateway as PushGateway;
 use Modules\User\Main\Services\UserImageService;
-use Modules\User\Preferences\Gateway\Gateway as PreferencesGateway;
-use Modules\User\Onboarding\Gateway\Gateway as OnboardingGateway;
-use Modules\User\Achievement\Gateway\Gateway as AchievementGateway;
-use Modules\User\Budget\Gateway\Gateway as BudgetGateway;
 
 /**
  * User Gateway
@@ -277,43 +273,4 @@ class Gateway
 		return $imageService->importFromUrl($url, $userId);
 	}
 
-	/**
-	 * Access user preferences gateway.
-	 *
-	 * @return PreferencesGateway
-	 */
-	public function preferences(): PreferencesGateway
-	{
-		return new PreferencesGateway();
-	}
-
-	/**
-	 * Access user onboarding gateway.
-	 *
-	 * @return OnboardingGateway
-	 */
-	public function onboarding(): OnboardingGateway
-	{
-		return new OnboardingGateway();
-	}
-
-	/**
-	 * Access the Achievement feature gateway.
-	 *
-	 * @return AchievementGateway
-	 */
-	public function achievement(): AchievementGateway
-	{
-		return new AchievementGateway();
-	}
-
-	/**
-	 * Access the Budget feature gateway.
-	 *
-	 * @return BudgetGateway
-	 */
-	public function budget(): BudgetGateway
-	{
-		return new BudgetGateway();
-	}
 }
