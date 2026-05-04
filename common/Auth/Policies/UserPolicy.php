@@ -17,7 +17,7 @@ class UserPolicy extends Policy
 	 *
 	 * @var string|null
 	 */
-	protected ?string $type = 'users';
+	protected ?string $type = 'user';
 
 	/**
 	 * Determines if the user can get a single user's information.
@@ -33,7 +33,7 @@ class UserPolicy extends Policy
 			return false;
 		}
 
-		return $this->canAccess('users.view') || $this->ownsResource($id);
+		return $this->canAccess('user.view') || $this->ownsResource($id);
 	}
 
 	/**
@@ -44,7 +44,7 @@ class UserPolicy extends Policy
 	 */
 	protected function canEdit(mixed $data): bool
 	{
-		if ($this->canAccess('users.edit'))
+		if ($this->canAccess('user.edit'))
 		{
 			return true;
 		}

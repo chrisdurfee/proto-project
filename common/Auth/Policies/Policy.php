@@ -2,6 +2,7 @@
 namespace Common\Auth\Policies;
 
 use Proto\Auth\Policies\Policy as BasePolicy;
+use Proto\Controllers\Controller;
 use Proto\Http\Router\Request;
 
 /**
@@ -10,6 +11,7 @@ use Proto\Http\Router\Request;
  * This policy handles access control for content-related actions.
  *
  * @package Common\Auth\Policies
+ * @property Controller|null $controller
  */
 class Policy extends BasePolicy
 {
@@ -123,6 +125,17 @@ class Policy extends BasePolicy
 	}
 
 	/**
+	 * Gets the current session user's ID.
+	 *
+	 * @return int|null
+	 */
+	protected function getUserId(): ?int
+	{
+		$userId = session()->user->id ?? null;
+		return ($userId !== null) ? (int) $userId : null;
+	}
+
+	/**
 	 * Helper method to check if the user owns a resource.
 	 *
 	 * @param mixed $ownerId The resource or owner value.
@@ -136,5 +149,27 @@ class Policy extends BasePolicy
 		}
 
 		return auth()->resource->isOwner($ownerId);
+	}
+
+	/**
+	 * Checks if the request's route userId parameter matches the session user.
+	 *
+	 * Useful for routes like /user/:userId/resource where the userId
+	 * in the URL must match the authenticated user.
+	 *
+	 * @param Request $request The request object.
+	 * @param string $paramName The route parameter name (default: 'userId').
+	 * @return bool
+	 */
+	protected function matchesRouteUser(Request $request, string $paramName = 'userId'): bool
+	{
+		$params = $request->params();
+		$routeUserId = (int)($params->$paramName ?? 0);
+		if ($routeUserId === 0)
+		{
+			return false;
+		}
+
+		return $this->ownsResource($routeUserId);
 	}
 }

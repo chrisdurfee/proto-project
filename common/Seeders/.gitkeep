@@ -1,0 +1,2 @@
+# Keep this directory in git
+# Place migration classes here that should be run before module migrations

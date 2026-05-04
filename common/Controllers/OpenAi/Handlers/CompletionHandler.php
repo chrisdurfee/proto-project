@@ -94,7 +94,6 @@ class CompletionHandler extends Handler
 	 *
 	 * @param string $prompt
 	 * @param object|null $systemSettings
-	 * @param bool $stream
 	 * @return object|null
 	 */
 	public function generate(

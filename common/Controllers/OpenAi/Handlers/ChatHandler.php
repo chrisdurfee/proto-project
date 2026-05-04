@@ -77,7 +77,7 @@ class ChatHandler extends Handler
 	 *
 	 * @param string|array $prompt
 	 * @param string|null $systemContent
-	 * @param string|null $model
+	 * @param object|null $systemSettings
 	 * @param callable|null $streamCallback
 	 * @return void
 	 */
@@ -132,8 +132,7 @@ class ChatHandler extends Handler
 	 *
 	 * @param string|array $prompt
 	 * @param string|null $systemContent
-	 * @param string|null $model
-	 * @param bool $stream
+	 * @param object|null $systemSettings
 	 * @return object|null
 	 */
 	public function generate(
