@@ -120,7 +120,7 @@ Docker Compose automatically reads `.env` files from the **same directory** as t
 
 ### Development
 ```bash
-cd /home/tech-e/projects/proto-project
+cd /home/tech-e/projects/rally
 
 # Docker Compose looks for infrastructure/.env (same directory as compose file)
 docker-compose -f infrastructure/docker-compose.yaml up -d
@@ -188,7 +188,7 @@ docker-compose -f infrastructure/docker-compose.production.yaml up -d
 
 4. **Build and deploy**:
    ```bash
-   docker build -f infrastructure/docker/Dockerfile -t proto-project-web:latest .
+   docker build -f infrastructure/docker/Dockerfile -t rally-web:latest .
    docker-compose -f infrastructure/docker-compose.production.yaml up -d
    ```
 
@@ -270,7 +270,7 @@ nano common/Config/.env
 **Solution**:
 ```bash
 # Always run from project root
-cd /home/tech-e/projects/proto-project
+cd /home/tech-e/projects/rally
 
 # Use full path to compose file
 docker-compose -f infrastructure/docker-compose.yaml up -d

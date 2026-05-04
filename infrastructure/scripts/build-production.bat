@@ -2,7 +2,7 @@
 REM Production Build Script for Subdomain Deployment (Windows)
 REM This script builds all frontend apps for production deployment to subdomains
 
-echo 🚀 Building Proto Project for Subdomain Deployment...
+echo 🚀 Building Rally for Subdomain Deployment...
 
 REM Set production environment
 set NODE_ENV=production

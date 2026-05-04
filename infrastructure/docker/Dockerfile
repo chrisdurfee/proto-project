@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     brotli \
     supervisor \
     inotify-tools \
+    cron \
     && apt-get install -y libapache2-mod-brotli || echo "Brotli module not available" \
     && rm -rf /var/lib/apt/lists/*
 
@@ -42,6 +43,15 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
+
+# Install ImageMagick with HEIC/HEIF support for receipt scanning
+RUN apt-get update && apt-get install -y \
+    libmagickwand-dev \
+    libheif-dev \
+    imagemagick \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy module enablement script
 COPY infrastructure/docker/enable-modules.sh /tmp/enable-modules.sh
@@ -72,6 +82,10 @@ COPY infrastructure/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 # Copy PHP-FPM configurations
 COPY infrastructure/docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
 COPY infrastructure/docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+# Dedicated pool for SSE streams (paths ending in /sync) — listens on 127.0.0.1:9001.
+# Apache vhosts route /sync$ to this pool so long-lived streams cannot starve
+# regular API workers in the [www] pool.
+COPY infrastructure/docker/php/sse.conf /usr/local/etc/php-fpm.d/sse.conf
 
 # Setup SSL certificates (use provided or generate self-signed)
 # We copy the whole docker directory to check for ssl certs, as the ssl dir might not exist in git

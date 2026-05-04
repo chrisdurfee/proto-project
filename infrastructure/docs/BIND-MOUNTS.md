@@ -1,10 +1,10 @@
 # Bind Mount Strategy
 
-This document explains how Proto Project handles bind mounts for seamless development across different installation scenarios.
+This document explains how Rally handles bind mounts for seamless development across different installation scenarios.
 
 ## Overview
 
-Proto Project uses a **hybrid approach** that combines:
+Rally uses a **hybrid approach** that combines:
 - **Built-in files** in the Docker image (production-ready)
 - **Bind mount overlays** for development (live editing)
 - **Automatic dependency detection** (handles missing vendor/)
@@ -76,7 +76,7 @@ fi
 ### Scenario 1: Fresh `composer create-project`
 
 ```bash
-composer create-project protoframework/proto-project my-app
+composer create-project chrisdurfee/rally my-app
 cd my-app
 cp common/Config/.env-example common/Config/.env
 ./run.sh sync-config
@@ -93,7 +93,7 @@ docker-compose up -d
 ### Scenario 2: Git Clone
 
 ```bash
-git clone https://github.com/protoframework/proto-project.git my-app
+git clone https://github.com/chrisdurfee/rally.git my-app
 cd my-app
 composer install  # (optional - can let Docker handle it)
 cp common/Config/.env-example common/Config/.env
@@ -110,7 +110,7 @@ docker-compose up -d
 ### Scenario 3: Existing Development Environment
 
 ```bash
-cd existing-proto-project
+cd existing-rally
 docker-compose up -d
 ```
 
@@ -249,7 +249,7 @@ COPY common/ ./common/
 
 1. **Document the quick start**:
    ```bash
-   composer create-project protoframework/proto-project my-app
+   composer create-project chrisdurfee/rally my-app
    cd my-app
    cp common/Config/.env-example common/Config/.env
    ./run.sh sync-config

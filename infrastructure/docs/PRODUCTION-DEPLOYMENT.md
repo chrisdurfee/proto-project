@@ -1,6 +1,6 @@
 # Production Deployment Guide
 
-This guide covers building and deploying the Proto Project production Docker container with frontend apps baked in.
+This guide covers building and deploying the Rally production Docker container with frontend apps baked in.
 
 ---
 

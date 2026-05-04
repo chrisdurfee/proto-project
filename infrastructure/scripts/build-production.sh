@@ -3,7 +3,7 @@
 # Production Build Script for Subdomain Deployment
 # This script builds all frontend apps for production deployment to subdomains
 
-echo "🚀 Building Proto Project for Subdomain Deployment..."
+echo "🚀 Building Rally for Subdomain Deployment..."
 
 # Set production environment
 export NODE_ENV=production

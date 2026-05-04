@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Proto Project uses the enhanced Proto Framework (v1.0.15+) with native PHPMailer/SMTP support for universal email sending. You can manage all email settings from the Proto configuration system and automatically sync them to Docker.
+The Rally uses the enhanced Proto Framework (v1.0.15+) with native PHPMailer/SMTP support for universal email sending. You can manage all email settings from the Proto configuration system and automatically sync them to Docker.
 
 ## Framework Requirements
 
@@ -149,8 +149,8 @@ MAIL_SENDING_ENABLED=false
       "username": "dev_username",
       "password": "dev_password",
       "encryption": "tls",
-      "fromAddress": "dev@proto-project.local",
-      "fromName": "Proto Project (Dev)",
+      "fromAddress": "dev@rally.local",
+      "fromName": "Rally (Dev)",
       "sendingEnabled": false  // Disabled by default for safety
     }
   }

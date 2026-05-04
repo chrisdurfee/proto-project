@@ -1,6 +1,6 @@
 # Subdomain Deployment Guide
 
-This guide explains how to deploy the Proto Project using subdomains for each application.
+This guide explains how to deploy the Rally using subdomains for each application.
 
 ## Domain Configuration
 

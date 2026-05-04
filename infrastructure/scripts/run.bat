@@ -1,5 +1,5 @@
 @echo off
-REM Script Runner for Proto Project (Windows)
+REM Script Runner  (Windows)
 REM Usage: run.bat <script-name> [args...]
 
 set SCRIPT_NAME=%1
@@ -58,7 +58,7 @@ call "%SCRIPTS_DIR%\switch-env.bat" %2 %3 %4 %5 %6 %7 %8 %9
 goto end
 
 :help
-echo Proto Project Script Runner
+echo Rally Script Runner
 echo.
 echo Usage: run.bat ^<script^> [args...]
 echo.

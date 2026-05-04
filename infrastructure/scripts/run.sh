@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script Runner for Proto Project
+# Script Runner
 # Usage: ./run.sh <script-name> [args...]
 
 SCRIPT_NAME="$1"
@@ -50,7 +50,7 @@ case "$SCRIPT_NAME" in
         "$SCRIPTS_DIR/switch-env.bat" "$@"
         ;;
     "help"|"--help"|"-h")
-        echo "Proto Project Script Runner"
+        echo "Rally Script Runner"
         echo ""
         echo "Usage: ./run.sh <script> [args...]"
         echo ""

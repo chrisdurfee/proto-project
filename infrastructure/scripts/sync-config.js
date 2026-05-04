@@ -86,8 +86,8 @@ function generateDockerEnv(protoConfig) {
         envVars.push(`MAIL_USERNAME=${smtp.username || ''}`);
         envVars.push(`MAIL_PASSWORD=${smtp.password || ''}`);
         envVars.push(`MAIL_ENCRYPTION=${smtp.encryption || 'tls'}`);
-        envVars.push(`MAIL_FROM_ADDRESS=${smtp.fromAddress || 'noreply@proto-project.com'}`);
-        envVars.push(`MAIL_FROM_NAME="${smtp.fromName || 'Proto Project'}"`);
+        envVars.push(`MAIL_FROM_ADDRESS=${smtp.fromAddress || 'noreply@rally.com'}`);
+        envVars.push(`MAIL_FROM_NAME="${smtp.fromName || 'Rally'}"`);
         envVars.push(`MAIL_SENDING_ENABLED=${smtp.sendingEnabled || false}`);
         envVars.push('');
     }

@@ -1,7 +1,7 @@
 # HTTPS and HTTP/2 Configuration
 
 ## Overview
-The Proto Project Docker container is configured with **HTTPS support** using a self-signed SSL certificate for local development. HTTP/2 is partially supported with the current configuration.
+The Rally Docker container is configured with **HTTPS support** using a self-signed SSL certificate for local development. HTTP/2 is partially supported with the current configuration.
 
 ## Accessing Your Application
 

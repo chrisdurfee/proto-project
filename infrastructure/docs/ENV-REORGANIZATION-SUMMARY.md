@@ -200,7 +200,7 @@ infrastructure/.env
 
 ```bash
 # All commands work from project root
-cd /home/tech-e/projects/proto-project
+cd /home/tech-e/projects/rally
 
 # Development
 docker-compose -f infrastructure/docker-compose.yaml up -d
@@ -383,7 +383,7 @@ $ docker-compose -f infrastructure/docker-compose.yaml config | grep MARIADB_ROO
 ### Production Deployment
 1. Set production values in master config
 2. Run sync: `./infrastructure/scripts/run.sh sync-config`
-3. Build image: `docker build -f infrastructure/docker/Dockerfile -t proto-project-web:latest .`
+3. Build image: `docker build -f infrastructure/docker/Dockerfile -t rally-web:latest .`
 4. Deploy: `docker-compose -f infrastructure/docker-compose.production.yaml up -d`
 
 ## Documentation Created

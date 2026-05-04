@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# SSL Certificate Setup Script for Proto Project
+# SSL Certificate Setup Script
 # This script sets up SSL certificates using Let's Encrypt
 
 set -e

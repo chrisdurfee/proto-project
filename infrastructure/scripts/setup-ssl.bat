@@ -1,5 +1,5 @@
 @echo off
-REM SSL Certificate Setup Script for Proto Project (Windows)
+REM SSL Certificate Setup Script (Windows)
 REM This script sets up SSL certificates using Let's Encrypt
 
 if "%~1"=="" (

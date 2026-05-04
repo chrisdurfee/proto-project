@@ -48,13 +48,13 @@ sudo nano /etc/apache2/sites-available/subdomain-test.conf
 ```apache
 <VirtualHost *:80>
     ServerName myapp.local
-    DocumentRoot /home/projects/proto-project/public
+    DocumentRoot /home/projects/rally/public
 
     # Main domain - serve main app
     RewriteEngine On
     RewriteRule ^/?$ /main/ [R=301,L]
 
-    <Directory "/home/projects/proto-project/public">
+    <Directory "/home/projects/rally/public">
         AllowOverride All
         Require all granted
     </Directory>
@@ -62,9 +62,9 @@ sudo nano /etc/apache2/sites-available/subdomain-test.conf
 
 <VirtualHost *:80>
     ServerName main.myapp.local
-    DocumentRoot /home/projects/proto-project/public/main
+    DocumentRoot /home/projects/rally/public/main
 
-    <Directory "/home/projects/proto-project/public/main">
+    <Directory "/home/projects/rally/public/main">
         AllowOverride All
         Require all granted
     </Directory>
@@ -72,9 +72,9 @@ sudo nano /etc/apache2/sites-available/subdomain-test.conf
 
 <VirtualHost *:80>
     ServerName crm.myapp.local
-    DocumentRoot /home/projects/proto-project/public/crm
+    DocumentRoot /home/projects/rally/public/crm
 
-    <Directory "/home/projects/proto-project/public/crm">
+    <Directory "/home/projects/rally/public/crm">
         AllowOverride All
         Require all granted
     </Directory>
@@ -82,9 +82,9 @@ sudo nano /etc/apache2/sites-available/subdomain-test.conf
 
 <VirtualHost *:80>
     ServerName developer.myapp.local
-    DocumentRoot /home/projects/proto-project/public/developer
+    DocumentRoot /home/projects/rally/public/developer
 
-    <Directory "/home/projects/proto-project/public/developer">
+    <Directory "/home/projects/rally/public/developer">
         AllowOverride All
         Require all granted
     </Directory>
@@ -205,13 +205,13 @@ cd ..
 ```apache
 <VirtualHost *:443>
     ServerName main.myapp.local
-    DocumentRoot /home/projects/proto-project/public/main
+    DocumentRoot /home/projects/rally/public/main
 
     SSLEngine on
-    SSLCertificateFile /home/projects/proto-project/ssl/server.crt
-    SSLCertificateKeyFile /home/projects/proto-project/ssl/server.key
+    SSLCertificateFile /home/projects/rally/ssl/server.crt
+    SSLCertificateKeyFile /home/projects/rally/ssl/server.key
 
-    <Directory "/home/projects/proto-project/public/main">
+    <Directory "/home/projects/rally/public/main">
         AllowOverride All
         Require all granted
     </Directory>

@@ -238,7 +238,24 @@ bash -c 'while true; do
     sleep 3
 done' &
 
-echo "🚀 Starting Apache with Event MPM and HTTP/2..."
+echo "� Configuring scheduled tasks (cron)..."
+# Install cron job files from the project's cron directory
+if [ -d /var/www/html/infrastructure/docker/cron ]; then
+    for cronfile in /var/www/html/infrastructure/docker/cron/*; do
+        [ -f "$cronfile" ] || continue
+        cp "$cronfile" /etc/cron.d/"$(basename "$cronfile")"
+        chmod 0644 /etc/cron.d/"$(basename "$cronfile")"
+        echo "✅ Installed cron job: $(basename "$cronfile")"
+    done
+fi
+# Ensure cron daemon logs directory exists, then start cron
+mkdir -p /var/log
+touch /var/log/vehicle-sync.log
+chmod 666 /var/log/vehicle-sync.log
+service cron start >/dev/null 2>&1 || cron >/dev/null 2>&1 || true
+echo "✅ Cron daemon started"
+
+echo "�🚀 Starting Apache with Event MPM and HTTP/2..."
 
 # Set Apache runtime directory to a writable location
 # Directories are already created with proper permissions in Dockerfile

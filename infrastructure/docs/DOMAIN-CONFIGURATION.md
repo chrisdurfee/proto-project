@@ -4,7 +4,7 @@ This guide explains how the centralized domain configuration system works and ho
 
 ## Overview
 
-The Proto Project uses a **hybrid domain configuration system** that:
+The Rally uses a **hybrid domain configuration system** that:
 
 1. **Automatically reads** from your Proto framework configuration (`common/Config/.env`)
 2. **Falls back** to static defaults if the config can't be read
