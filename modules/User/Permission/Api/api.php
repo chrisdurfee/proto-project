@@ -2,7 +2,6 @@
 namespace Modules\User\Permission\Api\Permission;
 
 use Modules\User\Permission\Controllers\PermissionController;
-use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * Permission Routes
@@ -10,7 +9,4 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * Defines the API routes for managing user permissions.
  */
 router()
-	->middleware(([
-		CrossSiteProtectionMiddleware::class
-	]))
 	->resource('user/permission', PermissionController::class);

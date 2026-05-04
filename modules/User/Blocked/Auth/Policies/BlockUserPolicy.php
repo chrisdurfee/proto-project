@@ -2,7 +2,7 @@
 namespace Modules\User\Blocked\Auth\Policies;
 
 use Proto\Http\Router\Request;
-use Modules\User\Main\Auth\Policies\Policy;
+use Common\Auth\Policies\Policy;
 
 /**
  * Class BlockUserPolicy
@@ -18,7 +18,7 @@ class BlockUserPolicy extends Policy
 	 *
 	 * @var string|null
 	 */
-	protected ?string $type = 'block-user';
+	protected ?string $type = 'blockUser';
 
 	/**
 	 * Determines if the user can unblock a user.

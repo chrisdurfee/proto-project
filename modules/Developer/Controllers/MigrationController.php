@@ -51,19 +51,31 @@ class MigrationController extends Controller
 	 */
 	public function updateMigrations(string $direction): object
 	{
-		$result = false;
-
-		switch ($direction)
+		try
 		{
-			case 'up':
-				$result = $this->run();
-				break;
-			case 'down':
-				$result = $this->revert();
-				break;
-		}
+			$result = false;
 
-		return $this->response($result);
+			switch ($direction)
+			{
+				case 'up':
+					$result = $this->run();
+					break;
+				case 'down':
+					$result = $this->revert();
+					break;
+			}
+
+			return $this->response($result);
+		}
+		catch (\Throwable $e)
+		{
+			$message = $e->getMessage();
+			$trace = $e->getFile() . ':' . $e->getLine();
+
+			error_log('[MigrationController] ' . get_class($e) . ': ' . $message . ' in ' . $trace);
+
+			return $this->error($message . ' [' . $trace . ']');
+		}
 	}
 
 	/**
@@ -106,10 +118,7 @@ class MigrationController extends Controller
 	/**
 	 * Retrieves migration records.
 	 *
-	 * @param mixed $filter Optional filter for migration rows.
-	 * @param int|null $offset Optional offset for pagination.
-	 * @param int|null $limit Optional count of rows to retrieve.
-	 * @param array|null $modifiers Optional query modifiers.
+	 * @param Request $request The request object containing filter, offset, limit, and modifiers parameters.
 	 * @return object Response object containing migration records.
 	 */
 	public function all(

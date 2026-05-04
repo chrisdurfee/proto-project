@@ -2,7 +2,7 @@
 namespace Modules\User\Follower\Auth\Policies;
 
 use Proto\Http\Router\Request;
-use Modules\User\Main\Auth\Policies\Policy;
+use Common\Auth\Policies\Policy;
 
 /**
  * Class FollowerPolicy
@@ -75,6 +75,17 @@ class FollowerPolicy extends Policy
 	 * @return bool True if the user can view followers, otherwise false.
 	 */
 	public function all(Request $request): bool
+	{
+		return $this->isSignedIn();
+	}
+
+	/**
+	 * Determines if the user can list all users being followed.
+	 *
+	 * @param Request $request The request object.
+	 * @return bool True if the user can view the following list, otherwise false.
+	 */
+	public function following(Request $request): bool
 	{
 		return $this->isSignedIn();
 	}

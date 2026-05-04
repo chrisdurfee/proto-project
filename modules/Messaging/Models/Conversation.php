@@ -3,14 +3,23 @@ namespace Modules\Messaging\Models;
 
 use Modules\User\Main\Models\User;
 use Proto\Models\Model;
+use Modules\Messaging\Models\Factories\ConversationFactory;
 
 /**
  * Conversation Model
  *
  * @package Modules\Messaging\Models
+ * @method void __construct(?object $data = null)
+ * @method static ConversationFactory factory(int $count = 1, array $attributes = [])
+ * @property \Proto\Storage\StorageProxy|null $storage
  */
 class Conversation extends Model
 {
+	/**
+	 * @var string|null $factory the factory class name
+	 */
+	protected static ?string $factory = ConversationFactory::class;
+
 	/**
 	 * @var string|null $tableName
 	 */
@@ -37,6 +46,11 @@ class Conversation extends Model
 		'lastMessageContent',
 		'lastMessageType',
 	];
+
+	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdAt', 'createdBy'];
 
 	/**
 	 * Define joins for the model.
@@ -68,7 +82,9 @@ class Conversation extends Model
 					'lastName',
 					'email',
 					'image',
-					'status'
+					'status',
+					'verified',
+					'username'
 				])
 				->on(['userId', 'id']);
 	}

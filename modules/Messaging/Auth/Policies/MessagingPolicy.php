@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Messaging\Auth\Policies;
 
-use Proto\Auth\Policies\Policy;
+use Common\Auth\Policies\Policy;
 use Proto\Http\Router\Request;
 use Modules\Messaging\Models\ConversationParticipant;
 use Modules\Messaging\Models\Message;
@@ -17,14 +17,11 @@ use Modules\Messaging\Models\Message;
 abstract class MessagingPolicy extends Policy
 {
 	/**
-	 * Get the current authenticated user ID.
+	 * The type of the policy.
 	 *
-	 * @return int|null
+	 * @var string|null
 	 */
-	protected function getUserId(): ?int
-	{
-		return session()->user->id ?? null;
-	}
+	protected ?string $type = 'messaging';
 
 	/**
 	 * Check if the user is a participant of the conversation.
@@ -56,15 +53,7 @@ abstract class MessagingPolicy extends Policy
 	 */
 	protected function matchesAuthenticatedUser(Request $request): bool
 	{
-		$userId = (int)($request->params()->userId ?? null);
-		$sessionUserId = $this->getUserId();
-
-		if (!$userId || !$sessionUserId)
-		{
-			return false;
-		}
-
-		return $userId === $sessionUserId;
+		return $this->matchesRouteUser($request, 'userId');
 	}
 
 	/**

@@ -48,69 +48,69 @@ class RoleFactory extends Factory
 	/**
 	 * Define an admin role state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateAdmin(): array
+	public function stateAdmin(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'name' => 'Admin',
 			'slug' => 'admin',
 			'description' => 'System administrator with full access'
-		];
+		]);
 	}
 
 	/**
 	 * Define a user role state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateUser(): array
+	public function stateUser(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'name' => 'User',
 			'slug' => 'user',
 			'description' => 'Standard user with basic access'
-		];
+		]);
 	}
 
 	/**
 	 * Define a moderator role state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateModerator(): array
+	public function stateModerator(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'name' => 'Moderator',
 			'slug' => 'moderator',
 			'description' => 'Content moderator with limited administrative access'
-		];
+		]);
 	}
 
 	/**
 	 * Define a guest role state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateGuest(): array
+	public function stateGuest(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'name' => 'Guest',
 			'slug' => 'guest',
 			'description' => 'Guest user with read-only access'
-		];
+		]);
 	}
 
 	/**
 	 * State with custom resource
 	 *
 	 * @param string $resource
-	 * @return array
+	 * @return static
 	 */
-	public function stateWithResource(string $resource): array
+	public function stateWithResource(string $resource): static
 	{
-		return [
+		return $this->state(fn() => [
 			'resource' => $resource
-		];
+		]);
 	}
 }

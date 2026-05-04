@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Blocked\Services;
 
+use Common\Services\Service;
 use Modules\User\Main\Models\User;
 use Modules\User\Blocked\Models\BlockUser;
 use Modules\User\Follower\Push\NewFollowerPush;
@@ -14,7 +15,7 @@ use Proto\Controllers\Response;
  *
  * @package Modules\User\Services\User
  */
-class BlockUserService
+class BlockUserService extends Service
 {
 	/**
 	 * Toggles the block status between a user and blocker.
@@ -31,8 +32,7 @@ class BlockUserService
 			return (object)['success' => false, 'error' => 'User not found.'];
 		}
 
-		$alreadyBlocked = $this->alreadyBlocked($userId, $blockerId);
-		$result = $user->blockers()->toggle([$blockerId]);
+		$result = $user->blocked()->toggle([$blockerId]);
 		if (!$result)
 		{
 			return Response::invalid('Failed to toggle block status.');
@@ -73,7 +73,7 @@ class BlockUserService
 			return Response::invalid('User is already blocked.');
 		}
 
-		$result = $user->blockers()->attach($blockerId);
+		$result = $user->blocked()->attach($blockerId);
 		if (!$result)
 		{
 			return Response::invalid('Failed to block user.');
@@ -102,7 +102,7 @@ class BlockUserService
 			return Response::invalid('User is not blocked.');
 		}
 
-		$result = $user->blockers()->detach($blockerId);
+		$result = $user->blocked()->detach($blockerId);
 		if (!$result)
 		{
 			return Response::invalid('Failed to unblock user.');

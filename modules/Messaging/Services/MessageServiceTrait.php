@@ -5,6 +5,7 @@ use Modules\Messaging\Models\Conversation;
 use Modules\Messaging\Models\ConversationParticipant;
 use Modules\Messaging\Models\Message;
 use Modules\Messaging\Push\NewMessage;
+use Modules\Notification\Models\UserNotification;
 
 /**
  * MessageServiceTrait
@@ -97,9 +98,10 @@ trait MessageServiceTrait
 				'action' => 'merge'
 			]);
 
-			if ($sendPushNotifications && $participant->userId !== $message->senderId)
+			if ($sendPushNotifications && (int)$participant->userId !== (int)$message->senderId)
 			{
 				$this->sendPushNotification($participant->userId, $message);
+				$this->logMessageNotification((int)$participant->userId, $message);
 			}
 		}
 	}
@@ -126,6 +128,77 @@ trait MessageServiceTrait
 		];
 
 		modules()->user()->push()->send($userId, $settings, $data);
+	}
+
+	/**
+	 * Log an in-app notification for a new message.
+	 *
+	 * If an unread notification already exists for the same conversation,
+	 * update it instead of creating a duplicate. This prevents notification
+	 * spam when the same user sends multiple messages in a row.
+	 *
+	 * @param int $userId
+	 * @param Message $message
+	 * @return void
+	 */
+	protected function logMessageNotification(int $userId, Message $message): void
+	{
+		$name = $message->displayName ?? 'Someone';
+		$conversationId = (int)$message->conversationId;
+
+		$existing = UserNotification::builder()
+			->select()
+			->where(
+				'un.user_id = ?',
+				'un.ref_id = ?',
+				"un.ref_type = 'conversation'",
+				'un.is_read = 0',
+				'un.deleted_at IS NULL'
+			)
+			->first([$userId, $conversationId]);
+
+		if ($existing)
+		{
+			UserNotification::builder()
+				->update()
+				->set([
+					'description' => "{$name} sent you a message",
+					'created_at' => date('Y-m-d H:i:s'),
+					'updated_at' => date('Y-m-d H:i:s')
+				])
+				->where('id = ?')
+				->execute([(int)$existing->id]);
+
+			$this->broadcastNotificationUpdate($userId);
+			return;
+		}
+
+		modules()->notification()->log(
+			$userId,
+			'social',
+			'social',
+			'medium',
+			'New Message',
+			"{$name} sent you a message",
+			'chat',
+			[
+				'refId' => $conversationId,
+				'refType' => 'conversation'
+			]
+		);
+	}
+
+	/**
+	 * Broadcast a notification update so the activity center refreshes.
+	 *
+	 * @param int $userId
+	 * @return void
+	 */
+	protected function broadcastNotificationUpdate(int $userId): void
+	{
+		events()->emit("redis:notification:user:{$userId}", [
+			'refresh' => true
+		]);
 	}
 
 	/**

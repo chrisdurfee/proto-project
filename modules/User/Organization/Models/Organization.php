@@ -33,6 +33,11 @@ class Organization extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdAt'];
+
+	/**
 	 * Define joins for the Role model.
 	 *
 	 * @param object $builder The query builder object

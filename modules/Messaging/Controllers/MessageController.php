@@ -23,6 +23,11 @@ class MessageController extends ResourceController
 	protected ?string $policy = MessagePolicy::class;
 
 	/**
+	 * @var string|null $serviceClass
+	 */
+	protected ?string $serviceClass = MessageService::class;
+
+	/**
 	 * Constructor
 	 *
 	 * @param string|null $model The model class reference using ::class.
@@ -45,7 +50,7 @@ class MessageController extends ResourceController
 		$data = $this->getRequestItem($request);
 		$conversationId = (int)$request->params()->conversationId ?? null;
 
-		$messageService = new MessageService();
+		$messageService = $this->service;
 		return $messageService->createMessage($conversationId, $data, $request);
 	}
 

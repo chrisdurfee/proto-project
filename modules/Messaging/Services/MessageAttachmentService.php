@@ -54,7 +54,7 @@ class MessageAttachmentService extends Service
 		$count = 0;
 
 		$uploadFiles = $request->validateFileArray('attachments', [
-			'attachments' => 'file:50240|mimes:pdf,doc,docx,xls,xlsx,txt,csv,jpg,jpeg,png,gif,webp,zip'
+			'attachments' => 'file:50240|mimes:pdf,doc,docx,xls,xlsx,txt,csv,jpg,jpeg,png,gif,webp,heic,heif,avif,jxl,zip'
 		]);
 
 		if (empty($uploadFiles))

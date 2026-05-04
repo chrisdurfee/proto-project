@@ -3,14 +3,21 @@ namespace Modules\Tracking\Activity\Models;
 
 use Proto\Models\Model;
 use Modules\User\Main\Models\User;
+use Modules\Tracking\Activity\Models\Factories\ActivityFactory;
 
 /**
  * Activity
  *
  * @package Modules\Tracking\Activity\Models
+ * @method static ActivityFactory factory(int $count = 1, array $attributes = [])
  */
 class Activity extends Model
 {
+	/**
+	 * @var string|null $factory the factory class name
+	 */
+	protected static ?string $factory = ActivityFactory::class;
+
 	/**
 	 * @var string|null $tableName
 	 */
@@ -34,6 +41,11 @@ class Activity extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['userId', 'type', 'refId', 'createdAt'];
+
+	/**
 	 * Define joins for the model.
 	 *
 	 * @param object $builder The query builder object
@@ -44,7 +56,7 @@ class Activity extends Model
 		$builder
 			->one(
 				User::class,
-				fields: ['id', 'displayName', 'firstName', 'lastName', 'image']
+				fields: ['displayName', 'firstName', 'lastName', 'image', 'username', 'status', 'verified']
 			)
 			->on(['userId', 'id']);
 	}
@@ -64,7 +76,7 @@ class Activity extends Model
 
 		if (isset($refId))
 		{
-			$filter[] = ['ref_id', $refId];
+			$filter[] = ['refId', $refId];
 		}
 
 		return static::fetchWhere($filter);

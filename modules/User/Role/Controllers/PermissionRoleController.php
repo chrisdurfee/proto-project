@@ -33,7 +33,7 @@ class PermissionRoleController extends Controller
 	/**
 	 * Deletes model data.
 	 *
-	 * @param int|object $data The model ID or object.
+	 * @param Request $request
 	 * @return object The response.
 	 */
 	public function delete(Request $request): object

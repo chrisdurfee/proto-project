@@ -11,6 +11,19 @@ use Proto\Storage\Storage;
 class ConversationParticipantStorage extends Storage
 {
 	/**
+	 * Override default ordering to sort by conversation last message time.
+	 *
+	 * @param object $sql Query builder instance.
+	 * @param array|null $modifiers Modifiers.
+	 * @param array|null $params Parameter array.
+	 * @return void
+	 */
+	protected function setOrderBy(object $sql, ?array $modifiers = null, ?array &$params = null): void
+	{
+		$sql->orderBy('COALESCE(c.last_message_at, c.created_at) DESC');
+	}
+
+	/**
 	 * (Optional) Sets a custom where clause.
 	 *
 	 * @param object $sql Query builder instance.

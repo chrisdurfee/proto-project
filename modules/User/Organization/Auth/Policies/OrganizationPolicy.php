@@ -2,7 +2,7 @@
 namespace Modules\User\Organization\Auth\Policies;
 
 use Modules\User\Organization\Auth\Gates\OrganizationGate;
-use Modules\User\Main\Auth\Policies\Policy;
+use Common\Auth\Policies\Policy;
 use Proto\Http\Router\Request;
 use Proto\Controllers\Controller;
 

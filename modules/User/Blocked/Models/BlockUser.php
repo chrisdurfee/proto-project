@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Blocked\Models;
 
-use Proto\Models\Model;
+use Proto\Models\PivotModel;
 use Modules\User\Main\Models\User;
 /**
  * BlockUser
@@ -10,7 +10,7 @@ use Modules\User\Main\Models\User;
  *
  * @package Modules\User\Models
  */
-class BlockUser extends Model
+class BlockUser extends PivotModel
 {
 	/**
 	 * @var string|null $tableName
@@ -34,6 +34,11 @@ class BlockUser extends Model
 	];
 
 	/**
+	 * @var array<string> $immutableFields fields that cannot change after creation
+	 */
+	protected static array $immutableFields = ['userId', 'blockUserId', 'createdAt'];
+
+	/**
 	 * Define joins for the model.
 	 *
 	 * @param object $builder The query builder object
@@ -44,7 +49,7 @@ class BlockUser extends Model
 		$builder
 			->one(
 				User::class,
-				fields: ['id', 'displayName', 'image']
+				fields: ['id', 'displayName', 'image', 'username', 'status', 'verified']
 			)
 			->on(['blockUserId', 'id']);
 	}

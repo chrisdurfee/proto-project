@@ -4,6 +4,7 @@ namespace Modules\User\Push\Models;
 
 use Modules\User\Push\Storage\WebPushUserStorage;
 use Proto\Models\Model;
+use Proto\Storage\DataTypes\JsonType;
 
 /**
  * WebPushUser
@@ -25,6 +26,13 @@ class WebPushUser extends Model
 	protected static ?string $alias = 'wp';
 
 	/**
+	 * @var array<string, class-string> $dataTypes
+	 */
+	protected static array $dataTypes = [
+		'authKeys' => JsonType::class,
+	];
+
+	/**
 	 * @var array $fields
 	 */
 	protected static array $fields = [
@@ -38,20 +46,9 @@ class WebPushUser extends Model
 	];
 
 	/**
-	 * This will decode the authKeys field.
-	 *
-	 * @param mixed $data
-	 * @return object|null
+	 * @var array $immutableFields
 	 */
-	protected static function format(?object $data): ?object
-	{
-		if (isset($data->authKeys))
-		{
-			$data->authKeys = json_decode($data->authKeys);
-		}
-
-		return $data;
-	}
+	protected static array $immutableFields = ['createdAt', 'userId'];
 
 	/**
 	 * @var string $storageType

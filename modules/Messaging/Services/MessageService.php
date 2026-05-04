@@ -3,6 +3,7 @@ namespace Modules\Messaging\Services;
 
 use Common\Services\Service;
 use Modules\Messaging\Models\Message;
+use Modules\Tracking\Signals\Signals\SignalType;
 use Proto\Http\Router\Request;
 
 /**
@@ -50,6 +51,24 @@ class MessageService extends Service
 
 		// Update conversation and notify participants
 		$this->updateConversationForSync($conversationId, $messageId);
+
+		$senderId = (int)($data->senderId ?? 0);
+		if ($senderId > 0)
+		{
+			modules()->tracking()->signal()->record($senderId, SignalType::MESSAGE_SENT, [
+				'messageId' => (int)$messageId,
+				'conversationId' => $conversationId
+			]);
+
+			modules()->tracking()->userActivityLog()->log(
+				$senderId,
+				'message_sent',
+				'Sent a message',
+				null,
+				(int)$messageId,
+				'message'
+			);
+		}
 
 		return $this->response([
 			'success' => true,
@@ -106,6 +125,9 @@ class MessageService extends Service
 	/**
 	 * Check if the request has file attachments.
 	 *
+	 * Uses a raw $_FILES check to avoid creating UploadFile instances (which rename
+	 * temp files) before processAttachments() gets a chance to validate and store them.
+	 *
 	 * @param Request|null $request The HTTP request object.
 	 * @return bool
 	 */
@@ -116,8 +138,8 @@ class MessageService extends Service
 			return false;
 		}
 
-		$attachments = $request->fileArray('attachments');
-		return !empty($attachments);
+		$rawFiles = $_FILES['attachments'] ?? null;
+		return !empty($rawFiles) && !empty($rawFiles['name']);
 	}
 
 	/**

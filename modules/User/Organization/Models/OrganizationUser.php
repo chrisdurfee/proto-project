@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Organization\Models;
 
-use Proto\Models\Model;
+use Proto\Models\PivotModel;
 
 /**
  * OrganizationUser
@@ -10,7 +10,7 @@ use Proto\Models\Model;
  *
  * @package Modules\User\Models
  */
-class OrganizationUser extends Model
+class OrganizationUser extends PivotModel
 {
 	/**
 	 * @var string|null $tableName
@@ -32,6 +32,11 @@ class OrganizationUser extends Model
 		'userId',
 		'organizationId'
 	];
+
+	/**
+	 * @var array<string> $immutableFields fields that cannot change after creation
+	 */
+	protected static array $immutableFields = ['userId', 'organizationId', 'createdAt'];
 
 	/**
 	 * Define joins for the organization user model.

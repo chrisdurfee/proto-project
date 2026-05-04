@@ -3,7 +3,6 @@ namespace Modules\Messaging\Api;
 
 use Modules\Messaging\Controllers\MessageController;
 use Modules\Messaging\Controllers\MessageAttachmentController;
-use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * Messaging API Routes
@@ -13,9 +12,6 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * @package Modules\Messaging\Api
  */
 router()
-	->middleware(([
-		CrossSiteProtectionMiddleware::class
-	]))
 	->get('messaging/:conversationId/messages/sync', [MessageController::class, 'sync'])
 	->post('messaging/:conversationId/messages/mark-read', [MessageController::class, 'markAsRead'])
 	->resource('messaging/:conversationId/messages', MessageController::class);

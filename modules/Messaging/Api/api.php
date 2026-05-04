@@ -2,7 +2,6 @@
 namespace Modules\Messaging\Api;
 
 use Modules\Messaging\Controllers\ConversationController;
-use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * Messaging API Routes
@@ -13,9 +12,6 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  */
 
 router()
-	->middleware(([
-		CrossSiteProtectionMiddleware::class
-	]))
 	->get('messaging/:userId/conversations/sync', [ConversationController::class, 'sync'])
 	->post('messaging/:userId/conversations/find-or-create', [ConversationController::class, 'findOrCreate'])
 	->resource('messaging/:userId/conversations', ConversationController::class);

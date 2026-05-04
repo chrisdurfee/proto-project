@@ -11,6 +11,13 @@ use Proto\Http\Router\Request;
  */
 class ActivityPolicy extends Policy
 {
+	/**
+	 * The type of the policy.
+	 *
+	 * @var string|null
+	 */
+	protected ?string $type = 'activity';
+
     /**
 	 * Checks if the user can access the CRM.
 	 *
@@ -29,6 +36,6 @@ class ActivityPolicy extends Policy
 	 */
 	public function default(Request $request): bool
 	{
-		return (!$this->canAccessCrm());
+		return ($this->canAccessCrm());
 	}
 }

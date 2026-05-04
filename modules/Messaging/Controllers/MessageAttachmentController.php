@@ -3,6 +3,7 @@ namespace Modules\Messaging\Controllers;
 
 use Proto\Controllers\ResourceController as Controller;
 use Modules\Messaging\Models\MessageAttachment;
+use Modules\Messaging\Auth\Policies\MessageAttachmentPolicy;
 
 /**
  * MessageAttachmentController
@@ -11,6 +12,11 @@ use Modules\Messaging\Models\MessageAttachment;
  */
 class MessageAttachmentController extends Controller
 {
+	/**
+	 * @var string|null $policy The policy class for authorization.
+	 */
+	protected ?string $policy = MessageAttachmentPolicy::class;
+
 	/**
 	 * Initializes the model class.
 	 *

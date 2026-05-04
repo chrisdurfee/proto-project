@@ -77,7 +77,7 @@ class RoleTest extends Test
 	 */
 	public function testCreateAdminRole(): void
 	{
-		$role = Role::factory()->state('admin')->create();
+		$role = Role::factory()->stateAdmin()->create();
 
 		$this->assertEquals('Admin', $role->name);
 		$this->assertEquals('admin', $role->slug);
@@ -91,7 +91,7 @@ class RoleTest extends Test
 	 */
 	public function testCreateUserRole(): void
 	{
-		$role = Role::factory()->state('user')->create();
+		$role = Role::factory()->stateUser()->create();
 
 		$this->assertEquals('User', $role->name);
 		$this->assertEquals('user', $role->slug);
@@ -104,7 +104,7 @@ class RoleTest extends Test
 	 */
 	public function testCreateModeratorRole(): void
 	{
-		$role = Role::factory()->state('moderator')->create();
+		$role = Role::factory()->stateModerator()->create();
 
 		$this->assertEquals('Moderator', $role->name);
 		$this->assertEquals('moderator', $role->slug);
@@ -117,7 +117,7 @@ class RoleTest extends Test
 	 */
 	public function testCreateGuestRole(): void
 	{
-		$role = Role::factory()->state('guest')->create();
+		$role = Role::factory()->stateGuest()->create();
 
 		$this->assertEquals('Guest', $role->name);
 		$this->assertEquals('guest', $role->slug);
@@ -130,7 +130,7 @@ class RoleTest extends Test
 	 */
 	public function testCreateRoleWithResource(): void
 	{
-		$role = Role::factory()->state('withResource', 'organization')->create();
+		$role = Role::factory()->stateWithResource('organization')->create();
 
 		$this->assertEquals('organization', $role->resource);
 	}
@@ -268,9 +268,9 @@ class RoleTest extends Test
 	 */
 	public function testCreateStandardRoleSet(): void
 	{
-		$adminRole = Role::factory()->state('admin')->create();
-		$userRole = Role::factory()->state('user')->create();
-		$guestRole = Role::factory()->state('guest')->create();
+		$adminRole = Role::factory()->stateAdmin()->create();
+		$userRole = Role::factory()->stateUser()->create();
+		$guestRole = Role::factory()->stateGuest()->create();
 
 		$roles = Role::fetchWhere([]);
 

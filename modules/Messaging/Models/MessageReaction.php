@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Messaging\Models;
 
-use Proto\Models\Model;
+use Proto\Models\PivotModel;
 use Modules\User\Main\Models\User;
 
 /**
@@ -9,7 +9,7 @@ use Modules\User\Main\Models\User;
  *
  * @package Modules\Messaging\Models
  */
-class MessageReaction extends Model
+class MessageReaction extends PivotModel
 {
 	/**
 	 * @var string|null $tableName
@@ -32,6 +32,11 @@ class MessageReaction extends Model
 		'userId',
 		'emoji'
 	];
+
+	/**
+	 * @var array<string> $immutableFields fields that cannot change after creation
+	 */
+	protected static array $immutableFields = ['messageId', 'userId', 'createdAt'];
 
 	/**
 	 * Get the message this reaction belongs to.

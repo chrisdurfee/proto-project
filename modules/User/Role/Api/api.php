@@ -3,7 +3,6 @@ namespace Modules\User\Role\Api\Role;
 
 use Modules\User\Role\Controllers\RoleController;
 use Modules\User\Role\Controllers\RoleUserController;
-use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * User Role Routes
@@ -11,9 +10,6 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * Defines the API routes for managing user roles and their assignments.
  */
 router()
-	->middleware(([
-		CrossSiteProtectionMiddleware::class
-	]))
 	->resource('user/:userId/role', RoleUserController::class);
 
 /**

@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 use Modules\Tracking\Activity\Controllers\ActivityController;
-use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
+use Proto\Http\Router\Router;
 
 /**
  * Activity Routes
@@ -10,10 +10,10 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * URL Pattern: /api/tracking/activity
  */
 router()
-	->middleware(([
-		CrossSiteProtectionMiddleware::class
-	]))
-	->post('tracking/activity', [ActivityController::class, 'add'])
-	->get('tracking/activity/type', [ActivityController::class, 'getByType'])
-	->get('tracking/activity/sync', [ActivityController::class, 'sync'])
-	->delete('tracking/activity/type', [ActivityController::class, 'deleteUserByType']);
+	->group('tracking/activity', function(Router $router)
+	{
+		$router->post('', [ActivityController::class, 'add']);
+		$router->get('type', [ActivityController::class, 'getByType']);
+		$router->get('sync', [ActivityController::class, 'sync']);
+		$router->delete('type', [ActivityController::class, 'deleteUserByType']);
+	});

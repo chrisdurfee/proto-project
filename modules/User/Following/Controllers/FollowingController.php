@@ -41,6 +41,16 @@ class FollowingController extends Controller
 
 		$inputs = $this->getAllInputs($request);
 		$result = $user->following()->all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+
+		// Every user in the following list is by definition followed
+		if (!empty($result->rows))
+		{
+			foreach ($result->rows as &$row)
+			{
+				$row->isFollowing = true;
+			}
+		}
+
 		return $this->response($result);
 	}
 }

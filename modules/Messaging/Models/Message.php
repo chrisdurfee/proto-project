@@ -3,14 +3,21 @@ namespace Modules\Messaging\Models;
 
 use Modules\User\Main\Models\User;
 use Proto\Models\Model;
+use Modules\Messaging\Models\Factories\MessageFactory;
 
 /**
  * Message Model
  *
  * @package Modules\Messaging\Models
+ * @method static MessageFactory factory(int $count = 1, array $attributes = [])
  */
 class Message extends Model
 {
+	/**
+	 * @var string|null $factory the factory class name
+	 */
+	protected static ?string $factory = MessageFactory::class;
+
 	/**
 	 * @var string|null $tableName
 	 */
@@ -39,6 +46,11 @@ class Message extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['conversationId', 'senderId', 'parentId', 'createdAt'];
+
+	/**
 	 * Define joins for the model.
 	 *
 	 * @param object $builder The query builder object
@@ -51,14 +63,14 @@ class Message extends Model
 				Conversation::class,
 				fields: ['title']
 			)
-			->on(['conversation_id', 'id']);
+			->on(['conversationId', 'id']);
 
 		$builder
 			->one(
 				User::class,
-				fields: ['displayName', 'firstName', 'lastName', 'email', 'image', 'status']
+				fields: ['displayName', 'firstName', 'lastName', 'email', 'image', 'status', 'verified', 'username']
 			)
-			->on(['sender_id', 'id']);
+			->on(['senderId', 'id']);
 
 		// Include attachments
 		$builder
@@ -66,7 +78,7 @@ class Message extends Model
 				MessageAttachment::class,
 				fields: ['id', 'messageId', 'fileUrl', 'fileType', 'fileName', 'fileSize', 'createdAt']
 			)
-			->on(['id', 'message_id'])
+			->on(['id', 'messageId'])
 			->as('attachments');
 
 		// Include reactions with user info
@@ -75,7 +87,7 @@ class Message extends Model
 				MessageReaction::class,
 				fields: ['id', 'messageId', 'userId', 'emoji', 'createdAt']
 			)
-			->on(['id', 'message_id'])
+			->on(['id', 'messageId'])
 			->as('reactions');
 	}
 
@@ -86,7 +98,7 @@ class Message extends Model
 	 */
 	public function conversation()
 	{
-		return $this->belongsTo(Conversation::class, 'conversation_id');
+		return $this->belongsTo(Conversation::class);
 	}
 
 	/**
@@ -267,6 +279,24 @@ class Message extends Model
 		}
 
 		return $counts;
+	}
+
+	/**
+	 * Get the latest message ID for a conversation.
+	 *
+	 * @param int $conversationId
+	 * @return int|null
+	 */
+	public static function getLatestIdByConversation(int $conversationId): ?int
+	{
+		$result = static::builder()
+			->select(['m.id'])
+			->where(['m.conversation_id', $conversationId])
+			->orderBy('m.id DESC')
+			->limit(1)
+			->first();
+
+		return $result?->id ?? null;
 	}
 
 	/**

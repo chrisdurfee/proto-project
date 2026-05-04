@@ -30,7 +30,7 @@ class OrganizationGate extends Gate
 		foreach ($organizations as $organization)
 		{
 			$organization = (object)$organization;
-			if ($organization->id === $orgId)
+			if ((int)$organization->id === (int)$orgId)
 			{
 				return true;
 			}

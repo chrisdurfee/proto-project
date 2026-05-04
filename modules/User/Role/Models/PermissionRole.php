@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Role\Models;
 
-use Proto\Models\Model;
+use Proto\Models\PivotModel;
 
 /**
  * PermissionRole
@@ -10,7 +10,7 @@ use Proto\Models\Model;
  *
  * @package Modules\User\Models
  */
-class PermissionRole extends Model
+class PermissionRole extends PivotModel
 {
 	/**
 	 * @var string|null $tableName

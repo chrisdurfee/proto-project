@@ -6,6 +6,7 @@ use Modules\User\Main\Models\NotificationPreference;
 use Modules\User\Push\Models\WebPushUser;
 use Proto\Controllers\ResourceController as Controller;
 use Proto\Dispatch\Dispatcher;
+use Proto\Http\Router\Request;
 
 /**
  * WebPushUserController
@@ -42,6 +43,84 @@ class WebPushUserController extends Controller
 			['user_id', $userId]
 		]);
 		return (bool)($preference?->allowPush ?? true);
+	}
+
+	/**
+	 * Subscribe the user to web push notifications.
+	 *
+	 * @param Request $request
+	 * @return object
+	 */
+	public function subscribe(Request $request): object
+	{
+		$data = $this->getRequestItem($request);
+		$params = $request->params();
+		$userId = (int)($params->userId ?? 0);
+		if (!$userId)
+		{
+			return $this->error('User ID is required.');
+		}
+
+		$subscription = $data->subscription ?? null;
+		if (!$subscription || empty($subscription->endpoint))
+		{
+			return $this->error('A valid subscription is required.');
+		}
+
+		$existing = WebPushUser::getBy([
+			['userId', $userId],
+			['endpoint', $subscription->endpoint]
+		]);
+		if ($existing)
+		{
+			return $this->response($existing);
+		}
+
+		$pushUser = new WebPushUser((object)[
+			'userId' => $userId,
+			'endpoint' => $subscription->endpoint,
+			'authKeys' => $subscription->keys ?? null,
+			'status' => 'active'
+		]);
+		$pushUser->add();
+		if (!$pushUser->id)
+		{
+			return $this->error('Failed to save push subscription.');
+		}
+
+		return $this->response($pushUser);
+	}
+
+	/**
+	 * Unsubscribe the user from web push notifications.
+	 *
+	 * @param Request $request
+	 * @return object
+	 */
+	public function unsubscribe(Request $request): object
+	{
+		$data = $this->getRequestItem($request);
+		$params = $request->params();
+		$userId = (int)($params->userId ?? 0);
+		if (!$userId)
+		{
+			return $this->error('User ID is required.');
+		}
+
+		$subscription = $data->subscription ?? null;
+		if ($subscription && !empty($subscription->endpoint))
+		{
+			$existing = WebPushUser::getBy([
+				['userId', $userId],
+				['endpoint', $subscription->endpoint]
+			]);
+			if ($existing)
+			{
+				WebPushUser::remove($existing->id);
+			}
+		}
+
+		return $this->response(['success' => true]);
 	}
 
 	/**

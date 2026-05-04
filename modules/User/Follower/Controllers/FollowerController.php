@@ -2,6 +2,7 @@
 namespace Modules\User\Follower\Controllers;
 
 use Modules\User\Follower\Auth\Policies\FollowerPolicy;
+use Modules\User\Follower\Models\FollowerUser;
 use Proto\Controllers\ApiController as Controller;
 use Modules\User\Main\Models\User;
 use Modules\User\Follower\Services\FollowerService;
@@ -55,7 +56,7 @@ class FollowerController extends Controller
 		$result = $this->followerService->notifyNewFollower((int)$userId, (int)$followerId, (bool)$queue);
 		if (!$result->success)
 		{
-			return $this->error($result->message);
+			return $this->error($result->message ?? 'Failed to send notification.');
 		}
 
 		return $this->response($result->result);
@@ -180,6 +181,86 @@ class FollowerController extends Controller
 
 		$inputs = $this->getAllInputs($request);
 		$result = $user->followers()->all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+		$this->enrichWithFollowStatus($result, (int)session()->user->id);
 		return $this->response($result);
+	}
+
+	/**
+	 * Enrich result rows with isFollowing status for the session user.
+	 *
+	 * @param object $result
+	 * @param int $sessionUserId
+	 * @return void
+	 */
+	protected function enrichWithFollowStatus(object $result, int $sessionUserId): void
+	{
+		if (empty($result->rows))
+		{
+			return;
+		}
+
+		$userIds = array_map(fn($row) => (int)$row->id, $result->rows);
+		$followedRows = FollowerUser::fetchWhere([
+			['followerUserId', $sessionUserId],
+			['fu.user_id', 'IN', $userIds]
+		]);
+		$followedSet = [];
+		foreach ($followedRows ?? [] as $row)
+		{
+			$followedSet[(int)$row->userId] = true;
+		}
+
+		foreach ($result->rows as &$row)
+		{
+			$row->isFollowing = isset($followedSet[(int)$row->id]);
+		}
+	}
+
+	/**
+	 * Retrieve all users that the specified user is following.
+	 *
+	 * @param Request $request The request object.
+	 * @return object
+	 */
+	public function following(Request $request): object
+	{
+		$userId = $this->getResourceId($request);
+		if ($userId === null)
+		{
+			return $this->error('Invalid user ID.');
+		}
+
+		$user = User::get($userId);
+		if ($user === null)
+		{
+			return $this->error('User not found.');
+		}
+
+		$inputs = $this->getAllInputs($request);
+		$result = $user->following()->all($inputs->filter, $inputs->offset, $inputs->limit, $inputs->modifiers);
+		return $this->response($result);
+	}
+
+	/**
+	 * Re-syncs followerCount and followingCount from actual DB data.
+	 *
+	 * @param Request $request The request object.
+	 * @return object
+	 */
+	public function sync(Request $request): object
+	{
+		$userId = $this->getResourceId($request);
+		if ($userId === null)
+		{
+			return $this->error('Invalid user ID.');
+		}
+
+		$result = $this->followerService->syncCounts((int)$userId);
+		if (!$result->success)
+		{
+			return $this->error($result->message);
+		}
+
+		return $this->response($result->result);
 	}
 }

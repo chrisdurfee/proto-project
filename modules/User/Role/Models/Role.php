@@ -2,17 +2,25 @@
 namespace Modules\User\Role\Models;
 
 use Proto\Models\Model;
-use Modules\User\Role\Storage\RoleStorage;
 use Modules\User\Permission\Models\Permission;
+use Modules\User\Role\Models\Factories\RoleFactory;
+
 /**
  * Role
  *
  * This is the model class for table "roles".
  *
+ * @method static RoleFactory factory(int $count = 1, array $attributes = [])
+ *
  * @package Modules\User\Models
  */
 class Role extends Model
 {
+	/**
+	 * @var string|null $factory the factory class name (IDE hint only — HasFactory resolves by naming convention)
+	 */
+	protected static ?string $factory = RoleFactory::class;
+
 	/**
 	 * @var string|null $tableName
 	 */
@@ -53,9 +61,4 @@ class Role extends Model
 				'module'
 			]);
 	}
-
-	/**
-	 * @var string $storageType
-	 */
-	protected static string $storageType = RoleStorage::class;
 }

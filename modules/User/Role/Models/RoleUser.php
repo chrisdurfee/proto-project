@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Role\Models;
 
-use Proto\Models\Model;
+use Proto\Models\PivotModel;
 
 /**
  * RoleUser
@@ -10,7 +10,7 @@ use Proto\Models\Model;
  *
  * @package Modules\User\Models
  */
-class RoleUser extends Model
+class RoleUser extends PivotModel
 {
 	/**
 	 * @var string|null $tableName
@@ -35,6 +35,11 @@ class RoleUser extends Model
 	];
 
 	/**
+	 * @var array<string> $immutableFields fields that cannot change after creation
+	 */
+	protected static array $immutableFields = ['userId', 'roleId', 'organizationId', 'createdAt'];
+
+	/**
 	 * Define joins for the Permission model.
 	 *
 	 * @param object $builder The query builder object
@@ -43,7 +48,7 @@ class RoleUser extends Model
 	protected static function joins(object $builder): void
 	{
 		$builder
-			->one(Role::class, fields: ['id', 'name', 'slug']);
+			->one(Role::class, fields: ['name', 'slug']);
 	}
 
 	/**

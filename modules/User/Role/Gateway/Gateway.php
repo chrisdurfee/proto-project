@@ -2,7 +2,6 @@
 
 namespace Modules\User\Role\Gateway;
 
-use Modules\User\Role\Storage\RoleStorage;
 use Modules\User\Role\Models\RoleUser;
 use Modules\User\Role\Models\Role;
 

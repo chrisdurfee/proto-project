@@ -3,6 +3,7 @@ namespace Modules\Tracking\Activity\Controllers;
 
 use Modules\Tracking\Activity\Auth\Policies\ActivityPolicy;
 use Proto\Controllers\ResourceController as Controller;
+use Proto\Controllers\Traits\SyncableTrait;
 use Modules\Tracking\Activity\Models\Activity;
 use Proto\Http\Router\Request;
 
@@ -13,6 +14,8 @@ use Proto\Http\Router\Request;
  */
 class ActivityController extends Controller
 {
+	use SyncableTrait;
+
 	/**
 	 * @var string|null $policy
 	 */
@@ -96,37 +99,42 @@ class ActivityController extends Controller
 	}
 
 	/**
-	 * Stream activity updates via Redis-based Server-Sent Events.
-	 * Listens to activity updates published via Redis pub/sub.
+	 * Get the Redis channel for activity sync.
 	 *
 	 * @param Request $request
-	 * @return void
+	 * @return string
 	 */
-	public function sync(Request $request): void
+	protected function getSyncChannel(Request $request): string
 	{
 		$type = $request->input('type');
 		$refId = $request->getInt('refId');
+		return "activity:{$type}:{$refId}";
+	}
 
+	/**
+	 * Handle incoming sync message for activity updates.
+	 *
+	 * @param string $channel
+	 * @param array $message
+	 * @param Request $request
+	 * @return array|null|false
+	 */
+	protected function handleSyncMessage(string $channel, array $message, Request $request): array|null|false
+	{
+		$type = $request->input('type');
+		$refId = $request->getInt('refId');
 		if (empty($type) || !isset($refId))
 		{
-			return;
+			return null;
 		}
 
-		// Subscribe to resource activity updates channel
-		$channel = "activity:{$type}:{$refId}";
-		redisEvent($channel, function($channel, $message) use ($type, $refId)
-		{
-			// Fetch the updated activity list
-			$activities = Activity::getByType($type, $refId);
+		$activities = Activity::getByType($type, $refId);
+		$action = $message['action'] ?? 'merge';
 
-			// Determine action type from message
-			$action = $message['action'] ?? 'merge';
-
-			return [
-				'rows' => $activities,
-				'action' => $action
-			];
-		});
+		return [
+			'rows' => $activities,
+			'action' => $action
+		];
 	}
 
 	/**

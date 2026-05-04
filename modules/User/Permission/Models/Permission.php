@@ -4,15 +4,24 @@ namespace Modules\User\Permission\Models;
 use Proto\Models\Model;
 use Proto\Models\Relations;
 use Modules\User\Role\Models\Role;
+use Modules\User\Permission\Models\Factories\PermissionFactory;
+
 /**
  * Permission
  *
  * This is the model class for table "permissions".
  *
+ * @method static PermissionFactory factory(int $count = 1, array $attributes = [])
+ *
  * @package Modules\User\Models
  */
 class Permission extends Model
 {
+	/**
+	 * @var string|null $factory the factory class name (IDE hint only — HasFactory resolves by naming convention)
+	 */
+	protected static ?string $factory = PermissionFactory::class;
+
 	/**
 	 * @var string|null $tableName
 	 */

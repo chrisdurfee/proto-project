@@ -4,14 +4,21 @@ namespace Modules\Messaging\Models;
 use Modules\Messaging\Storage\ConversationParticipantStorage;
 use Modules\User\Main\Models\User;
 use Proto\Models\Model;
+use Modules\Messaging\Models\Factories\ConversationParticipantFactory;
 
 /**
  * ConversationParticipant Model
  *
  * @package Modules\Messaging\Models
+ * @method static ConversationParticipantFactory factory(int $count = 1, array $attributes = [])
  */
 class ConversationParticipant extends Model
 {
+	/**
+	 * @var string|null $factory the factory class name
+	 */
+	protected static ?string $factory = ConversationParticipantFactory::class;
+
 	/**
 	 * @var string|null $tableName
 	 */
@@ -39,6 +46,11 @@ class ConversationParticipant extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['conversationId', 'userId', 'createdAt'];
+
+	/**
 	 * Define joins for the model.
 	 *
 	 * @param object $builder The query builder object
@@ -49,7 +61,7 @@ class ConversationParticipant extends Model
 		$builder
 			->one(
 				User::class,
-				fields: ['displayName', 'firstName', 'lastName', 'email', 'image', 'status']
+				fields: ['displayName', 'firstName', 'lastName', 'email', 'image', 'status', 'username']
 			)
 			->on(['userId', 'id']);
 
@@ -87,7 +99,9 @@ class ConversationParticipant extends Model
 					'lastName',
 					'email',
 					'image',
-					'status'
+					'status',
+					'verified',
+					'username'
 				])
 				->on(['userId', 'id']);
 	}

@@ -70,25 +70,25 @@ class SeedRolesAndPermissions extends Migration
             // User management permissions
             [
                 'name' => 'View Users',
-                'slug' => 'users.view',
+                'slug' => 'user.view',
                 'description' => 'Can view users',
                 'module' => 'user',
             ],
             [
                 'name' => 'Create Users',
-                'slug' => 'users.create',
+                'slug' => 'user.create',
                 'description' => 'Can create users',
                 'module' => 'user',
             ],
             [
                 'name' => 'Edit Users',
-                'slug' => 'users.edit',
+                'slug' => 'user.edit',
                 'description' => 'Can edit users',
                 'module' => 'user',
             ],
             [
                 'name' => 'Delete Users',
-                'slug' => 'users.delete',
+                'slug' => 'user.delete',
                 'description' => 'Can delete users',
                 'module' => 'user',
             ],
@@ -96,25 +96,25 @@ class SeedRolesAndPermissions extends Migration
             // Role management permissions
             [
                 'name' => 'View Roles',
-                'slug' => 'roles.view',
+                'slug' => 'role.view',
                 'description' => 'Can view roles',
                 'module' => 'user',
             ],
             [
                 'name' => 'Create Roles',
-                'slug' => 'roles.create',
+                'slug' => 'role.create',
                 'description' => 'Can create roles',
                 'module' => 'user',
             ],
             [
                 'name' => 'Edit Roles',
-                'slug' => 'roles.edit',
+                'slug' => 'role.edit',
                 'description' => 'Can edit roles',
                 'module' => 'user',
             ],
             [
                 'name' => 'Delete Roles',
-                'slug' => 'roles.delete',
+                'slug' => 'role.delete',
                 'description' => 'Can delete roles',
                 'module' => 'user',
             ],
@@ -122,13 +122,13 @@ class SeedRolesAndPermissions extends Migration
             // Permission management permissions
             [
                 'name' => 'View Permissions',
-                'slug' => 'permissions.view',
+                'slug' => 'permission.view',
                 'description' => 'Can view permissions',
                 'module' => 'user',
             ],
             [
                 'name' => 'Assign Permissions',
-                'slug' => 'permissions.assign',
+                'slug' => 'permission.assign',
                 'description' => 'Can assign permissions',
                 'module' => 'user',
             ],

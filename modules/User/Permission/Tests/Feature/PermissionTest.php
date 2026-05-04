@@ -80,7 +80,7 @@ class PermissionTest extends Test
 	 */
 	public function testCreateUserManagePermission(): void
 	{
-		$permission = Permission::factory()->state('userManage')->create();
+		$permission = Permission::factory()->stateUserManage()->create();
 
 		$this->assertEquals('Manage Users', $permission->name);
 		$this->assertEquals('manage-users', $permission->slug);
@@ -94,7 +94,7 @@ class PermissionTest extends Test
 	 */
 	public function testCreateContentManagePermission(): void
 	{
-		$permission = Permission::factory()->state('contentManage')->create();
+		$permission = Permission::factory()->stateContentManage()->create();
 
 		$this->assertEquals('Manage Content', $permission->name);
 		$this->assertEquals('manage-content', $permission->slug);
@@ -108,7 +108,7 @@ class PermissionTest extends Test
 	 */
 	public function testCreateViewOnlyPermission(): void
 	{
-		$permission = Permission::factory()->state('viewOnly')->create();
+		$permission = Permission::factory()->stateViewOnly()->create();
 
 		$this->assertEquals('View Reports', $permission->name);
 		$this->assertEquals('view-reports', $permission->slug);
@@ -122,7 +122,7 @@ class PermissionTest extends Test
 	 */
 	public function testCreatePermissionWithModule(): void
 	{
-		$permission = Permission::factory()->state('withModule', 'Billing')->create();
+		$permission = Permission::factory()->stateWithModule('Billing')->create();
 
 		$this->assertEquals('Billing', $permission->module);
 	}

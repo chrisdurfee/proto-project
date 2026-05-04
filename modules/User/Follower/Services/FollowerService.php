@@ -1,9 +1,11 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Follower\Services;
 
+use Common\Services\Service;
 use Modules\User\Main\Models\User;
 use Modules\User\Follower\Models\FollowerUser;
 use Modules\User\Follower\Push\NewFollowerPush;
+use Modules\Tracking\Signals\Signals\SignalType;
 use Proto\Controllers\Response;
 
 /**
@@ -14,7 +16,7 @@ use Proto\Controllers\Response;
  *
  * @package Modules\User\Services\User
  */
-class FollowerService
+class FollowerService extends Service
 {
 	/**
 	 * Toggles the follower status between a user and follower.
@@ -42,6 +44,11 @@ class FollowerService
 		if (!$alreadyFollows)
 		{
 			$this->notifyNewFollower($userId, $followerId);
+
+			modules()->tracking()->signal()->record((int)$followerId, SignalType::USER_FOLLOWED, [
+				'userId' => (int)$userId,
+				'followerId' => (int)$followerId
+			]);
 		}
 
 		return Response::success(['result' => $result]);
@@ -86,6 +93,11 @@ class FollowerService
 		}
 
 		$this->notifyNewFollower($userId, $followerId);
+
+		modules()->tracking()->signal()->record((int)$followerId, SignalType::USER_FOLLOWED, [
+			'userId' => (int)$userId,
+			'followerId' => (int)$followerId
+		]);
 
 		$countUpdate = $this->updateCounts($user, $followerId, 'up');
 		if (!$countUpdate)
@@ -177,7 +189,34 @@ class FollowerService
 			return Response::invalid('Follower not found.');
 		}
 
+		$this->logFollowerNotification((int)$userId, $follower);
 		return $this->dispatchNotification($user, $follower, $queue);
+	}
+
+	/**
+	 * Log an in-app notification for a new follower.
+	 *
+	 * @param int $userId The user who gained a follower
+	 * @param User $follower The user who started following
+	 * @return void
+	 */
+	protected function logFollowerNotification(int $userId, User $follower): void
+	{
+		$name = trim("{$follower->firstName} {$follower->lastName}") ?: $follower->username;
+		modules()->notification()->log(
+			$userId,
+			'social',
+			'social',
+			'medium',
+			'New Follower',
+			"{$name} started following you",
+			'person_add',
+			[
+				'refId' => (int)$follower->id,
+				'refType' => 'user',
+				'createdAt' => date('Y-m-d H:i:s')
+			]
+		);
 	}
 
 	/**
@@ -189,37 +228,29 @@ class FollowerService
 	 */
 	protected function updateFollowerCount(User $user, string $direction = 'up'): bool
 	{
-		$newFollowerCount = ($direction === 'up') ? (++$user->followerCount) : (--$user->followerCount);
+		if ($direction === 'up')
+		{
+			return User::atomicIncrement($user->id, 'followerCount');
+		}
 
-		$model = new User((object)[
-			'id' => $user->id,
-			'followerCount' => $newFollowerCount
-		]);
-		return $model->update();
+		return User::atomicDecrement($user->id, 'followerCount');
 	}
 
 	/**
-	 * Updates the follower count for a user.
+	 * Updates the following count for a user.
 	 *
-	 * @param User $user The user object
+	 * @param mixed $followerId
 	 * @param string $direction The direction to update ('up' or 'down')
 	 * @return bool
 	 */
 	protected function updateFollowingCount(mixed $followerId, string $direction = 'up'): bool
 	{
-		$follower = User::get($followerId);
-		if (!$follower)
+		if ($direction === 'up')
 		{
-			return false;
+			return User::atomicIncrement($followerId, 'followingCount');
 		}
 
-		$newFollowingCount = ($direction === 'up') ? (++$follower->followingCount) : (--$follower->followingCount);
-
-		$model = new User((object)[
-			'id' => $follower->id,
-			'followingCount' => $newFollowingCount
-		]);
-		return $model->update();
+		return User::atomicDecrement($followerId, 'followingCount');
 	}
 
 	/**
@@ -248,5 +279,72 @@ class FollowerService
 		];
 
 		return modules()->user()->push()->send($user->id, $settings, $data);
+	}
+
+	/**
+	 * Re-compute followerCount and followingCount for a user directly from the
+	 * follower_users table and persist the corrected values to the users table.
+	 *
+	 * @param mixed $userId
+	 * @return object
+	 */
+	public function syncCounts(mixed $userId): object
+	{
+		$user = User::get($userId);
+		if (!$user)
+		{
+			return Response::invalid('User not found.');
+		}
+
+		$followerCount = $this->getActualFollowerCount($userId);
+		$followingCount = $this->getActualFollowingCount($userId);
+
+		$model = new User((object)[
+			'id' => $user->id,
+			'followerCount' => $followerCount,
+			'followingCount' => $followingCount
+		]);
+
+		if (!$model->update())
+		{
+			return Response::invalid('Failed to sync follower counts.');
+		}
+
+		return Response::success([
+			'followerCount' => $followerCount,
+			'followingCount' => $followingCount
+		]);
+	}
+
+	/**
+	 * Count actual followers (rows where user_id = $userId).
+	 *
+	 * @param mixed $userId
+	 * @return int
+	 */
+	protected function getActualFollowerCount(mixed $userId): int
+	{
+		$row = FollowerUser::builder()
+			->select([['COUNT(*)'], 'total'])
+			->where('user_id = ?')
+			->first([(int)$userId]);
+
+		return (int)($row->total ?? 0);
+	}
+
+	/**
+	 * Count actual following (rows where follower_user_id = $userId).
+	 *
+	 * @param mixed $userId
+	 * @return int
+	 */
+	protected function getActualFollowingCount(mixed $userId): int
+	{
+		$row = FollowerUser::builder()
+			->select([['COUNT(*)'], 'total'])
+			->where('follower_user_id = ?')
+			->first([(int)$userId]);
+
+		return (int)($row->total ?? 0);
 	}
 }

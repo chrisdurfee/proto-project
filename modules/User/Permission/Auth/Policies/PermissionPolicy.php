@@ -2,7 +2,7 @@
 namespace Modules\User\Permission\Auth\Policies;
 
 use Proto\Http\Router\Request;
-use Modules\User\Main\Auth\Policies\Policy;
+use Common\Auth\Policies\Policy;
 
 /**
  * Class PermissionPolicy
@@ -18,7 +18,7 @@ class PermissionPolicy extends Policy
 	 *
 	 * @var string|null
 	 */
-	protected ?string $type = 'permissions';
+	protected ?string $type = 'permission';
 
 	/**
 	 * Determines if the user can assign or create new permissions.
@@ -28,7 +28,7 @@ class PermissionPolicy extends Policy
 	 */
 	public function add(Request $request): bool
 	{
-		return $this->canAccess('permissions.assign');
+		return $this->canAccess('permission.assign');
 	}
 
 	/**
@@ -39,7 +39,7 @@ class PermissionPolicy extends Policy
 	 */
 	public function update(Request $request): bool
 	{
-		return $this->canAccess('permissions.assign');
+		return $this->canAccess('permission.assign');
 	}
 
 	/**
@@ -50,6 +50,6 @@ class PermissionPolicy extends Policy
 	 */
 	public function delete(Request $request): bool
 	{
-		return $this->canAccess('permissions.assign');
+		return $this->canAccess('permission.assign');
 	}
 }

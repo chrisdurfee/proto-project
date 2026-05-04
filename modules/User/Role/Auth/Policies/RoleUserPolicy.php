@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\User\Role\Auth\Policies;
 
-use Modules\User\Main\Auth\Policies\Policy;
+use Common\Auth\Policies\Policy;
 
 /**
  * Class RoleUserPolicy
@@ -17,5 +17,5 @@ class RoleUserPolicy extends Policy
 	 *
 	 * @var string|null
 	 */
-	protected ?string $type = 'users';
+	protected ?string $type = 'user';
 }

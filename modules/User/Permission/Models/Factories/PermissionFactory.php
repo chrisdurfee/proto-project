@@ -53,58 +53,58 @@ class PermissionFactory extends Factory
 	/**
 	 * Define a user management permission state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateUserManage(): array
+	public function stateUserManage(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'name' => 'Manage Users',
 			'slug' => 'manage-users',
 			'description' => 'Full access to manage user accounts',
 			'module' => 'User'
-		];
+		]);
 	}
 
 	/**
 	 * Define a content management permission state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateContentManage(): array
+	public function stateContentManage(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'name' => 'Manage Content',
 			'slug' => 'manage-content',
 			'description' => 'Full access to manage content',
 			'module' => 'Content'
-		];
+		]);
 	}
 
 	/**
 	 * Define a view only permission state
 	 *
-	 * @return array
+	 * @return static
 	 */
-	public function stateViewOnly(): array
+	public function stateViewOnly(): static
 	{
-		return [
+		return $this->state(fn() => [
 			'name' => 'View Reports',
 			'slug' => 'view-reports',
 			'description' => 'Read-only access to view reports',
 			'module' => 'Report'
-		];
+		]);
 	}
 
 	/**
 	 * State with custom module
 	 *
 	 * @param string $module
-	 * @return array
+	 * @return static
 	 */
-	public function stateWithModule(string $module): array
+	public function stateWithModule(string $module): static
 	{
-		return [
+		return $this->state(fn() => [
 			'module' => $module
-		];
+		]);
 	}
 }

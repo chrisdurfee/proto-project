@@ -3,7 +3,7 @@ namespace Modules\Developer\Auth\Policies;
 
 use Modules\Developer\Auth\Gates\EnvGate;
 use Common\Auth\Policies\Policy;
-use Proto\Controllers\ApiController;
+use Proto\Controllers\Controller;
 use Proto\Http\Router\Request;
 
 /**
@@ -16,14 +16,21 @@ use Proto\Http\Router\Request;
 class DeveloperPolicy extends Policy
 {
 	/**
+	 * The type of the policy.
+	 *
+	 * @var string|null
+	 */
+	protected ?string $type = 'developer';
+
+	/**
 	 * This will create a new instance of the policy.
 	 *
-	 * @param ?ApiController $controller The controller instance associated with this policy.
+	 * @param ?Controller $controller The controller instance associated with this policy.
 	 * @param EnvGate $gate The environment gate instance for access control.
 	 * @return void
 	 */
 	public function __construct(
-		protected ?ApiController $controller = null,
+		protected ?Controller $controller = null,
 		protected EnvGate $gate = new EnvGate()
 	)
 	{

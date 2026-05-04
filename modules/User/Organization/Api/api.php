@@ -3,7 +3,6 @@ namespace Modules\User\Organization\Api\Organization;
 
 use Modules\User\Organization\Controllers\OrganizationController;
 use Modules\User\Organization\Controllers\OrganizationUserController;
-use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 
 /**
  * User Organization Routes
@@ -11,9 +10,6 @@ use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
  * Defines the API routes for managing user organizations.
  */
 router()
-	->middleware(([
-		CrossSiteProtectionMiddleware::class
-	]))
 	->resource('user/:userId/organization', OrganizationUserController::class);
 
 /**

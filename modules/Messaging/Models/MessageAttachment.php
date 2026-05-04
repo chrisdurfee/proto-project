@@ -21,6 +21,13 @@ class MessageAttachment extends Model
 	protected static ?string $alias = 'ma';
 
 	/**
+	 * Fields that cannot change after creation.
+	 *
+	 * @var array
+	 */
+	protected static array $immutableFields = ['messageId', 'createdAt'];
+
+	/**
 	 * @var array $fields
 	 */
 	protected static array $fields = [

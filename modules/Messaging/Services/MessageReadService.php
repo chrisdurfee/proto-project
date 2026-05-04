@@ -4,6 +4,7 @@ namespace Modules\Messaging\Services;
 use Common\Services\Service;
 use Modules\Messaging\Models\Message;
 use Modules\Messaging\Models\ConversationParticipant;
+use Modules\Notification\Models\UserNotification;
 
 /**
  * MessageReadService
@@ -62,10 +63,43 @@ class MessageReadService extends Service
 		$this->touchConversation($conversationId);
 		$this->notifyConversationParticipants($conversationId, $messageId, false);
 
+		// Mark related notifications as read so the activity center stays in sync
+		$this->markConversationNotificationsAsRead($conversationId, $userId);
+
 		return $this->response([
 			'success' => $result,
 			'message' => $result ? 'Messages marked as read' : 'Failed to mark messages as read'
 		]);
+	}
+
+	/**
+	 * Mark any unread notifications for a conversation as read.
+	 *
+	 * This keeps the activity center in sync when a user reads messages
+	 * directly in the messaging UI.
+	 *
+	 * @param int $conversationId
+	 * @param int $userId
+	 * @return void
+	 */
+	protected function markConversationNotificationsAsRead(int $conversationId, int $userId): void
+	{
+		UserNotification::builder()
+			->update()
+			->set([
+				'is_read' => 1,
+				'read_at' => date('Y-m-d H:i:s')
+			])
+			->where(
+				'user_id = ?',
+				'ref_id = ?',
+				"ref_type = 'conversation'",
+				'is_read = 0',
+				'deleted_at IS NULL'
+			)
+			->execute([$userId, $conversationId]);
+
+		$this->broadcastNotificationUpdate($userId);
 	}
 
 	/**
@@ -76,7 +110,8 @@ class MessageReadService extends Service
 	 */
 	protected function getLatestMessageId(int $conversationId): ?int
 	{
-		$latestMessage = Message::find()
+		$latestMessage = Message::builder()
+			->select(['id'])
 			->where(['m.conversation_id', $conversationId])
 			->orderBy('m.id DESC')
 			->first();

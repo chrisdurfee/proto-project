@@ -45,7 +45,7 @@ class MessageReactionController extends Controller
 			return $this->error('Message ID and emoji are required', 400);
 		}
 
-		$userId = session()->user->id ?? null;
+		$userId = session()->user->id;
 		$existing = $this->findExistingReaction($messageId, $userId, $data->emoji);
 		if ($existing)
 		{
@@ -114,7 +114,7 @@ class MessageReactionController extends Controller
 	/**
 	 * Notify all conversation participants about an update.
 	 *
-	 * @param int $conversationId
+	 * @param int $messageId
 	 * @return void
 	 */
 	protected function notifyMessageUpdate(int $messageId): void
