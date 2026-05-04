@@ -8,7 +8,7 @@ use Common\Seeders\SystemUserSeeder;
  *
  * Re-runs the SystemUserSeeder now that the users.status enum
  * includes the 'system' value. The seeder is idempotent — it skips
- * if rally-bot already exists.
+ * if proto-bot already exists.
  */
 class SystemUserReseed extends Migration
 {

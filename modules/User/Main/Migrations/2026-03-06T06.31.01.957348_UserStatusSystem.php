@@ -6,7 +6,7 @@ use Proto\Database\Migrations\Migration;
  * UserStatusSystem
  *
  * Adds the 'system' status to the users.status enum so that
- * system/bot accounts (e.g. rally-bot) can be identified distinctly
+ * system/bot accounts (e.g. proto-bot) can be identified distinctly
  * from regular user presence states.
  */
 class UserStatusSystem extends Migration
