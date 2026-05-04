@@ -2,7 +2,6 @@
 namespace Modules\Auth\Api\AuthedDevice;
 
 use Modules\Auth\Controllers\UserAuthedDeviceController;
-use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 use Proto\Http\Router\Router;
 
 /**
@@ -12,11 +11,8 @@ use Proto\Http\Router\Router;
  * login, logout, registration, MFA, and CSRF token retrieval.
  */
 router()
-	->middleware(([
-		CrossSiteProtectionMiddleware::class
-	]))
 	->group('auth/:userId', function(Router $router)
 	{
-		$controller = new UserAuthedDeviceController();
-		$router->get('authed-device', [$controller, 'all']);
+		$router->get('authed-device', [UserAuthedDeviceController::class, 'all']);
+		$router->delete('authed-device', [UserAuthedDeviceController::class, 'revokeAll']);
 	});

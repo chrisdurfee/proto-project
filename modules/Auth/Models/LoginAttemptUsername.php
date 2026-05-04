@@ -33,6 +33,11 @@ class LoginAttemptUsername extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdAt', 'username'];
+
+	/**
 	 * @var string $storageType
 	 */
 	protected static string $storageType = LoginAttemptUsernameStorage::class;

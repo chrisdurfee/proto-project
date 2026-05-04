@@ -33,4 +33,9 @@ class LoginLog extends Model
 		'direction',
 		'ip'
 	];
+
+	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdAt', 'userId', 'ip', 'direction'];
 }

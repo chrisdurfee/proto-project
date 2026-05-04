@@ -20,6 +20,13 @@ class LoginLogController extends Controller
 	protected ?string $policy = UserPolicy::class;
 
 	/**
+	 * Route parameters to auto-inject on add and auto-filter on all().
+	 *
+	 * @var array
+	 */
+	protected array $routeParams = ['userId' => true];
+
+	/**
 	 * Initializes the model class.
 	 *
 	 * @param string|null $model The model class reference using ::class.
@@ -29,21 +36,4 @@ class LoginLogController extends Controller
 		parent::__construct();
 	}
 
-	/**
-	 * Modifies the filter object based on the request.
-	 *
-	 * @param mixed $filter
-	 * @param Request $request
-	 * @return object|null
-	 */
-	protected function modifyFilter(?object $filter, Request $request): ?object
-	{
-		$userId = $request->params()->userId ?? null;
-		if (isset($userId))
-		{
-			$filter->userId = $userId;
-		}
-
-		return $filter;
-	}
 }

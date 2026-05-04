@@ -37,6 +37,11 @@ class UserAuthedConnection extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdAt', 'ipAddress', 'deviceId', 'locationId'];
+
+	/**
 	 * Define joins for the model.
 	 *
 	 * @param object $builder The query builder object

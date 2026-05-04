@@ -4,6 +4,7 @@ namespace Modules\Auth\Controllers;
 use Modules\User\Main\Models\User;
 use Modules\Auth\Services\Auth\MultiFactorAuthService;
 use Modules\Auth\Services\Password\PasswordService;
+use Modules\Auth\Auth\Policies\PasswordPolicy;
 use Proto\Controllers\Controller;
 use Proto\Http\Router\Request;
 
@@ -17,6 +18,11 @@ use Proto\Http\Router\Request;
 class PasswordController extends Controller
 {
     use AuthTrait;
+
+	/**
+	 * @var string|null $policy
+	 */
+	protected ?string $policy = PasswordPolicy::class;
 
 	/**
 	 * Constructor.

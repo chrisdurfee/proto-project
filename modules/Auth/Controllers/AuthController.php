@@ -4,9 +4,11 @@ namespace Modules\Auth\Controllers;
 use Modules\User\Main\Models\User;
 use Modules\Auth\Controllers\LoginAttemptController;
 use Modules\Auth\Controllers\UserStatus;
+use Modules\Auth\Models\LoginAttempt;
 use Modules\Auth\Services\Auth\MultiFactorAuthService;
 use Modules\Auth\Services\Auth\GoogleSignInService;
 use Modules\Auth\Controllers\Multifactor\MultiFactorHelper;
+use Modules\Auth\Auth\Policies\AuthPolicy;
 use Proto\Controllers\Controller;
 use Proto\Http\Router\Request;
 use Proto\Auth\Gates\CrossSiteRequestForgeryGate;
@@ -21,6 +23,11 @@ use Proto\Auth\Gates\CrossSiteRequestForgeryGate;
 class AuthController extends Controller
 {
 	use AuthTrait;
+
+	/**
+	 * @var string|null $policy
+	 */
+	protected ?string $policy = AuthPolicy::class;
 
 	/**
 	 * Maximum failed login attempts allowed.
@@ -203,22 +210,12 @@ class AuthController extends Controller
 	 */
 	public function logout(Request $req): object
 	{
-		$session = getSession('user');
-		$userId = $session->id ?? null;
-		if (!$userId)
+		$user = $this->getAuthenticatedUser();
+		if (!$user)
 		{
 			return $this->error(
 				'The user is not authenticated.',
 				HttpStatus::UNAUTHORIZED->value
-			);
-		}
-
-		$user = $this->user->get($userId);
-		if (!$user)
-		{
-			return $this->error(
-				'The user is not found.',
-				HttpStatus::NOT_FOUND->value
 			);
 		}
 
@@ -238,22 +235,12 @@ class AuthController extends Controller
 	 */
 	public function resume(Request $req): object
 	{
-		$session = getSession('user');
-		$userId = $session->id ?? null;
-		if (!$userId)
+		$user = $this->getAuthenticatedUser();
+		if (!$user)
 		{
 			return $this->error(
 				'The user is not authenticated.',
 				HttpStatus::UNAUTHORIZED->value
-			);
-		}
-
-		$user = $this->user->get($userId);
-		if (!$user)
-		{
-			return $this->error(
-				'The user is not found.',
-				HttpStatus::NOT_FOUND->value
 			);
 		}
 
@@ -287,20 +274,11 @@ class AuthController extends Controller
 	 */
 	public function getSessionUser(Request $req): object
 	{
-		$sessionUser = getSession('user');
-		$userId = $sessionUser->id ?? null;
-		if (!$userId)
-		{
-			return $this->error(
-				'The user is not in the session.'
-			);
-		}
-
-		$user = $this->user->get($userId);
+		$user = $this->getAuthenticatedUser();
 		if (!$user)
 		{
 			return $this->error(
-				'The user is not found.'
+				'The user is not in the session.'
 			);
 		}
 
@@ -315,22 +293,12 @@ class AuthController extends Controller
 	 */
 	public function pulse(Request $req): object
 	{
-		$session = getSession('user');
-		$userId = $session->id ?? null;
-		if (!$userId)
+		$user = $this->getAuthenticatedUser();
+		if (!$user)
 		{
 			return $this->error(
 				'The user is not authenticated.',
 				HttpStatus::UNAUTHORIZED->value
-			);
-		}
-
-		$user = $this->user->get($userId);
-		if (!$user)
-		{
-			return $this->error(
-				'The user is not found.',
-				HttpStatus::NOT_FOUND->value
 			);
 		}
 
@@ -358,6 +326,44 @@ class AuthController extends Controller
 		{
 			return $this->error(
 				'The data is invalid for registration.',
+				HttpStatus::BAD_REQUEST->value
+			);
+		}
+
+		$username = (string)($data->username ?? '');
+		$email = (string)($data->email ?? '');
+		$password = (string)($data->password ?? '');
+		$firstName = (string)($data->firstName ?? '');
+		$lastName = (string)($data->lastName ?? '');
+
+		if ($username === '' || $email === '' || $password === '' || $firstName === '' || $lastName === '')
+		{
+			return $this->error(
+				'All fields are required: username, email, password, firstName, lastName.',
+				HttpStatus::BAD_REQUEST->value
+			);
+		}
+
+		if (strlen($username) > 50 || strlen($firstName) > 100 || strlen($lastName) > 100)
+		{
+			return $this->error(
+				'Field length exceeds maximum allowed.',
+				HttpStatus::BAD_REQUEST->value
+			);
+		}
+
+		if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+		{
+			return $this->error(
+				'Invalid email format.',
+				HttpStatus::BAD_REQUEST->value
+			);
+		}
+
+		if (!$this->isPasswordStrong($password, $firstName, $lastName))
+		{
+			return $this->error(
+				'Password must be at least 12 characters and include an uppercase letter, lowercase letter, number, and special character. It must not contain parts of your name.',
 				HttpStatus::BAD_REQUEST->value
 			);
 		}
@@ -402,6 +408,25 @@ class AuthController extends Controller
 			return $this->error(
 				'The user is not authenticated.',
 				HttpStatus::UNAUTHORIZED->value
+			);
+		}
+
+		$password = (string)($data->password ?? '');
+		if ($password === '')
+		{
+			return $this->error(
+				'Password is required.',
+				HttpStatus::BAD_REQUEST->value
+			);
+		}
+
+		$firstName = (string)($sessionUser->firstName ?? '');
+		$lastName = (string)($sessionUser->lastName ?? '');
+		if (!$this->isPasswordStrong($password, $firstName, $lastName))
+		{
+			return $this->error(
+				'Password must be at least 12 characters and include an uppercase letter, lowercase letter, number, and special character. It must not contain parts of your name.',
+				HttpStatus::BAD_REQUEST->value
 			);
 		}
 
@@ -578,6 +603,76 @@ class AuthController extends Controller
 	}
 
 	/**
+	 * Retrieve the authenticated user from session.
+	 *
+	 * @return User|null
+	 */
+	private function getAuthenticatedUser(): ?User
+	{
+		$session = getSession('user');
+		$userId = $session->id ?? null;
+		if (!$userId)
+		{
+			return null;
+		}
+
+		return $this->user->get($userId);
+	}
+
+	/**
+	 * Check if a password meets strength requirements.
+	 * Mirrors the frontend PasswordValidator rules.
+	 *
+	 * @param string $password
+	 * @param string $firstName
+	 * @param string $lastName
+	 * @return bool
+	 */
+	private function isPasswordStrong(string $password, string $firstName = '', string $lastName = ''): bool
+	{
+		if (strlen($password) < 12)
+		{
+			return false;
+		}
+
+		if (!preg_match('/[A-Z]/', $password))
+		{
+			return false;
+		}
+
+		if (!preg_match('/[a-z]/', $password))
+		{
+			return false;
+		}
+
+		if (!preg_match('/[0-9]/', $password))
+		{
+			return false;
+		}
+
+		if (!preg_match('/[^A-Za-z0-9]/', $password))
+		{
+			return false;
+		}
+
+		$nameParts = array_filter([$firstName, $lastName], fn($n) => strlen($n) >= 3);
+		$lowerPassword = strtolower($password);
+		foreach ($nameParts as $part)
+		{
+			$partLower = strtolower($part);
+			for ($i = 0; $i <= strlen($partLower) - 3; $i++)
+			{
+				if (str_contains($lowerPassword, substr($partLower, $i, 3)))
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Authenticate credentials and log failed attempts.
 	 *
 	 * @param string $username
@@ -608,6 +703,6 @@ class AuthController extends Controller
 	 */
 	protected function getAttempts(string $username, string $ipAddress): int
 	{
-		return LoginAttemptController::countAttempts($ipAddress, $username);
+		return LoginAttempt::countAttempts($ipAddress, $username);
 	}
 }

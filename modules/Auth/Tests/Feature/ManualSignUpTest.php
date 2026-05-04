@@ -31,7 +31,7 @@ class ManualSignUpTest extends Test
 
 		$this->assertNotNull($user);
 		$this->assertEquals('manual_test@example.com', $user->email);
-		$this->assertEquals('manual_test@example.com', $user->username); // Email is used as username
+		$this->assertEquals('manual_test', $user->username); // Username is generated from email local part
 		$this->assertEquals(0, $user->enabled); // Should be disabled initially
 
 		// Verify user is in DB
@@ -139,9 +139,7 @@ class ManualSignUpTest extends Test
 		$user1 = $service->createUser($data);
 		$this->assertNotNull($user1);
 
-		$this->expectException(\Exception::class);
-		$this->expectExceptionMessage('Username already taken.');
-
-		$service->createUser($data);
+		$user2 = $service->createUser($data);
+		$this->assertNull($user2, 'Duplicate email registration should return null');
 	}
 }

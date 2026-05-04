@@ -42,11 +42,16 @@ class UserAuthedLocation extends Model
 		'continentCode',
 		'countryCallingCode',
 		'position',
-		[['X(`position`)'], 'latitude'],
-		[['Y(`position`)'], 'longitude'],
+		[['X(`position`)'], 'longitude'],
+		[['Y(`position`)'], 'latitude'],
 		'timezone',
 		'deletedAt'
 	];
+
+	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdAt'];
 
 	/**
 	 * Custom data type handlers for complex fields.

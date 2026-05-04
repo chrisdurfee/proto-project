@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Auth\Services\Password;
 
+use Common\Services\Service;
 use Modules\Auth\Email\Password\PasswordResetRequestEmail;
 use Modules\Auth\Email\Password\PasswordResetSuccessEmail;
 use Modules\Auth\Text\Password\PasswordResetRequestText;
@@ -18,7 +19,7 @@ use Proto\Controllers\Response;
  *
  * @package Modules\Auth\Services\Password
  */
-class PasswordService
+class PasswordService extends Service
 {
 	/** @var PasswordRequestGate|null */
 	protected static ?PasswordRequestGate $gate = null;
@@ -58,9 +59,9 @@ class PasswordService
 	 * This will display the error message.
 	 *
 	 * @param string $message
-	 * @return Response
+	 * @return object
 	 */
-	protected function error(string $message): Response
+	protected function errorResponse(string $message): object
 	{
 		$response = new Response();
 		$response->error($message);

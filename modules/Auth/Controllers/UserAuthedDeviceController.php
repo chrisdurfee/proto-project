@@ -20,6 +20,13 @@ class UserAuthedDeviceController extends Controller
 	protected ?string $policy = UserPolicy::class;
 
 	/**
+	 * Route parameters to auto-inject on add and auto-filter on all().
+	 *
+	 * @var array
+	 */
+	protected array $routeParams = ['userId' => true];
+
+	/**
 	 * Initializes the model class.
 	 *
 	 * @param string|null $model The model class reference using ::class.
@@ -30,20 +37,29 @@ class UserAuthedDeviceController extends Controller
 	}
 
 	/**
-	 * Modifies the filter object based on the request.
+	 * Revokes all authenticated devices for a user.
 	 *
-	 * @param mixed $filter
 	 * @param Request $request
-	 * @return object|null
+	 * @return object
 	 */
-	protected function modifyFilter(?object $filter, Request $request): ?object
+	public function revokeAll(Request $request): object
 	{
-		$userId = $request->params()->userId ?? null;
-		if (isset($userId))
+		$userId = (int)($request->params()->userId ?? 0);
+		if (!$userId)
 		{
-			$filter->userId = $userId;
+			return $this->error('User ID required.');
 		}
 
-		return $filter;
+		$result = UserAuthedDevice::builder()
+			->delete()
+			->where('user_id = ?')
+			->execute([$userId]);
+
+		if (!$result)
+		{
+			return $this->error('Failed to revoke devices.');
+		}
+
+		return $this->response(true);
 	}
 }

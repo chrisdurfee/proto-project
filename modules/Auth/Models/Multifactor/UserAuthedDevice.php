@@ -43,6 +43,11 @@ class UserAuthedDevice extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdAt', 'userId', 'guid'];
+
+	/**
 	 * Define joins for the model.
 	 *
 	 * @param object $builder The query builder object

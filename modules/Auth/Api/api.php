@@ -3,7 +3,6 @@ namespace Modules\Auth\Api;
 
 use Modules\Auth\Controllers\AuthController;
 use Modules\Auth\Controllers\PasswordController;
-use Proto\Http\Middleware\CrossSiteProtectionMiddleware;
 use Proto\Http\Middleware\DomainMiddleware;
 use Proto\Http\Middleware\ThrottleMiddleware;
 use Proto\Http\Router\Router;
@@ -15,30 +14,25 @@ use Proto\Http\Router\Router;
  * login, logout, registration, MFA, and CSRF token retrieval.
  */
 router()
-	->middleware(([
-		CrossSiteProtectionMiddleware::class
-	]))
 	->group('auth', function(Router $router)
 	{
-		$controller = new AuthController();
-		$router->post('pulse', [$controller, 'pulse']);
-		$router->post('resume', [$controller, 'resume']);
-		$router->post('logout', [$controller, 'logout']);
+		$router->post('pulse', [AuthController::class, 'pulse']);
+		$router->post('resume', [AuthController::class, 'resume']);
+		$router->post('logout', [AuthController::class, 'logout']);
 
-		// Registration and profile management
-		$router->post('register', [$controller, 'register']);
-		$router->post('set-password', [$controller, 'setPassword']);
-		$router->post('update-profile', [$controller, 'updateProfile']);
+		// Profile management
+		$router->post('set-password', [AuthController::class, 'setPassword']);
+		$router->post('update-profile', [AuthController::class, 'updateProfile']);
 
 		// Google Auth
-		$router->post('google/callback', [$controller, 'googleCallback']);
-		$router->post('google/signup/callback', [$controller, 'googleSignupCallback']);
+		$router->post('google/callback', [AuthController::class, 'googleCallback']);
+		$router->post('google/signup/callback', [AuthController::class, 'googleSignupCallback']);
 
 		// Session User
-		$router->get('session-user', [$controller, 'getSessionUser']);
+		$router->get('session-user', [AuthController::class, 'getSessionUser']);
 
 		// CSRF Token
-		$router->get('csrf-token', [$controller, 'getToken'], [
+		$router->get('csrf-token', [AuthController::class, 'getToken'], [
 			DomainMiddleware::class
 		]);
 	});
@@ -49,21 +43,22 @@ router()
 	]))
 	->group('auth', function(Router $router)
 	{
-		$controller = new AuthController();
-		// standard login
-		$router->post('login', [$controller, 'login']);
+		// standard login (exempt from CSRF — user has no token yet)
+		$router->withoutMutationMiddleware()->post('login', [AuthController::class, 'login']);
+
+		// Registration (exempt from CSRF — user has no token yet)
+		$router->withoutMutationMiddleware()->post('register', [AuthController::class, 'register']);
 
 		// MFA: send & verify one‑time codes
-		$router->post('mfa/code', [$controller, 'getAuthCode']);
-		$router->post('mfa/verify', [$controller, 'verifyAuthCode']);
+		$router->withoutMutationMiddleware()->post('mfa/code', [AuthController::class, 'getAuthCode']);
+		$router->withoutMutationMiddleware()->post('mfa/verify', [AuthController::class, 'verifyAuthCode']);
 
 		// Google Auth
-		$router->get('google/login', [$controller, 'googleLogin']);
-		$router->get('google/signup', [$controller, 'googleSignup']);
+		$router->get('google/login', [AuthController::class, 'googleLogin']);
+		$router->get('google/signup', [AuthController::class, 'googleSignup']);
 
 		// Password reset: request & verify reset codes
-		$controller = new PasswordController();
-		$router->post('password/request', [$controller, 'requestPasswordReset']);
-		$router->post('password/verify', [$controller, 'validatePasswordRequest']);
-		$router->post('password/reset', [$controller, 'resetPassword']);
+		$router->withoutMutationMiddleware()->post('password/request', [PasswordController::class, 'requestPasswordReset']);
+		$router->withoutMutationMiddleware()->post('password/verify', [PasswordController::class, 'validatePasswordRequest']);
+		$router->withoutMutationMiddleware()->post('password/reset', [PasswordController::class, 'resetPassword']);
 	});

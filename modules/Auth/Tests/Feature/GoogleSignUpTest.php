@@ -5,7 +5,7 @@ use Proto\Tests\Test;
 use Modules\Auth\Services\Auth\GoogleSignInService;
 use Modules\Auth\Integrations\Google\GoogleService;
 use Modules\User\Main\Models\User;
-use Modules\User\Services\User\UserImageService;
+use Modules\User\Main\Services\UserImageService;
 
 /**
  * GoogleSignUpTest

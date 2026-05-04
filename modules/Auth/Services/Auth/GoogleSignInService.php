@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Auth\Services\Auth;
 
+use Common\Services\Service;
 use Modules\Auth\Integrations\Google\GoogleService;
 use Modules\User\Main\Models\User;
 
@@ -11,7 +12,7 @@ use Modules\User\Main\Models\User;
  *
  * @package Modules\Auth\Services\Auth
  */
-class GoogleSignInService
+class GoogleSignInService extends Service
 {
 	/**
 	 * Constructor.
@@ -121,6 +122,31 @@ class GoogleSignInService
 	}
 
 	/**
+	 * Generate a unique username (handle) from a name.
+	 *
+	 * Builds a lowercase slug from the user's name, then appends a random
+	 * numeric suffix until the handle is not already taken.
+	 *
+	 * @param string $firstName
+	 * @param string $lastName
+	 * @return string
+	 */
+	protected function generateUsername(string $firstName, string $lastName): string
+	{
+		$base = strtolower(trim($firstName . '_' . $lastName));
+		$base = preg_replace('/[^a-z0-9_]/', '', $base);
+		$base = trim($base, '_') ?: 'user';
+
+		$username = $base;
+		while (User::getBy(['username' => $username]))
+		{
+			$username = $base . '_' . rand(100, 9999);
+		}
+
+		return $username;
+	}
+
+	/**
 	 * Create a new user based on Google profile.
 	 *
 	 * @param object $profile
@@ -129,13 +155,18 @@ class GoogleSignInService
 	protected function createNewUser(object $profile): ?User
 	{
 		$email = $profile->email;
+		$firstName = $profile->given_name ?? '';
+		$lastName = $profile->family_name ?? '';
+		$displayName = $profile->name ?? trim($firstName . ' ' . $lastName);
+		$username = $this->generateUsername($firstName, $lastName);
+
 		// Create new user
 		$userData = [
 			'email' => $email,
-			'firstName' => $profile->given_name ?? '',
-			'lastName' => $profile->family_name ?? '',
-			'displayName' => $profile->name ?? ($profile->given_name ?? '' . ' ' . ($profile->family_name ?? '')),
-			'username' => $email, // Fallback username
+			'firstName' => $firstName,
+			'lastName' => $lastName,
+			'displayName' => $displayName,
+			'username' => $username,
 			'image' => $profile->picture ?? null,
 			'emailVerifiedAt' => date('Y-m-d H:i:s'),
 			'createdAt' => date('Y-m-d H:i:s'),

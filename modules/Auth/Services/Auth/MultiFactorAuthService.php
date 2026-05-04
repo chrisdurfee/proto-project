@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Auth\Services\Auth;
 
+use Common\Services\Service;
 use Modules\Auth\Email\Auth\AuthMultiFactorEmail;
 use Modules\Auth\Email\Auth\AuthNewConnectionEmail;
 use Modules\Auth\Text\Auth\AuthMultiFactorText;
@@ -22,7 +23,7 @@ use Modules\Auth\Controllers\Multifactor\UserAuthedConnectionController;
  *
  * @package Modules\Auth\Services\Auth
  */
-class MultiFactorAuthService
+class MultiFactorAuthService extends Service
 {
 	/**
 	 * Singleton instance of the MFA gate.

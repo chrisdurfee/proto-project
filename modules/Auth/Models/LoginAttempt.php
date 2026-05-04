@@ -32,6 +32,11 @@ class LoginAttempt extends Model
 	];
 
 	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdAt', 'ipAddress', 'usernameId'];
+
+	/**
 	 * Define joins for the User model.
 	 *
 	 * @param object $builder The query builder object
@@ -39,13 +44,43 @@ class LoginAttempt extends Model
 	 */
 	protected static function joins(object $builder): void
 	{
-		LoginAttemptUsername::one($builder)
-			->on(['usernameId', 'id'])
-			->fields('username');
+		$builder->belongsTo(LoginAttemptUsername::class, fields: ['username'])
+			->on(['usernameId', 'id']);
 	}
 
 	/**
 	 * @var string $storageType
 	 */
 	protected static string $storageType = LoginAttemptStorage::class;
+
+	/**
+	 * Count the number of recent login attempts for a given IP and username.
+	 *
+	 * @param string $ipAddress
+	 * @param string $username
+	 * @return int
+	 */
+	public static function countAttempts(string $ipAddress, string $username): int
+	{
+		$dateTime = date('Y-m-d H:i:s');
+
+		$row = static::builder()
+			->select([['COUNT(*)'], 'total'])
+			->join(function($joins)
+			{
+				$joins->left('login_attempt_usernames', 'lu')
+					->on('a.username_id = lu.id');
+			})
+			->where(
+				'a.ip_address = ?',
+				'lu.username = ?',
+				"a.created_at >= DATE_SUB('{$dateTime}', INTERVAL 15 MINUTE)"
+			)
+			->first([
+				$ipAddress,
+				$username
+			]);
+
+		return (int)($row->total ?? 0);
+	}
 }

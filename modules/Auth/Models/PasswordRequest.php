@@ -10,6 +10,13 @@ use Proto\Models\Model;
  * This will set up the password request model.
  *
  * @package Modules\Auth\Models
+ *
+ * @property int $id
+ * @property string $createdAt
+ * @property string|null $updatedAt
+ * @property int $userId
+ * @property string $requestId
+ * @property string $status
  */
 class PasswordRequest extends Model
 {
@@ -34,6 +41,11 @@ class PasswordRequest extends Model
 		'requestId',
 		'status'
 	];
+
+	/**
+	 * @var array $immutableFields
+	 */
+	protected static array $immutableFields = ['createdAt', 'userId', 'requestId'];
 
 	/**
 	 * @var string $storageType
