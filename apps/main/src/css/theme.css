@@ -10,79 +10,253 @@
 
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-display: 'Instrument Serif', ui-serif, Georgia, serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+    --font-mono-meta: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 
-    --color-background: hsl(0 0% 92%);
+    /* Light theme defaults */
+    --color-background: hsl(0 0% 95%);
     --color-foreground: hsl(0 0% 0%);
     --color-foreground-secondary: hsl(240 5% 55%);
     --color-foreground-tertiary: hsl(240 2% 77%);
     --color-foreground-quaternary: hsl(240 2% 86%);
-    --color-card: hsl(0 0% 95%);
-    --color-card-foreground: hsl(240 10% 3.9%);
-    --color-popover: hsl(0 0% 95%);
-    --color-popover-foreground: hsl(240 10% 3.9%);
+    --color-card: hsl(0 0% 100%);
+    --color-card-foreground: hsl(0 0% 0%);
+    --color-popover: hsl(0 0% 100%);
+    --color-popover-foreground: hsl(0 0% 0%);
     --color-primary: hsl(240 5.9% 10%);
     --color-primary-foreground: hsl(0 0% 98%);
     --color-secondary: hsl(240 4.8% 85%);
     --color-secondary-foreground: hsl(240 5.9% 10%);
     --color-muted: hsl(240 4.8% 85%);
-    --color-muted-foreground: hsl(240 3.8% 46.1%);
-    --color-accent: hsl(240 4.8% 100%);
-    --color-accent-foreground: hsl(240 5.9% 10%);
+    --color-muted-foreground: hsl(240 5% 55%);
+    --color-accent: hsl(78 100% 62%);              /* #b8ff3b lime — critical CTAs only */
+    --color-accent-foreground: hsl(240 4% 4%);
     --color-destructive: hsl(0 72.22% 50.59%);
     --color-destructive-foreground: hsl(0 0% 98%);
     --color-warning: hsl(38 92% 50%);
     --color-warning-foreground: hsl(0 85.7% 97.3%);
+    --color-success: hsl(142 71% 45%);
+    --color-success-foreground: hsl(0 0% 98%);
+    --color-info: hsl(217 91% 60%);
+    --color-info-foreground: hsl(0 0% 98%);
     --color-border: hsl(240 5.9% 80%);
-    --color-input: hsl(240 5.9% 95%);
+    --color-input: transparent;
     --color-ring: hsl(240 5% 64.9%);
+
+    /* Additive surface, hairline and accent-tint tokens.
+       Light values mirror the existing card/border palette so utilities
+       like `bg-surface-2` resolve sensibly in light mode; dark mode
+       overrides below replace these with the Rally dark palette. */
+    --color-surface-2: hsl(0 0% 96%);
+    --color-surface-3: hsl(0 0% 98%);
+    --color-border-strong: hsl(240 5.9% 70%);
+    --color-accent-soft: hsl(78 100% 62% / 0.18);
+
     --radius: 0.5rem;
     /* map Tailwind sizes to your formula */
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
 
+    /* Card radius scale used by the new design system */
+    --radius-card: 16px;
+    --radius-card-sm: 10px;
+    --radius-card-lg: 22px;
+}
+
+/*
+   Safe-area CSS variables consumed by the @utility top-safe / bottom-safe /
+   left-safe / right-safe / pt-safe-top / etc. blocks below. These MUST be
+   defined on :root or the var() lookups resolve to nothing, which makes
+   `top: max(var(--safe-top), 0px)` invalid CSS — the entire `top` declaration
+   is dropped and `position: sticky` falls back to `top: auto`, causing sticky
+   elements to scroll like static content.
+*/
+:root {
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
-
-    /* Dynamic viewport units for iOS Safari */
-    --vh: 1vh;
-    --dvh: 1dvh;
 }
 
-/* 2) System dark mode */
+/*
+   Dark theme — Rally palette. Applied via system preference (when not
+   explicitly opted into light) and via the `.dark` class. Light theme
+   above is intentionally left unchanged.
+*/
+
 @media (prefers-color-scheme: dark) {
     :root:not(.light) {
-        --color-background: hsl(240 10% 3.9%);
-        --color-foreground: hsl(0 0% 100%);
-        --color-foreground-secondary: hsl(240 3% 56%);
-        --color-foreground-tertiary: hsl(240 2% 28%);
-        --color-foreground-quaternary: hsl(240 2% 17%);
-        --color-card: hsl(240 3% 11%);
-        --color-card-foreground: hsl(0 0% 100%);
-        --color-popover: hsl(240 3% 11%);
-        --color-popover-foreground: hsl(0 0% 100%);
-        --color-primary: hsl(0 0% 100%);
-        --color-primary-foreground: hsl(240 10% 3.9%);
-        --color-secondary: hsl(240 3.7% 15.9%);
-        --color-secondary-foreground: hsl(0 0% 100%);
-        --color-muted: hsl(240 4% 16%);
-        --color-muted-foreground: hsl(240 3% 56%);
+        --color-background: hsl(240 5% 5%);            /* #0b0b0c */
+        --color-foreground: hsl(60 9% 98%);            /* #fafaf9 */
+        --color-foreground-secondary: hsl(60 9% 98% / 0.72);
+        --color-foreground-tertiary: hsl(60 9% 98% / 0.48);
+        --color-foreground-quaternary: hsl(60 9% 98% / 0.32);
+        --color-card: hsl(240 5% 7%);                  /* #121214 surface */
+        --color-card-foreground: hsl(60 9% 98%);
+        --color-popover: hsl(240 5% 7%);
+        --color-popover-foreground: hsl(60 9% 98%);
+        --color-primary: hsl(60 9% 98%);
+        --color-primary-foreground: hsl(240 5% 5%);
+        --color-secondary: hsl(240 5% 10%);            /* #18181b surface-2 */
+        --color-secondary-foreground: hsl(60 9% 98%);
+        --color-muted: hsl(240 5% 10%);
         --color-accent: hsl(240 3.7% 15.9%);
-        --color-accent-foreground: hsl(0 0% 98%);
-        --color-destructive: hsl(0 62.8% 30.6%);
-        --color-destructive-foreground: hsl(0 85.7% 97.3%);
-        --color-warning: hsl(38 92% 50%);
-        --color-warning-foreground: hsl(0 0% 98%);
-        --color-border: hsl(240 3.7% 15.9%);
-        --color-input: hsl(240 10% 4%);
-        --color-ring: hsl(240 4.9% 83.9%);
+        --color-accent-foreground: hsl(0 0% 98%);              /* #B8FF3B lime */
+        --color-accent-foreground: hsl(240 5% 5%);
+        --color-destructive: hsl(5 100% 68%);          /* #ff6b5b */
+        --color-destructive-foreground: hsl(60 9% 98%);
+        --color-warning: hsl(36 100% 62%);             /* #ffb23f */
+        --color-warning-foreground: hsl(240 5% 5%);
+        --color-success: hsl(142 71% 58%);             /* #4ade80 */
+        --color-success-foreground: hsl(240 5% 5%);
+        --color-info: hsl(217 91% 60%);
+        --color-info-foreground: hsl(60 9% 98%);
+        --color-border: hsl(0 0% 100% / 0.06);          /* hairline */
+        --color-input: transparent;
+        --color-ring: hsl(0 0% 100% / 0.20);
+
+        /* Additive dark tokens */
+        --color-surface-2: hsl(240 5% 10%);            /* #18181b */
+        --color-surface-3: hsl(240 5% 14%);            /* #1f1f23 */
+        --color-border-strong: hsl(0 0% 100% / 0.10);
+        --color-accent-soft: hsl(78 100% 62% / 0.14);
+
         color-scheme: dark;
     }
 }
 
+/* Explicit `.dark` override (mirror of the @media block, no nesting) */
+:root.dark {
+    --color-background: hsl(240 5% 5%);
+    --color-foreground: hsl(60 9% 98%);
+    --color-foreground-secondary: hsl(60 9% 98% / 0.72);
+    --color-foreground-tertiary: hsl(60 9% 98% / 0.48);
+    --color-foreground-quaternary: hsl(60 9% 98% / 0.32);
+    --color-card: hsl(240 5% 7%);
+    --color-card-foreground: hsl(60 9% 98%);
+    --color-popover: hsl(240 5% 7%);
+    --color-popover-foreground: hsl(60 9% 98%);
+    --color-primary: hsl(60 9% 98%);
+    --color-primary-foreground: hsl(240 5% 5%);
+    --color-secondary: hsl(240 5% 10%);
+    --color-secondary-foreground: hsl(60 9% 98%);
+    --color-muted: hsl(240 5% 10%);
+    --color-muted-foreground: hsl(60 9% 98% / 0.48);
+    --color-accent: hsl(240 3.7% 15.9%);
+    --color-accent-foreground: hsl(0 0% 98%);
+    --color-destructive: hsl(5 100% 68%);
+    --color-destructive-foreground: hsl(60 9% 98%);
+    --color-warning: hsl(36 100% 62%);
+    --color-warning-foreground: hsl(240 5% 5%);
+    --color-success: hsl(142 71% 58%);
+    --color-success-foreground: hsl(240 5% 5%);
+    --color-info: hsl(217 91% 60%);
+    --color-info-foreground: hsl(60 9% 98%);
+    --color-border: hsl(0 0% 100% / 0.06);
+    --color-input: transparent;
+    --color-ring: hsl(0 0% 100% / 0.20);
+    --color-surface-2: hsl(240 5% 10%);
+    --color-surface-3: hsl(240 5% 14%);
+    --color-border-strong: hsl(0 0% 100% / 0.10);
+    --color-accent-soft: hsl(78 100% 62% / 0.14);
+
+    color-scheme: dark;
+}
+
+/* Explicit `.dark` override (mirror of the @media block, no nesting) */
+
+/* Tabular numerics — used for stats, counts, timestamps */
+.tabular {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Hairline section dividers (one-px borders using the theme border token) */
+.hairline-t {
+    border-top: 1px solid var(--color-border);
+}
+
+.hairline-b {
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Striped placeholder image — for empty image slots in card layouts */
+.placeholder-img {
+    background-color: var(--color-surface-2);
+    background-image: repeating-linear-gradient(135deg,
+        hsl(0 0% 100% / 0.0) 0 8px,
+        hsl(0 0% 100% / 0.01) 8px 16px);
+}
+
+/* Larger-pitch stripe variant — for hero cards and editorial slots */
+.placeholder-img-lg {
+    background-color: var(--color-surface-2);
+    background-image: repeating-linear-gradient(135deg,
+        hsl(0 0% 100% / 0.0) 0 12px,
+        hsl(0 0% 100% / 0.01) 12px 24px);
+}
+
+/* Shimmer pass — apply on a relatively positioned element */
+.sheen {
+    position: relative;
+    overflow: hidden;
+}
+
+.sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.03), transparent);
+    background-size: 60% 100%;
+    background-repeat: no-repeat;
+    animation: sheen 3.6s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes sheen {
+    0% { background-position: -120% 0; }
+    100% { background-position: 220% 0; }
+}
+
+:root.dark {
+    --color-background: hsl(240 5% 5%);
+    --color-foreground: hsl(60 9% 98%);
+    --color-foreground-secondary: hsl(60 9% 98% / 0.72);
+    --color-foreground-tertiary: hsl(60 9% 98% / 0.48);
+    --color-foreground-quaternary: hsl(60 9% 98% / 0.32);
+    --color-card: hsl(240 5% 7%);
+    --color-card-foreground: hsl(60 9% 98%);
+    --color-popover: hsl(240 5% 7%);
+    --color-popover-foreground: hsl(60 9% 98%);
+    --color-primary: hsl(60 9% 98%);
+    --color-primary-foreground: hsl(240 5% 5%);
+    --color-secondary: hsl(240 5% 10%);
+    --color-secondary-foreground: hsl(60 9% 98%);
+    --color-muted: hsl(240 5% 10%);
+    --color-muted-foreground: hsl(60 9% 98% / 0.48);
+    --color-accent: hsl(240 3.7% 15.9%);
+    --color-accent-foreground: hsl(0 0% 98%);
+    --color-destructive: hsl(5 100% 68%);
+    --color-destructive-foreground: hsl(60 9% 98%);
+    --color-warning: hsl(36 100% 62%);
+    --color-warning-foreground: hsl(240 5% 5%);
+    --color-success: hsl(142 71% 58%);
+    --color-success-foreground: hsl(240 5% 5%);
+    --color-info: hsl(217 91% 60%);
+    --color-info-foreground: hsl(60 9% 98%);
+    --color-border: hsl(0 0% 100% / 0.06);
+    --color-input: transparent;
+    --color-ring: hsl(0 0% 100% / 0.20);
+    --color-surface-2: hsl(240 5% 10%);
+    --color-surface-3: hsl(240 5% 14%);
+    --color-border-strong: hsl(0 0% 100% / 0.10);
+    --color-accent-soft: hsl(78 100% 62% / 0.14);
+    color-scheme: dark;
+}
+
 @layer base {
+
     html,
     body,
     input,
@@ -90,23 +264,97 @@
     select,
     button {
         font-family: 'Inter', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        font-feature-settings: 'ss01', 'ss03', 'cv11';
+        -webkit-font-smoothing: antialiased;
+    }
+}
+
+@layer utilities {
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+
+    /* Tabular numerics — used for stats, counts, timestamps */
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Hairline section dividers (one-px borders using the theme border token) */
+    .hairline-t {
+        border-top: 1px solid var(--color-border);
+    }
+
+    .hairline-b {
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    /* Striped placeholder image — for empty image slots in card layouts */
+    .placeholder-img {
+        background-color: var(--color-background);
+        background-image: repeating-linear-gradient(135deg,
+            var(--color-background) 0 8px,
+            var(--color-card) 8px 16px);
+    }
+
+    /* Larger-pitch stripe variant — for hero cards and editorial slots */
+    .placeholder-img-lg {
+        background-color: var(--color-background);
+        background-image: repeating-linear-gradient(135deg,
+            var(--color-background) 0 12px,
+            var(--color-card) 12px 24px);
+    }
+
+    /* Shimmer pass — apply on a relatively positioned element */
+    .sheen {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sheen::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.03), transparent);
+        background-size: 60% 100%;
+        background-repeat: no-repeat;
+        animation: sheen 3.6s linear infinite;
+        pointer-events: none;
+    }
+
+    @keyframes sheen {
+        0% { background-position: -120% 0; }
+        100% { background-position: 220% 0; }
     }
 }
 
 @utility top-safe {
-	top: max(var(--safe-top), 0px);
+    top: max(var(--safe-top), 0px);
+}
+
+@utility top-header-safe {
+    top: calc(max(var(--safe-top), 0px) + 56px);
 }
 
 @utility bottom-safe {
-	bottom: max(var(--safe-bottom), 0px);
+    bottom: max(var(--safe-bottom), 0px);
 }
 
 @utility left-safe {
-	left: max(var(--safe-left), 0px);
+    left: max(var(--safe-left), 0px);
 }
 
 @utility right-safe {
-	right: max(var(--safe-right), 0px);
+    right: max(var(--safe-right), 0px);
 }
 
 @utility pt-safe-top {
@@ -137,21 +385,57 @@
     padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
 
+@utility h-safe-full {
+    height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+}
+
+@utility max-h-safe-full {
+    max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+}
+
 /* Dynamic viewport height utilities for iOS Safari */
 @utility h-screen-dynamic {
-    height: 100vh; /* Fallback */
-    height: 100dvh; /* Dynamic viewport height */
-    height: -webkit-fill-available; /* iOS fallback */
+    height: 100vh;
+    /* Fallback */
+    height: 100dvh;
+    /* Dynamic viewport height */
+    height: -webkit-fill-available;
+    /* iOS fallback */
 }
 
 @utility min-h-screen-dynamic {
-    min-height: 100vh; /* Fallback */
-    min-height: 100dvh; /* Dynamic viewport height */
-    min-height: -webkit-fill-available; /* iOS fallback */
+    min-height: 100vh;
+    /* Fallback */
+    min-height: 100dvh;
+    /* Dynamic viewport height */
+    min-height: -webkit-fill-available;
+    /* iOS fallback */
 }
 
 @utility max-h-screen-dynamic {
-    max-height: 100vh; /* Fallback */
-    max-height: 100dvh; /* Dynamic viewport height */
-    max-height: -webkit-fill-available; /* iOS fallback */
+    max-height: 100vh;
+    /* Fallback */
+    max-height: 100dvh;
+    /* Dynamic viewport height */
+    max-height: -webkit-fill-available;
+    /* iOS fallback */
+}
+
+/*
+   Card radius utilities. Tailwind v4 does not reliably auto-generate
+   `rounded-card`, `rounded-card-sm`, `rounded-card-lg` from the
+   `--radius-card-*` theme tokens because the multi-segment names after
+   `--radius-` are not always matched by the namespace inference. Declaring
+   them explicitly here guarantees the utilities exist regardless.
+*/
+@utility rounded-card {
+    border-radius: var(--radius-card);
+}
+
+@utility rounded-card-sm {
+    border-radius: var(--radius-card-sm);
+}
+
+@utility rounded-card-lg {
+    border-radius: var(--radius-card-lg);
 }

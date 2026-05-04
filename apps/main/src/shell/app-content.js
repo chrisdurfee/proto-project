@@ -71,6 +71,7 @@ const resumeUserSession = () =>
 			if (response.allowAccess === true)
 			{
 				app.setUserData(response.user);
+				app.data.notifications.setup();
 			}
 			else
 			{
@@ -87,7 +88,7 @@ const resumeUserSession = () =>
  */
 export const AppContent = () => (
 	Div({
-		class: 'app-content flex flex-auto flex-col will-change-contents',
+		class: 'app-content flex flex-auto flex-col',
 
 		/**
 		 * This will open the install prompt when the app is created.

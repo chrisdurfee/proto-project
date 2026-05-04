@@ -1,8 +1,10 @@
 import { Builder, router } from "@base-framework/base";
+import { blockEdgeSwipe } from "@components/utils/block-edge-swipe.js";
 import { Configs } from "./configs.js";
 import { getCsrfToken } from "./csrf-token.js";
 import { setupServiceWorker } from "./service.js";
 import { AppShell } from "./shell/app-shell.js";
+import { NotificationData } from "./shell/data/notification-data.js";
 import { AuthModel } from "./shell/models/auth-model.js";
 import { UserData } from "./shell/models/user-data.js";
 import { setHtmlThemeBySettings } from "./theme.js";
@@ -51,6 +53,8 @@ export class AppController
 		this.setupRouter();
 		this.setData();
 		this.getCsrfToken();
+		this.setupFontLoading();
+		blockEdgeSwipe();
 	}
 
 	/**
@@ -63,7 +67,8 @@ export class AppController
 	{
 		this.data = {
 			user: this.setupUserData(),
-			auth: new AuthModel()
+			auth: new AuthModel(),
+			notifications: new NotificationData()
 		};
 	}
 
@@ -94,6 +99,46 @@ export class AppController
 	setupService()
 	{
 		setupServiceWorker(this);
+	}
+
+	/**
+	 * This will setup font loading detection to prevent FOUT.
+	 * Adds 'fonts-loaded' class to html element when Material Symbols fonts are ready.
+	 *
+	 * @protected
+	 * @returns {void}
+	 */
+	setupFontLoading()
+	{
+		// Check if Font Loading API is supported
+		if ('fonts' in document)
+		{
+			const fonts = [
+				'Material Symbols Outlined',
+				'Material Symbols Rounded',
+				'Material Symbols Sharp'
+			];
+
+			// Load all Material Symbol fonts
+			Promise.all(
+				fonts.map(font => document.fonts.load(`24px "${font}"`))
+			).then(() => {
+				// Add class to html element when fonts are loaded
+				document.documentElement.classList.add('fonts-loaded');
+			}).catch(() => {
+				// Fallback: show icons after a delay even if font loading fails
+				setTimeout(() => {
+					document.documentElement.classList.add('fonts-loaded');
+				}, 1000);
+			});
+		}
+		else
+		{
+			// Fallback for browsers without Font Loading API
+			setTimeout(() => {
+				document.documentElement.classList.add('fonts-loaded');
+			}, 1000);
+		}
 	}
 
 	/**
@@ -155,6 +200,32 @@ export class AppController
 		 * This property should be used to add popovers, modals, overlays, etc.
 		 */
 		this.root = main.panel;
+
+		this.hideSplash();
+	}
+
+	/**
+	 * This will fade out and remove the in-app splash screen.
+	 *
+	 * @protected
+	 * @returns {void}
+	 */
+	hideSplash()
+	{
+		const splash = document.getElementById('app-splash');
+		if (!splash)
+		{
+			return;
+		}
+
+		requestAnimationFrame(() =>
+		{
+			requestAnimationFrame(() =>
+			{
+				splash.classList.add('fade-out');
+				splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+			});
+		});
 	}
 
 	/**
@@ -166,6 +237,7 @@ export class AppController
 	{
 		this.appShell.state.isSignedIn = true;
 		this.setUserData(user);
+		this.data.notifications.setup();
 
 		if (this.push)
 		{
@@ -181,6 +253,7 @@ export class AppController
 	signOut()
 	{
 		this.appShell.state.isSignedIn = false;
+		this.data.notifications.teardown();
 		this.data.auth.xhr.logout('', () =>
 		{
 			this.data.user

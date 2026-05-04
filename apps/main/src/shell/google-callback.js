@@ -1,7 +1,6 @@
 import { A, Div, H1, OnState, P } from '@base-framework/atoms';
-import { Component, Jot } from '@base-framework/base';
-import { Icon } from '@base-framework/ui/atoms';
-import { Icons } from '@base-framework/ui/icons';
+import { Jot } from '@base-framework/base';
+import { UniversalIcon } from '@base-framework/ui/atoms';
 import { GoogleModel } from './models/google-model.js';
 
 /**
@@ -14,7 +13,7 @@ const LoadingScreen = () => (
 		Div({ class: 'flex flex-col items-center gap-4' }, [
 			Div({ class: 'animate-spin rounded-full h-12 w-12 border-b-2 border-primary' }),
 			H1({ class: 'text-xl font-semibold' }, 'Authenticating with Google...'),
-			P({ class: 'text-muted-foreground' }, 'Please wait while we sign you in.')
+			P({ class: 'text-foreground-secondary' }, 'Please wait while we sign you in.')
 		])
 	])
 );
@@ -28,9 +27,9 @@ const LoadingScreen = () => (
 const ErrorScreen = (message) => (
 	Div({ class: 'flex flex-auto flex-col justify-center items-center h-screen' }, [
 		Div({ class: 'flex flex-col items-center gap-4 text-center max-w-md p-6' }, [
-			Icon({ class: 'text-destructive', size: '2xl' }, Icons.warning),
+			UniversalIcon({ class: 'text-destructive', size: '2xl' }, 'warning'),
 			H1({ class: 'text-xl font-semibold text-destructive' }, 'Authentication Failed'),
-			P({ class: 'text-muted-foreground' }, message),
+			P({ class: 'text-foreground-secondary' }, message),
 			A({
 				href: '/',
 				class: 'mt-4 text-primary hover:underline'
@@ -44,7 +43,7 @@ const ErrorScreen = (message) => (
  *
  * This component handles the Google OAuth callback.
  *
- * @type {typeof Component}
+ * @returns {object}
  */
 export const GoogleCallback = Jot(
 {

@@ -1,0 +1,72 @@
+---
+description: Project architecture, stack, code layout, autoloading, and new feature checklist
+globs: 
+alwaysApply: true
+---
+
+# Project Overview & Architecture
+
+**Goal**: Resilient, scalable, maintainable, and secure code. Functions adhere to SRP, classes follow SOLID. Fail gracefully with proper error handling and logging. Database tables normalized to at least 3NF.
+
+## Critical Formatting Rules
+
+### ZERO TOLERANCE: No Vertical Alignment
+Never pad values, keys, operators, types, or comments with extra spaces to make them line up into visual columns. Every instance is a formatting error.
+
+```js
+// ❌ WRONG
+{ value: 'white',       label: 'White',  hex: '#F8F8F8' },
+{ value: 'pearl_white', label: 'Pearl',  hex: '#EEE8D5' },
+
+// ✅ CORRECT
+{ value: 'white', label: 'White', hex: '#F8F8F8' },
+{ value: 'pearl_white', label: 'Pearl', hex: '#EEE8D5' },
+```
+
+### Indentation
+Always use tabs with 4 spaces for alignment. Do not use spaces for indentation.
+
+## Stack
+- **Backend**: PHP 8.4 monolith using **Proto Framework**. Entry: `public/api/index.php`.
+ Proto has built-in routing, middleware, server events, sockets, tests, controllers, models, factories, seeders, generators, dispatching, jobs, integrations, automations, auth, patterns, services, storages, migrations, ORM, validation, file storage, utils.
+- **Frontend**: Vite-based apps in `apps/{crm,developer,main}` using **Base Framework** (fundamentally different from React/Vue).
+- **Infrastructure**: Dockerized (Web/PHP, MariaDB, Redis) via `infrastructure/docker-compose.yaml`.
+
+## Code Layout
+- `modules/*`: Feature modules (domain logic). Supports nested feature modules.
+- `common/*`: Shared framework glue, base classes, configs.
+- `public/*`: HTTP entrypoints and assets.
+- `apps/*`: Independent frontend applications proxying to backend.
+
+## Autoloading
+- PSR-4: `Modules\` → `modules/`, `Common\` → `common/`.
+- Migrations: classmapped from `common/Migrations` and recursively discovered from `modules/*/Migrations` (up to 6 levels deep).
+
+## Agent Research Requirements
+
+Before building any feature, the agent MUST:
+1. **Search for existing patterns** — look at similar modules/features in the codebase to follow established conventions
+2. **Check for built-in framework methods** — Proto and Base have many built-in methods (service traits, controller properties, model helpers, UI components). NEVER rebuild what already exists
+3. **Check shared components** — `apps/main/src/components/` has reusable atoms/molecules/organisms. Always check before creating new ones
+4. **Cross-reference migrations** — when writing factories, enum values MUST match migration definitions exactly
+5. **Use model static methods** — NEVER instantiate Storage classes directly. Use `Model::get()`, `Model::fetchWhere()`, `Model::builder()`, etc.
+
+## Add New Feature Checklist
+
+**Backend (Flat Module)**:
+1. Controller: `modules/Feature/Controllers/FeatureController.php`
+2. Routes: `modules/Feature/Api/api.php`
+3. Migrations: `modules/Feature/Migrations/*`
+4. Tests: `modules/Feature/Tests/Feature/*Test.php`
+
+**Backend (Nested Feature Module)**:
+1. Feature directory: `modules/ParentModule/Feature/`
+2. Controller, Routes, Migrations in feature directory
+3. Gateway method in parent: `modules/ParentModule/Gateway/Gateway.php`
+4. Use `Main/` folder if parent needs root-level routes
+
+**Frontend**:
+1. Module: `apps/{crm|main}/src/modules/{moduleName}/module.js`
+2. Pages/components: `components/pages/{feature}/{pageName}-page.js`
+3. Models: `components/models/{name}-model.js`
+4. Register in `imported-modules.js`

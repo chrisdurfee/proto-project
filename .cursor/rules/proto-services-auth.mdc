@@ -1,0 +1,319 @@
+---
+description: Proto Framework services, service traits, ServiceResult, auth policies, validation, file storage, and controller audit patterns
+globs: "{modules/**/Services/*.php,modules/**/Auth/**/*.php,common/**/Services/*.php,common/**/Auth/**/*.php}"
+alwaysApply: false
+---
+
+# Proto Services & Auth
+
+## Services
+
+**Base**: `Common\Services\Service`
+
+Services coordinate business logic; models handle data access. Follow SRP — each method does ONE thing.
+
+### ServiceResult (Standardized Returns)
+```php
+use Proto\Services\ServiceResult;
+
+public function createGroup(int $userId, int $communityId, array $data): ServiceResult
+{
+    if (!$this->isGroupSlugUnique($communityId, $data['slug']))
+    {
+        return ServiceResult::failure('Group slug already exists');
+    }
+    $group = $this->createGroupRecord($userId, $communityId, $data);
+    return $group ? ServiceResult::success($group) : ServiceResult::failure('Failed to create group', 'CREATE_FAILED');
+}
+```
+
+**API**: `ServiceResult::success($data)`, `ServiceResult::failure($message, $code)`, `$result->success`, `$result->data`, `$result->error`, `$result->code`, `$result->failed()`
+
+**Controller usage**:
+```php
+$result = $this->service->createGroup($userId, $communityId, $data);
+if (!$result->success)
+{
+    return $this->error($result->error);
+}
+return $this->response($result->data);
+```
+
+### Built-in Service Traits
+
+**ToggleLikeTrait** — like/toggle with atomic counters:
+```php
+use Proto\Services\Traits\ToggleLikeTrait;
+
+public function togglePostLike(int $userId, int $postId): object
+{
+    return $this->toggleLike(PostLike::class, Post::class, $userId, $postId, 'postId', 'likeCount');
+    // Returns: {liked: bool, likeCount: int}
+}
+```
+
+**TogglePivotTrait** — generic pivot toggle (bookmarks, favorites, follows):
+```php
+use Proto\Services\Traits\TogglePivotTrait;
+
+public function toggle(int $userId, string $itemType, int $itemId): object
+{
+    return $this->togglePivot(Bookmark::class, [
+        'userId' => $userId, 'itemType' => $itemType, 'itemId' => $itemId
+    ]);
+    // Returns: {active: bool, record: ?object}
+}
+```
+
+**VoteableTrait** — up/down voting with toggle-off, vote-switching, and atomic scores:
+```php
+use Proto\Services\Traits\VoteableTrait;
+
+public function voteOnPost(int $userId, int $postId, string $direction): object
+{
+    return $this->vote(ForumPostVote::class, ForumPost::class, $userId, $postId, 'postId', $direction, 'score');
+    // Returns: {direction: ?string, score: int}
+}
+```
+
+**AudienceTargetingTrait** — multi-dimensional targeting:
+```php
+use Proto\Services\Traits\AudienceTargetingTrait;
+
+protected function getTargetingConfig(): array
+{
+    return [
+        'brands' => ['model' => EventBrandTarget::class, 'fk' => 'eventId'],
+        'vehicleTypes' => ['model' => EventVehicleTypeTarget::class, 'fk' => 'eventId'],
+        'interests' => ['model' => EventInterestTarget::class, 'fk' => 'eventId', 'valueField' => 'interestId'],
+    ];
+}
+// $service->getTargeting($eventId);
+// $service->saveTargets($eventId, $targets);
+```
+
+**LocationFilterTrait** — proximity filtering:
+```php
+use Proto\Services\Traits\LocationFilterTrait;
+
+// Direct filter on POINT column
+$this->filterByProximity($filter, [
+    'latitude' => $lat, 'longitude' => $lon,
+    'radius' => 50, 'alias' => 'v', 'column' => 'position'
+]);
+
+// Subquery filter against related table
+$this->filterByProximitySubquery($filter, [
+    'latitude' => $lat, 'longitude' => $lon,
+    'radius' => 50, 'table' => 'user_location_preferences',
+    'joinColumn' => 'user_id', 'parentColumn' => 'v.user_id'
+]);
+```
+
+Methods: `filterByProximity()`, `filterByProximitySubquery()`, `buildProximityCondition()`, `buildProximitySubqueryCondition()`, `convertToMeters()`
+
+### Service Principles & SRP Refactoring
+
+```php
+// ❌ WRONG — method doing too much
+public function createGroup(int $userId, array $data): object|false
+{
+    $existing = Group::getBy(['slug' => $data['slug']]);
+    if ($existing) return false;
+    // ... Stripe setup, group creation, member add, count update all in one method
+}
+
+// ✅ CORRECT — delegated to focused methods
+public function createGroup(int $userId, int $communityId, array $data): object|false
+{
+    if (!$this->isGroupSlugUnique($communityId, $data['slug']))
+    {
+        return false;
+    }
+
+    $stripeData = $this->setupGroupStripeIntegration($data);
+    if ($stripeData === false) return false;
+
+    $group = $this->createGroupRecord($userId, $communityId, array_merge($data, $stripeData));
+    if (!$group) return false;
+
+    $this->addGroupMember($group->id, $userId, 'owner', null);
+    $this->incrementCommunityGroupCount($communityId);
+
+    return Group::get($group->id);
+}
+```
+
+**CRITICAL**:
+- Services NEVER instantiate storage classes directly — use model methods
+- Always use constructor with object: `new Model((object)[...])`, not verbose property-by-property
+- Extract repeated logic into protected helper methods
+- Helper methods should be protected unless needed elsewhere
+- For complex queries, add static methods to model that delegate to storage
+
+## Validation
+
+**Format**: `'type[:max]|required'`
+
+**Types**: `int`, `float`, `string`, `email`, `ip`, `phone`, `mac`, `bool`, `url`, `domain`
+
+```php
+'name' => 'string:255|required',
+'email' => 'email|required',
+'avatar' => 'image:2048|required|mimes:jpeg,png,gif,bmp,tiff,webp,jxl,heic,heif,avif'
+```
+
+**Image validation**: `Proto\Api\ImageValidator::validate($uploadFile, $maxSizeKB, $mimeTypes)`
+
+## Auth & Policies
+
+### Gates
+```php
+class UserGate extends Gate
+{
+    public function isUser(int $userId): bool
+    {
+        $sessionUserId = $this->session->get('user')->id ?? null;
+        return $sessionUserId === $userId;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->session->get('role') === 'admin';
+    }
+}
+
+// Register: $auth = auth(); $auth->user = new UserGate();
+// Use: auth()->user->isUser(1);
+```
+
+### Policies
+```php
+use Proto\Http\Router\Request;
+
+class UserPolicy extends Policy
+{
+    protected ?string $type = 'user';
+
+    public function before(Request $request): bool
+    {
+        return (auth()->user->isAdmin());
+    }
+
+    public function default(Request $request): bool
+    {
+        return false;
+    }
+
+    public function get(Request $request): bool
+    {
+        $id = $this->getResourceId($request);
+        $user = User::get($id);
+        if (!$user) { return false; }
+        return $this->ownsResource($user->id);
+    }
+
+    public function afterGet(mixed $result): bool
+    {
+        $userId = $this->getUserId();
+        if (!$userId) return false;
+        return ($result->id === $userId);
+    }
+
+    public function add(Request $request): bool
+    {
+        return $this->isSignedIn();
+    }
+
+    public function update(Request $request): bool
+    {
+        return $this->matchesRouteUser($request, 'userId');
+    }
+}
+```
+
+**Built-in Helpers** (on `Common\Auth\Policies\Policy`):
+- `$this->isSignedIn()` — checks if user is logged in via session
+- `$this->getUserId()` — returns `session()->user->id` or `null`
+- `$this->getResourceId(Request $request)` — extracts resource ID
+- `$this->ownsResource(mixed $ownerId)` — compares to session user; admins always pass
+- `$this->matchesRouteUser(Request $request, string $paramName)` — route param matches session user
+
+### Policy Checklist (CRITICAL)
+1. **Always extend `Common\Auth\Policies\Policy`** — NOT `Proto\Auth\Policies\Policy` directly. Common adds `$type`, `ownsResource()`, `hasPermission()`
+2. **Always set `protected ?string $type`** — Proto auto-infers from class name if not set (e.g., `EventPolicy` → `'event'`)
+3. **Every method MUST accept `(Request $request): bool`** — wrong signature is logged as warning in ALL environments
+4. **Use `add()` not `create()`** — framework dispatches POST to `add`
+5. **Use built-in helpers** — avoid raw `auth()->user` and manual session checks
+6. **Every ResourceController MUST have `protected ?string $policy`** — unprotected controllers are an authorization gap
+
+### Controller Auth Pattern
+```php
+// ✅ CORRECT - Policy enforces auth, controller uses session directly
+class GroupController extends ResourceController
+{
+    protected ?string $policy = GroupPolicy::class;
+
+    public function join(Request $request): object
+    {
+        $userId = session()->user->id; // Safe after policy check — no null check needed
+        return $this->service->joinGroup($userId, $request->getInt('groupId'));
+    }
+}
+```
+
+### Controller Audit Field Patterns
+```php
+// Standard modifyAddItem — inject audit fields
+protected function modifyAddItem(object &$data, Request $request): void
+{
+    $data->createdBy = session()->user->id;
+}
+
+// Standard modifyUpdateItem (when model has $immutableFields)
+// Framework auto-strips immutable fields — just set audit fields
+protected function modifyUpdateItem(object &$data, Request $request): void
+{
+    $data->updatedBy = (int)session()->user->id;
+}
+
+// When model does NOT have $immutableFields — manually restrict
+protected function modifyUpdateItem(object &$data, Request $request): void
+{
+    $data->updatedBy = session()->user->id;
+    $id = $data->id ?? null;
+    $this->restrictFields($data, ['id', 'createdBy', 'createdAt']);
+    $data->id = $id;
+}
+```
+
+**CRITICAL**: Prefer declaring `$immutableFields` on the model over manual `restrictFields()` in controllers.
+
+## File Storage (Vault)
+
+```php
+use Proto\Utils\Files\Vault;
+
+// Access uploaded files from request
+$uploadFile = $request->file('upload');          // Single file (UploadFile|null)
+$attachments = $request->fileArray('attachments'); // Multiple files (UploadFile[])
+
+// Store
+$uploadFile->store('local', 'attachments');
+
+// Metadata
+$originalName = $uploadFile->getOriginalName();
+$newName = $uploadFile->getNewName();
+$size = $uploadFile->getSize();
+$mimeType = $uploadFile->getMimeType();
+if ($uploadFile->isImageFile()) { [$width, $height] = $uploadFile->getDimensions(); }
+
+// Via Vault directly
+Vault::disk('local', 'attachments')->add('/tmp/file.txt');
+Vault::disk('local', 'attachments')->download('file.txt');
+$content = Vault::disk('local')->get('/tmp/file.txt');
+Vault::disk('local')->delete('/tmp/file.txt');
+Vault::disk('s3', 'uploads')->add('/tmp/file.txt');
+```
+
+**CRITICAL**: Use `$request->file('field')` to access uploads, NOT `$_FILES` directly.

@@ -1,0 +1,389 @@
+---
+description: Base UI components, icons, buttons, avatars, lists, shared components, notifications, data tables, and frontend models
+globs: "apps/**/*.js"
+alwaysApply: false
+---
+
+# Frontend UI Components & Models
+
+## Base UI Components
+**CRITICAL**: Use Base UI components before creating custom ones.
+
+```javascript
+import { Badge, Button, Card, Checkbox, Dialog, Input, Label, Select, Switch, Tabs, Textarea, Skeleton } from '@base-framework/ui/atoms';
+import { Avatar, StaticStatusIndicator, StatusIndicator, TimeFrame, EmptyState } from '@base-framework/ui/molecules';
+import { ScrollableList, ScrollableDataTable, DynamicDataTable } from "@base-framework/ui/organisms";
+import { CheckboxCol, HeaderCol } from "@base-framework/ui/organisms";
+```
+
+## Avatar (CRITICAL)
+**ALWAYS use Base UI `Avatar` from `@base-framework/ui/molecules`**. NEVER build custom avatars with raw `Img`/`Div`.
+
+```javascript
+import { Avatar } from '@base-framework/ui/molecules';
+
+Avatar({ src: user.avatar, alt: user.name, fallbackText: 'CN', size: 'md' })
+
+// Reactive watcher fallback (converts name to initials automatically)
+Avatar({ src: '[[user.image]]', alt: '[[user.name]]', watcherFallback: '[[user.name]]', size: 'sm' })
+```
+
+**Sizes**: `xs`, `sm`, `md` (default), `lg`, `xl`, `2xl`, `3xl`
+
+**Status Indicators**:
+```javascript
+import { StaticStatusIndicator, StatusIndicator } from '@base-framework/ui/molecules';
+
+// Static (fixed status)
+Div({ class: 'relative' }, [
+    Avatar({ src: url, alt: name, size: 'md' }),
+    StaticStatusIndicator('online')  // 'online'|'offline'|'busy'|'away'
+])
+
+// Reactive (binds to parent status state/data key)
+Div({ class: 'relative', addState() { return { status: 'online' }; } }, [
+    Avatar({ src: url, alt: name, size: 'md' }),
+    StatusIndicator()
+])
+```
+
+## TimeFrame
+Shows relative time that auto-updates:
+```javascript
+import { TimeFrame } from '@base-framework/ui/molecules';
+TimeFrame({ dateTime: '2014-02-11T11:30:00' });
+```
+
+## Universal Icon System
+
+```javascript
+import { Icon, MaterialIcon, UniversalIcon, isMaterialIcon, isHeroicon } from '@base-framework/ui/atoms';
+import { Icons, MaterialSymbols } from '@base-framework/ui/icons';
+
+// UniversalIcon auto-detects icon type (recommended)
+UniversalIcon({ size: 'md' }, Icons.home);                            // Heroicon SVG
+UniversalIcon({ size: 'md' }, 'home');                                 // Material Symbol name
+UniversalIcon({ size: 'md' }, MaterialSymbols.home);                   // Material Symbol
+UniversalIcon({ size: 'md' }, { name: 'favorite', variant: 'filled' }); // With variant
+```
+
+**Detection Logic**: SVG string → `Icon`, Object with `.name` → `MaterialIcon`, plain string → `MaterialIcon`
+
+**Material Symbol Variants**: `outlined` (default), `filled`, `rounded`, `sharp`
+
+**Sizes**: xs (16px), sm (24px, default), md (32px), lg (40px), xl (48px), 2xl (56px), 3xl (64px)
+
+**Helper Functions** (for custom components):
+```javascript
+isMaterialIcon('home');    // true
+isHeroicon(Icons.home);    // true
+```
+
+**All components accepting `icon` prop support both systems automatically.**
+
+## Button Variants
+
+```javascript
+import { Button, CircleButton, CircleToggleButton, LoadingButton, ToggleButton } from '@base-framework/ui/atoms';
+
+// Standard variants — Atom, no `new`
+Button({ variant: 'primary' }, 'Submit');
+Button({ variant: 'secondary' }, 'Cancel');
+Button({ variant: 'outline' }, 'Outline');
+Button({ variant: 'ghost' }, 'Ghost');
+Button({ variant: 'link' }, 'Link');
+Button({ variant: 'destructive' }, 'Delete');
+Button({ variant: 'warning' }, 'Warning');
+
+// Icon variants
+Button({ variant: 'icon', icon: Icons.settings });
+Button({ variant: 'withIcon', icon: 'add' }, 'Add New');
+Button({ variant: 'circleIcon', icon: 'home', size: 'md' }); // semi-transparent circular
+
+// Back button — navigates back
+Button({ variant: 'back', class: 'ghost', allowHistory: false });
+
+// Toggle buttons (Component — use `new`)
+new ToggleButton({ icon: 'heart', value: 234, toggle: (active) => {} });
+new ToggleButton({ icon: 'heart', active: true, value: 234 }); // starts active
+new ToggleButton({ icon: 'bookmark', activeIcon: 'bookmarkSolid' }); // swap icon
+new ToggleButton({ icon: 'heart', dataKey: 'likeCount', toggle: (active) => {} }); // reactive count
+
+// Circle buttons — frosted-glass (Atom, no `new`; sizes: xs|sm|md|lg|xl|2xl)
+CircleButton({ icon: 'arrows.left', size: 'sm' });
+CircleButton({ icon: 'share', size: 'md', click: () => {} });
+
+// Circle toggle buttons (Component — use `new`)
+new CircleToggleButton({ icon: 'heart', size: 'md', toggle: (active) => {} });
+new CircleToggleButton({ icon: 'star', size: 'md', activeClass: 'text-yellow-400' });
+
+// Loading button (Atom, no `new`)
+LoadingButton('Saving…');
+```
+
+**CRITICAL**: No `variant: 'default'`. Primary CTA = `variant: 'primary'`.
+
+## Design System Tokens (Rally) (CRITICAL)
+
+**Surfaces** (additive layering):
+- `bg-background` — base canvas (dark `#0b0b0c`)
+- `bg-card` / `bg-popover` — surface 1 (dark `#121214`)
+- `bg-surface-2` — raised cards / inputs / muted regions (dark `#18181b`)
+- `bg-surface-3` — hovered / topmost layers (dark `#1f1f23`)
+- `bg-accent-soft` — lime-accent low alpha for chips / selection
+
+**Borders**:
+- `border-border` — default hairline
+- `border-border-strong` — hover / active hairline
+
+**Card radius**: `rounded-card` (16px), `rounded-card-sm` (10px), `rounded-card-lg` (22px)
+
+**Custom utilities**: `tabular` (tabular-nums), `hairline-t` / `hairline-b`, `placeholder-img`, `sheen`
+
+**Fonts**: `font-sans` (Inter, with `'ss01','ss03','cv11'`), `font-display` (Instrument Serif italic), `font-mono` (JetBrains Mono), `font-mono-meta` (uppercase eyebrow mono)
+
+**CRITICAL**:
+- Never hardcode hex (`#0b0b0c`) or vendor colors (`bg-zinc-900`) — always use tokens
+- Never use `border-white/10` — use `border-border` / `border-border-strong`
+- These tokens cover light AND dark; the same component must work in both
+
+## Shared Design-System Atoms (`@components/`)
+
+Always check before building from scratch:
+
+```javascript
+import { MonoLabel } from '@components/atoms/typography/mono-label.js';
+import { SerifDisplay } from '@components/atoms/typography/serif-display.js';
+import { CTA } from '@components/atoms/cta.js';
+import { Chip } from '@components/atoms/chip.js';
+import { SectionDivider } from '@components/atoms/section-divider.js';
+import { PlaceholderImage } from '@components/atoms/placeholder-image.js';
+import { KeyValueRow } from '@components/atoms/key-value-row.js';
+import { GlassIconButton } from '@components/atoms/buttons/glass-icon-button.js';
+import { SectionHeader } from '@components/molecules/headers/section-header.js';
+import { PageTitle } from '@components/molecules/headers/page-title.js';
+import { EmptyStateDisplay } from '@components/molecules/empty-state-display.js';
+```
+
+| Atom | Purpose |
+|------|---------|
+| `MonoLabel` | Small uppercase mono eyebrow / metadata |
+| `SerifDisplay` | Instrument Serif italic for editorial titles |
+| `CTA` | Pill-shaped CTA — `primary` \| `accent` \| `secondary` \| `ghost`; sizes `sm` \| `md` \| `lg`; opt `pill`, `monoMeta`, `fullWidth` |
+| `Chip` | Filter/tag pill — `default` \| `accent` \| `outline`; renders Button when `click` provided |
+| `SectionDivider` | Hairline divider between page sections |
+| `PlaceholderImage` | Striped image slot, optional `shimmer`, optional centered mono label |
+| `KeyValueRow` | Mono uppercase key + tabular value, `hairline-b` unless `last:true` |
+| `GlassIconButton` | Frosted-glass icon button |
+| `SectionHeader` | Numbered eyebrow + H2 + optional action |
+| `PageTitle` | Page top header with eyebrow + title (`serif: true` for editorial italic) |
+| `EmptyStateDisplay` | Serif italic empty state for content pages |
+
+**CRITICAL**: There is no `editorial/` folder under `components/atoms` or `components/molecules` — these atoms ARE the app's base design system. Never create or import from `@components/atoms/editorial/...` or `@components/molecules/editorial/...`. Never prefix new tokens, classes, or files with `rally-`.
+
+## Skeleton Components (CRITICAL)
+
+**ALWAYS use Base UI `Skeleton`**, never raw `Div` with `bg-muted animate-pulse`.
+
+```javascript
+import { Skeleton } from '@base-framework/ui/atoms';
+
+Skeleton({ shape: 'circle', width: 'size-10', height: 'size-10' })
+Skeleton({ class: 'rounded-full', width: 'w-32' })
+Skeleton({ class: 'aspect-square rounded-sm', width: 'w-full', height: 'h-auto' })
+```
+
+**RowSkeleton** — shared avatar + text lines pattern:
+```javascript
+import { RowSkeleton } from '@components/atoms/skeletons/row-skeleton.js';
+RowSkeleton()
+RowSkeleton({ avatarSize: 'size-12', lines: ['w-48', 'w-32', 'w-12'] })
+RowSkeleton({ class: 'border-b border-border/50' })
+```
+
+## Shared Components (@components/)
+
+**Location**: `apps/main/src/components/` (aliased as `@components/`)
+Always check here BEFORE building a new component.
+
+### Pill Bars
+```javascript
+import { PillTabBar } from '@components/molecules/pills/pill-tab-bar.js';
+import { PillLinkBar } from '@components/molecules/pills/pill-link-bar.js';
+import { StickyFilterBar } from '@components/organisms/sticky-filter-bar.js';
+
+// State-driven (highlights based on reactive data key)
+PillTabBar({ tabs: [{ label: 'All', value: 'all' }, ...], watchKey: 'activeFilter', onTabClick: (v) => this.data.activeFilter = v })
+
+// Route-driven (highlights based on URL)
+PillLinkBar({ tabs: [{ label: 'Followers', value: 'followers', href: './followers' }, ...], watchKey: 'activeTab' })
+
+// Frosted-glass sticky wrapper
+StickyFilterBar([PillTabBar({ ... })])
+StickyFilterBar({ top: 'top-header-safe' }, [PillLinkBar({ ... })])
+```
+
+### User Display
+```javascript
+import { UserRow } from '@components/molecules/users/user-row.js';
+import { UserAvatar } from '@components/molecules/users/user-avatar.js';
+import { UserInfo } from '@components/molecules/users/user-info.js';
+import { UserActions } from '@components/molecules/users/user-actions.js';
+
+// Complete user row (most common pattern)
+UserRow({ id, name, username, avatar, status, isFollowing })
+
+// Individual pieces
+UserAvatar({ src, alt, status: 'online', size: 'lg', fallbackText: 'JD' })
+UserInfo({ name: 'Jane Doe', username: 'janedoe', verified: true, mutualConnections: 5 })
+UserActions({ userId: 1, isFollowing: false })
+```
+
+## Lists
+
+```javascript
+import { ScrollableList, List, DataList, DynamicList } from "@base-framework/organisms";
+import { ScrollableDataTable, DynamicDataTable, CheckboxCol, HeaderCol } from "@base-framework/ui/organisms";
+
+// ScrollableList — paginated, scroll-driven loading
+ScrollableList({
+    data: new VehicleModel({ filter: { type: 'sedan' } }),
+    cache: 'listName',
+    key: 'id',
+    xhrMethod: 'all', // defaults to 'all'
+    skeleton: { number: 4, row: BookmarkRowSkeleton },
+    rowItem: BookmarkCard,
+    emptyState: () => BookmarkEmptyState()
+})
+
+// ScrollableDataTable — paginated table
+ScrollableDataTable({
+    data,
+    cache: 'list',
+    limit: 50,
+    customHeader: HeaderRow(),
+    skeleton: true,
+    rowItem: FollowingRow,
+    key: 'id',
+    emptyState: () => EmptyState({ title: 'No Data', description: 'Nothing here', icon: 'favorite' })
+})
+```
+
+**Table Header/Rows**:
+```javascript
+const HeaderRow = () =>
+    Thead([Tr({ class: 'text-muted-foreground border-b' }, [
+        CheckboxCol({ class: 'hidden md:table-cell' }),
+        HeaderCol({ key: 'user', label: 'User' }),
+        HeaderCol({ key: 'email', label: 'Email', class: 'hidden md:table-cell' }),
+    ])]);
+
+export const DataRow = (row, onSelect) =>
+    Tr({ class: 'items-center px-4 py-2 hover:bg-muted/50' }, [
+        Td({ class: 'p-4 hidden md:table-cell' }, [
+            new Checkbox({ checked: row.selected, onChange: () => onSelect(row) })
+        ]),
+        Td({ class: 'p-4' }, [UserAvatar(row)]),
+    ]);
+```
+
+## EmptyState
+```javascript
+import { EmptyState } from '@base-framework/ui/molecules';
+
+EmptyState({
+    title: 'Not Following Anyone',
+    description: 'Start following users to see them here.',
+    icon: 'favorite'
+})
+```
+
+## Notifications
+```javascript
+app.notify({
+    type: 'success',        // 'success' | 'destructive' | 'warning' | 'info'
+    title: 'Success',
+    description: 'Operation completed',
+    icon: Icons.check       // or Material Symbol name
+});
+```
+
+## Models (API Integration)
+
+**Location**: `apps/{crm,main}/src/modules/{moduleName}/components/models/{name}-model.js`
+
+### Built-in XHR Methods (CRITICAL)
+Every model gets: `get`, `add`, `update`, `setup`, `delete`, `all` — NEVER override unless behavior genuinely differs.
+
+`all()` reads from model data and sends as query params:
+
+| Model data key | Backend picks up as |
+|---|---|
+| `filter` | `$inputs->filter` |
+| `search` | `$inputs->modifiers['search']` |
+| `dates` | `$inputs->modifiers['dates']` |
+| `orderBy` | `$inputs->modifiers['orderBy']` |
+| `groupBy` | `$inputs->modifiers['groupBy']` |
+
+```javascript
+import { Model } from "@base-framework/base";
+
+export const PostModel = Model.extend({
+    url: '/api/post',
+    xhr: {
+        // Only add LEGITIMATELY custom methods (different URL, FormData, SSE)
+        addWithFiles(instanceParams, callBack, files)
+        {
+            const data = this.model.get();
+            const formData = new FormData();
+            Object.keys(data).forEach(key =>
+            {
+                if (key !== 'attachments') formData.append(key, data[key]);
+            });
+            Array.from(files).forEach(file => formData.append('attachments[]', file));
+            return this._post('', formData, instanceParams, callBack);
+        },
+
+        sync(instanceParams, callBack, onOpenCallBack)
+        {
+            const lastId = instanceParams?.lastId || 0;
+            const params = lastId ? `lastId=${lastId}` : '';
+            return this.setupEventSource('/sync', params, callBack, onOpenCallBack);
+        }
+    }
+});
+```
+
+**Do NOT create custom methods for**: filtering, searching, sorting, date ranges, pagination — use built-in `all()` with model data keys.
+
+```javascript
+// ✅ CORRECT — change filter and reload
+filterByType(type) { this.data.filter = { type }; this.data.xhr.all({}, (r) => { ... }); }
+onSearch(q) { this.data.search = q; this.data.xhr.all({}, (r) => { ... }); }
+```
+
+## Modules System
+
+```javascript
+import { Icons } from "@base-framework/ui/icons";
+import { Module } from '../module/module.js';
+
+const routes = Module.convertRoutes([
+    { path: '/', import: () => import('./components/pages/home/home-page.js'), title: 'Home' },
+    { path: '/settings', import: () => import('./components/pages/settings/settings-page.js'), title: 'Settings' }
+]);
+
+const links = [
+    { label: 'Home', href: './', icon: Icons.home, mobileOrder: 1, exact: true },
+    { label: 'Settings', href: './settings', icon: Icons.settings, mobileOrder: 5 }
+];
+
+Module.create({ routes, links });
+```
+
+Register in `apps/{crm,main}/src/modules/imported-modules.js`:
+```javascript
+import "./home/module.js";
+```
+
+**Link icon options**: `Icons` (Heroicons SVG), `MaterialSymbols`, or a Material Symbol name string.

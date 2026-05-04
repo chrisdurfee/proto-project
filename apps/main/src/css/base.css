@@ -72,9 +72,6 @@
 		text-decoration: none;
 		/* Improve touch responsiveness */
 		touch-action: manipulation;
-		/* Prevent text selection on tap */
-		-webkit-user-select: none;
-		user-select: none;
 		/* Hardware acceleration */
 		transform: translateZ(0);
 		-webkit-backface-visibility: hidden;
@@ -108,7 +105,6 @@
 	.scroll-container {
 		-webkit-overflow-scrolling: touch;
 		overscroll-behavior: contain;
-		will-change: scroll-position;
 	}
 }
 

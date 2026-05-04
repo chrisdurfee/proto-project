@@ -4,6 +4,46 @@
  */
 
 /**
+ * Prevent browser swipe-to-navigate (back/forward) on all pages.
+ * The custom swipe-back gesture is handled in JS for full-screen overlays.
+ */
+html,
+body {
+	overscroll-behavior-x: none;
+}
+
+/**
+ * Swipe-back overlay
+ *
+ * A translucent edge indicator and page-slide effect for dismissing
+ * full-screen overlays with a right-swipe from the left edge.
+ */
+.swipe-back-indicator {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 3px;
+	height: 100%;
+	background: var(--color-foreground, currentColor);
+	opacity: 0;
+	z-index: 9998;
+	pointer-events: none;
+	border-radius: 0 3px 3px 0;
+	transition: opacity 0.15s ease;
+	will-change: opacity, width;
+}
+
+.swipe-back-scrim {
+	position: fixed;
+	inset: 0;
+	background: black;
+	opacity: 0;
+	z-index: 9997;
+	pointer-events: none;
+	will-change: opacity;
+}
+
+/**
  * Touch feedback - adds a subtle press effect
  */
 .touch-feedback {

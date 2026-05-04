@@ -1,9 +1,9 @@
 import { Main } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
+import { SafeZoneTop } from '@base-framework/ui/atoms';
 import { modules } from '../modules/modules.js';
 import { Heartbeat } from './heartbeat/heartbeat.js';
 import { AppControl } from './navigation/app-control.js';
-import { MobileHeader } from './navigation/mobile-header.js';
 
 /**
  * This will create the active panel container.
@@ -15,7 +15,7 @@ import { MobileHeader } from './navigation/mobile-header.js';
 const ActivePanelContainer = Atom((props, children) =>
 {
 	return Main({
-		class: 'active-panel-container flex flex-auto relative z-0 md:pb-0',
+		class: 'active-panel-container flex flex-auto relative z-0 md:pb-0 will-change-contents backface-hidden',
 		...props,
 		children
 	});
@@ -32,7 +32,7 @@ export const MainContent = () =>
 
 	return [
 		Heartbeat(),
-		MobileHeader(),
+		SafeZoneTop(),
 
 		/**
 		 * This will add the desktop and mobile navigation.

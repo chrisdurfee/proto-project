@@ -1,3 +1,9 @@
 .row {
     width: auto;
 }
+
+/* Message thread: add vertical breathing room when the sender changes */
+.msg-sent + .msg-received,
+.msg-received + .msg-sent {
+    margin-top: 0.75rem;
+}

@@ -1,5 +1,5 @@
 import { Div } from '@base-framework/atoms';
-import { Atom, Component, Jot } from '@base-framework/base';
+import { Atom, Jot } from '@base-framework/base';
 import { NotificationContainer } from '@base-framework/ui/molecules';
 import { verifyEmail } from './verify-email.js';
 
@@ -32,7 +32,7 @@ const Shell = Atom((props, children) =>
  *
  * This will create the app shell.
  *
- * @type {typeof Component} AppShell
+ * @returns {object} AppShell
  */
 export const AppShell = Jot(
 {
@@ -64,8 +64,7 @@ export const AppShell = Jot(
 						import: () => import('./email-unsubscribe/email-unsubscribe-page.js')
 					},
 					{
-						import: () => import('./app-content.js'),
-						preventScroll: true
+						import: () => import('./app-content.js')
 					}
 				]
 			})

@@ -7,7 +7,7 @@
  * This will add landscape support for small devices
  * If someone uses that. HaHa
  */
-@media (min-width: 641px) {
+@media (min-width: 640px) {
 
 	.app-container {
 		padding-left: env(safe-area-inset-left);
@@ -38,7 +38,7 @@
 }
 
 .app-nav-container:hover .navigation li.option.sub>.active {
-	@apply bg-accent;
+	@apply bg-muted;
 }
 
 .app-nav-container .navigation:not(.sub) .option .label {
