@@ -34,7 +34,6 @@ router()
 	->patch('user/:id/accept-terms', [UserController::class, 'acceptTerms'])
 	->patch('user/:id/update-credentials', [UserController::class, 'updateCredentials'])
 	->patch('user/:id/notification-settings', [UserController::class, 'updateNotificationSettings'])
-	->patch('user/:id/privacy-settings', [UserController::class, 'updatePrivacySettings'])
 	->post('user/:id/upload-image', [UserController::class, 'uploadImage'])
 	->post('user/:id/upload-cover-image', [UserController::class, 'uploadCoverImage'])
 	->resource('user', UserController::class);
