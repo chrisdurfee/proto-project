@@ -1,180 +1,18 @@
 import { On } from "@base-framework/atoms";
+import {
+	getAppUser,
+	userHasAnyPermission,
+	userHasAnyRole,
+	userHasPermission,
+	userHasRole,
+	userIsAdmin,
+	userIsEditor,
+	userIsManager,
+	userIsNotOwner,
+	userIsOwner
+} from "../../utils/gates/user-gate.js";
 
-/**
- * Gets the global app data user object.
- *
- * @returns {object|null}
- */
-const getAppUser = () =>
-{
-	return (typeof app !== 'undefined' && app.data && app.data.user) ? app.data.user : null;
-};
-
-/**
- * Checks if the user has a specific role by slug.
- *
- * @param {object[]} roles
- * @param {string} roleSlug
- * @returns {boolean}
- */
-const userHasRole = (roles, roleSlug) =>
-{
-	if (!roles || !Array.isArray(roles))
-	{
-		return false;
-	}
-
-	// Check for exact role match
-	return roles.some(role => role.slug === roleSlug);
-};
-
-/**
- * Checks if the user has any of the specified roles.
- *
- * @param {object[]} roles
- * @param {string[]} roleSlugs
- * @returns {boolean}
- */
-const userHasAnyRole = (roles, roleSlugs) =>
-{
-	if (!roles || !Array.isArray(roles))
-	{
-		return false;
-	}
-
-	// Check for any role match
-	return roles.some(role => roleSlugs.includes(role.slug));
-};
-
-/**
- * Checks if the user is an administrator.
- *
- * @returns {boolean}
- */
-export const userIsAdmin = () =>
-{
-	const userData = getAppUser();
-	if (!userData || !userData.roles)
-	{
-		return false;
-	}
-
-	return userHasRole(userData.roles, 'admin');
-};
-
-/**
- * Checks if the user is a manager.
- *
- * @returns {boolean}
- */
-export const userIsManager = () =>
-{
-	if (userIsAdmin())
-	{
-		return true;
-	}
-
-	const userData = getAppUser();
-	if (!userData || !userData.roles)
-	{
-		return false;
-	}
-
-	return userHasRole(userData.roles, 'manager');
-};
-
-/**
- * Checks if the user is an editor.
- *
- * @returns {boolean}
- */
-export const userIsEditor = () =>
-{
-	if (userIsManager())
-	{
-		return true;
-	}
-
-	const userData = getAppUser();
-	if (!userData || !userData.roles)
-	{
-		return false;
-	}
-
-	return userHasRole(userData.roles, 'editor');
-};
-
-/**
- * Checks if the user has a specific permission by slug.
- *
- * @param {object[]} roles
- * @param {string} permissionSlug
- * @returns {boolean}
- */
-const userHasPermission = (roles, permissionSlug) =>
-{
-	if (userIsAdmin())
-    {
-        return true;
-    }
-
-	if (!roles || !Array.isArray(roles))
-	{
-		return false;
-	}
-
-	return roles.some(role =>
-		role.permissions && Array.isArray(role.permissions) &&
-		role.permissions.some(permission => permission.slug === permissionSlug)
-	);
-};
-
-/**
- * Checks if the user has any of the specified permissions.
- *
- * @param {object[]} roles
- * @param {string[]} permissionSlugs
- * @returns {boolean}
- */
-const userHasAnyPermission = (roles, permissionSlugs) =>
-{
-	if (userIsAdmin())
-    {
-        return true;
-    }
-
-	if (!roles || !Array.isArray(roles))
-	{
-		return false;
-	}
-
-	return roles.some(role =>
-		role.permissions && Array.isArray(role.permissions) &&
-		role.permissions.some(permission => permissionSlugs.includes(permission.slug))
-	);
-};
-
-/**
- * Checks if the user is the owner of a resource.
- *
- * @param {number} userId
- * @param {number|string} resourceId
- * @returns {boolean}
- */
-const userIsOwner = (userId, resourceId) =>
-{
-	if (userIsManager())
-	{
-		return true;
-	}
-
-	if (!userId)
-	{
-		return false;
-	}
-
-	return userId == resourceId;
-};
+export { getAppUser, userIsAdmin, userIsEditor, userIsManager, userIsOwner };
 
 /**
  * Generic factory for creating user-based conditional rendering atoms.
@@ -413,7 +251,17 @@ export const HasAnyPermission = createParameterizedUserAtom((roles, permissionSl
  * IsOwner(post.userId, () => Button('Edit Post'))
  * IsOwner(comment.userId, () => Button('Delete'), () => Span('Not Owner'))
  */
-export const IsOwner = createParameterizedUserAtom((userId, resourceId) => userIsOwner(userId, resourceId), 'id');
+export const IsOwner = createParameterizedUserAtom((userId, resourceId) => userIsOwner(resourceId), 'id');
+
+/**
+ * Renders content if the user is NOT the owner of a resource.
+ *
+ * @param {number|string} resourceId - The resource owner ID to check against user.id
+ * @param {function} callback - Function to render if condition is met (userId) => layout
+ * @param {function|object|null} [fallback=null] - Fallback content if condition is not met
+ * @returns {object} Comment element
+ */
+export const IsNotOwner = createParameterizedUserAtom((userId, resourceId) => userIsNotOwner(resourceId), 'id');
 
 /**
  * Renders content if the user is authenticated (has user data).
