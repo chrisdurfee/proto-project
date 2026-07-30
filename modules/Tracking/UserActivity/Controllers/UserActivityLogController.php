@@ -68,7 +68,7 @@ class UserActivityLogController extends ResourceController
 	}
 
 	/**
-	 * Build a synthetic "Joined Rally" row for users with no logged activity yet.
+	 * Build a synthetic "Account created" row for users with no logged activity yet.
 	 *
 	 * @param int $userId
 	 * @return object|null
@@ -85,7 +85,7 @@ class UserActivityLogController extends ResourceController
 			'id' => 0,
 			'userId' => $userId,
 			'action' => 'account_created',
-			'title' => 'Joined Rally',
+			'title' => 'Account created',
 			'description' => 'Welcome to the community',
 			'refId' => $userId,
 			'refType' => 'user',

@@ -91,7 +91,7 @@ apps/{crm,main}/src/modules/{moduleName}/
 ```javascript
 // ✅ CORRECT
 export const HomePage = () => (
-    new BlankPage([RallyHeader(), GreetingSection(), FeedPostModern({ post })])
+    new BlankPage([AppHeader(), GreetingSection(), FeedPostModern({ post })])
 );
 
 // ❌ WRONG — page contains inline markup

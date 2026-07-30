@@ -64,7 +64,7 @@ class NewUserService extends Service
 		modules()->tracking()->userActivityLog()->log(
 			(int)$user->id,
 			'account_created',
-			'Joined Rally',
+			'Account created',
 			'Welcome to the community',
 			(int)$user->id,
 			'user'

@@ -148,7 +148,7 @@ applyTo: "**"
 | `.map()` for reactive lists | Use `for` or `map` directive |
 | `import { ... } from '@components/atoms/editorial/...'` | Folder removed — use `@components/atoms/typography/...` |
 | `import { SectionHeader } from '@components/molecules/editorial/...'` | Use `@components/molecules/headers/section-header.js` |
-| New file or token prefixed with `rally-` | This **is** the base design system — never prefix |
+| New file or token prefixed with your product's brand name | This **is** the base design system — never prefix |
 | Hardcoded hex like `#0b0b0c` or `bg-zinc-900` | Use theme tokens: `bg-background`, `bg-card`, `bg-surface-2`, `bg-surface-3` |
 | Hairline borders via `border-white/10` | Use `border-border` / `border-border-strong` |
 | Custom shimmer with bespoke keyframes | Use the `.sheen` utility on a relative element |

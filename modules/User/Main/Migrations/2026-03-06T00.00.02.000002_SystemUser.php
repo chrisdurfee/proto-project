@@ -4,7 +4,7 @@ use Proto\Database\Migrations\Migration;
 use Common\Seeders\SystemUserSeeder;
 
 /**
- * Migration to seed the Rally Bot system user.
+ * Migration to seed the Proto Bot system user.
  */
 class SystemUser extends Migration
 {
@@ -19,7 +19,7 @@ class SystemUser extends Migration
 	}
 
 	/**
-	 * Seeds the Rally Bot system user.
+	 * Seeds the Proto Bot system user.
 	 *
 	 * @return void
 	 */
