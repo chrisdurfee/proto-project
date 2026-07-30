@@ -1,3 +1,5 @@
+import { setCsrfToken, whenCsrfReady } from "../../csrf-token.js";
+
 /**
  * PulseTimer
  *
@@ -29,6 +31,7 @@ export class PulseTimer
 	start()
 	{
 		this.stop();
+		this.verify();
 
 		const DELAY = this.delay;
 		this.timer = window.setInterval(() =>
@@ -50,15 +53,28 @@ export class PulseTimer
 	/**
 	 * Used to verify the user has access to the app.
 	 *
+	 * Pulse is CSRF-protected, so wait for the boot-time CSRF token
+	 * fetch before firing. After the first pulse the token is always
+	 * set, so `whenCsrfReady()` resolves synchronously.
+	 *
 	 * @returns {void}
 	 */
 	verify()
 	{
-		app.data.auth.xhr.pulse('', this.afterVerify.bind(this));
+		whenCsrfReady().then(() =>
+		{
+			app.data.auth.xhr.pulse('', this.afterVerify.bind(this));
+		});
 	}
 
 	/**
 	 * Called after the verification process is complete.
+	 *
+	 * If the backend ever rotates the CSRF token on pulse (it should
+	 * not — pulse is a heartbeat, not an auth state transition — but
+	 * this is defensive in depth), capture the rotated token so the
+	 * next mutation does not fail with "The CSRF token is invalid."
+	 * and then trigger `signOut()` on the next pulse.
 	 *
 	 * @param {object} response
 	 * @returns {void}
@@ -72,6 +88,7 @@ export class PulseTimer
 
 		if (response.allowAccess === true)
 		{
+			setCsrfToken(response.csrfToken);
 			app.setUserData(response.user);
 		}
 		else

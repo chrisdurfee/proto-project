@@ -1,6 +1,5 @@
 import { Div, P } from "@base-framework/atoms";
-import { Button, Icon } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+import { Button, UniversalIcon } from "@base-framework/ui/atoms";
 import { Dialog } from "@base-framework/ui/molecules";
 import { Configs } from "../../configs.js";
 
@@ -13,7 +12,7 @@ import { Configs } from "../../configs.js";
 const Step = (props) => (
 	Div({ class: 'flex items-center gap-2' }, [
 		P({ class: 'text-sm' }, props.step),
-		props.icon && Icon(props.icon)
+		props.icon && UniversalIcon({ size: 'sm' }, props.icon)
 	])
 );
 
@@ -25,8 +24,8 @@ const Step = (props) => (
 const iOSInstructions = () =>
 	Div({ class: 'flex flex-col gap-y-4' }, [
 		Div({ class: 'border-t my-2' }),
-		Step({ step: '1. Tap the Share button', icon: Icons.apple.share }),
-		Step({ step: '2. Select "Add to Home Screen"', icon: Icons.circlePlus }),
+		Step({ step: '1. Tap the Share button', icon: 'ios_share' }),
+		Step({ step: '2. Scroll down and select "Add to Home Screen"', icon: 'add_circle' }),
 	]);
 
 /**
@@ -52,9 +51,10 @@ const PromptButtons = (props) =>
 	const isIOSFallback = !promptEvent;
 
 	return [
-		Button({ variant: 'outline', click: (e, parent) => parent.close() }, 'Not Now'),
+		Button({ variant: 'outline', class: 'rounded-full', click: (e, parent) => parent.close() }, 'Not Now'),
 		(!isIOSFallback) && Button({
 			variant: 'primary',
+			class: 'rounded-full',
 			click: (e, parent) =>
 			{
 				promptEvent.prompt();
@@ -72,7 +72,7 @@ const PromptButtons = (props) =>
 				});
 			}
 		}, 'Add to homescreen')
-	];
+	].filter(Boolean);
 };
 
 /**
@@ -91,7 +91,7 @@ export const InstallPrompt = (props) =>
 	const isIOSFallback = !promptEvent;
 
 	return new Dialog({
-		icon: Icons.download,
+		icon: 'download',
 		title: `Install ${Configs.APP_NAME}`,
 		description: getDescription(isIOSFallback),
 		size: 'sm',

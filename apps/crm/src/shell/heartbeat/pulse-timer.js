@@ -1,3 +1,5 @@
+import { whenCsrfReady } from "../../csrf-token.js";
+
 /**
  * PulseTimer
  *
@@ -29,6 +31,7 @@ export class PulseTimer
 	start()
 	{
 		this.stop();
+		this.verify();
 
 		const DELAY = this.delay;
 		this.timer = window.setInterval(() =>
@@ -50,15 +53,27 @@ export class PulseTimer
 	/**
 	 * Used to verify the user has access to the app.
 	 *
+	 * Pulse is CSRF-protected, so wait for the boot-time CSRF token
+	 * fetch before firing. After the first pulse the token is always
+	 * set, so `whenCsrfReady()` resolves synchronously.
+	 *
 	 * @returns {void}
 	 */
 	verify()
 	{
-		app.data.auth.xhr.pulse('', this.afterVerify.bind(this));
+		whenCsrfReady().then(() =>
+		{
+			app.data.auth.xhr.pulse('', this.afterVerify.bind(this));
+		});
 	}
 
 	/**
 	 * Called after the verification process is complete.
+	 *
+	 * Pulse is a heartbeat, not an auth state transition, so the CRM
+	 * backend never rotates the CSRF token here. The client keeps the
+	 * boot-time token for the whole session, which keeps concurrent
+	 * tabs working.
 	 *
 	 * @param {object} response
 	 * @returns {void}

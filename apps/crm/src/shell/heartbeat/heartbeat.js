@@ -3,10 +3,10 @@ import { PulseTimer } from "./pulse-timer.js";
 
 /**
  * This will set up a timer to check user
- * authentication every 15 minutes.
+ * authentication every 5 minutes.
  */
-const FIFTEEN_MINUTES = 15 * 60 * 1000;
-const timer = new PulseTimer(FIFTEEN_MINUTES);
+const FIVE_MINUTES = 5 * 60 * 1000;
+const timer = new PulseTimer(FIVE_MINUTES);
 
 /**
  * Heartbeat
