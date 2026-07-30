@@ -49,9 +49,35 @@ export default defineConfig({
 		} : {})
 		// Note: Proxy is handled by http2ProxyPlugin above
 	},
+	esbuild: {
+		// Strip debugger statements and tree-shake noisy dev logging from
+		// production builds. console.error / console.warn are intentionally
+		// kept so production diagnostics (bootstrap errors, SW failures) survive.
+		drop: ['debugger'],
+		pure: ['console.log', 'console.debug', 'console.info']
+	},
 	build: {
 		outDir: path.resolve(__dirname, '../../public/crm'),
-		emptyOutDir: true
+		emptyOutDir: true,
+		rollupOptions: {
+			output: {
+				/**
+				 * Isolate the always-loaded core framework runtime into a
+				 * stable, long-cached vendor chunk so app-code deploys do not
+				 * bust it (and vice-versa). ui/organisms are intentionally
+				 * left out so they keep splitting per-page — that keeps unused
+				 * components out of the initial load.
+				 */
+				manualChunks(id)
+				{
+					if (id.includes('node_modules/@base-framework/base')
+						|| id.includes('node_modules/@base-framework/atoms'))
+					{
+						return 'base-framework';
+					}
+				}
+			}
+		}
 	},
 	define: {
 		'process.env.VITE_API_URL': JSON.stringify(apiTarget)

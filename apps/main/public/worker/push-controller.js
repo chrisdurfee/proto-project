@@ -28,12 +28,26 @@ class PushController
 	getOptions(event)
 	{
 		const icon = './images/icons/icon-512.png',
-		badge = '/images/icons/badge.png',
-		data = event.data.json();
+		badge = '/images/icons/badge.png';
+
+		/**
+		 * A push can arrive with no (or malformed) payload — throwing
+		 * here would skip showNotification and the browser may show a
+		 * generic notification and penalize the subscription.
+		 */
+		let data = {};
+		try
+		{
+			data = event.data ? event.data.json() : {};
+		}
+		catch (e)
+		{
+			data = {};
+		}
 
 		return {
 			title: data.title || null,
-			body: data.message,
+			body: data.message || 'You have a new notification.',
 			icon,
 			badge,
 			data
@@ -88,7 +102,7 @@ class PushController
 							{
 								client.postMessage({
 									type: 'NAVIGATE_TO',
-									url: normalizedTarget.pathname
+									url: normalizedTarget.pathname + normalizedTarget.search + normalizedTarget.hash
 								});
 								return client;
 							});

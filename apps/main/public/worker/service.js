@@ -13,8 +13,9 @@ class Service
 	 *
 	 * @param {string} prefix
 	 * @param {Array<string>} files
+	 * @param {string} [version]
 	 */
-	constructor(prefix, files = [])
+	constructor(prefix, files = [], version = '')
 	{
 		/**
 		 * @member {CacheController} cache
@@ -26,6 +27,11 @@ class Service
 		 */
 		this.files = files;
 
+		/**
+		 * @member {string} version
+		 */
+		this.version = version;
+
 		this.addEvents();
 	}
 
@@ -35,14 +41,93 @@ class Service
 	dataUri = '/api/';
 
 	/**
+	 * @member {Array<string>} fontHosts
+	 */
+	fontHosts = ['fonts.googleapis.com', 'fonts.gstatic.com'];
+
+	/**
 	 * This will check if the request is a data request.
 	 *
-	 * @param {string} url
+	 * @param {URL} url
 	 * @returns {boolean}
 	 */
-	isDataRequest(url = '')
+	isDataRequest(url)
 	{
-		return (url.indexOf(this.dataUri) > -1);
+		return url.pathname.indexOf(this.dataUri) === 0;
+	}
+
+	/**
+	 * Whether the request targets a Google Fonts host.
+	 *
+	 * @param {URL} url
+	 * @returns {boolean}
+	 */
+	isFontRequest(url)
+	{
+		return this.fontHosts.indexOf(url.hostname) > -1;
+	}
+
+	/**
+	 * Whether the request targets user-uploaded media.
+	 *
+	 * @param {URL} url
+	 * @returns {boolean}
+	 */
+	isMediaRequest(url)
+	{
+		return url.pathname.indexOf('/files/') === 0;
+	}
+
+	/**
+	 * Whether the request targets a video file. Video playback uses HTTP
+	 * Range requests, which the Cache Storage API mishandles —
+	 * cache.match() ignores Range headers and returns the full body,
+	 * breaking seek/scrub — and multi-megabyte bodies would churn the
+	 * capped media cache. Videos always go straight to the network so
+	 * the browser's HTTP cache and range handling stay in charge.
+	 *
+	 * @param {URL} url
+	 * @returns {boolean}
+	 */
+	isVideoRequest(url)
+	{
+		return /\.(mp4|webm|mov|m4v|avi|mpeg)$/i.test(url.pathname);
+	}
+
+	/**
+	 * Whether the request targets a Vite dev-server module URL. These
+	 * are served at stable URLs (/src/..., /@vite/client, /@fs/...,
+	 * /node_modules/...) that change content between edits, so caching
+	 * them serves stale code after a full reload. Production builds
+	 * never emit these paths, so this guard is inert in production.
+	 *
+	 * @param {URL} url
+	 * @returns {boolean}
+	 */
+	isDevModuleRequest(url)
+	{
+		const path = url.pathname;
+		return path.indexOf('/@') === 0
+			|| path.indexOf('/src/') === 0
+			|| path.indexOf('/node_modules/') === 0;
+	}
+
+	/**
+	 * This will disable navigation preload. The shell is served
+	 * cache-first, so an unconsumed preload response only produces
+	 * "preload cancelled" warnings. Disabling is idempotent and clears
+	 * any preload enabled by a previously activated worker version.
+	 *
+	 * @returns {Promise}
+	 */
+	disableNavigationPreload()
+	{
+		if (self.registration.navigationPreload)
+		{
+			return self.registration.navigationPreload.disable().catch(() => {});
+		}
+
+		return Promise.resolve();
 	}
 
 	/**
@@ -54,7 +139,7 @@ class Service
 	{
 		self.addEventListener('install', (e) =>
 		{
-			//self.skipWaiting();
+			self.skipWaiting();
 
 			e.waitUntil(
 				this.cache.addFiles(this.files)
@@ -64,19 +149,19 @@ class Service
 		self.addEventListener('activate', (e) =>
 		{
 			e.waitUntil(
-				this.cache.refresh().then(() =>
+				this.disableNavigationPreload()
+					.then(() => this.cache.refresh())
+					.then(() =>
 				{
-					// return self.clients.matchAll({ includeUncontrolled: true }).then((clients) =>
-					// {
-					// 	clients.forEach((client) =>
-					// 	{
-					// 		client.postMessage({ action: 'reload' });
-					// 	});
-					// });
-				})
+					if (this.version)
+					{
+						return this.cache.notifyClients({
+							type: 'SW_READY',
+							version: this.version
+						});
+					}
+				}).then(() => self.clients.claim())
 			);
-
-			return self.clients.claim();
 		});
 
 		self.addEventListener('message', (e) =>
@@ -84,56 +169,112 @@ class Service
 			if (e.data === 'delete')
 			{
 				this.cache.deleteFiles();
+				return;
+			}
+
+			if (e.data?.type === 'GET_VERSION' && this.version)
+			{
+				const client = e.source;
+				if (client)
+				{
+					client.postMessage({
+						type: 'SW_READY',
+						version: this.version
+					});
+				}
 			}
 		});
 
 		self.addEventListener('fetch', (e) =>
 		{
+			const request = e.request;
+
 			/**
-			 * Prevent non-GET requests.
+			 * Only GET requests are cacheable.
 			 */
-			if (e.request.method !== 'GET')
+			if (request.method !== 'GET')
+			{
+				return;
+			}
+
+			const url = new URL(request.url);
+
+			/**
+			 * Never intercept API/data requests — these must always hit
+			 * the network so auth and freshness are preserved.
+			 */
+			if (this.isDataRequest(url))
 			{
 				return;
 			}
 
 			/**
-			 * Prevent the service worker from handling the data requests.
+			 * Ignore non-http(s) schemes (chrome-extension, etc.).
 			 */
-			if (this.isDataRequest(e.request.url))
+			if (url.protocol !== 'http:' && url.protocol !== 'https:')
 			{
 				return;
 			}
 
 			/**
-			 * Prevent the service worker from handling the navigation requests.
+			 * Google Fonts: stale-while-revalidate into a persistent
+			 * font cache so type renders instantly and works offline.
 			 */
-			if (e.request.mode === 'navigate')
+			if (this.isFontRequest(url))
 			{
-				fetch(e.request).catch(() => {
-					return caches.match('index.html');
-				});
-				return false;
+				e.respondWith(this.cache.staleWhileRevalidate(this.cache.fontCacheName, request));
+				return;
 			}
 
 			/**
-			 * Prevent the service worker from handling the CORS requests.
+			 * Let the network handle any other cross-origin request.
 			 */
-			if (e.request.mode === 'cors')
-			{
-				return false;
-			}
-
-			/**
-			 * Prevent the service worker from handling the extension requests.
-			 */
-			if (e.request.url.startsWith('chrome-extension://'))
+			if (url.origin !== self.location.origin)
 			{
 				return;
 			}
 
-			const response = this.cache.fetchFile(e);
-			e.respondWith(response);
+			/**
+			 * Vite dev-server modules must always hit the network so dev
+			 * never serves stale source. Inert in production builds.
+			 */
+			if (this.isDevModuleRequest(url))
+			{
+				//return;
+			}
+
+			/**
+			 * User media: cache-first into a capped, version-independent
+			 * cache so images stay instant across deploys and storage
+			 * stays bounded. Videos bypass the worker entirely — Range
+			 * requests + Cache Storage break seeking, so the network and
+			 * the browser's HTTP cache handle them natively.
+			 */
+			if (this.isMediaRequest(url))
+			{
+				if (this.isVideoRequest(url))
+				{
+					return;
+				}
+				e.respondWith(this.cache.fetchMedia(e));
+				return;
+			}
+
+			/**
+			 * Shell navigations: cached shell immediately, refresh in the
+			 * background, fall back to the cached shell when offline.
+			 */
+			if (request.mode === 'navigate')
+			{
+				e.respondWith(this.cache.fetchNavigate(e));
+				return;
+			}
+
+			/**
+			 * Same-origin static assets (hashed JS/CSS, images, icons):
+			 * cache-first for the fastest repeat loads.
+			 */
+			e.respondWith(this.cache.fetchFile(e));
 		});
 	}
 }

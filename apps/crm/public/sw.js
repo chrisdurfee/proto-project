@@ -11,6 +11,8 @@ const APP_NAME = 'crm',
 
 /**
  * This is the version of the app. This is used to create the cache
+ * name. Bump this whenever the precached shell or worker logic
+ * changes so a fresh service worker installs and old caches purge.
  *
  * @const
  * @type {string} version
@@ -18,8 +20,15 @@ const APP_NAME = 'crm',
 version = '0.0.1';
 
 /**
- * This will add these files to cache. Add any files you want to
- * cache here. As files are fetched, they will be added to the cache.
+ * This will add these files to cache. These make up the minimal app
+ * shell required to boot offline. Only stable, destination-agnostic
+ * documents are precached here.
+ *
+ * CSS/JS are intentionally NOT precached: the Vite dev server serves
+ * the same source URL as either CSS or a JS style-injection module
+ * depending on the request destination, and production filenames are
+ * content-hashed. Both are cached correctly at runtime from their
+ * real (stylesheet/script) requests instead.
  *
  * @const
  * @type {Array<string>} DEFAULT_FILES
@@ -27,7 +36,8 @@ version = '0.0.1';
 const DEFAULT_FILES =
 [
 	'./',
-	'./index.html'
+	'./index.html',
+	'./manifest.json'
 ];
 
 /**
@@ -35,7 +45,7 @@ const DEFAULT_FILES =
  * the app name and the files to cache.
  */
 const appNameId = `${APP_NAME}-${version}`;
-const service = new Service(appNameId, DEFAULT_FILES);
+const service = new Service(appNameId, DEFAULT_FILES, version);
 
 /**
  * Push needs to be added to the service to allow for push
