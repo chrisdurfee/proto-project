@@ -139,8 +139,9 @@ applyTo: "**"
 | Override `add()` in xhr to replicate built-in POST | Use built-in `add()` |
 | Override `update()` in xhr to replicate built-in PATCH | Use built-in `update()` |
 | Override `all()` in xhr with stripped-down version | Use built-in `all()` |
-| `Icon(Icons.home)` | `Icon({ size: 'sm' }, 'home')` |
-| `Icon({ icon: Icons.home })` | `Icon({ size: 'sm' }, 'home')` |
+| `import { Icon } from '@base-framework/ui/atoms'` (deprecated heroicon atom) | `import { UniversalIcon } from '@base-framework/ui/atoms'` |
+| `Icon(Icons.home)` / `Icon({ icon: Icons.home })` | `UniversalIcon({ size: 'sm' }, 'home')` — Material Symbols string name, not the `Icons` object |
+| `import { Icons } from '@base-framework/ui/icons'` just to pass `Icons.trash` as a prop value | Pass the Material Symbol string directly: `icon: 'delete'` |
 | `export class Page extends Component {` | Brace on new line: `extends Component\n{` |
 | `const data = new Data({})` | `const data = new Data({});` (semicolon required) |
 | Module not in `imported-modules.js` | Add `import "./module/module.js";` |

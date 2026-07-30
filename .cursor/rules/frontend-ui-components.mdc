@@ -123,7 +123,7 @@ LoadingButton('Saving…');
 
 **CRITICAL**: No `variant: 'default'`. Primary CTA = `variant: 'primary'`.
 
-## Design System Tokens (Rally) (CRITICAL)
+## Design System Tokens (CRITICAL)
 
 **Surfaces** (additive layering):
 - `bg-background` — base canvas (dark `#0b0b0c`)
@@ -179,7 +179,7 @@ import { EmptyStateDisplay } from '@components/molecules/empty-state-display.js'
 | `PageTitle` | Page top header with eyebrow + title (`serif: true` for editorial italic) |
 | `EmptyStateDisplay` | Serif italic empty state for content pages |
 
-**CRITICAL**: There is no `editorial/` folder under `components/atoms` or `components/molecules` — these atoms ARE the app's base design system. Never create or import from `@components/atoms/editorial/...` or `@components/molecules/editorial/...`. Never prefix new tokens, classes, or files with `rally-`.
+**CRITICAL**: There is no `editorial/` folder under `components/atoms` or `components/molecules` — these atoms ARE the app's base design system. Never create or import from `@components/atoms/editorial/...` or `@components/molecules/editorial/...`. Never prefix new tokens, classes, or files with your product's brand name.
 
 ## Skeleton Components (CRITICAL)
 

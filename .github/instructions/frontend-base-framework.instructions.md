@@ -1,5 +1,5 @@
 ---
-description: "Use when writing or editing JavaScript files in apps/* — covers Base Framework core philosophy (NOT React/JSX), code style, theme colors, file organization, component decomposition rules, BlankPage/Jot/hybrid atoms, data binding, lists with for/map directives, state management, conditionals, routing, HTTP/Ajax, forms, dynamic imports, and common mistakes"
+description: "Use when writing or editing JavaScript files in apps/* — covers Base Framework core philosophy (NOT React/JSX), code style, theme colors, file organization, component decomposition rules, BlankPage/Jot/hybrid atoms, data binding, lists with for/map directives, state management, conditionals, routing, HTTP/Ajax, forms, dynamic imports, icons (UniversalIcon + Material Symbols), app shell/bootstrap (app-controller/*, CSRF-ready guard, stale-chunk recovery, route-loading progress, splash screen, service worker), and common mistakes"
 applyTo: "apps/**/*.js"
 ---
 
@@ -407,7 +407,7 @@ this.data.xhr.all({}, (response, xhr) =>
             type: 'destructive',
             title: 'Error',
             description: response.message || 'Failed to load data',
-            icon: Icons.warning
+            icon: 'warning'
         });
     }
 });
@@ -423,6 +423,69 @@ condition && Import(() => import('./components/heavy-component.js'))
 Import('./file.js')
 ```
 
+## Icons (Material Symbols — CRITICAL)
+
+Every app uses `UniversalIcon` with a plain Material Symbol string name — never the deprecated `Icon` atom or the `Icons` heroicon object.
+
+```javascript
+import { UniversalIcon } from '@base-framework/ui/atoms';
+
+UniversalIcon({ size: 'sm' }, 'home');
+UniversalIcon({ size: 'sm', class: 'text-destructive' }, 'delete');
+```
+
+- Sizes: `xs` \| `sm` (default) \| `md` \| `lg` \| `xl` \| `2xl` \| `3xl`.
+- Icon names are [Material Symbols](https://fonts.google.com/icons) identifiers (`home`, `delete`, `search`, `check_circle`, `add_circle`, `close`, ...) — pass them as plain strings, not through an `Icons.foo.bar` lookup object.
+- `icon:` props on shared components (`Button`, `Confirmation`, `EmptyState`, `SidebarMenu` options, etc.) already accept a plain string and render it internally — you rarely need to call `UniversalIcon` directly except inside a custom atom/organism.
+- See `anti-patterns.mdc` for the full WRONG → CORRECT icon migration table.
+
+## App Shell & Bootstrap (`src/app-controller.js`)
+
+`app-controller.js` is a thin facade — it MUST NOT grow business logic. Each concern lives in its own module under `src/app-controller/` and is wired together by `bootstrap()`:
+
+```
+src/app-controller/
+  bootstrap.js        # setupRouter, createDataLayer, bootstrap(app), renderShell(app)
+  splash.js            # hideSplash / hideSplashAndMarkReady
+  splash-state.js      # sessionStorage warm-start flags (shellReady, shellSwVersion)
+  font-loading.js      # setupFontLoading — waits for Material Symbols Outlined only
+  ios-viewport-fix.js  # fixIosStandaloneViewport — WKWebView safe-area bug
+  user-data.js         # createUserData / mergeAndStoreUser
+  auth-actions.js      # signIn / signOut
+```
+
+When adding a new boot-time concern, create a new file here and call it from `bootstrap()` — do not inline it into `app-controller.js` or `bootstrap.js` itself.
+
+### CSRF-Ready Race Guard
+Any code that fires an XHR during/right-after boot MUST wait for the CSRF token before sending, or the first request can 403:
+```javascript
+import { whenCsrfReady } from '../csrf-token.js';
+
+whenCsrfReady().then(() => model.xhr.pulse({}, callback));
+```
+`whenCsrfReady()` resolves once the boot-time token fetch completes (or times out), and immediately for any call made after boot.
+
+### Stale-Chunk Recovery
+Lazy route imports can 404 after a deploy ships new asset hashes. Route loaders MUST be wrapped so a failed chunk triggers a one-time reload instead of a blank page:
+```javascript
+import { recoverFromStaleChunk, installStaleChunkRecovery } from '../utils/stale-chunk.js';
+
+installStaleChunkRecovery(); // called once during bootstrap
+// module-routes.js wraps every dynamic import's error handler with recoverFromStaleChunk()
+```
+
+### Route Loading Progress
+`shell/data/route-loading.js` exposes a reactive `RouteLoading` singleton (`start()`/`done()`) that `module-routes.js` calls around every dynamic import; `shell/route-progress/route-progress.js` renders a top-of-app progress bar bound to it. Mount `RouteProgress()` once inside `AppShell`.
+
+### Splash Screen
+`index.html` renders a `#app-splash` overlay before any JS loads. `splash-state.js` tracks a warm/cold start via `sessionStorage` (`shellReady`, `shellSwVersion`); `splash.js` hides it instantly on warm reloads or fades it out on cold starts once `bootstrap()` finishes. Never remove the `#app-splash` markup or the inline warm-detection `<script>` in `index.html`.
+
+### Service Worker
+- Registration uses `updateViaCache: 'none'` so the SW script itself is never cache-stale.
+- `stampServiceWorker` (Vite plugin) auto-versions `sw.js` on every build — never hardcode a version string.
+- Messages arrive on `navigator.serviceWorker` (NOT the `ServiceWorkerRegistration`) — `setupServiceMessages` listens there for `NAVIGATE_TO` / `SW_READY` / `reload` / `update`.
+- Navigation targets from push notifications or SW messages MUST go through `isSafeInAppPath` (`src/utils/safe-url.js`) before calling `app.navigate()` — never navigate to an unvalidated URL.
+
 ## Common Mistakes
 1. ❌ DON'T pass children in props: `Div({ children: [...] })`
 2. ❌ DON'T use `new` with Atoms: `new Button()`
@@ -435,3 +498,5 @@ Import('./file.js')
 9. ❌ DON'T use hardcoded colors — use theme variables
 10. ❌ DON'T write inline markup in page components — extract to organisms
 11. ❌ DON'T exceed ~20 lines per component — extract sub-sections
+12. ❌ DON'T use the deprecated `Icon`/`Icons` heroicon pattern — use `UniversalIcon({ size }, 'material_name')`
+13. ❌ DON'T fire XHR calls at boot without `whenCsrfReady()` — the CSRF token may not be set yet

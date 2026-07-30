@@ -1,5 +1,5 @@
 ---
-description: "Use when writing Proto Framework services, auth gates, policies, or handling file uploads - covers Common\\Services\\Service base, ServiceResult::success/failure, built-in service traits (ToggleLikeTrait, TogglePivotTrait, VoteableTrait, AudienceTargetingTrait, LocationFilterTrait), SRP refactoring, validation rule strings, gates registration, policies extending Common\\Auth\\Policies\\Policy with $type and (Request) signatures (use add() not create()), built-in policy helpers (isSignedIn, ownsResource, matchesRouteUser), controller audit field patterns in modifyAddItem/modifyUpdateItem, and Vault file storage with $request->file()"
+description: "Use when writing Proto Framework services, auth gates, policies, or handling file uploads - covers Common\\Services\\Service base, ServiceResult::success/failure, built-in service traits (ToggleLikeTrait, TogglePivotTrait, VoteableTrait, AudienceTargetingTrait, LocationFilterTrait), SRP refactoring, validation rule strings, gates registration, policies extending Common\\Auth\\Policies\\Policy with $type and (Request) signatures (use add() not create()), built-in policy helpers (isSignedIn, ownsResource, matchesRouteUser), controller audit field patterns in modifyAddItem/modifyUpdateItem, Vault file storage with $request->file(), and image optimization (ImageProcessor/ImagePresets AVIF/WebP variants)"
 applyTo: "{modules/**/Services/*.php,modules/**/Auth/**/*.php,common/**/Services/*.php,common/**/Auth/**/*.php}"
 ---
 
@@ -316,3 +316,30 @@ Vault::disk('s3', 'uploads')->add('/tmp/file.txt');
 ```
 
 **CRITICAL**: Use `$request->file('field')` to access uploads, NOT `$_FILES` directly.
+
+## Image Optimization (`Common\Media\ImageProcessor`)
+
+For any entity image (avatar, cover, banner, logo) the controller should go through `ImageOptimizationTrait::handleOptimizedImageUpload()` — never persist the raw upload alone when the image is displayed at multiple sizes. The trait:
+
+1. Validates the upload (`image:N|mimes:...`) via `handleFileUpload()`.
+2. Re-encodes the original via `ImagePresets::ORIGINAL_*` options.
+3. Generates AVIF + WebP variants (`thumb`, `card`, and `large` where applicable) through `ImageProcessor::process()` (requires the `imagick` PHP extension).
+4. Returns `['mainFile' => string, 'variants' => ['thumb' => 'xxx.webp', 'card' => 'yyy.webp', ...] | null]`.
+
+The model needs a paired JSON column. Migration shape:
+
+```php
+$table->varchar('cover_image', 255)->nullable();
+$table->json('cover_image_variants')->nullable();
+```
+
+Model:
+
+```php
+protected static array $fields = ['id', /* ... */ 'coverImage', 'coverImageVariants'];
+protected static array $dataTypes = [
+    'coverImageVariants' => \Proto\Storage\DataTypes\JsonType::class,
+];
+```
+
+Direct controller usage lives in `proto-controllers-routing.mdc`. Call `ImageProcessor::process()` directly only from backfill scripts or batch jobs — controllers should always go through the trait.

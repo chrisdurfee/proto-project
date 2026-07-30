@@ -1,5 +1,5 @@
 ---
-description: "Use when working with Proto Framework controllers, routing, modules, gateways, or API endpoints - covers Module activate(), nested feature modules with Main/, gateway pattern, fluent routing (resource last), CSRF mutation middleware, ResourceController properties (routeParams, filterParams, scopeToUser, enrichUserFields, serviceClass, maxLimit), getAllInputs() contract for list endpoints, BatchEnrichmentTrait, serviceResponse(), file upload helpers, and SyncableTrait for SSE"
+description: "Use when working with Proto Framework controllers, routing, modules, gateways, or API endpoints - covers Module activate(), nested feature modules with Main/, gateway pattern, fluent routing (resource last), CSRF mutation middleware, ResourceController properties (routeParams, filterParams, scopeToUser, enrichUserFields, serviceClass, maxLimit), getAllInputs() contract for list endpoints, BatchEnrichmentTrait, serviceResponse(), file upload helpers, optimized image uploads (ImageOptimizationTrait), and SyncableTrait for SSE"
 applyTo: "{modules/**/Controllers/*.php,modules/**/Api/*.php,modules/**/*Module.php}"
 ---
 
@@ -343,6 +343,39 @@ $data->coverImage = $this->handleFileUpload($request, 'coverImage', 'local', 've
 // Batch — returns array of metadata objects {fileName, originalName, mimeType, size}
 $media = $this->handleMediaUpload($request, 'media', 'local', 'forum', 'image:5120');
 ```
+
+### Optimized Image Uploads (AVIF/WebP variants)
+
+For any entity image that gets displayed at multiple sizes (avatar, cover, logo, banner), use `ImageOptimizationTrait::handleOptimizedImageUpload()` instead of `handleFileUpload()` directly — it re-encodes the original and generates `thumb`/`card`(/`large`) AVIF+WebP variants via `Common\Media\ImageProcessor`.
+
+```php
+use Common\Controllers\Concerns\ImageOptimizationTrait;
+use Common\Media\ImagePresets;
+
+class GroupController extends ResourceController
+{
+    use ImageOptimizationTrait;
+
+    protected function modifyUpdateItem(object $data, Request $request): object
+    {
+        $upload = $this->handleOptimizedImageUpload(
+            $request,
+            'coverImage',           // form field
+            'groups',                // Vault bucket
+            ImagePresets::COVER      // AVATAR | COVER | MEDIA
+        );
+        if ($upload !== null)
+        {
+            $data->coverImage = $upload['mainFile'];
+            $data->coverImageVariants = $upload['variants']; // array or null — JsonType handles encoding
+        }
+
+        return $data;
+    }
+}
+```
+
+Preset selection: `ImagePresets::AVATAR` (square, thumb 128 / card 400), `ImagePresets::COVER` (wide, thumb 560 / card 1600), `ImagePresets::MEDIA` (thumb 320 / card 800 / large 1600). See `proto-services-auth.mdc` for the model/migration wiring `*Variants` columns need.
 
 ### SyncableTrait (SSE on ResourceControllers)
 

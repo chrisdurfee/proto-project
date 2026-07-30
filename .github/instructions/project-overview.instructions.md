@@ -63,6 +63,7 @@ Before building any feature, the agent MUST:
 2. Controller, Routes, Migrations in feature directory
 3. Gateway method in parent: `modules/ParentModule/Gateway/Gateway.php`
 4. Use `Main/` folder if parent needs root-level routes
+5. Features can be nested in other features.
 
 **Frontend**:
 1. Module: `apps/{crm|main}/src/modules/{moduleName}/module.js`

@@ -1,5 +1,5 @@
 ---
-description: Proto Framework services, service traits, ServiceResult, auth policies, validation, file storage, and controller audit patterns
+description: Proto Framework services, service traits, ServiceResult, auth policies, validation, file storage, image optimization, and controller audit patterns
 globs: "{modules/**/Services/*.php,modules/**/Auth/**/*.php,common/**/Services/*.php,common/**/Auth/**/*.php}"
 alwaysApply: false
 ---
@@ -317,3 +317,30 @@ Vault::disk('s3', 'uploads')->add('/tmp/file.txt');
 ```
 
 **CRITICAL**: Use `$request->file('field')` to access uploads, NOT `$_FILES` directly.
+
+## Image Optimization (`Common\Media\ImageProcessor`)
+
+For any entity image (avatar, cover, banner, logo) the controller should go through `ImageOptimizationTrait::handleOptimizedImageUpload()` — never persist the raw upload alone when the image is displayed at multiple sizes. The trait:
+
+1. Validates the upload (`image:N|mimes:...`) via `handleFileUpload()`.
+2. Re-encodes the original via `ImagePresets::ORIGINAL_*` options.
+3. Generates AVIF + WebP variants (`thumb`, `card`, and `large` where applicable) through `ImageProcessor::process()` (requires the `imagick` PHP extension).
+4. Returns `['mainFile' => string, 'variants' => ['thumb' => 'xxx.webp', 'card' => 'yyy.webp', ...] | null]`.
+
+The model needs a paired JSON column. Migration shape:
+
+```php
+$table->varchar('cover_image', 255)->nullable();
+$table->json('cover_image_variants')->nullable();
+```
+
+Model:
+
+```php
+protected static array $fields = ['id', /* ... */ 'coverImage', 'coverImageVariants'];
+protected static array $dataTypes = [
+    'coverImageVariants' => \Proto\Storage\DataTypes\JsonType::class,
+];
+```
+
+Direct controller usage lives in `proto-controllers-routing.mdc`. Call `ImageProcessor::process()` directly only from backfill scripts or batch jobs — controllers should always go through the trait.
