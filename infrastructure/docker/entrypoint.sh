@@ -238,24 +238,58 @@ bash -c 'while true; do
     sleep 3
 done' &
 
-echo "� Configuring scheduled tasks (cron)..."
-# Install cron job files from the project's cron directory
-if [ -d /var/www/html/infrastructure/docker/cron ]; then
-    for cronfile in /var/www/html/infrastructure/docker/cron/*; do
-        [ -f "$cronfile" ] || continue
-        cp "$cronfile" /etc/cron.d/"$(basename "$cronfile")"
-        chmod 0644 /etc/cron.d/"$(basename "$cronfile")"
-        echo "✅ Installed cron job: $(basename "$cronfile")"
-    done
+echo "📅 Configuring scheduled tasks (cron)..."
+# RUN_CRON gates whether THIS container runs the scheduler. Defaults to true so
+# single-container (dev) deployments work out of the box. When scaling
+# horizontally (many web replicas), set RUN_CRON=false on the web replicas and
+# run exactly one dedicated scheduler container with RUN_CRON=true to avoid every
+# replica spinning a cron daemon. Correctness does NOT depend on this: each
+# routine is additionally guarded by a MySQL advisory lock (GET_LOCK) in
+# run-routine.php, so even if multiple containers run cron the same routine can
+# never execute twice concurrently.
+if [ "${RUN_CRON:-true}" = "true" ]; then
+    # Install cron job files from the project's cron directory
+    mkdir -p /var/log
+    # Ensure www-data can create new log files inside /var/log even if the
+    # per-file pre-creation below is skipped (e.g. due to a timing race on
+    # first container start or after a recreate that drops the writable layer).
+    chgrp www-data /var/log 2>/dev/null || true
+    chmod g+w /var/log 2>/dev/null || true
+    if [ -d /var/www/html/infrastructure/docker/cron ]; then
+        for cronfile in /var/www/html/infrastructure/docker/cron/*; do
+            [ -f "$cronfile" ] || continue
+            name="$(basename "$cronfile")"
+            cp "$cronfile" /etc/cron.d/"$name"
+            chmod 0644 /etc/cron.d/"$name"
+            # Pre-create the log file each cron job redirects to so the
+            # unprivileged user (www-data) running the job can append to
+            # it. Without this, cron jobs silently fail with
+            # "cannot create /var/log/<name>.log: Permission denied" and
+            # the failure only surfaces in /var/mail/www-data.
+            logfile="/var/log/${name}.log"
+            touch "$logfile"
+            chown www-data:www-data "$logfile"
+            chmod 0664 "$logfile"
+            echo "✅ Installed cron job: $name"
+        done
+        php /var/www/html/infrastructure/scripts/sync-cron-registry.php >/dev/null 2>&1 || true
+    fi
+    service cron start >/dev/null 2>&1 || cron >/dev/null 2>&1 || true
+    echo "✅ Cron daemon started"
+else
+    echo "⏭️  RUN_CRON=false — skipping cron daemon on this container (scheduler runs elsewhere)"
 fi
-# Ensure cron daemon logs directory exists, then start cron
-mkdir -p /var/log
-touch /var/log/vehicle-sync.log
-chmod 666 /var/log/vehicle-sync.log
-service cron start >/dev/null 2>&1 || cron >/dev/null 2>&1 || true
-echo "✅ Cron daemon started"
 
-echo "�🚀 Starting Apache with Event MPM and HTTP/2..."
+echo "🚀 Starting Apache with Event MPM and HTTP/2..."
+
+# Recreate log directories every start. In production, docker-compose mounts an
+# empty tmpfs at /var/log for security/perf, which wipes out /var/log/apache2
+# (baked into the image at build time) before Apache ever runs. Without this,
+# Apache's config check fails with "Cannot access directory '/var/log/apache2/'"
+# and the container crash-loops.
+mkdir -p /var/log/apache2
+chown root:adm /var/log/apache2 2>/dev/null || true
+chmod 750 /var/log/apache2 2>/dev/null || true
 
 # Set Apache runtime directory to a writable location
 # Directories are already created with proper permissions in Dockerfile

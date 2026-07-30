@@ -1,0 +1,53 @@
+version: 2
+updates:
+  # Backend PHP dependencies
+  - package-ecosystem: "composer"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "php"
+
+  # Frontend — main app
+  - package-ecosystem: "npm"
+    directory: "/apps/main"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "main"
+
+  # Frontend — CRM app
+  - package-ecosystem: "npm"
+    directory: "/apps/crm"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "crm"
+
+  # Frontend — Developer app
+  - package-ecosystem: "npm"
+    directory: "/apps/developer"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "developer"
+
+  # GitHub Actions workflow dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "ci"

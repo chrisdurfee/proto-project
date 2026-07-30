@@ -19,6 +19,11 @@ services:
       - mariadb_data:/var/lib/mysql
       - ./infrastructure/config/mariadb/conf.d:/etc/mysql/mariadb.conf.d:ro
       - ./infrastructure/docker/mysql/:/docker-entrypoint-initdb.d/
+    # performance.cnf sets secure_file_priv=/var/lib/mysql-files; the MariaDB
+    # image does not ship that directory, and a missing path fails the
+    # entrypoint config check. Provide it as an ephemeral tmpfs.
+    tmpfs:
+      - /var/lib/mysql-files
     networks:
       - proto-network
     command: >
@@ -42,13 +47,18 @@ services:
     volumes:
       - redis_data:/data
       - ./infrastructure/config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    command: ["redis-server","/usr/local/etc/redis/redis.conf"]
+    # redis.conf documents that auth is applied via --requirepass on the
+    # command line (it can't be safely templated into a static, checked-in
+    # config file) — actually pass it here so Redis isn't left running
+    # without a password.
+    command: ["sh", "-c", "exec redis-server /usr/local/etc/redis/redis.conf --requirepass \"$$REDIS_PASSWORD\""]
     networks:
       - proto-network
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?Please set REDIS_PASSWORD in infrastructure/.env file}
+      - REDISCLI_AUTH=${REDIS_PASSWORD:?Please set REDIS_PASSWORD in infrastructure/.env file}
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG || exit 1"]
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning ping | grep PONG || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -72,9 +82,26 @@ services:
       # Scripts directory for ownership watcher
       - ./scripts:/var/www/html/infrastructure/scripts:ro
 
+      # Cron job definitions — bind-mounted so new/edited jobs apply on
+      # container restart without rebuilding the web image.
+      - ./docker/cron:/var/www/html/infrastructure/docker/cron:ro
+
       # Config files only
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
       - ./docker/apache-mpm.conf:/etc/apache2/conf-available/mpm-tuning.conf:ro
+      - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
+      # Dedicated SSE pool — bind-mounted so tweaks apply on container restart
+      # without a full image rebuild.
+      - ./docker/php/sse.conf:/usr/local/etc/php-fpm.d/sse.conf:ro
+      # Apache vhosts — bind-mounted for the same reason as the FPM pools above.
+      - ./docker/apache-vhost.conf:/etc/apache2/sites-available/000-default.conf:ro
+      - ./docker/apache-ssl-vhost.conf:/etc/apache2/sites-available/default-ssl.conf:ro
+      - ./docker/apache-subdomain.conf:/etc/apache2/sites-available/002-subdomain.conf:ro
+      - ./docker/apache-subdomain-ssl.conf:/etc/apache2/sites-available/003-subdomain-ssl.conf:ro
+      # Dev SSL cert — bind-mounted so regenerating it on the host applies on
+      # container restart without rebuilding the web image.
+      - ./docker/ssl/localhost.crt:/etc/ssl/certs/localhost.crt:ro
+      - ./docker/ssl/localhost.key:/etc/ssl/private/localhost.key:ro
     depends_on:
       - mariadb
       - redis
@@ -87,13 +114,18 @@ services:
       - DB_PORT=${DB_PORT:-3306}
       - DB_DATABASE=${DB_DATABASE:-proto}
       - DB_USERNAME=${DB_USERNAME:-proto_app_user}
-      - DB_PASSWORD=${DB_PASSWORD:-ProtoApp2025!SecureDbPass#789}
+      - DB_PASSWORD=${DB_PASSWORD:?Please set DB_PASSWORD in infrastructure/.env file}
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?Please set REDIS_PASSWORD in infrastructure/.env file}
       - APP_ENV=${APP_ENV:-development}
       # Automation controls
       - AUTO_MIGRATE=${AUTO_MIGRATE:-true}
+      # Scheduler control. Cron runs in-container by default for single-host dev.
+      # When scaling to multiple web containers, set RUN_CRON=false on the web
+      # replicas and run one dedicated scheduler with RUN_CRON=true. Routines are
+      # also guarded by a MySQL advisory lock so duplicates are impossible either way.
+      - RUN_CRON=${RUN_CRON:-true}
       # Generator control
       - DOCKER_CONTAINER=true
       - PROJECT_ROOT=/var/www/html
@@ -103,8 +135,8 @@ services:
       - MAIL_USERNAME=${MAIL_USERNAME:-}
       - MAIL_PASSWORD=${MAIL_PASSWORD:-}
       - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-tls}
-      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@rally.local}
-      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Rally}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@proto.local}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Proto Project}
       - MAIL_ENABLED=${MAIL_ENABLED:-true}
       # Enable CORS for local development
       - CORS_ENABLED=true
@@ -137,7 +169,7 @@ services:
       - PMA_HOST=${DB_HOST:-mariadb}
       - PMA_PORT=3306
       - PMA_USER=root
-      - PMA_PASSWORD=${DB_ROOT_PASSWORD:-ProtoRoot2025!AdminPass#456}
+      - PMA_PASSWORD=${DB_ROOT_PASSWORD:?Please set DB_ROOT_PASSWORD in infrastructure/.env file}
     depends_on:
       - mariadb
     networks:

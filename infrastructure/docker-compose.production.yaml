@@ -86,7 +86,7 @@ services:
     build:
       context: ..
       dockerfile: infrastructure/docker/Dockerfile
-    image: rally-web:latest
+    image: proto-web:latest
     container_name: proto-web
     restart: unless-stopped
     ports:
@@ -124,8 +124,8 @@ services:
       - MAIL_USERNAME=${MAIL_USERNAME:-}
       - MAIL_PASSWORD=${MAIL_PASSWORD:-}
       - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-tls}
-      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@rally.local}
-      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Rally}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@proto.local}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Proto Project}
       - MAIL_ENABLED=${MAIL_ENABLED:-true}
       - CORS_ENABLED=true
     healthcheck:
