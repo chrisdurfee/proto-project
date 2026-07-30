@@ -1,0 +1,8 @@
+# Data retention sweep — runs daily at 04:45
+# Hard-deletes expired rows from log and analytics tables per the
+# retention policy (infrastructure/docs/data-retention-policy.md).
+# Logs are written to /var/log/data-retention.log inside the container.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+45 4 * * * www-data cd /var/www/html && php infrastructure/scripts/run-routine.php "Common\\Automation\\Processes\\DataRetentionRoutine" >> /var/log/data-retention.log 2>&1

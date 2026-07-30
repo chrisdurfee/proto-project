@@ -1,0 +1,10 @@
+# Error log spike check — runs every 15 minutes
+# Alerts ops via email when proto_error_log receives an unusual volume
+# of new unresolved rows in the trailing window (see
+# common/Services/ErrorLogAlertService.php). Stateless: only re-fires
+# on the next run if the volume is still elevated.
+# Logs are written to /var/log/error-log-alert.log inside the container.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+*/15 * * * * www-data cd /var/www/html && php infrastructure/scripts/run-routine.php "Common\\Automation\\Processes\\ErrorLogAlertRoutine" >> /var/log/error-log-alert.log 2>&1
