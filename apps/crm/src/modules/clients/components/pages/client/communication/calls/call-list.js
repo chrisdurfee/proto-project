@@ -1,8 +1,7 @@
 import { Div, P } from "@base-framework/atoms";
 import { Atom, DateTime } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
-import { Badge, Card, Icon } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+import { Badge, Card, UniversalIcon } from "@base-framework/ui/atoms";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { CallDetailsModal } from "./modals/call-details-modal.js";
 
@@ -17,15 +16,15 @@ const CallIcon = (status) =>
 	switch (status)
 	{
 		case "missed":
-			return Icon({ class: 'text-red-500' }, Icons.phone.missed);
+			return UniversalIcon({ class: 'text-red-500' }, 'call_missed');
 		case "inbound":
-			return Icon({ class: 'text-blue-500' }, Icons.phone.inbound);
+			return UniversalIcon({ class: 'text-blue-500' }, 'call_received');
 		case "outbound":
-			return Icon({ class: 'text-yellow-500' }, Icons.phone.outbound);
+			return UniversalIcon({ class: 'text-yellow-500' }, 'call_made');
 		case "voicemail":
-			return Icon({ class: 'text-purple-500' }, Icons.voicemail);
+			return UniversalIcon({ class: 'text-purple-500' }, 'voicemail');
 		default:
-			return Icon({ class: 'text-base' }, Icons.phone.default);
+			return UniversalIcon({ class: 'text-base' }, 'phone');
 	}
 };
 
@@ -122,7 +121,7 @@ export const CallList = Atom(({ data }) =>
 			emptyState: () => EmptyState({
 				title: 'No Calls Found',
 				description: 'No call records have been added for this client yet.',
-				icon: Icons.phone.default
+				icon: 'phone'
 			})
 		})
 	]);

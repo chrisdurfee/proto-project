@@ -1,6 +1,5 @@
 import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
 import { PermissionModal } from "./modals/permission-modal.js";
 
@@ -35,13 +34,13 @@ const Modal = (item, parent) => (
 export const PageHeader = () => (
 	TablePageHeader({ title: 'Permissions' }, [
 		Div({ class: 'hidden lg:flex' }, [
-			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.refresh, click: refresh }, 'Refresh')
+			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: 'refresh', click: refresh }, 'Refresh')
 		]),
 		Div({ class: 'hidden lg:flex' }, [
-			Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add Permission')
+			Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: 'add_circle', click: (e, parent) => Modal(null, parent) }, 'Add Permission')
 		]),
 		Div({ class: 'flex lg:hidden mr-0' }, [
-			Tooltip({ content: 'Add Permission', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }))
+			Tooltip({ content: 'Add Permission', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: 'add_circle', click: (e, parent) => Modal(null, parent) }))
 		])
 	])
 );

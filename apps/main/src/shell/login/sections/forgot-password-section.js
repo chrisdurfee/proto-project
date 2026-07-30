@@ -1,6 +1,5 @@
 import { Div, H1, Header, OnState, P, Section } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { Icons } from "@base-framework/ui/icons";
 import { Alert } from "@base-framework/ui/molecules";
 import { ForgotPasswordForm } from '../forms/forgot/forgot-password-form.js';
 
@@ -26,7 +25,7 @@ const SuccessMessage = () => (
 	Alert({
 		title: 'Success!',
 		description: 'Check your email for instructions to reset your password.',
-		icon: Icons.circleCheck
+		icon: 'check_circle'
 	})
 );
 

@@ -1,7 +1,6 @@
 import { A, Div, H1, OnState, P } from '@base-framework/atoms';
 import { Component, Jot } from '@base-framework/base';
-import { Icon } from '@base-framework/ui/atoms';
-import { Icons } from '@base-framework/ui/icons';
+import { UniversalIcon } from '@base-framework/ui/atoms';
 import { GoogleModel } from '../models/google-model.js';
 import { STEPS } from './steps.js';
 
@@ -29,7 +28,7 @@ const LoadingScreen = () => (
 const ErrorScreen = (message) => (
 	Div({ class: 'flex flex-auto flex-col justify-center items-center h-screen' }, [
 		Div({ class: 'flex flex-col items-center gap-4 text-center max-w-md p-6' }, [
-			Icon({ class: 'text-destructive', size: '2xl' }, Icons.warning),
+			UniversalIcon({ class: 'text-destructive', size: '2xl' }, 'warning'),
 			H1({ class: 'text-xl font-semibold text-destructive' }, 'Authentication Failed'),
 			P({ class: 'text-muted-foreground' }, message),
 			A({
@@ -113,7 +112,7 @@ export const GoogleCallback = Jot(
 					type: 'success',
 					title: 'Already signed up',
 					description: 'The account is already registered. Signing you in...',
-					icon: Icons.circleCheck
+					icon: 'check_circle'
 				});
 
 				// Redirect to home

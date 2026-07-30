@@ -2,7 +2,6 @@ import { Div, P, UseParent } from "@base-framework/atoms";
 import { Data } from "@base-framework/base";
 import { Avatar } from "@base-framework/ui";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { ColumnRow, DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
 import { Format } from "@base-framework/ui/utils";
 import { IsEditor } from "@components/atoms/gate-atoms.js";
@@ -19,7 +18,7 @@ const QuickConnectButtons = () =>
 			Tooltip({ content: 'Email', position: 'bottom' }, [
 				Button({
 					variant: 'icon',
-					icon: Icons.envelope.default,
+					icon: 'mail',
 					label: 'Email',
 					disabled: '[[email]]',
 					click: (e, parent) =>
@@ -35,7 +34,7 @@ const QuickConnectButtons = () =>
 			Tooltip({ content: 'Call', position: 'bottom' }, [
 				Button({
 					variant: 'icon',
-					icon: Icons.phone.default,
+					icon: 'phone',
 					label: 'Call',
 					disabled: '[[mobile]]',
 					click: (e, parent) =>
@@ -51,7 +50,7 @@ const QuickConnectButtons = () =>
 			Tooltip({ content: 'Message', position: 'bottom' }, [
 				Button({
 					variant: 'icon',
-					icon: Icons.chat.text,
+					icon: 'chat',
 					label: 'Message',
 					click: (e, parent) =>
 					{
@@ -63,7 +62,7 @@ const QuickConnectButtons = () =>
 			Tooltip({ content: 'More', position: 'bottom' }, [
 				Button({
 					variant: 'icon',
-					icon: Icons.ellipsis.vertical,
+					icon: 'more_vert',
 					label: 'More'
 				})
 			])
@@ -171,11 +170,11 @@ const HeaderOptions = (contact, clientId, onUpdate) =>
 		IsEditor(() =>
 			UseParent((parent) => (
 				new DropdownMenu({
-					icon: Icons.ellipsis.vertical,
+					icon: 'more_vert',
 					groups: [
 						[
-							{ icon: Icons.pencil.square, label: 'Edit Contact', value: 'edit-contact' },
-							{ icon: Icons.trash, label: 'Delete Contact', value: 'delete-contact' }
+							{ icon: 'edit', label: 'Edit Contact', value: 'edit-contact' },
+							{ icon: 'delete', label: 'Delete Contact', value: 'delete-contact' }
 						]
 					],
 					onSelect: (selected) =>
@@ -214,7 +213,7 @@ const HeaderOptions = (contact, clientId, onUpdate) =>
 										type: "destructive",
 										title: "Error",
 										description: "An error occurred while deleting the contact.",
-										icon: Icons.shield
+										icon: 'shield'
 									});
 									return;
 								}
@@ -225,7 +224,7 @@ const HeaderOptions = (contact, clientId, onUpdate) =>
 									type: "success",
 									title: "Contact Deleted",
 									description: "The contact has been deleted.",
-									icon: Icons.check
+									icon: 'check'
 								});
 
 								if (onUpdate)
@@ -239,7 +238,7 @@ const HeaderOptions = (contact, clientId, onUpdate) =>
 									type: "destructive",
 									title: "Error",
 									description: "An error occurred while deleting the contact.",
-									icon: Icons.shield
+									icon: 'shield'
 								});
 							});
 						}
@@ -350,7 +349,7 @@ export const ContactDetailsModal = (props = { contact: {}, clientId: '', onUpdat
 
 	return new Modal({
 		title: formattedContact.displayName,
-		icon: Icons.user.default,
+		icon: 'person',
 		description: formattedContact.contactTypeLabel,
 		size: 'md',
 		type: 'right',

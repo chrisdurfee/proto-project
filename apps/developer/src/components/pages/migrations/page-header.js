@@ -1,6 +1,5 @@
 import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Confirmation } from "@base-framework/ui/molecules";
 import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
 import { MigrationModel } from "./models/migration-model.js";
@@ -15,7 +14,7 @@ import { MigrationModel } from "./models/migration-model.js";
 const revert = (e, parent) =>
 {
 	new Confirmation({
-		icon: Icons.circleMinus,
+		icon: 'remove_circle',
 		type: 'destructive',
 		title: 'Are you absolutely sure?',
 		description: 'Are you sure you want to revert the last migration?',
@@ -34,7 +33,7 @@ const revert = (e, parent) =>
 const run = (e, parent) =>
 {
 	new Confirmation({
-		icon: Icons.circlePlus,
+		icon: 'add_circle',
 		title: 'Are you absolutely sure?',
 		description: 'Are you sure you want to run the migration?',
 		confirmTextLabel: 'Confirm',
@@ -69,16 +68,16 @@ const update = (direction, { list }) =>
 export const PageHeader = () => (
 	TablePageHeader({ title: 'Migrations' }, [
 		Div({ class: 'hidden lg:flex' }, [
-			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.circleMinus, click: revert }, 'Revert')
+			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: 'remove_circle', click: revert }, 'Revert')
 		]),
 		Div({ class: 'flex lg:hidden mr-0' }, [
-			Tooltip({ content: 'Revert Migration', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circleMinus, click: revert }))
+			Tooltip({ content: 'Revert Migration', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: 'remove_circle', click: revert }))
 		]),
 		Div({ class: 'hidden lg:flex' }, [
-			Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: Icons.circlePlus, click: run }, 'Run')
+			Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: 'add_circle', click: run }, 'Run')
 		]),
 		Div({ class: 'flex lg:hidden mr-0' }, [
-			Tooltip({ content: 'Run Migration', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: run }))
+			Tooltip({ content: 'Run Migration', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: 'add_circle', click: run }))
 		])
 	])
 );

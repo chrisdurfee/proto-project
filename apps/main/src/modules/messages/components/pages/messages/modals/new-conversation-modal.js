@@ -1,7 +1,6 @@
 import { Div, Label } from "@base-framework/atoms";
 import { Data } from "@base-framework/base";
 import { Input } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Modal } from "@base-framework/ui/molecules";
 import { ConversationModel } from "../../../../models/conversation-model.js";
 
@@ -25,7 +24,7 @@ const add = (data, destroyCallback = null) =>
 				type: "destructive",
 				title: "Error",
 				description: response?.message || "An error occurred while starting the conversation.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -41,7 +40,7 @@ const add = (data, destroyCallback = null) =>
 		app.notify({
 			title: "Conversation Started",
 			description: "The conversation has been started successfully.",
-			icon: Icons.check
+			icon: 'check'
 		});
 	});
 };
@@ -108,7 +107,7 @@ export const NewConversationModal = (props = {}) =>
 				type: "destructive",
 				title: "Validation Error",
 				description: "Please enter a participant user ID.",
-				icon: Icons.warning
+				icon: 'warning'
 			});
 			return false;
 		}
@@ -124,7 +123,7 @@ export const NewConversationModal = (props = {}) =>
 	return new Modal({
 		data,
 		title: 'Start New Conversation',
-		icon: Icons.chatBubbleLeft,
+		icon: 'chat_bubble',
 		description: 'Create a new conversation with another user.',
 		size: 'md',
 		type: 'right',

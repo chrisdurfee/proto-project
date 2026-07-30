@@ -1,5 +1,4 @@
 import { Div, H1 } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu } from "@base-framework/ui/molecules";
 import { IsEditor } from "@components/atoms/gate-atoms.js";
 import { UserModal } from "../../users/modals/user-modal.js";
@@ -36,11 +35,11 @@ export const PageHeader = ({ context }) => (
 		Div({ class: 'flex flex-row gap-x-2' }, [
 			IsEditor(() =>
 				new DropdownMenu({
-					icon: Icons.ellipsis.vertical,
+					icon: 'more_vert',
 					variant: 'outline',
 					groups: [
 						[
-							{ icon: Icons.pencil.square, label: 'Edit', value: 'edit' }
+							{ icon: 'edit', label: 'Edit', value: 'edit' }
 						]
 					],
 					onSelect: (selected) =>

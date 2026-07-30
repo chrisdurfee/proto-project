@@ -1,8 +1,7 @@
 import { A, Div, H2, Header, P, Span } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
 import { List } from "@base-framework/organisms";
-import { Badge, Card, Icon } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+import { Badge, Card, UniversalIcon } from "@base-framework/ui/atoms";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { Format } from "@base-framework/ui/utils";
 import { ClientSummaryCard } from "./client-summary-card.js";
@@ -79,30 +78,30 @@ export const ClientSummaryCardsSection = Atom(({ client }) =>
 				ClientSummaryCard({
 					title: "Payment Amount",
 					value: Format.money("[[client.paymentAmount]]", "$", "0.00"),
-					icon: Icons.creditCard,
+					icon: 'credit_card',
 					url: `clients/${client.id}/payments`
 				}),
 				ClientSummaryCard({
 					title: "Package",
 					value: Format.default("[[client.package]]", "Basic"),
-					icon: Icons.cube,
+					icon: 'inventory_2',
 					url: `clients/${client.id}/orders`
 				}),
 				ClientSummaryCard({
 					title: "Next Due Date",
 					value: Format.date("[[client.nextDue]]", "N/A"),
-					icon: Icons.calendar.default,
+					icon: 'calendar_today',
 					url: `clients/${client.id}/payments`
 				}),
 				ClientSummaryCard({
 					title: "Secret Passphrase",
 					value: Format.default("[[client.passphrase]]", "N/A"),
-					icon: Icons.locked
+					icon: 'lock'
 				}),
 				ClientSummaryCard({
 					title: "Client Since",
 					value: Format.date("[[client.createdAt]]"),
-					icon: Icons.clock
+					icon: 'schedule'
 				})
 			])
 		]),
@@ -209,11 +208,11 @@ const TicketIcon = (priority) =>
 	switch (priority)
 	{
 		case "high":
-			return Icons.chevron.up;
+			return 'expand_less';
 		case "low":
-			return Icons.chevron.down;
+			return 'expand_more';
 		default:
-			return Icons.check;
+			return 'check';
 	}
 };
 
@@ -228,7 +227,7 @@ const TicketIcon = (priority) =>
 const TicketListItem = Atom(ticket =>
 	Card({ class: "flex items-center justify-between p-4 cursor-pointer", margin: "my-2", hover: true }, [
 		Div({ class: "flex items-center gap-x-4" }, [
-			Icon(TicketIcon(ticket.priority)),
+			UniversalIcon({ size: 'sm' }, TicketIcon(ticket.priority)),
 			Div({ class: "flex flex-col" }, [
 				P({ class: "font-medium" }, Format.default("[[subject]]", "No subject")),
 				P({ class: "text-sm text-muted-foreground" }, Format.default("[[owner]]", "Unassigned"))
@@ -277,7 +276,7 @@ const InvoiceListItem = (client) => (
 		A({ href: `clients/${client.id}/invoices/${invoice.id}` }, [
 			Card({ class: "flex items-center justify-between cursor-pointer p-4", margin: "my-2", hover: true }, [
 				Div({ class: "flex items-center gap-x-4" }, [
-					Icon(Icons.document.default),
+					UniversalIcon({ size: 'sm' }, 'description'),
 					Div({ class: "flex flex-col" }, [
 						P({ class: "font-medium" }, Format.default("[[number]]", "N/A")),
 						P({ class: "text-sm text-muted-foreground" }, Format.date("[[date]]", "No date"))

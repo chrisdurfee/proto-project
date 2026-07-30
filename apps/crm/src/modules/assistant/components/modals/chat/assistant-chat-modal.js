@@ -1,4 +1,3 @@
-import { Icons } from '@base-framework/ui/icons';
 import { Modal } from '@base-framework/ui/molecules';
 import { AssistantConversationModel } from '../../../models/assistant-conversation-model.js';
 import { AssistantChatContent } from './assistant-chat-content.js';
@@ -20,7 +19,7 @@ export const AssistantChatModal = (props = {}) =>
 	return new Modal({
 		data,
 		title: 'AI Assistant',
-		icon: Icons.ai,
+		icon: 'auto_awesome',
 		size: 'full',
 		type: 'right',
 		hideFooter: true,

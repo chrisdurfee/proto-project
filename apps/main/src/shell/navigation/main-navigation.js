@@ -1,6 +1,5 @@
 import { Div } from "@base-framework/atoms";
 import { Atom, Component, Jot } from "@base-framework/base";
-import { Icons } from "@base-framework/ui/icons";
 import { InlineNavigation } from "@base-framework/ui/organisms";
 import { Configs } from "../../configs.js";
 import { NavigationAvatar } from "./avatars/navigation-avatar.js";
@@ -56,7 +55,7 @@ const LowerNavigation = () => (
 				{
 					href: 'settings',
 					label: 'Settings',
-					icon: Icons.cog.eight
+					icon: 'settings'
 				}
 			]
 		})

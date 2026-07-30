@@ -1,7 +1,6 @@
 import { Div, Form, OnState, Span } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { Button, Icon, Input, LoadingButton } from '@base-framework/ui/atoms';
-import { Icons } from "@base-framework/ui/icons";
+import { Button, Input, LoadingButton, UniversalIcon } from '@base-framework/ui/atoms';
 import { AuthModel } from '@shell/models/auth-model.js';
 import { GoogleModel } from '@shell/models/google-model';
 import { CardHeader, FormWrapper } from './form-atoms.js';
@@ -76,7 +75,7 @@ const SignUpWithGoogleButton = Atom(() =>
 							type: "destructive",
 							title: "Error",
 							description: response?.message || "Failed to sign up with Google.",
-							icon: Icons.warning
+							icon: 'warning'
 						});
 						return;
 					}
@@ -85,7 +84,7 @@ const SignUpWithGoogleButton = Atom(() =>
 				});
 			}
 		}, [
-			Icon(Icons.companies.google || ''),
+			UniversalIcon({ size: 'sm' }, 'g_mobiledata'),
 			Span("Google")
 		])
 	)
@@ -114,7 +113,7 @@ const signUp = (parent) =>
 				type: "destructive",
 				title: "Error",
 				description: response?.message || "Failed to sign up.",
-				icon: Icons.warning
+				icon: 'warning'
 			});
 			return;
 		}

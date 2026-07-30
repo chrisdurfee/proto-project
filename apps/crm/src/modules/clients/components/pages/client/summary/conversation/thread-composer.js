@@ -1,6 +1,5 @@
 import { Div, Input } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
-import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
 import { ConversationModel } from "../../../../models/conversation-model.js";
 import { ThreadTextarea } from "./thread-textarea.js";
@@ -88,7 +87,7 @@ export const ThreadComposer = Jot(
 					type: "destructive",
 					title: "Error",
 					description: response?.message || "Failed to send message.",
-					icon: Icons.warning
+					icon: 'warning'
 				});
 				return;
 			}

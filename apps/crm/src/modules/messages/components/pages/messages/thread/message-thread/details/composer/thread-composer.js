@@ -1,7 +1,6 @@
 import { Div, Input, UseParent } from "@base-framework/atoms";
 import { Veil, VeilJot } from "@base-framework/ui";
 import { Button } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
 import { MessageModel } from "@modules/messages/models/message-model.js";
 import { AttachmentPreview } from "./attachment/attachment-preview.js";
@@ -27,7 +26,7 @@ const SendButton = () => (
 			Button({
 				type: "submit",
 				variant: "icon",
-				icon: Icons.airplane,
+				icon: 'send',
 				class: "text-foreground hover:text-accent",
 				// @ts-ignore
 				onSet: [parent.textareaComponent.state, 'empty', (empty, el) => el.disabled = empty]
@@ -176,7 +175,7 @@ export const ThreadComposer = VeilJot(
 					Div({ class: 'flex flex-col sticky top-0' }, [
 						Button({
 							variant: "icon",
-							icon: Icons.paperclip,
+							icon: 'attach_file',
 							class: "text-foreground hover:text-accent sticky top-0",
 							// @ts-ignore
 							click: () => this.openFilePicker()

@@ -1,7 +1,6 @@
 import { Div, Form, OnState } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
 import { Button, HiddenInput, Input, LoadingButton } from '@base-framework/ui/atoms';
-import { Icons } from "@base-framework/ui/icons";
 import { AuthModel } from '@shell/models/auth-model.js';
 import { STEPS } from '../steps.js';
 import { CardHeader, FormWrapper } from './form-atoms.js';
@@ -70,7 +69,7 @@ const setPassword = (parent) =>
 				type: "destructive",
 				title: "Error",
 				description: response?.message || "Failed to set password.",
-				icon: Icons.warning
+				icon: 'warning'
 			});
 			return;
 		}

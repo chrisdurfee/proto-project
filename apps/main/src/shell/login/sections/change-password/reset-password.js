@@ -1,5 +1,4 @@
 import { Strings } from '@base-framework/base';
-import { Icons } from '@base-framework/ui/icons';
 import { AuthModel } from '../../../models/auth-model.js';
 
 /**
@@ -49,7 +48,7 @@ export const resetPassword = (parent) =>
 			app.notify({
 				title: 'Error',
 				description: response?.message || 'There was an error resetting your password.',
-				icon: Icons.circleX,
+				icon: 'cancel',
 				type: 'destructive'
 			});
 			return;
@@ -60,7 +59,7 @@ export const resetPassword = (parent) =>
 			app.notify({
 				title: 'All Done!',
 				description: 'You have successfully changed your password.',
-				icon: Icons.circleCheck,
+				icon: 'check_circle',
 				type: 'success'
 			});
 
@@ -72,7 +71,7 @@ export const resetPassword = (parent) =>
 		app.notify({
 			title: 'Error',
 			description: response?.message || 'There was an error resetting your password.',
-			icon: Icons.circleX,
+			icon: 'cancel',
 			type: 'destructive'
 		});
 	});

@@ -2,7 +2,6 @@ import { Div, OnState, Span } from "@base-framework/atoms";
 import { Jot } from "@base-framework/base";
 import { Toggle } from "@base-framework/ui";
 import { Skeleton } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { FormField } from "@base-framework/ui/molecules";
 import { PermissionModel } from "../../permissions/models/permission-model.js";
 import { RolePermissionModel } from "../models/role-permission-model.js";
@@ -30,7 +29,7 @@ const request = (checked, roleId, permissionId) =>
 				type: "destructive",
 				title: "Error",
 				description: `An error occurred while ${method === 'add' ? 'adding' : 'removing'} the permission.`,
-				icon: Icons.shield
+				icon: 'shield'
 			});
 		}
 	});

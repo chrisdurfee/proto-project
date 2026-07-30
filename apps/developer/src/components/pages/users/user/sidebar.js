@@ -1,5 +1,4 @@
 import { Div, H1, Header } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { BackButton } from "@base-framework/ui/organisms";
 import { SidebarMenu } from "./sidebar-menu.js";
 import { UserAvatar } from "./user-avatar.js";
@@ -36,10 +35,10 @@ export const Sidebar = ({ userId }) => (
 	SidebarMenu({
 		topNav: Toolbar(),
 		options: [
-			{ label: 'Profile', href: `users/${userId}`, icon: Icons.identification, exact: true },
-			{ label: 'Login Times', href: `users/${userId}/login-times`, icon: Icons.calendar.default },
-			{ label: 'Authorized Devices', href: `users/${userId}/authed-devices`, icon: Icons.device.mobile },
-			{ label: 'Connections', href: `users/${userId}/connections`, icon: Icons.user.group }
+			{ label: 'Profile', href: `users/${userId}`, icon: 'badge', exact: true },
+			{ label: 'Login Times', href: `users/${userId}/login-times`, icon: 'calendar_today' },
+			{ label: 'Authorized Devices', href: `users/${userId}/authed-devices`, icon: 'smartphone' },
+			{ label: 'Connections', href: `users/${userId}/connections`, icon: 'group' }
 		]
 	})
 );

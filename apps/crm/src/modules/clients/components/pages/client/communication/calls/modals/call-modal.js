@@ -1,5 +1,4 @@
 import { Div, UseParent } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu, Modal } from "@base-framework/ui/molecules";
 import { ClientCallModel } from "../../../../../models/client-call-model.js";
 import { CallForm } from "./call-form.js";
@@ -21,7 +20,7 @@ const add = (data, destroyCallback = null) =>
 				type: "destructive",
 				title: "Error",
 				description: "An error occurred while adding the call.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -35,7 +34,7 @@ const add = (data, destroyCallback = null) =>
 			type: "success",
 			title: "Call Added",
 			description: "The call has been added.",
-			icon: Icons.check
+			icon: 'check'
 		});
 	});
 };
@@ -57,7 +56,7 @@ const update = (data, destroyCallback = null) =>
 				type: "destructive",
 				title: "Error",
 				description: "An error occurred while updating the call.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -71,7 +70,7 @@ const update = (data, destroyCallback = null) =>
 			type: "success",
 			title: "Call Updated",
 			description: "The call has been updated.",
-			icon: Icons.check
+			icon: 'check'
 		});
 	});
 };
@@ -89,10 +88,10 @@ const HeaderOptions = (data, closeCallback, onSubmit) =>
 	return () => [
 		UseParent((parent) => (
 			new DropdownMenu({
-				icon: Icons.ellipsis.vertical,
+				icon: 'more_vert',
 				groups: [
 					[
-						{ icon: Icons.trash, label: 'Delete Call', value: 'delete-call' }
+						{ icon: 'delete', label: 'Delete Call', value: 'delete-call' }
 					]
 				],
 				onSelect: (selected) =>
@@ -108,7 +107,7 @@ const HeaderOptions = (data, closeCallback, onSubmit) =>
 									type: "destructive",
 									title: "Error",
 									description: "An error occurred while deleting the call.",
-									icon: Icons.shield
+									icon: 'shield'
 								});
 								return;
 							}
@@ -119,7 +118,7 @@ const HeaderOptions = (data, closeCallback, onSubmit) =>
 								type: "success",
 								title: "Call Deleted",
 								description: "The call has been deleted.",
-								icon: Icons.check
+								icon: 'check'
 							});
 
 							if (closeCallback)
@@ -164,7 +163,7 @@ export const CallModal = (props = { item: {}, clientId: '', onClose: undefined, 
 	return new Modal({
 		data,
 		title: isEditing ? 'Edit Call' : 'Add Call',
-		icon: isEditing ? Icons.pencil.square : Icons.phone.plus,
+		icon: isEditing ? 'edit' : 'add_call',
 		description: isEditing ? 'Update call details.' : 'Create a new call record for this client.',
 		size: 'md',
 		type: 'right',

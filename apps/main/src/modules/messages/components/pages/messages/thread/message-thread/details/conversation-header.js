@@ -1,6 +1,5 @@
 import { A, Div, Span } from "@base-framework/atoms";
-import { Button, Icon, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+import { Button, Tooltip, UniversalIcon } from "@base-framework/ui/atoms";
 import { Avatar, StatusIndicator } from "@base-framework/ui/molecules";
 import { BackButton } from "@base-framework/ui/organisms";
 
@@ -53,23 +52,23 @@ export const ConversationHeader = () =>
 						class: "bttn icon",
 						href: '/messages/video/[[conversation.id]]',
 					}, [
-						Icon(Icons.videoCamera.default)
+						UniversalIcon({ size: 'sm' }, 'videocam')
 					])
 				]),
 				// Tooltip({ content: 'Email', position: 'bottom' }, [
-				// 	Button({ variant: 'icon', icon: Icons.envelope.default, label: 'Email', disabled: '[[user.email]]', click: (e, { data }) =>
+				// 	Button({ variant: 'icon', icon: 'mail', label: 'Email', disabled: '[[user.email]]', click: (e, { data }) =>
 				// 	{
 				// 		window.location.href = `mailto:${data?.otherUser?.email}`;
 				// 	}})
 				// ]),
 				Tooltip({ content: 'Call', position: 'bottom' }, [
-					Button({ variant: 'icon', icon: Icons.phone.default, label: 'Call', disabled: '[[user.mobile]]', click: (e, { data }) =>
+					Button({ variant: 'icon', icon: 'phone', label: 'Call', disabled: '[[user.mobile]]', click: (e, { data }) =>
 					{
 						window.location.href = `tel:${data?.otherUser?.mobile}`;
 					}})
 				]),
 				Tooltip({ content: 'More', position: 'bottom' }, [
-					Button({ variant: 'icon', icon: Icons.ellipsis.vertical, label: 'More' })
+					Button({ variant: 'icon', icon: 'more_vert', label: 'More' })
 				])
 			])
 		])

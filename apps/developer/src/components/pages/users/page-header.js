@@ -1,6 +1,5 @@
 import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Combobox } from "@base-framework/ui/molecules";
 import { SearchInput } from "@base-framework/ui/organisms";
 import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
@@ -80,21 +79,21 @@ export const PageHeader = () => (
 				placeholder: 'Search users...',
 				bind: 'search',
 				keyup: (e, parent) => parent.list.refresh(),
-				icon: Icons.magnifyingGlass.default
+				icon: 'search'
 			})
 		]),
 		Div({ class: 'hidden lg:flex' }, [
-			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.refresh, click: refresh }, 'Refresh')
+			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: 'refresh', click: refresh }, 'Refresh')
 		]),
 		Div({ class: 'flex lg:hidden mr-0' }, [
-			Tooltip({ content: 'Refresh', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.refresh, click: refresh }))
+			Tooltip({ content: 'Refresh', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: 'refresh', click: refresh }))
 		]),
 		Dropdown(),
 		Div({ class: 'hidden lg:flex' }, [
-			Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add User')
+			Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: 'add_circle', click: (e, parent) => Modal(null, parent) }, 'Add User')
 		]),
 		Div({ class: 'flex lg:hidden mr-0' }, [
-			Tooltip({ content: 'Add User', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }))
+			Tooltip({ content: 'Add User', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: 'add_circle', click: (e, parent) => Modal(null, parent) }))
 		])
 	])
 );

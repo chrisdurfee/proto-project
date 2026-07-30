@@ -1,5 +1,4 @@
 import { Div, UseParent } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu, Modal } from "@base-framework/ui/molecules";
 import { IsManager } from "@components/atoms/gate-atoms.js";
 import { ClientNoteModel } from "../../../../../models/client-note-model.js";
@@ -22,7 +21,7 @@ const add = (data, destroyCallback = null) =>
 				type: "destructive",
 				title: "Error",
 				description: "An error occurred while adding the note.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -36,7 +35,7 @@ const add = (data, destroyCallback = null) =>
 			type: "success",
 			title: "Note Added",
 			description: "The note has been added.",
-			icon: Icons.check
+			icon: 'check'
 		});
 	});
 };
@@ -58,7 +57,7 @@ const update = (data, destroyCallback = null) =>
 				type: "destructive",
 				title: "Error",
 				description: "An error occurred while updating the note.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -72,7 +71,7 @@ const update = (data, destroyCallback = null) =>
 			type: "success",
 			title: "Note Updated",
 			description: "The note has been updated.",
-			icon: Icons.check
+			icon: 'check'
 		});
 	});
 };
@@ -91,10 +90,10 @@ const HeaderOptions = (data, closeCallback, onSubmit) =>
 		IsManager(() =>
 			UseParent((parent) => (
 				new DropdownMenu({
-					icon: Icons.ellipsis.vertical,
+					icon: 'more_vert',
 					groups: [
 						[
-							{ icon: Icons.trash, label: 'Delete Note', value: 'delete-note' }
+							{ icon: 'delete', label: 'Delete Note', value: 'delete-note' }
 						]
 					],
 					onSelect: (selected) =>
@@ -110,7 +109,7 @@ const HeaderOptions = (data, closeCallback, onSubmit) =>
 										type: "destructive",
 										title: "Error",
 										description: "An error occurred while deleting the note.",
-										icon: Icons.shield
+										icon: 'shield'
 									});
 									return;
 								}
@@ -121,7 +120,7 @@ const HeaderOptions = (data, closeCallback, onSubmit) =>
 									type: "success",
 									title: "Note Deleted",
 									description: "The note has been deleted.",
-									icon: Icons.check
+									icon: 'check'
 								});
 
 								if (closeCallback)
@@ -167,7 +166,7 @@ export const NoteModal = (props = { item: {}, clientId: '', onClose: undefined, 
 	return new Modal({
 		data,
 		title: isEditing ? 'Edit Note' : 'Add Note',
-		icon: isEditing ? Icons.pencil.square : Icons.document.add,
+		icon: isEditing ? 'edit' : 'note_add',
 		description: isEditing ? 'Update note details.' : 'Create a new note for this client.',
 		size: 'md',
 		type: 'right',

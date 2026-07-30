@@ -1,6 +1,5 @@
 import { Div, H1 } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { UserModal } from "../../modals/user-modal.js";
 
 /**
@@ -37,7 +36,7 @@ export const PageHeader = ({ context }) => (
 				Button({
 					variant: 'withIcon',
 					class: 'text-muted-foreground outline',
-					icon: Icons.pencil.square,
+					icon: 'edit',
 					click: () => Modal(context)
 				}, 'Edit'),
 			]),
@@ -46,7 +45,7 @@ export const PageHeader = ({ context }) => (
 					Button({
 						variant: 'icon',
 						class: 'outline',
-						icon: Icons.pencil.square,
+						icon: 'edit',
 						click: () => Modal(context)
 					})
 				])

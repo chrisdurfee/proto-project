@@ -1,6 +1,5 @@
 import { Div, OnState } from "@base-framework/atoms";
 import { Jot } from "@base-framework/base";
-import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
 import { ThreadComposer } from "./composer/thread-composer.js";
@@ -137,7 +136,7 @@ export const ThreadDetail = Jot(
 						EmptyState({
 							title: 'No Conversation Found',
 							description: 'The conversation does not exist. Please try another.',
-							icon: Icons.circleX
+							icon: 'cancel'
 						})
 					]);
 				}

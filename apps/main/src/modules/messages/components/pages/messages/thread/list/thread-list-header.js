@@ -1,6 +1,5 @@
 import { Div, H2, Header } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { ButtonTab } from "@base-framework/ui/organisms";
 
 /**
@@ -14,7 +13,7 @@ const AddMessageButton = () => (
             Button({
                 variant: 'icon',
                 class: 'outline',
-                icon: Icons.circlePlus,
+                icon: 'add_circle',
                 click: () => {
                     // Navigate to new conversation form
                     app.navigate('messages/new');

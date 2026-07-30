@@ -1,6 +1,5 @@
 import { Td, Thead, Tr } from "@base-framework/atoms";
 import { Button, Checkbox } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 import { OrganizationModal } from "../modals/organization-modal.js";
@@ -84,9 +83,9 @@ export const OrganizationTable = (data) => (
 		emptyState: () => EmptyState({
 			title: 'No Organizations Found',
 			description: 'No organizations have been found.',
-			icon: Icons.office.double
+			icon: 'domain'
 		}, [
-			Button({ variant: 'withIcon', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add Organization')
+			Button({ variant: 'withIcon', icon: 'add_circle', click: (e, parent) => Modal(null, parent) }, 'Add Organization')
 		])
 	})
 );

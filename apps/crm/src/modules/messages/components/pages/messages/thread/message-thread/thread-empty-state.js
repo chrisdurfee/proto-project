@@ -1,6 +1,6 @@
 import { EmptyState } from "@base-framework/ui";
 import { Button } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+
 
 /**
  * ThreadEmptyState
@@ -13,7 +13,7 @@ export const ThreadEmptyState = () =>
 	EmptyState({
 		title: 'No Thread Selected',
 		description: 'Select a message from the list to view the conversation.',
-		icon: Icons.airplane,
+		icon: 'send',
 	}, [
 		Button({
 			variant: 'outline',

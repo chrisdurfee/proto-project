@@ -1,7 +1,6 @@
 import { Form, OnState } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
 import { Button, Fieldset, Input, LoadingButton } from "@base-framework/ui/atoms";
-import { Icons } from '@base-framework/ui/icons';
 import { DatePicker, FormField } from '@base-framework/ui/molecules';
 import { AuthModel } from '../../models/auth-model.js';
 import { STEPS } from '../steps.js';
@@ -50,7 +49,7 @@ const submit = (e, parent) =>
 			notify(
 				'Error!',
 				response.message ?? 'Registration failed.',
-				Icons.warning,
+				'warning',
 				'destructive'
 			);
 			return;

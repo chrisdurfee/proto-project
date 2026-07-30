@@ -1,5 +1,4 @@
 import { Div } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Modal } from "@base-framework/ui/molecules";
 import { UserModel } from "../models/user-model.js";
 import { PasswordForm } from "./password-form.js";
@@ -21,7 +20,7 @@ const update = (data) =>
 				type: "destructive",
 				title: "Error",
 				description: "An error occurred while updating the credentials.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -32,7 +31,7 @@ const update = (data) =>
 				type: "destructive",
 				title: "Username Taken",
 				description: "The username is already taken. Please choose a different one.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -43,7 +42,7 @@ const update = (data) =>
 				type: "destructive",
 				title: "Username Failed",
 				description: "The username update failed. Please try again.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -54,7 +53,7 @@ const update = (data) =>
 				type: "destructive",
 				title: "Password Failed",
 				description: "The password update failed. Please try again.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -63,7 +62,7 @@ const update = (data) =>
 			type: "success",
 			title: "Credentials Updated",
 			description: "The credentials have been updated.",
-			icon: Icons.check
+			icon: 'check'
 		});
 	});
 };
@@ -84,7 +83,7 @@ export const ChangePasswordModal = (props = {}) =>
 	return new Modal({
 		data,
 		title: 'Change Password',
-		icon: Icons.locked,
+		icon: 'lock',
 		description: 'Update your password.',
 		size: 'md',
 		type: 'right',
@@ -111,7 +110,7 @@ export const ChangePasswordModal = (props = {}) =>
 					type: "warning",
 					title: "Error",
 					description: "Please enter a username or new password.",
-					icon: Icons.shield
+					icon: 'shield'
 				});
 				return false;
 			}

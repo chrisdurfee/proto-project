@@ -2,7 +2,6 @@ import { Div, H2, Header } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Button, Card } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
 import { UserModel } from "../../../../../../models/user-model.js";
@@ -61,7 +60,7 @@ const SearchInput = (data) => (
 		bind: 'search',
 		autofocus: true,
 		keyup: (e, parent) => parent.list?.refresh(),
-		icon: Icons.magnifyingGlass.default
+		icon: 'search'
 	})
 );
 
@@ -93,7 +92,7 @@ const handleUserClick = (user, parent) =>
 			type: 'error',
 			title: 'Error',
 			description: result?.message ?? 'Failed to start conversation. Please try again.',
-			icon: Icons.circleX
+			icon: 'cancel'
 		});
 	});
 };
@@ -137,7 +136,7 @@ export const NewConversationForm = Jot(
 					H2({ class: "text-xl font-semibold" }, "Start New Conversation"),
 					Button({
 						variant: 'ghost',
-						icon: Icons.x,
+						icon: 'close',
 						click: () => app.navigate('messages')
 					})
 				]),
@@ -160,7 +159,7 @@ export const NewConversationForm = Jot(
 							return EmptyState({
 								title: 'No Users Found',
 								description: searchValue ? 'Try adjusting your search terms.' : 'Start typing to search users.',
-								icon: Icons.magnifyingGlass.default
+								icon: 'search'
 							});
 						}
 					})

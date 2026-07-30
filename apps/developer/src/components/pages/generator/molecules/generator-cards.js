@@ -1,5 +1,4 @@
 import { Div } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { ResourceCard } from "../atoms/resource-card.js";
 import { GeneratorModal } from "../modals/generator-modal.js";
 
@@ -19,7 +18,7 @@ export const GeneratorCards = () =>
 				resourceType: 'Full Resource'
 			}),
 			description: 'Create a full resource with all the necessary files.',
-			icon: Icons.document.duplicate
+			icon: 'content_copy'
 		}),
 		ResourceCard({
 			title: 'Module',
@@ -27,7 +26,7 @@ export const GeneratorCards = () =>
 				resourceType: 'Module'
 			}),
 			description: 'Create a new module directory.',
-			icon: Icons.document.duplicate
+			icon: 'content_copy'
 		}),
 		ResourceCard({
 			title: 'Gateway',
@@ -35,7 +34,7 @@ export const GeneratorCards = () =>
 				resourceType: 'Gateway'
 			}),
 			description: 'Create a module gateway.',
-			icon: Icons.document.duplicate
+			icon: 'content_copy'
 		}),
 		ResourceCard({
 			title: 'API',
@@ -43,7 +42,7 @@ export const GeneratorCards = () =>
 				resourceType: 'API'
 			}),
 			description: 'Create an API.',
-			icon: Icons.document.duplicate
+			icon: 'content_copy'
 		}),
 		ResourceCard({
 			title: 'Controller',
@@ -51,7 +50,7 @@ export const GeneratorCards = () =>
 				resourceType: 'Controller'
 			}),
 			description: 'Create a controller.',
-			icon: Icons.document.duplicate
+			icon: 'content_copy'
 		}),
 		ResourceCard({
 			title: 'Model',
@@ -59,7 +58,7 @@ export const GeneratorCards = () =>
 				resourceType: 'Model'
 			}),
 			description: 'Create a model.',
-			icon: Icons.document.duplicate
+			icon: 'content_copy'
 		}),
 		ResourceCard({
 			title: 'Storage',
@@ -67,7 +66,7 @@ export const GeneratorCards = () =>
 				resourceType: 'Storage'
 			}),
 			description: 'Create a storage.',
-			icon: Icons.document.duplicate
+			icon: 'content_copy'
 		}),
 		ResourceCard({
 			title: 'Policy',
@@ -75,7 +74,7 @@ export const GeneratorCards = () =>
 				resourceType: 'Policy'
 			}),
 			description: 'Create a policy.',
-			icon: Icons.document.duplicate
+			icon: 'content_copy'
 		}),
 		ResourceCard({
 			title: 'Table',
@@ -83,7 +82,7 @@ export const GeneratorCards = () =>
 				resourceType: 'Table'
 			}),
 			description: 'Create a database table.',
-			icon: Icons.document.duplicate
+			icon: 'content_copy'
 		}),
 		ResourceCard({
 			title: 'Migration',
@@ -91,7 +90,7 @@ export const GeneratorCards = () =>
 				resourceType: 'Migration'
 			}),
 			description: 'Create a new migration.',
-			icon: Icons.document.duplicate
+			icon: 'content_copy'
 		}),
 		ResourceCard({
 			title: 'Unit Test',
@@ -99,7 +98,7 @@ export const GeneratorCards = () =>
 				resourceType: 'Unit Test'
 			}),
 			description: 'Create a test.',
-			icon: Icons.document.duplicate
+			icon: 'content_copy'
 		})
 	])
 );

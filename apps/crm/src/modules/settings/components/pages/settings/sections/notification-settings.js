@@ -1,6 +1,5 @@
 import { Div, H4, P } from "@base-framework/atoms";
 import { Button } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { FormCard, FormCardContent, FormCardGroup, FormField, Toggle } from "@base-framework/ui/molecules";
 import { Page } from "@base-framework/ui/pages";
 import { SettingsSection } from "../atoms/settings-section.js";
@@ -36,7 +35,7 @@ export const NotificationSettings = () => (
 							type: "destructive",
 							title: "Error",
 							description: "An error occurred while updating the notification settings.",
-							icon: Icons.shield
+							icon: 'shield'
 						});
 						return;
 					}
@@ -45,7 +44,7 @@ export const NotificationSettings = () => (
 						type: "success",
 						title: "Notification Settings Updated",
 						description: "The notification settings have been updated.",
-						icon: Icons.check
+						icon: 'check'
 					});
 				});
             }

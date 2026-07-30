@@ -1,6 +1,5 @@
 import { Td, Thead, Tr } from "@base-framework/atoms";
 import { Button, Checkbox } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 import { RoleModal } from "../modals/role-modal.js";
@@ -90,9 +89,9 @@ export const RoleTable = (data) => (
 		emptyState: () => EmptyState({
 			title: 'Missing Some Roles',
 			description: 'No roles have been found.',
-			icon: Icons.user.minus
+			icon: 'person_remove'
 		}, [
-			Button({ variant: 'withIcon', icon: Icons.user.plus, click: (e, parent) => Modal(null, parent) }, 'Add Role')
+			Button({ variant: 'withIcon', icon: 'person_add', click: (e, parent) => Modal(null, parent) }, 'Add Role')
 		])
 	})
 );

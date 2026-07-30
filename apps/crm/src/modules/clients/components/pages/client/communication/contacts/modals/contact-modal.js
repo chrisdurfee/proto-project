@@ -1,5 +1,4 @@
 import { Div, UseParent } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu, Modal } from "@base-framework/ui/molecules";
 import { ClientContactModel } from "../../../../../models/client-contact-model.js";
 import { ContactForm } from "./contact-form.js";
@@ -21,7 +20,7 @@ const add = (data, destroyCallback = null) =>
 				type: "destructive",
 				title: "Error",
 				description: "An error occurred while adding the contact.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -35,7 +34,7 @@ const add = (data, destroyCallback = null) =>
 			type: "success",
 			title: "Contact Added",
 			description: "The contact has been added.",
-			icon: Icons.check
+			icon: 'check'
 		});
 	});
 };
@@ -57,7 +56,7 @@ const update = (data, destroyCallback = null) =>
 				type: "destructive",
 				title: "Error",
 				description: "An error occurred while updating the contact.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -71,7 +70,7 @@ const update = (data, destroyCallback = null) =>
 			type: "success",
 			title: "Contact Updated",
 			description: "The contact has been updated.",
-			icon: Icons.check
+			icon: 'check'
 		});
 	});
 };
@@ -89,10 +88,10 @@ const HeaderOptions = (data, closeCallback, onSubmit) =>
 	return () => [
 		UseParent((parent) => (
 			new DropdownMenu({
-				icon: Icons.ellipsis.vertical,
+				icon: 'more_vert',
 				groups: [
 					[
-						{ icon: Icons.trash, label: 'Delete Contact', value: 'delete-contact' }
+						{ icon: 'delete', label: 'Delete Contact', value: 'delete-contact' }
 					]
 				],
 				onSelect: (selected) =>
@@ -108,7 +107,7 @@ const HeaderOptions = (data, closeCallback, onSubmit) =>
 									type: "destructive",
 									title: "Error",
 									description: "An error occurred while deleting the contact.",
-									icon: Icons.shield
+									icon: 'shield'
 								});
 								return;
 							}
@@ -119,7 +118,7 @@ const HeaderOptions = (data, closeCallback, onSubmit) =>
 								type: "success",
 								title: "Contact Deleted",
 								description: "The contact has been deleted.",
-								icon: Icons.check
+								icon: 'check'
 							});
 
 							if (closeCallback)
@@ -164,7 +163,7 @@ export const ContactModal = (props = { item: {}, clientId: '', onClose: undefine
 	return new Modal({
 		data,
 		title: isEditing ? 'Edit Contact' : 'Add Contact',
-		icon: isEditing ? Icons.pencil.square : Icons.user.plus,
+		icon: isEditing ? 'edit' : 'person_add',
 		description: isEditing ? 'Update contact details.' : 'Create a new contact for this client.',
 		size: 'md',
 		type: 'right',
@@ -187,7 +186,7 @@ export const ContactModal = (props = { item: {}, clientId: '', onClose: undefine
 						type: "destructive",
 						title: "Password Mismatch",
 						description: "Password and confirm password do not match.",
-						icon: Icons.shield
+						icon: 'shield'
 					});
 					return false;
 				}

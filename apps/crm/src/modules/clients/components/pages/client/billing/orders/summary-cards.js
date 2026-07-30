@@ -1,5 +1,4 @@
 import { Div } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { SummaryCard } from "./summary-card.js";
 
 /**
@@ -88,25 +87,25 @@ export const SummaryCards = ({ orders }) =>
 				title: 'Total Orders',
 				value: stats.orderCounts.total.toString(),
 				change: `Latest: ${stats.latestOrderDate}`,
-				icon: Icons.shoppingBag
+				icon: 'shopping_bag'
 			}),
 			SummaryCard({
 				title: 'Completed Orders',
 				value: stats.completedAmount,
 				change: `${stats.orderCounts.completed} orders`,
-				icon: Icons.check
+				icon: 'check'
 			}),
 			SummaryCard({
 				title: 'In Progress',
 				value: stats.inProgressAmount,
 				change: `${stats.orderCounts.inProgress} orders`,
-				icon: Icons.loader
+				icon: 'progress_activity'
 			}),
 			SummaryCard({
 				title: 'Pending Orders',
 				value: stats.pendingAmount,
 				change: `${stats.orderCounts.pending} orders`,
-				icon: Icons.clock
+				icon: 'schedule'
 			}),
 		])
 	]);

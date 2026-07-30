@@ -1,6 +1,5 @@
 import { A, Div, P, Span, Td, Thead, Tr } from "@base-framework/atoms";
 import { Checkbox } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState, StaticStatusIndicator } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 
@@ -95,6 +94,6 @@ export const BlockedTable = (data) =>
 		emptyState: () => EmptyState({
 			title: 'No Blocked Users',
 			description: 'No users are currently blocked.',
-			icon: Icons.user.minus
+			icon: 'person_remove'
 		})
 	});

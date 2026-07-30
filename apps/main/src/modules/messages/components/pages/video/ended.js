@@ -1,6 +1,6 @@
 import { Button, Div, Span } from "@base-framework/atoms";
-import { Icon } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+import { UniversalIcon } from "@base-framework/ui/atoms";
+
 
 /**
  * This will create the ended view.
@@ -31,7 +31,7 @@ export const Ended = ({ onRedial, onExit }) => (
 	}, [
 		// Status icon
 		Div({ class: 'w-24 h-24 rounded-full bg-muted flex items-center justify-center' }, [
-			//Icon({ size: 'lg', class: 'text-muted-foreground' }, Icons.phone.missed)
+			//UniversalIcon({ size: 'lg', class: 'text-muted-foreground' }, 'call_missed')
 		]),
 
 		// Status text
@@ -46,13 +46,13 @@ export const Ended = ({ onRedial, onExit }) => (
 				class: 'w-12 h-12 rounded-full bg-primary hover:bg-primary text-primary-foreground flex items-center justify-center mt-8',
 				click: onRedial
 			}, [
-				Icon({ size: 'sm' }, Icons.phone.outbound)
+				UniversalIcon({ size: 'sm' }, 'call_made')
 			]),
 			Button({
 				class: 'w-12 h-12 rounded-full bg-muted hover:bg-muted text-muted-foreground flex items-center justify-center mt-8',
 				click: onExit
 			}, [
-				Icon({ size: 'sm' }, Icons.x)
+				UniversalIcon({ size: 'sm' }, 'close')
 			])
 		])
 	])

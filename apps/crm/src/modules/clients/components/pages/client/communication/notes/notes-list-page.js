@@ -1,7 +1,6 @@
 import { Div, H2, Img, P, Span } from "@base-framework/atoms";
 import { List } from "@base-framework/organisms";
 import { Button } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Avatar } from "@base-framework/ui/molecules";
 import { NOTES } from "./notes.js";
 
@@ -19,7 +18,7 @@ const Header = () =>
                 variant: "withIcon",
 				class: "primary",
 				onClick: () => console.log("New note clicked"),
-                icon: Icons.circlePlus
+                icon: 'add_circle'
 			}, "New note")
 		])
 	])

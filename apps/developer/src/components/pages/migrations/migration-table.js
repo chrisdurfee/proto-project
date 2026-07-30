@@ -1,6 +1,5 @@
 import { Td, Thead, Tr } from "@base-framework/atoms";
 import { Checkbox } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 import { MigrationModel } from "./models/migration-model";
@@ -63,7 +62,7 @@ export const MigrationTable = () => (
 		emptyState: () => EmptyState({
 			title: 'No Migrations Found',
 			description: 'No migrations have been found. Maybe create a new migration.',
-			icon: Icons.stack
+			icon: 'layers'
 		})
 	})
 );

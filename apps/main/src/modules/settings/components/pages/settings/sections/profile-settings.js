@@ -1,7 +1,6 @@
 import { Div } from "@base-framework/atoms";
 import { DatePicker, ImageUploader, TelInput } from "@base-framework/ui";
 import { Button, Input, NumberInput, Select, Textarea } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import {
 	FormCard,
 	FormCardGroup,
@@ -41,7 +40,7 @@ export const ProfileSettings = () => (
 							type: "destructive",
 							title: "Error",
 							description: "An error occurred while updating the profile.",
-							icon: Icons.shield
+							icon: 'shield'
 						});
 						return;
 					}
@@ -50,7 +49,7 @@ export const ProfileSettings = () => (
 						type: "success",
 						title: "Profile Updated",
 						description: "The profile has been updated.",
-						icon: Icons.check
+						icon: 'check'
 					});
 				});
 			}
@@ -89,7 +88,7 @@ export const ProfileSettings = () => (
 											type: "destructive",
 											title: "Upload Error",
 											description: "There was an error uploading your profile image.",
-											icon: Icons.shield
+											icon: 'shield'
 										});
 										return;
 									}

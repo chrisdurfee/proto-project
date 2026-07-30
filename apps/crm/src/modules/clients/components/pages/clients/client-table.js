@@ -1,6 +1,5 @@
 import { A, Div, P, Span, Td, Thead, Tr } from "@base-framework/atoms";
 import { Badge, Button, Checkbox } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 import { ClientModal } from "../../organisms/modals/client-modal.js";
@@ -108,7 +107,7 @@ export const ClientRow = (row, onSelect) => (
 			Button({
 				variant: 'ghost',
 				size: 'sm',
-				icon: Icons.eye,
+				icon: 'visibility',
 				click: (e) => {
 					e.preventDefault();
 					e.stopPropagation();
@@ -156,11 +155,11 @@ const ClientListEmpty = () => EmptyState(
 	{
 		title: 'No Clients Found!',
 		description: 'No clients have been found. Maybe create a new client.',
-		icon: Icons.user.minus
+		icon: 'person_remove'
 	}, [
 	Button({
 		variant: 'withIcon',
-		icon: Icons.circlePlus,
+		icon: 'add_circle',
 		click: (e, parent) => ClientModal({
 			onClose: (data) =>
 			{

@@ -1,7 +1,6 @@
 import { Div, Form, H2, Header, P } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { Button, Icon } from "@base-framework/ui/atoms";
-import { Icons } from '@base-framework/ui/icons';
+import { Button, UniversalIcon } from "@base-framework/ui/atoms";
 
 /**
  * @function CongratsMessage
@@ -17,7 +16,7 @@ export const CongratsMessage = Atom(() =>
             Div({ class: 'flex flex-auto flex-col gap-y-4' }, [
                 Div({ class: 'flex flex-auto items-center justify-center' }, [
                     Div({ class: 'w-16 h-16 mb-6 text-primary' }, [
-                        Icon(Icons.circleCheck)
+                        UniversalIcon({ size: 'sm' }, 'check_circle')
                     ])
                 ]),
                 Header({ class: 'py-4 text-center' }, [

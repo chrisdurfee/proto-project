@@ -1,7 +1,6 @@
 import { Div } from "@base-framework/atoms";
 import { Model } from "@base-framework/base";
 import { Fieldset, Input } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { FormField, Modal } from "@base-framework/ui/molecules";
 
 /**
@@ -69,7 +68,7 @@ export const TestEmailModal = (props = {}) =>
             template
         }),
         title: 'Test Email',
-        icon: Icons.at,
+        icon: 'alternate_email',
         description: 'Test the email template.',
         size: 'md',
         type: 'right',
@@ -83,7 +82,7 @@ export const TestEmailModal = (props = {}) =>
                         type: "destructive",
                         title: "Error",
                         description: "An error occurred while testing the email.",
-                        icon: Icons.shield
+                        icon: 'shield'
                     });
                     return;
                 }
@@ -92,7 +91,7 @@ export const TestEmailModal = (props = {}) =>
                     type: "success",
                     title: "Email Test Successful",
                     description: "The email has been sent successfully.",
-                    icon: Icons.check
+                    icon: 'check'
                 });
             });
         }

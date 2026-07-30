@@ -1,6 +1,5 @@
 import { A, Span, Td, Thead, Tr } from "@base-framework/atoms";
 import { Badge, Checkbox } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 
@@ -75,6 +74,6 @@ export const AuthedDevicesTable = (data) =>
 		emptyState: () => EmptyState({
 			title: 'No Authorized Devices',
 			description: 'No devices have been authorized for this user.',
-			icon: Icons.device.mobile
+			icon: 'smartphone'
 		})
 	});

@@ -1,5 +1,5 @@
 import { Div, H2, P } from "@base-framework/atoms";
-import { Card, Icon } from "@base-framework/ui/atoms";
+import { Card, UniversalIcon } from "@base-framework/ui/atoms";
 
 /**
  * SummaryCard
@@ -17,7 +17,7 @@ export const SummaryCard = ({ title, value, change, icon }) => (
 	Card({ class: "flex flex-col w-72 max-w-sm hover:bg-muted/50 transition-colors", margin: "m-0" }, [
 		Div({ class: "flex justify-between items-center mb-2" }, [
 			H2({ class: "text-base font-medium text-muted-foreground" }, title),
-			Icon(icon, { class: "text-xl" })
+			UniversalIcon({ class: "text-xl" }, icon)
 		]),
 		Div({ class: "flex flex-col" }, [
 			P({ class: "text-2xl font-bold leading-tight" }, value),

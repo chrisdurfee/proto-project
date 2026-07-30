@@ -1,7 +1,6 @@
 import { OnState } from "@base-framework/atoms";
 import { Jot } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { ErrorModel } from "../models/error-model.js";
 
 /**
@@ -33,7 +32,7 @@ const ResolveButton = ({ id, row }) => (
 	Button({
 		variant: 'withIcon',
 		class: 'outline',
-		icon: Icons.circleCheck,
+		icon: 'check_circle',
 		click(e, { state })
 		{
 			e.preventDefault();
@@ -56,7 +55,7 @@ const UnresolveButton = ({ id, row }) => (
 	Button({
 		variant: 'withIcon',
 		class: 'outline',
-		icon: Icons.circleX,
+		icon: 'cancel',
 		click(e, { state })
 		{
 			e.preventDefault();

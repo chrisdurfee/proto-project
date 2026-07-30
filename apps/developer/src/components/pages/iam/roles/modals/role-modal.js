@@ -1,5 +1,4 @@
 import { Div } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Modal } from "@base-framework/ui/molecules";
 import { RoleModel } from "../models/role-model.js";
 import { RoleForm } from "./role-form.js";
@@ -21,7 +20,7 @@ const add = (data, destroyCallback = null) =>
 				type: "destructive",
 				title: "Error",
 				description: "An error occurred while adding the role.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -35,7 +34,7 @@ const add = (data, destroyCallback = null) =>
 			type: "success",
 			title: "Role Added",
 			description: "The role has been added.",
-			icon: Icons.check
+			icon: 'check'
 		});
 	});
 };
@@ -57,7 +56,7 @@ const update = (data, destroyCallback = null) =>
 				type: "destructive",
 				title: "Error",
 				description: "An error occurred while updating the role.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -71,7 +70,7 @@ const update = (data, destroyCallback = null) =>
 			type: "success",
 			title: "Role Updated",
 			description: "The role has been updated.",
-			icon: Icons.check
+			icon: 'check'
 		});
 	});
 };
@@ -93,7 +92,7 @@ export const RoleModal = (props = {}) =>
 	return new Modal({
 		data,
 		title: mode === 'edit' ? 'Edit Role' : 'Add Role',
-		icon: mode === 'edit' ? Icons.pencil.square : Icons.document.add,
+		icon: mode === 'edit' ? 'edit' : 'note_add',
 		description: mode === 'edit' ? `Editing the '${item.name}' role` : 'Let\'s add a new role.',
 		size: 'md',
 		type: 'right',

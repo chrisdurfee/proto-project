@@ -1,6 +1,5 @@
 import { Div, UseParent } from "@base-framework/atoms";
 import { Checkbox, Fieldset, Input, Select, Textarea } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { FormField, Modal } from "@base-framework/ui/molecules";
 import { GeneratorModel } from "../models/generator-model.js";
 import { TableModel } from "../models/table-model.js";
@@ -37,7 +36,7 @@ export const GeneratorModal = ({ resourceType = 'Full Resource' }) =>
 			type: formatType(resourceType),
 		}),
 		title: `Add ${resourceType}`,
-		icon: Icons.document.add,
+		icon: 'note_add',
 		description: `Let's add a new ${resourceType}.`,
 		size: 'md',
 		type: 'right',
@@ -54,7 +53,7 @@ export const GeneratorModal = ({ resourceType = 'Full Resource' }) =>
 						type: "destructive",
 						title: "Error",
 						description: "An error occurred while adding the resource.",
-						icon: Icons.shield
+						icon: 'shield'
 					});
 					return;
 				}
@@ -63,7 +62,7 @@ export const GeneratorModal = ({ resourceType = 'Full Resource' }) =>
 					type: "success",
 					title: `${resourceType} Added`,
 					description: `The ${resourceType} has been added.`,
-					icon: Icons.check
+					icon: 'check'
 				});
 			});
 		}

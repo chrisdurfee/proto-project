@@ -1,6 +1,5 @@
 import { Div, On, UseParent } from "@base-framework/atoms";
 import { ScrollableList } from "@base-framework/organisms";
-import { Icons } from "@base-framework/ui/icons";
 import { SearchInput } from "@base-framework/ui/organisms";
 import { ListEmptyState } from "./list-empty-state.js";
 import { ThreadListHeader } from "./thread-list-header.js";
@@ -24,7 +23,7 @@ export const ThreadList = ({ data }) =>
 				placeholder: 'Search...',
 				bind: 'search',
 				keyup: (e, parent) => parent.list.refresh(),
-				icon: Icons.magnifyingGlass.default
+				icon: 'search'
 			}),
 		]),
 		On('filter.view', () => (

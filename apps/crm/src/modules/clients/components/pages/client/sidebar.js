@@ -1,6 +1,5 @@
 import { Div, H1, Header } from "@base-framework/atoms";
 import { Button } from "@base-framework/ui";
-import { Icons } from "@base-framework/ui/icons";
 import { BackButton } from "@base-framework/ui/organisms";
 import { ClientDetailsModal } from "../../organisms/modals/client-details-modal.js";
 import { SidebarMenu } from "./sidebar-menu.js";
@@ -27,7 +26,7 @@ const Toolbar = () => (
 		Button({
 			variant: 'withIcon',
 			class: 'outline',
-			icon: Icons.identification,
+			icon: 'badge',
 			click: (e, { context }) => {
 				ClientDetailsModal({
 					client: context?.data?.client
@@ -47,10 +46,10 @@ export const Sidebar = ({ clientId }) => (
 	SidebarMenu({
 		topNav: Toolbar(),
 		options: [
-			{ label: 'Summary', href: `clients/${clientId}`, icon: Icons.office.single, exact: true },
+			{ label: 'Summary', href: `clients/${clientId}`, icon: 'business', exact: true },
 			{
 				label: 'Communication',
-				icon: Icons.chat.group,
+				icon: 'forum',
 				options: [
 					{ label: 'Contacts', href: `clients/${clientId}/contacts` },
 					//{ label: 'Messages', href: `clients/${clientId}/messages` },
@@ -60,14 +59,14 @@ export const Sidebar = ({ clientId }) => (
 			},
 			{
 				label: 'Billing',
-				icon: Icons.currency.dollar,
+				icon: 'payments',
 				options: [
 					{ label: 'Invoices', href: `clients/${clientId}/invoices` },
 					{ label: 'Payments', href: `clients/${clientId}/payments` },
 					{ label: 'Orders', href: `clients/${clientId}/orders` }
 				]
 			},
-			{ label: 'Support', href: `clients/${clientId}/support`, icon: Icons.ticket }
+			{ label: 'Support', href: `clients/${clientId}/support`, icon: 'confirmation_number' }
 		]
 	})
 );

@@ -1,6 +1,6 @@
 import { Div, H1, Header } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+
 
 /**
  * This will create a page header for the orders page.
@@ -13,10 +13,10 @@ export const PageHeader = () => (
 			H1({ class: 'text-3xl font-bold' }, 'Orders'),
 			Div({ class: 'flex items-center gap-2' }, [
 				Div({ class: 'hidden lg:flex' }, [
-					Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.circlePlus, click: () => null }, 'Create Order')
+					Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: 'add_circle', click: () => null }, 'Create Order')
 				]),
 				Div({ class: 'flex lg:hidden mr-0' }, [
-					Tooltip({ content: 'Create Order', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: () => null }))
+					Tooltip({ content: 'Create Order', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: 'add_circle', click: () => null }))
 				])
 			])
 		])

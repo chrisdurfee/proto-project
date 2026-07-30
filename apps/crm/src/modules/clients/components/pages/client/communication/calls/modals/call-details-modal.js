@@ -1,7 +1,6 @@
 import { Div, P, UseParent } from "@base-framework/atoms";
 import { Data, DateTime } from "@base-framework/base";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
 import { Format } from "@base-framework/ui/utils";
 import { CallModal } from "./call-modal.js";
@@ -17,7 +16,7 @@ const QuickConnectButtons = () =>
 			Tooltip({ content: 'Call' }, [
 				Button({
 					variant: 'icon',
-					icon: Icons.phone.default,
+					icon: 'phone',
 					label: 'Call',
 					click: (e, parent) =>
 					{
@@ -32,7 +31,7 @@ const QuickConnectButtons = () =>
 			Tooltip({ content: 'Play Recording' }, [
 				Button({
 					variant: 'icon',
-					icon: Icons.play,
+					icon: 'play_arrow',
 					label: 'Play Recording',
 					click: (e, parent) =>
 					{
@@ -47,14 +46,14 @@ const QuickConnectButtons = () =>
 			Tooltip({ content: 'Message' }, [
 				Button({
 					variant: 'icon',
-					icon: Icons.chat.text,
+					icon: 'chat',
 					label: 'Message'
 				})
 			]),
 			Tooltip({ content: 'More' }, [
 				Button({
 					variant: 'icon',
-					icon: Icons.ellipsis.vertical,
+					icon: 'more_vert',
 					label: 'More'
 				})
 			])
@@ -161,11 +160,11 @@ const HeaderOptions = (call, clientId, onUpdate) =>
 	return () => [
 		UseParent((parent) => (
 			new DropdownMenu({
-				icon: Icons.ellipsis.vertical,
+				icon: 'more_vert',
 				groups: [
 					[
-						{ icon: Icons.pencil.square, label: 'Edit Call', value: 'edit-call' },
-						{ icon: Icons.trash, label: 'Delete Call', value: 'delete-call' }
+						{ icon: 'edit', label: 'Edit Call', value: 'edit-call' },
+						{ icon: 'delete', label: 'Delete Call', value: 'delete-call' }
 					]
 				],
 				onSelect: (selected) =>
@@ -204,7 +203,7 @@ const HeaderOptions = (call, clientId, onUpdate) =>
 									type: "destructive",
 									title: "Error",
 									description: "An error occurred while deleting the call.",
-									icon: Icons.shield
+									icon: 'shield'
 								});
 								return;
 							}
@@ -215,7 +214,7 @@ const HeaderOptions = (call, clientId, onUpdate) =>
 								type: "success",
 								title: "Call Deleted",
 								description: "The call has been deleted.",
-								icon: Icons.check
+								icon: 'check'
 							});
 
 							if (onUpdate)
@@ -229,7 +228,7 @@ const HeaderOptions = (call, clientId, onUpdate) =>
 								type: "destructive",
 								title: "Error",
 								description: "An error occurred while deleting the call.",
-								icon: Icons.shield
+								icon: 'shield'
 							});
 						});
 					}
@@ -331,7 +330,7 @@ export const CallDetailsModal = (props = { call: {}, clientId: '', onUpdate: und
 
 	return new Modal({
 		title: formatCallData(call).subject,
-		icon: Icons.phone.default,
+		icon: 'phone',
 		description: formatCallData(call).callTypeLabel,
 		size: 'md',
 		type: 'right',

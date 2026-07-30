@@ -1,7 +1,6 @@
 import { Div, OnState, Span } from "@base-framework/atoms";
 import { Jot } from "@base-framework/base";
 import { Skeleton } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { FormField, Toggle } from "@base-framework/ui/molecules";
 import { RoleModel } from "../models/role-model.js";
 import { UserRoleModel } from "../models/user-role-model.js";
@@ -29,7 +28,7 @@ const request = (checked, userId, roleId) =>
 				type: "destructive",
 				title: "Error",
 				description: `An error occurred while ${method === 'add' ? 'adding' : 'removing'} the role.`,
-				icon: Icons.shield
+				icon: 'shield'
 			});
 		}
 	});

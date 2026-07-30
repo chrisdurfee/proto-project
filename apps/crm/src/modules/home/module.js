@@ -1,4 +1,3 @@
-import { Icons } from "@base-framework/ui/icons";
 import { Module } from '../module/module.js';
 
 /**
@@ -18,7 +17,7 @@ const routes = Module.convertRoutes(
  */
 const links =
 [
-    { label: 'Home', href: './', icon: Icons.home, mobileOrder: 1, exact: true }
+    { label: 'Home', href: './', icon: 'home', mobileOrder: 1, exact: true }
 ];
 
 /**

@@ -1,6 +1,5 @@
 import { Div, H1, Header } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { SearchInput as BaseSearch } from "@base-framework/ui/organisms";
 import { NoteModal } from "./modals/note-modal.js";
 
@@ -15,7 +14,7 @@ const SearchInput = () => (
 		placeholder: 'Search notes...',
 		bind: 'search',
 		keyup: (e, parent) => parent.list.refresh(),
-		icon: Icons.magnifyingGlass.default
+		icon: 'search'
 	})
 );
 
@@ -53,10 +52,10 @@ export const PageHeader = () => (
 			]),
 			Div({ class: 'flex items-center gap-2' }, [
 				Div({ class: 'hidden lg:flex' }, [
-					Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add Note')
+					Button({ variant: 'withIcon', class: 'text-muted-foreground', icon: 'add_circle', click: (e, parent) => Modal(null, parent) }, 'Add Note')
 				]),
 				Div({ class: 'flex lg:hidden mr-0' }, [
-					Tooltip({ content: 'Add Note', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }))
+					Tooltip({ content: 'Add Note', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: 'add_circle', click: (e, parent) => Modal(null, parent) }))
 				])
 			])
 		]),

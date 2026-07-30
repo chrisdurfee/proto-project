@@ -1,6 +1,5 @@
 import { A, Div, P, Span, Td, Thead, Tr } from "@base-framework/atoms";
 import { Checkbox } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState, StaticStatusIndicator } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 
@@ -95,6 +94,6 @@ export const FollowingTable = (data) =>
 		emptyState: () => EmptyState({
 			title: 'Not Following Anyone',
 			description: 'Start following users to see them here.',
-			icon: Icons.user.default
+			icon: 'person'
 		})
 	});

@@ -1,7 +1,6 @@
 import { Div, Pre, Span } from "@base-framework/atoms";
 import { TimeFrame } from "@base-framework/ui";
-import { Icon } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+import { UniversalIcon } from "@base-framework/ui/atoms";
 import { Avatar } from "@base-framework/ui/molecules";
 import { AssistantMessageModel } from "../../../../models/assistant-message-model.js";
 
@@ -75,7 +74,7 @@ const UserAvatar = () => Avatar({
 const AiAvatar = () => Div({
 	class: "flex items-center justify-center w-8 h-8 rounded-full bg-primary/10"
 }, [
-	Icon({ size: 'sm' }, Icons.ai)
+	UniversalIcon({ size: 'sm' }, 'auto_awesome')
 ]);
 
 /**

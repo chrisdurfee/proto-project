@@ -2,7 +2,6 @@ import { Div, UseParent } from '@base-framework/atoms';
 import { ScrollableList } from '@base-framework/organisms';
 import { Badge } from '@base-framework/ui';
 import { Card } from '@base-framework/ui/atoms';
-import { Icons } from '@base-framework/ui/icons';
 import { Avatar, EmptyState, Modal } from '@base-framework/ui/molecules';
 import { ClientModel } from '../../models/client-model.js';
 import { SearchInput as BaseSearch } from './search-input.js';
@@ -62,7 +61,7 @@ const SearchInput = (data) => (
 		bind: 'search',
 		autofocus: true,
 		keyup: (e, parent) => parent.list?.refresh(),
-		icon: Icons.magnifyingGlass.default
+		icon: 'search'
 	})
 );
 
@@ -97,7 +96,7 @@ export const ClientSearchModal = (props = {}) =>
 	return new Modal({
 		data,
 		title: 'Search Clients',
-		icon: Icons.magnifyingGlass.default,
+		icon: 'search',
 		description: 'Find and view client details.',
 		size: 'sm',
 		type: 'left',
@@ -122,7 +121,7 @@ export const ClientSearchModal = (props = {}) =>
 							return EmptyState({
 								title: 'No Clients Found',
 								description: searchValue ? 'Try adjusting your search terms.' : 'Start typing to search clients.',
-								icon: Icons.magnifyingGlass.default
+								icon: 'search'
 							});
 						}
 					})

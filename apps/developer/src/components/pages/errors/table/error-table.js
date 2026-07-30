@@ -1,6 +1,5 @@
 import { Td, Thead, Tr } from "@base-framework/atoms";
 import { Checkbox } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 import { ErrorModal } from "../modals/error-modal.js";
@@ -94,7 +93,7 @@ export const ErrorTable = (data) => (
 		emptyState: () => EmptyState({
 			title: 'Well Done!',
 			description: 'No errors found. Your coding skills are impressive!',
-			icon: Icons.circleCheck
+			icon: 'check_circle'
 		})
 	})
 );

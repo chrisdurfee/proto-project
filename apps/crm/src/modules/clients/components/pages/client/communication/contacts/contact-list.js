@@ -2,7 +2,6 @@ import { Div, P } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
 import { Badge, Card } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { ContactDetailsModal } from "./modals/contact-details-modal.js";
 
@@ -97,7 +96,7 @@ export const ContactList = Atom(({ data }) =>
 			emptyState: () => EmptyState({
 				title: 'No Contacts Found',
 				description: 'No contacts have been added for this client yet.',
-				icon: Icons.user.default
+				icon: 'person'
 			})
 		})
 	]);

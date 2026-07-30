@@ -1,7 +1,7 @@
 import { Div, Textarea } from "@base-framework/atoms";
 import { Jot } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+
 
 
 /**
@@ -34,14 +34,14 @@ const SendButton = () => (
 		Button({
 			type: "button",
 			variant: "icon",
-			icon: Icons.paperclip,
+			icon: 'attach_file',
 			class: "text-foreground hover:text-accent",
 			click: (e, parent) => parent.parent?.fileInput?.click()
 		}),
 		Button({
 			type: "submit",
 			variant: "icon",
-			icon: Icons.airplane,
+			icon: 'send',
 			class: "text-foreground hover:text-accent",
 			onState: ['empty', (empty, el) => el.disabled = empty]
 		})
@@ -122,7 +122,7 @@ export const ThreadTextarea = Jot(
 		if (this.state.empty === true)
 		{
 			app.notify({
-				icon: Icons.warning,
+				icon: 'warning',
 				type: 'warning',
 				title: 'Missing Message',
 				description: 'Please enter a message.',
@@ -135,7 +135,7 @@ export const ThreadTextarea = Jot(
 		if (this.state.isOverLimit === true)
 		{
 			app.notify({
-				icon: Icons.warning,
+				icon: 'warning',
 				type: 'warning',
 				title: 'Message Too Long',
 				description: 'Your message exceeds the character limit.',

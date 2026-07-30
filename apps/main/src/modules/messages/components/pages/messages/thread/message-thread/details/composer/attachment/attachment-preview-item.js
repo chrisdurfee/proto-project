@@ -1,6 +1,5 @@
 import { Div, P, Span } from "@base-framework/atoms";
 import { Button } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { AttachmentIcon } from "./attachment-icon.js";
 import { ImageThumbnail } from "./image-thumbnail.js";
 import { formatFileSize, getFileExtension, isImageFile } from "./utils.js";
@@ -35,7 +34,7 @@ export const AttachmentPreviewItem = (file, index, parent) =>
 		// Remove button
 		Button({
 			variant: "icon",
-			icon: Icons.x,
+			icon: 'close',
 			class: "text-muted-foreground hover:text-destructive h-6 w-6",
 			click: (e) =>
 			{

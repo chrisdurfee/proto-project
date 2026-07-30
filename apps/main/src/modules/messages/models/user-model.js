@@ -1,5 +1,4 @@
 import { Model } from "@base-framework/base";
-import { Icons } from "@base-framework/ui/icons";
 
 /**
  * UserModel
@@ -82,7 +81,7 @@ export const UserModel = Model.extend({
 					type: "destructive",
 					title: "Error",
 					description: "No user ID found.",
-					icon: Icons.shield
+					icon: 'shield'
 				});
 				return;
 			}
@@ -96,7 +95,7 @@ export const UserModel = Model.extend({
 					type: "destructive",
 					title: "Error",
 					description: "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.",
-					icon: Icons.shield
+					icon: 'shield'
 				});
 				return;
 			}
@@ -109,7 +108,7 @@ export const UserModel = Model.extend({
 					type: "destructive",
 					title: "Error",
 					description: "File size too large. Maximum size is 30MB.",
-					icon: Icons.shield
+					icon: 'shield'
 				});
 				return;
 			}

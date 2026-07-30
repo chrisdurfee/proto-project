@@ -1,6 +1,6 @@
 import { Div, H1, Header } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+
 
 /**
  * This will create a page header for the invoices page.
@@ -13,10 +13,10 @@ export const PageHeader = () => (
 			H1({ class: 'text-3xl font-bold' }, 'Invoices'),
 			Div({ class: 'flex items-center gap-2' }, [
 				Div({ class: 'hidden lg:flex' }, [
-					Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.circlePlus, click: () => null }, 'Add Invoice')
+					Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: 'add_circle', click: () => null }, 'Add Invoice')
 				]),
 				Div({ class: 'flex lg:hidden mr-0' }, [
-					Tooltip({ content: 'Add Invoice', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.circlePlus, click: () => null }))
+					Tooltip({ content: 'Add Invoice', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: 'add_circle', click: () => null }))
 				])
 			])
 		])

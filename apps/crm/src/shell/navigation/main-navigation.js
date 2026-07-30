@@ -1,6 +1,5 @@
 import { Div } from '@base-framework/atoms';
 import { Atom, Jot } from '@base-framework/base';
-import { Icons } from '@base-framework/ui/icons';
 import { InlineNavigation } from '@base-framework/ui/organisms';
 import { Configs } from '../../configs.js';
 import { AssistantChatModal } from '../../modules/assistant/components/modals/chat/assistant-chat-modal.js';
@@ -58,7 +57,7 @@ const LowerNavigation = () => (
 				{
 					href: 'settings',
 					label: 'Settings',
-					icon: Icons.cog.eight
+					icon: 'settings'
 				}
 			]
 		})
@@ -72,7 +71,7 @@ const LowerNavigation = () => (
  */
 const SearchButton = () => ({
 	label: 'Search',
-	icon: Icons.magnifyingGlass.default,
+	icon: 'search',
 	exact: true,
 	click: () => ClientSearchModal()
 });
@@ -84,7 +83,7 @@ const SearchButton = () => ({
  */
 const AssistantChatButton = () => ({
 	label: 'Assistant',
-	icon: Icons.ai,
+	icon: 'auto_awesome',
 	exact: true,
 	click: () => AssistantChatModal()
 });

@@ -1,5 +1,4 @@
 import { Div, H1, Header } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { SearchInput as BaseSearch } from "@base-framework/ui/organisms";
 
 /**
@@ -13,7 +12,7 @@ const SearchInput = () => (
 		placeholder: 'Search calls...',
 		bind: 'search',
 		keyup: (e, parent) => parent.list.refresh(),
-		icon: Icons.magnifyingGlass.default
+		icon: 'search'
 	})
 );
 

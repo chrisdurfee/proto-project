@@ -1,6 +1,6 @@
 import { Button, Div } from "@base-framework/atoms";
-import { Icon } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+import { UniversalIcon } from "@base-framework/ui/atoms";
+
 
 /**
  * This will create a control button.
@@ -14,7 +14,7 @@ const ControlButton = ({ action, className, icon }) => (
 		action(e, parent);
 	}
 	 }, [
-		Icon({ size: 'sm' }, icon)
+		UniversalIcon({ size: 'sm' }, icon)
 	])
 )
 
@@ -34,22 +34,22 @@ export const Controls = ({ actions }) =>
 		ControlButton({
 			action: actions.toggleCamera,
 			className: "w-12 h-12 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center",
-			icon: Icons.videoCamera.default
+			icon: 'videocam'
 		}),
 		ControlButton({
 			action: actions.toggleMute,
 			className: "w-12 h-12 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center",
-			icon: Icons.microphone
+			icon: 'mic'
 		}),
 		ControlButton({
 			action: actions.endCall,
 			className: "w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center",
-			icon: Icons.x
+			icon: 'close'
 		}),
 		ControlButton({
 			action: actions.toggleFullscreen,
 			className: "w-12 h-12 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center",
-			icon: Icons.expand
+			icon: 'open_in_full'
 		})
 	]);
 };

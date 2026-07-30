@@ -1,7 +1,6 @@
 import { Div, P, UseParent } from "@base-framework/atoms";
 import { Data, DateTime } from "@base-framework/base";
-import { Badge, Icon } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+import { Badge, UniversalIcon } from "@base-framework/ui/atoms";
 import { DetailBody, DetailSection, DropdownMenu, Modal, SplitRow } from "@base-framework/ui/molecules";
 import { IsOwner } from "@components/atoms/gate-atoms.js";
 import { ClientNoteModel } from "@modules/clients/components/models/client-note-model.js";
@@ -21,11 +20,11 @@ const HeaderOptions = (note, clientId, onUpdate) =>
 		IsOwner(note.createdBy, () =>
 			UseParent((parent) => (
 				new DropdownMenu({
-					icon: Icons.ellipsis.vertical,
+					icon: 'more_vert',
 					groups: [
 						[
-							{ icon: Icons.pencil.square, label: 'Edit Note', value: 'edit-note' },
-							{ icon: Icons.trash, label: 'Delete Note', value: 'delete-note' }
+							{ icon: 'edit', label: 'Edit Note', value: 'edit-note' },
+							{ icon: 'delete', label: 'Delete Note', value: 'delete-note' }
 						]
 					],
 					onSelect: (selected) =>
@@ -57,7 +56,7 @@ const HeaderOptions = (note, clientId, onUpdate) =>
 										type: "destructive",
 										title: "Error",
 										description: "An error occurred while deleting the note.",
-										icon: Icons.shield
+										icon: 'shield'
 									});
 									return;
 								}
@@ -213,7 +212,7 @@ export const NoteDetailsModal = (props = { note: {}, clientId: '', onUpdate: und
 
 	return new Modal({
 		title: formatNoteData(note).title,
-		icon: Icons.document.default,
+		icon: 'description',
 		description: formatNoteData(note).noteTypeLabel,
 		size: 'md',
 		type: 'right',
@@ -245,15 +244,15 @@ export const NoteDetailsModal = (props = { note: {}, clientId: '', onUpdate: und
 		// Quick action badges
 		Div({ class: "flex items-center gap-2 pb-4 border-b" }, [
 			note.hasReminder === 1 && Badge({ type: 'outline', class: 'gap-1' }, [
-				Icon({ size: 'xs' }, Icons.bell),
+				UniversalIcon({ size: 'xs' }, 'notifications'),
 				'Reminder Set'
 			]),
 			note.requiresFollowUp === 1 && Badge({ type: 'outline', class: 'gap-1' }, [
-				Icon({ size: 'xs' }, Icons.arrowPath),
+				UniversalIcon({ size: 'xs' }, 'refresh'),
 				'Follow-up Required'
 			]),
 			note.isPinned === 1 && Badge({ type: 'outline', class: 'gap-1' }, [
-				Icon({ size: 'xs' }, Icons.pin),
+				UniversalIcon({ size: 'xs' }, 'push_pin'),
 				'Pinned'
 			]),
 			note.priority === 'urgent' && Badge({ type: 'destructive' }, 'URGENT'),

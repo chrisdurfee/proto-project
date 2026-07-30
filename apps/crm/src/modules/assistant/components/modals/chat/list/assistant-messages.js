@@ -1,7 +1,6 @@
 import { Div, Span, UseParent } from "@base-framework/atoms";
 import { DateTime, Jot } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
-import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { AssistantMessageModel } from "../../../../models/assistant-message-model.js";
 import { AssistantMessageBubble } from "./assistant-message-bubble.js";
@@ -183,7 +182,7 @@ export const AssistantMessages = Jot(
 						emptyState: () => EmptyState({
 							title: 'Start a conversation',
 							description: 'Ask me anything! I\'m here to help.',
-							icon: Icons.ai
+							icon: 'auto_awesome'
 						})
 					})
 				))

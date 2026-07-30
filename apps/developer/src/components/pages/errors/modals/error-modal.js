@@ -1,7 +1,6 @@
 import { Code, Pre } from "@base-framework/atoms";
 import { Data, DateTime } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { DetailBody, DetailSection, Modal, SplitRow } from "@base-framework/ui/molecules";
 import { ResultButtons } from "../table/result-buttons";
 
@@ -48,7 +47,7 @@ export const ErrorModal = (props) => new Modal(
 {
 	title: '[[title]]',
 	description: 'Error Details',
-	icon: Icons.bug,
+	icon: 'bug_report',
 	size: 'lg',
 	type: 'right',
 	error: props.error,

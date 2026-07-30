@@ -1,4 +1,3 @@
-import { Icons } from '@base-framework/ui/icons';
 import { AuthModel } from '../../../models/auth-model.js';
 import { STEPS } from '../../steps.js';
 
@@ -74,7 +73,7 @@ export const submit = (e, parent) =>
 			notify(
 				'Error!',
 				response.message ?? 'Something went wrong. Please try again later.',
-				Icons.warning,
+				'warning',
 				'destructive'
 			);
 			return;
@@ -102,7 +101,7 @@ export const submit = (e, parent) =>
 		notify(
 			'Invalid Credentials',
 			response.message ?? 'The provided credentials are incorrect.',
-			Icons.warning,
+			'warning',
 			'destructive'
 		);
 	});

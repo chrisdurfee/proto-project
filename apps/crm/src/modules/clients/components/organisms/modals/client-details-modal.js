@@ -1,6 +1,5 @@
 import { Div } from "@base-framework/atoms";
 import { Data } from "@base-framework/base";
-import { Icons } from "@base-framework/ui/icons";
 import { Modal } from "@base-framework/ui/molecules";
 import { UnderlinedButtonTab } from "@base-framework/ui/organisms";
 import { ClientDetailsAvatar } from "./client-details/client-details-avatar.js";
@@ -33,7 +32,7 @@ export const ClientDetailsModal = (props) =>
 
 	return new Modal({
 		title: 'Client Profile',
-		icon: Icons.identification,
+		icon: 'badge',
 		size: 'md',
 		type: 'right',
 		hideFooter: true,

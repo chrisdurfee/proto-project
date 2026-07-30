@@ -1,5 +1,4 @@
 import { Div, On } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { Page } from "@base-framework/ui/pages";
 import { ClientContent } from "./client-content.js";
@@ -39,8 +38,7 @@ export const SummaryPage = () => (
 				return EmptyState({
 					title: 'Client not found',
 					description: 'Please check the client ID and try again.',
-					// @ts-ignore
-					icon: Icons.user.group
+					icon: 'group'
 				});
 			}
 

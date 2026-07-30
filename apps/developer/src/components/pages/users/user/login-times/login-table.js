@@ -1,6 +1,5 @@
 import { Span, Td, Thead, Tr } from "@base-framework/atoms";
 import { Checkbox } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 
@@ -64,6 +63,6 @@ export const LoginTable = (data) =>
 		emptyState: () => EmptyState({
 			title: 'Who Hurt Them?',
 			description: 'No login attempts have been found. Maybe we should send them flowers.',
-			icon: Icons.clock
+			icon: 'schedule'
 		})
 	});

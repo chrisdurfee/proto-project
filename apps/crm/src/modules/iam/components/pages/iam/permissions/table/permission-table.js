@@ -1,6 +1,5 @@
 import { Td, Thead, Tr } from "@base-framework/atoms";
 import { Button, Checkbox } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 import { PermissionModal } from "../modals/permission-modal.js";
@@ -90,9 +89,9 @@ export const PermissionTable = (data) => (
 		emptyState: () => EmptyState({
 			title: 'Missing Some Permissions',
 			description: 'No permissions have been found.',
-			icon: Icons.locked
+			icon: 'lock'
 		}, [
-			Button({ variant: 'withIcon', icon: Icons.circlePlus, click: (e, parent) => Modal(null, parent) }, 'Add Permission')
+			Button({ variant: 'withIcon', icon: 'add_circle', click: (e, parent) => Modal(null, parent) }, 'Add Permission')
 		])
 	})
 );

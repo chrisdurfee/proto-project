@@ -1,6 +1,5 @@
 import { Div } from "@base-framework/atoms";
 import { Fieldset, Input, Textarea } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { FormField, Modal } from "@base-framework/ui/molecules";
 import { PermissionModel } from "../models/permission-model.js";
 
@@ -57,7 +56,7 @@ const add = (data, onClose) =>
 				type: "destructive",
 				title: "Error",
 				description: "An error occurred while adding the permission.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -66,7 +65,7 @@ const add = (data, onClose) =>
 			type: "success",
 			title: "Permission Added",
 			description: "The permission has been added.",
-			icon: Icons.check
+			icon: 'check'
 		});
 
 		onClose();
@@ -90,7 +89,7 @@ const update = (data, onClose) =>
 				type: "destructive",
 				title: "Error",
 				description: "An error occurred while updating the permission.",
-				icon: Icons.shield
+				icon: 'shield'
 			});
 			return;
 		}
@@ -99,7 +98,7 @@ const update = (data, onClose) =>
 			type: "success",
 			title: "Permission Updated",
 			description: "The permission has been updated.",
-			icon: Icons.check
+			icon: 'check'
 		});
 
 		onClose();
@@ -122,7 +121,7 @@ export const PermissionModal = (props = {}) =>
 	return new Modal({
 		data: new PermissionModel(item),
 		title: mode === 'edit' ? 'Edit Permission' : 'Add Permission',
-		icon: mode === 'edit' ? Icons.pencil.square : Icons.document.add,
+		icon: mode === 'edit' ? 'edit' : 'note_add',
 		description: mode === 'edit' ? `Editing the '${item.name}' Permission` : 'Let\'s add a new Permission.',
 		size: 'md',
 		type: 'right',

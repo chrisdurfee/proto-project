@@ -1,5 +1,4 @@
 import { Model } from "@base-framework/base";
-import { Icons } from "@base-framework/ui/icons";
 
 /**
  * ConversationModel
@@ -75,7 +74,7 @@ export const ConversationModel = Model.extend({
 						type: "destructive",
 						title: "File Too Large",
 						description: `${file.name} exceeds 10MB limit.`,
-						icon: Icons.warning
+						icon: 'warning'
 					});
 					return;
 				}

@@ -1,7 +1,6 @@
 import { A, Div, Span, Td, Thead, Tr } from "@base-framework/atoms";
 import { UniversalIcon } from "@base-framework/ui";
 import { Badge, Button, Checkbox } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState, StaticStatusIndicator } from "@base-framework/ui/molecules";
 import { CheckboxCol, HeaderCol, ScrollableDataTable } from "@base-framework/ui/organisms";
 import { UserModal } from "../modals/user-modal.js";
@@ -113,11 +112,11 @@ const UserListEmpty = () => EmptyState(
 	{
 		title: 'Feels Empty!',
 		description: 'No users have been found. Maybe create a new user.',
-		icon: Icons.user.minus
+		icon: 'person_remove'
 	}, [
 	Button({
 		variant: 'withIcon',
-		icon: Icons.user.plus,
+		icon: 'person_add',
 		click: (e, parent) => UserModal({
 			onClose: (data) =>
 			{

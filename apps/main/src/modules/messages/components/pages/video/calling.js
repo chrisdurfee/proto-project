@@ -1,7 +1,6 @@
 import { Button, Div, Span } from "@base-framework/atoms";
 import { Avatar } from "@base-framework/ui";
-import { Icon } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+import { UniversalIcon } from "@base-framework/ui/atoms";
 import { STATES } from "./states.js";
 
 /**
@@ -50,7 +49,7 @@ export const Calling = ({ onCancel }) => (
 			class: 'w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center mt-8',
 			click: onCancel
 		}, [
-			Icon({ size: 'sm' }, Icons.x)
+			UniversalIcon({ size: 'sm' }, 'close')
 		])
 	])
 );

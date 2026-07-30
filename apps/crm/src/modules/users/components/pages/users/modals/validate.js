@@ -1,4 +1,3 @@
-import { Icons } from "@base-framework/ui/icons";
 import { PasswordValidator } from "./utils/password/password-validator.js";
 
 /**
@@ -16,7 +15,7 @@ export const validate = (password = '', confirmPassword = '') =>
 			title: 'Error',
 			description: 'Passwords do not match.',
 			type: 'destructive',
-			icon: Icons.shield
+			icon: 'shield'
 		});
 		return false;
 	}
@@ -31,7 +30,7 @@ export const validate = (password = '', confirmPassword = '') =>
 	}
 
 	app.notify({
-		icon: Icons.shield,
+		icon: 'shield',
 		title: 'Error',
 		description: 'Password does not meet requirements.',
 		type: 'warning'

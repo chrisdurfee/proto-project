@@ -1,7 +1,6 @@
 import { Div, H1, Header, OnState, P, Section } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
 import { Button, Input, LoadingButton } from "@base-framework/ui/atoms";
-import { Icons } from '@base-framework/ui/icons';
 import { Form } from '@base-framework/ui/molecules';
 import { AuthModel } from '../../models/auth-model.js';
 
@@ -43,7 +42,7 @@ const verifyAuthCode = (code, parent) =>
 			app.notify({
 				title: 'Invalid Code',
 				description: response.message ?? 'The provided code is incorrect.',
-				icon: Icons.warning,
+				icon: 'warning',
 				type: 'destructive'
 			});
 			return;
@@ -58,7 +57,7 @@ const verifyAuthCode = (code, parent) =>
 			app.notify({
 				title: 'Invalid Code',
 				description: response.message ?? 'The provided code is incorrect.',
-				icon: Icons.warning,
+				icon: 'warning',
 				type: 'destructive'
 			});
 		}

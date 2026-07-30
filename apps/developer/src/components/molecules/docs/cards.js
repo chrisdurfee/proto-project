@@ -1,6 +1,5 @@
 import { Code, Div, Pre } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
-import { Icons } from "@base-framework/ui/icons";
 
 /**
  * This will create a code card.
@@ -19,7 +18,7 @@ export const CodeCard = Atom((props, children) => (
             app.notify({
                 title: "Code copied",
                 description: "The code has been copied to your clipboard.",
-                icon: Icons.clipboard.checked
+                icon: 'assignment_turned_in'
             });
         }}, children)
     ])

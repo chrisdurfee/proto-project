@@ -1,5 +1,4 @@
 import { Div, OnRoute } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { EmptyState } from "@base-framework/ui/molecules";
 import { ConversationModel } from "@modules/messages/models/conversation-model.js";
 
@@ -32,7 +31,7 @@ const findConversation = (userId) =>
 				type: 'warning',
 				title: 'Error',
 				description: result?.message ?? 'Failed to start conversation. Please try again.',
-				icon: Icons.circleX
+				icon: 'cancel'
 			});
 		}
 	);
@@ -53,7 +52,7 @@ export const UserRedirect = () =>
 				EmptyState({
 					title: 'No User Found',
 					description: 'The user does not exist. Please try another.',
-					icon: Icons.user.default
+					icon: 'person'
 				})
 			]);
 		}
@@ -64,7 +63,7 @@ export const UserRedirect = () =>
 			// EmptyState({
 			//     title: 'Redirecting Conversation',
 			//     description: 'We are connecting you to the users conversation.',
-			//     icon: Icons.user.default
+			//     icon: 'person'
 			// })
 		]);
 	})

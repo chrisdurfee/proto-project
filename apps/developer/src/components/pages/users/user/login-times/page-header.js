@@ -1,6 +1,5 @@
 import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { DateRangePicker } from "@base-framework/ui/molecules";
 import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
 import { getDate } from "./get-date.js";
@@ -38,10 +37,10 @@ export const PageHeader = () => (
 			}
 		}),
 		Div({ class: 'hidden lg:flex' }, [
-			Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: Icons.refresh, click: refresh }, 'Refresh')
+			Button({ variant: 'withIcon', class: 'text-muted-foreground primary', icon: 'refresh', click: refresh }, 'Refresh')
 		]),
 		Div({ class: 'flex lg:hidden mr-0' }, [
-			Tooltip({ content: 'Refresh', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.refresh, click: refresh }))
+			Tooltip({ content: 'Refresh', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: 'refresh', click: refresh }))
 		]),
 	])
 );

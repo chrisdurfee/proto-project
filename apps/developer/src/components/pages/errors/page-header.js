@@ -1,6 +1,5 @@
 import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Combobox } from "@base-framework/ui/molecules";
 import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
 
@@ -56,10 +55,10 @@ const Dropdown = () => (
 export const PageHeader = () => (
 	TablePageHeader({ title: 'Errors' }, [
 		Div({ class: 'hidden lg:flex' }, [
-			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: Icons.refresh, click: refresh }, 'Refresh')
+			Button({ variant: 'withIcon', class: 'text-muted-foreground outline', icon: 'refresh', click: refresh }, 'Refresh')
 		]),
 		Div({ class: 'flex lg:hidden mr-0' }, [
-			Tooltip({ content: 'Refresh', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.refresh, click: refresh }))
+			Tooltip({ content: 'Refresh', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: 'refresh', click: refresh }))
 		]),
 		Dropdown()
 	])

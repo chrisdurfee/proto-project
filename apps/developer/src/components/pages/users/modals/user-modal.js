@@ -1,5 +1,4 @@
 import { Div, UseParent } from '@base-framework/atoms';
-import { Icons } from '@base-framework/ui/icons';
 import { DropdownMenu, Modal } from '@base-framework/ui/molecules';
 import { UserModel } from '../models/user-model.js';
 import { ChangePasswordModal } from './change-password-modal.js';
@@ -15,13 +14,13 @@ const NOTIFICATIONS = {
 			type: 'success',
 			title: 'User Added',
 			description: 'The user has been added.',
-			icon: Icons.check
+			icon: 'check'
 		},
 		error: {
 			type: 'destructive',
 			title: 'Error',
 			description: 'An error occurred while adding the user.',
-			icon: Icons.shield
+			icon: 'shield'
 		}
 	},
 	update: {
@@ -29,13 +28,13 @@ const NOTIFICATIONS = {
 			type: 'success',
 			title: 'User Updated',
 			description: 'The user has been updated.',
-			icon: Icons.check
+			icon: 'check'
 		},
 		error: {
 			type: 'destructive',
 			title: 'Error',
 			description: 'An error occurred while updating the user.',
-			icon: Icons.shield
+			icon: 'shield'
 		}
 	}
 };
@@ -117,11 +116,11 @@ const HeaderOptions = (data, closeCallback, onSubmit) =>
 	return () => [
 		UseParent((parent) => (
 			new DropdownMenu({
-				icon: Icons.ellipsis.vertical,
+				icon: 'more_vert',
 				groups: [
 					[
-						{ icon: Icons.locked, label: 'Change Password', value: 'change-password' },
-						{ icon: Icons.trash, label: 'Delete User', value: 'delete-user' }
+						{ icon: 'lock', label: 'Change Password', value: 'change-password' },
+						{ icon: 'delete', label: 'Delete User', value: 'delete-user' }
 					]
 				],
 				onSelect: (selected) => handleSelect(selected, parent)
@@ -176,7 +175,7 @@ export const UserModal = (props = {}) =>
 	return new Modal({
 		data,
 		title: isEditing ? 'Edit User' : 'Add User',
-		icon: isEditing ? Icons.pencil.square : Icons.user.plus,
+		icon: isEditing ? 'edit' : 'person_add',
 		description: isEditing ? 'Update user details.' : 'Create a new user.',
 		size: 'md',
 		type: 'right',

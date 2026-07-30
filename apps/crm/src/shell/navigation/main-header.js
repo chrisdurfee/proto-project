@@ -1,6 +1,5 @@
 import { A, Div, Img } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
-import { Icons } from "@base-framework/ui/icons";
 
 /**
  * This will create a logo.
@@ -36,7 +35,7 @@ const Logo = Atom((props) => (
  * @param {boolean} pinned
  * @returns {object}
  */
-const PinIcon = (pinned) => (pinned)? Icons.unlocked : Icons.locked;
+const PinIcon = (pinned) => (pinned)? 'lock_open' : 'lock';
 
 /**
  * This will create a pin button

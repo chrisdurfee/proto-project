@@ -1,7 +1,6 @@
 import { Div, P, Span } from "@base-framework/atoms";
 import { Atom, DateTime } from "@base-framework/base";
 import { ScrollableList } from "@base-framework/organisms";
-import { Icons } from "@base-framework/ui/icons";
 import { Avatar, EmptyState } from "@base-framework/ui/molecules";
 import { NoteDetailsModal } from "./modals/note-details-modal.js";
 
@@ -115,7 +114,7 @@ export const NoteList = Atom(({ data }) =>
 			emptyState: () => EmptyState({
 				title: 'No Notes Found',
 				description: 'No notes have been added for this client yet.',
-				icon: Icons.document.add
+				icon: 'note_add'
 			})
 		})
 	]);

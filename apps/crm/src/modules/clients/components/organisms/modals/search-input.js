@@ -1,6 +1,6 @@
 import { Div } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { Icon, Input } from "@base-framework/ui/atoms";
+import { Input, UniversalIcon } from "@base-framework/ui/atoms";
 
 const CLOSE_DELAY = 100;
 
@@ -20,7 +20,7 @@ export const SearchInput = Atom((props) => (
 			bind: (props.bind ?? [props.state, 'searchQuery'])
 		}),
 		props.icon && Div({ class: 'absolute flex right-0 mr-2' }, [
-			Icon(props.icon)
+			UniversalIcon({ size: 'sm' }, props.icon)
 		])
 	])
 ));

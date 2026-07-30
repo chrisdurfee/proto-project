@@ -1,5 +1,4 @@
 import { Strings } from "@base-framework/base";
-import { Icons } from '@base-framework/ui/icons';
 import { Confirmation } from '@base-framework/ui/molecules';
 
 /**
@@ -46,7 +45,7 @@ export const verifyEmail = () =>
 		}
 
 		app.notify({
-			icon: Icons.circleX,
+			icon: 'cancel',
 			title: 'Invalid Email Verification Token',
 			description: response.message ?? 'The provided verification token is incorrect.',
 			type: 'destructive'
@@ -63,7 +62,7 @@ export const verifyEmail = () =>
 const showDialog = () =>
 {
 	new Confirmation({
-		icon: Icons.circleCheck,
+		icon: 'check_circle',
 		type: 'success',
 		title: 'Email Verified',
 		description: 'Your email has been verified successfully.',

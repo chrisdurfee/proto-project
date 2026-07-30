@@ -1,7 +1,7 @@
 import { Div, Span } from "@base-framework/atoms";
 import { Atom } from "@base-framework/base";
-import { Icon } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
+import { UniversalIcon } from "@base-framework/ui/atoms";
+
 
 /**
  * VideoContainer
@@ -26,7 +26,7 @@ export const VideoContainer = Atom(({ name, isMuted, isMainParticipant = false }
 			Div({ class: "flex items-center justify-between" }, [
 				Span({ class: "text-sm font-medium" }, name),
 				isMuted && Span({ class: "flex items-center" }, [
-					Icon({ size: 'xs' }, Icons.microphone)
+					UniversalIcon({ size: 'xs' }, 'mic')
 				])
 			])
 		]),

@@ -1,6 +1,5 @@
 import { Div } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { PageHeader as TablePageHeader } from "@components/pages/types/page-header.js";
 
 /**
@@ -23,10 +22,10 @@ const refresh = (e, { list }) =>
 export const PageHeader = () => (
     TablePageHeader({ title: 'Authorized Devices' }, [
         Div({ class: 'hidden lg:flex' }, [
-            Button({ variant: 'withIcon', class: 'outline', icon: Icons.refresh, click: refresh }, 'Refresh')
+            Button({ variant: 'withIcon', class: 'outline', icon: 'refresh', click: refresh }, 'Refresh')
         ]),
         Div({ class: 'flex lg:hidden mr-0' }, [
-            Tooltip({ content: 'Refresh', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: Icons.refresh, click: refresh }))
+            Tooltip({ content: 'Refresh', position: 'left' }, Button({ variant: 'icon', class: 'outline', icon: 'refresh', click: refresh }))
         ]),
     ])
 );

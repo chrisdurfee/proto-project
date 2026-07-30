@@ -1,6 +1,5 @@
 import { Div, H1 } from "@base-framework/atoms";
 import { Button, Tooltip } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Avatar, StaticStatusIndicator } from "@base-framework/ui/molecules";
 import { Format } from "@base-framework/ui/utils";
 
@@ -49,22 +48,22 @@ export const UserHeader = ({ user }) => (
 		Div({ class: 'flex flex-auto items-center justify-center' }, [
 			Div({ class: 'flex gap-x-4 mt-4' }, [
 				Tooltip({ content: 'Email' }, [
-					Button({ variant: 'icon', icon: Icons.envelope.default, label: 'Email', disabled: '[[user.email]]', click: (e, { context }) =>
+					Button({ variant: 'icon', icon: 'mail', label: 'Email', disabled: '[[user.email]]', click: (e, { context }) =>
 					{
 						window.location.href = `mailto:${context?.data?.user?.email}`;
 					}})
 				]),
 				Tooltip({ content: 'Call' }, [
-					Button({ variant: 'icon', icon: Icons.phone.default, label: 'Call', disabled: '[[user.mobile]]', click: (e, { context }) =>
+					Button({ variant: 'icon', icon: 'phone', label: 'Call', disabled: '[[user.mobile]]', click: (e, { context }) =>
 					{
 						window.location.href = `tel:${context?.data?.user?.mobile}`;
 					}})
 				]),
 				Tooltip({ content: 'Message' }, [
-					Button({ variant: 'icon', icon: Icons.chat.text, label: 'Message' })
+					Button({ variant: 'icon', icon: 'chat', label: 'Message' })
 				]),
 				Tooltip({ content: 'More' }, [
-					Button({ variant: 'icon', icon: Icons.ellipsis.vertical, label: 'More' })
+					Button({ variant: 'icon', icon: 'more_vert', label: 'More' })
 				])
 			])
 		])

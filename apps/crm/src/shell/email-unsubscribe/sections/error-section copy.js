@@ -1,7 +1,6 @@
 import { Div, Form, H2, Header, P, Section } from '@base-framework/atoms';
 import { Atom } from '@base-framework/base';
-import { Icon } from "@base-framework/ui/atoms";
-import { Icons } from '@base-framework/ui/icons';
+import { UniversalIcon } from "@base-framework/ui/atoms";
 
 /**
  * @function ErrorMessage
@@ -17,7 +16,7 @@ export const ErrorMessage = Atom(() =>
 			Div({ class: 'flex flex-auto flex-col gap-y-4' }, [
 				Div({ class: 'flex flex-auto items-center justify-center' }, [
 					Div({ class: 'w-16 h-16 mb-6 text-primary' }, [
-						Icon(Icons.circleX)
+						UniversalIcon({ size: 'sm' }, 'cancel')
 					])
 				]),
 				Header({ class: 'py-4 text-center' }, [

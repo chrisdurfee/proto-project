@@ -1,7 +1,6 @@
 import { Div, Textarea } from "@base-framework/atoms";
 import { Jot } from "@base-framework/base";
 import { Button } from "@base-framework/ui/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { Form } from "@base-framework/ui/molecules";
 import { ClientNoteModel } from "../../../models/client-note-model.js";
 
@@ -92,7 +91,7 @@ export const NoteComposer = Jot(
 					type: "destructive",
 					title: "Error",
 					description: response?.message || "Failed to add note.",
-					icon: Icons.warning
+					icon: 'warning'
 				});
 				return;
 			}
@@ -156,7 +155,7 @@ export const NoteComposer = Jot(
 						Button({
 							type: "submit",
 							variant: "icon",
-							icon: Icons.airplane,
+							icon: 'send',
 							class: "text-foreground hover:text-accent",
 							onSet: ['empty', (empty, el) => el.disabled = empty]
 						})

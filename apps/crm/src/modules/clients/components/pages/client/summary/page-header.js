@@ -1,5 +1,4 @@
 import { Div, H2, UseParent } from "@base-framework/atoms";
-import { Icons } from "@base-framework/ui/icons";
 import { DropdownMenu } from "@base-framework/ui/molecules";
 import { IsAdmin } from "@components/atoms/gate-atoms.js";
 import { ActivityAvatarGroup } from "@components/organisms/tracking/activity-avatar-group.js";
@@ -38,11 +37,11 @@ export const PageHeader = (client) => (
 			IsAdmin(() =>
 				UseParent((parent) => (
 					new DropdownMenu({
-						icon: Icons.ellipsis.vertical,
+						icon: 'more_vert',
 						variant: 'outline',
 						groups: [
 							[
-								{ icon: Icons.pencil.square, label: 'Edit', value: 'edit' }
+								{ icon: 'edit', label: 'Edit', value: 'edit' }
 							]
 						],
 						onSelect: (selected) =>
