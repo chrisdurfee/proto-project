@@ -156,14 +156,18 @@ class NewUserService extends Service
 		UserHelper::restrictData($data);
 		UserHelper::restrictCredentials($data);
 
-		// Ensure the user is enabled
-		$data->enabled = 1;
-
 		$user = $this->updateUser($data);
 		if (!$user)
 		{
 			return null;
 		}
+
+		// Enable the account now that onboarding is complete.
+		if (!$user->activate())
+		{
+			return null;
+		}
+		$user->enabled = 1;
 
 		if (!$this->addRoles($user))
 		{

@@ -532,9 +532,18 @@ class AuthController extends Controller
 			return $this->error("User not found. Please sign up first.", HttpStatus::UNAUTHORIZED->value);
 		}
 
-		// Check if user is new (created within last 10 seconds)
+		/**
+		 * Treat the user as "new" if the row was just created OR if they
+		 * never finished onboarding (`enabled` is only flipped to 1 at the
+		 * end of the sign-up wizard). The frontend routes isNew users back
+		 * into the wizard; without this, a user whose signup crashed
+		 * mid-flow is signed in here, then pulse() sees enabled=0 seconds
+		 * later and signs them out — a permanent lockout with no path back
+		 * to onboarding.
+		 */
 		$user = $result->user;
-		$isNew = ($user->createdAt && strtotime($user->createdAt) > time() - 10);
+		$isNew = ($user->createdAt && strtotime($user->createdAt) > time() - 10)
+			|| (int)$user->enabled === 0;
 
 		$response = $this->permit($user, $req->ip());
 
@@ -598,7 +607,9 @@ class AuthController extends Controller
 
 		return $this->response([
 			'user' => $user,
-			'isNew' => $result->isNew
+			// Same rule as googleCallback(): an existing but never-enabled
+			// account still needs the onboarding wizard, so report it as new.
+			'isNew' => $result->isNew || (int)$user->enabled === 0
 		]);
 	}
 

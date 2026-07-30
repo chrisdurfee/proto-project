@@ -69,6 +69,31 @@ class UserStorage extends Storage
 	}
 
 	/**
+	 * This will enable the user account.
+	 *
+	 * Onboarding completion is the one sanctioned place an account gets
+	 * enabled. Going through a targeted update here (same pattern as
+	 * updatePassword()) keeps this working even if `enabled` is later
+	 * added to the model's immutable fields, which would otherwise cause
+	 * the standard update pipeline to silently strip it.
+	 *
+	 * @return bool
+	 */
+	public function activate(): bool
+	{
+		$id = $this->model->id ?? null;
+		if ($id === null)
+		{
+			return false;
+		}
+
+		return $this->db->update($this->tableName, (object)[
+			'id' => $id,
+			'enabled' => 1
+		]);
+	}
+
+	/**
 	 * This will check if a username is taken.
 	 *
 	 * @param string $username
