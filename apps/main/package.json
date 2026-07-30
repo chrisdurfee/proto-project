@@ -20,7 +20,7 @@
 	"author": "Chris Durfee",
 	"license": "ISC",
 	"devDependencies": {
-		"esbuild": "^0.25.12",
+		"esbuild": "^0.28.1",
 		"tailwindcss": "^4.1.16"
 	},
 	"dependencies": {
