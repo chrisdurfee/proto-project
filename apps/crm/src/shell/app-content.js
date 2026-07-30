@@ -1,5 +1,6 @@
 import { Div } from '@base-framework/atoms';
 import { Import } from '@base-framework/base';
+import { whenCsrfReady } from '../csrf-token.js';
 import { openInstallPrompt } from './installation/install.js';
 import { AuthModel } from './models/auth-model.js';
 
@@ -53,12 +54,18 @@ const MainContent = () => (
 /**
  * This will resume the user session.
  *
+ * MUST wait for the initial CSRF token to be set before firing the
+ * `resume` POST — `resume` is CSRF-protected and racing the
+ * `GET /api/auth/csrf-token` fetch with a fixed `setTimeout` causes
+ * a 403 on slow networks, which the frontend treats as
+ * `allowAccess !== true` and signs the user out. Awaiting the token
+ * eliminates the race entirely.
+ *
  * @returns {void}
  */
 const resumeUserSession = () =>
 {
-	const DELAY = 200;
-	setTimeout(() =>
+	whenCsrfReady().then(() =>
 	{
 		const model = new AuthModel();
 		model.xhr.resume('', (response) =>
@@ -77,7 +84,7 @@ const resumeUserSession = () =>
 				app.signOut();
 			}
 		});
-	}, DELAY);
+	});
 };
 
 /**
