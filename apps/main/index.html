@@ -10,6 +10,8 @@
 
 		<!-- Restore persisted theme class before first paint to avoid flash -->
 		<script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.classList.add(t);})();</script>
+		<!-- Skip splash before JS when the shell was ready in a prior visit (same tab session storage) -->
+		<script>(function(){try{if(sessionStorage.getItem('shellReady')==='1')document.documentElement.classList.add('splash-warm');}catch(e){}})();</script>
 
 		<!-- Critical background: set synchronously so iOS never paints a white canvas
 		     during swipe-back before the external theme.css resolves CSS variables. -->
@@ -95,6 +97,13 @@
 				pointer-events: none;
 			}
 
+			html.splash-warm #app-splash {
+				opacity: 0;
+				visibility: hidden;
+				pointer-events: none;
+				transition: none;
+			}
+
 			.authed #app-splash {
 				opacity: 0 !important;
 				pointer-events: none;
@@ -131,6 +140,18 @@
 			 * @type {object} app
 			 */
 			globalThis.app = new AppController();
+
+			// Never let a stalled bootstrap (e.g. an iOS PWA service
+			// worker that hangs) trap the user on the splash screen.
+			const bootTimeout = new Promise((resolve) => setTimeout(resolve, 4000));
+			try
+			{
+				await Promise.race([globalThis.app.ready(), bootTimeout]);
+			}
+			catch (e)
+			{
+				console.error('App bootstrap error:', e);
+			}
 			globalThis.app.render();
 		</script>
 	</body>

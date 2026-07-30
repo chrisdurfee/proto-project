@@ -8,6 +8,31 @@
 		<meta name="description" content="">
 		<meta name="keywords" content="">
 
+		<!-- Restore persisted theme class before first paint to avoid flash -->
+		<script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.classList.add(t);})();</script>
+		<!-- Skip splash before JS when the shell was ready in a prior visit (same tab session storage) -->
+		<script>(function(){try{if(sessionStorage.getItem('shellReady')==='1')document.documentElement.classList.add('splash-warm');}catch(e){}})();</script>
+
+		<!-- Critical background: set synchronously so iOS never paints a white canvas
+		     during swipe-back before the external theme.css resolves CSS variables. -->
+		<style>
+			html, body {
+				background-color: hsl(0 0% 95%);
+			}
+			@media (prefers-color-scheme: dark) {
+				html:not(.light),
+				html:not(.light) body {
+					background-color: hsl(240 5% 5%);
+					color-scheme: dark;
+				}
+			}
+			html.dark,
+			html.dark body {
+				background-color: hsl(240 5% 5%);
+				color-scheme: dark;
+			}
+		</style>
+
 		<!-- styles -->
 		<link rel="preload" href="/css/theme.css" as="style">
 		<link rel="stylesheet" type="text/css" href="/css/theme.css">
@@ -46,22 +71,70 @@
 		<meta name="msapplication-TileColor" content="#09090b">
 
 		<base href="./">
+
+		<!-- In-app splash screen -->
+		<style>
+			#app-splash {
+				position: fixed;
+				inset: 0;
+				z-index: 9999;
+				background-color: var(--color-background);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: opacity 0.3s ease-out;
+			}
+
+			#app-splash.fade-out {
+				opacity: 0;
+				pointer-events: none;
+			}
+
+			html.splash-warm #app-splash {
+				opacity: 0;
+				visibility: hidden;
+				pointer-events: none;
+				transition: none;
+			}
+
+			.authed #app-splash {
+				opacity: 0 !important;
+				pointer-events: none;
+				transition: opacity 1s ease-out !important;
+			}
+
+			#app-splash .splash-wordmark {
+				color: var(--color-foreground);
+				font-family: 'Inter', 'Helvetica Neue', sans-serif;
+				font-size: 1.75rem;
+				font-weight: 700;
+				letter-spacing: -0.04em;
+				line-height: 1;
+			}
+		</style>
 	</head>
 	<body class="app-container bg-background text-foreground relative flex flex-auto flex-col max-w-full z-10 focus:outline-none authed">
+		<div id="app-splash" aria-hidden="true">
+			<span class="splash-wordmark">Developer</span>
+		</div>
+
 		<!-- alert js error -->
 		<noscript>You need to enable JavaScript to run this app.</noscript>
 
 		<script type="module">
 			import { AppController } from './src/app-controller.js';
 
-			/**
-			 * This will start the app and add a global variable to
-			 * the app controller.
-			 *
-			 * @global
-			 * @type {object} app
-			 */
 			globalThis.app = new AppController();
+
+			const bootTimeout = new Promise((resolve) => setTimeout(resolve, 4000));
+			try
+			{
+				await Promise.race([globalThis.app.ready(), bootTimeout]);
+			}
+			catch (e)
+			{
+				console.error('App bootstrap error:', e);
+			}
 			globalThis.app.render();
 		</script>
 	</body>
