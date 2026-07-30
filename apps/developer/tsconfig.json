@@ -42,35 +42,35 @@
 			],
 			"@base-framework/ui": [
 				"./node_modules/@base-framework/ui/dist/types/ui.d.ts",
-				"./node_modules/@base-framework/ui/dist/index.es.js"
+				"./node_modules/@base-framework/ui/dist/index.js"
 			],
 			"@base-framework/ui/atoms": [
-				"./node_modules/@base-framework/ui/dist/components/types/atoms.d.ts",
-				"./node_modules/@base-framework/ui/dist/atoms.es.js"
+				"./node_modules/@base-framework/ui/dist/types/components/atoms/atoms.d.ts",
+				"./node_modules/@base-framework/ui/dist/atoms.js"
 			],
 			"@base-framework/ui/icons": [
-				"./node_modules/@base-framework/ui/dist/components/types/icons.d.ts",
-				"./node_modules/@base-framework/ui/dist/icons.es.js"
+				"./node_modules/@base-framework/ui/dist/types/components/icons/icons.d.ts",
+				"./node_modules/@base-framework/ui/dist/icons.js"
 			],
 			"@base-framework/ui/molecules": [
-				"./node_modules/@base-framework/ui/dist/components/types/molecules.d.ts",
-				"./node_modules/@base-framework/ui/dist/molecules.es.js"
+				"./node_modules/@base-framework/ui/dist/types/components/molecules/molecules.d.ts",
+				"./node_modules/@base-framework/ui/dist/molecules.js"
 			],
 			"@base-framework/ui/organisms": [
-				"./node_modules/@base-framework/ui/dist/components/types/organisms.d.ts",
-				"./node_modules/@base-framework/ui/dist/organisms.es.js"
+				"./node_modules/@base-framework/ui/dist/types/components/organisms/organisms.d.ts",
+				"./node_modules/@base-framework/ui/dist/organisms.js"
 			],
 			"@base-framework/ui/pages": [
-				"./node_modules/@base-framework/ui/dist/components/types/pages.d.ts",
-				"./node_modules/@base-framework/ui/dist/pages.es.js"
+				"./node_modules/@base-framework/ui/dist/types/components/pages/pages.d.ts",
+				"./node_modules/@base-framework/ui/dist/pages.js"
 			],
 			"@base-framework/ui/templates": [
-				"./node_modules/@base-framework/ui/dist/components/types/templates.d.ts",
-				"./node_modules/@base-framework/ui/dist/templates.es.js"
+				"./node_modules/@base-framework/ui/dist/types/components/pages/templates/templates.d.ts",
+				"./node_modules/@base-framework/ui/dist/templates.js"
 			],
 			"@base-framework/ui/utils": [
-				"./node_modules/@base-framework/ui/dist/components/types/utils.d.ts",
-				"./node_modules/@base-framework/ui/dist/utils.es.js"
+				"./node_modules/@base-framework/ui/dist/types/utils/utils.d.ts",
+				"./node_modules/@base-framework/ui/dist/utils.js"
 			],
 			"d3": [
 				"./node_modules/d3/dist/d3.js"
