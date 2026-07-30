@@ -1,6 +1,7 @@
 import { Div } from '@base-framework/atoms';
 import { Atom, Jot } from '@base-framework/base';
 import { NotificationContainer } from '@base-framework/ui/molecules';
+import { RouteProgress } from './route-progress/route-progress.js';
 import { verifyEmail } from './verify-email.js';
 
 /**
@@ -16,6 +17,11 @@ const Shell = Atom((props, children) =>
 			...props,
 			class: 'shell flex flex-auto relative z-10'
 		}, [
+			/**
+			 * This shows a thin top loading bar while a route chunk downloads.
+			 */
+			RouteProgress(),
+
 			/**
 			 * This will set up the notification container so that it can be used
 			 * throughout the app.

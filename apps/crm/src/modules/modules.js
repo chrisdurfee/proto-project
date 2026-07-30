@@ -1,5 +1,20 @@
 import "./imported-modules.js";
-import { AppModules } from "./module/module.js";
+import { AppModules, Module } from "./module/module.js";
+
+/**
+ * Catch-all route appended after every module route. The router matches
+ * routes in order, so this only renders when no module route matches,
+ * keeping the user inside the app shell instead of a blank content area.
+ *
+ * @returns {Array<object>}
+ */
+const getFallbackRoutes = () => Module.convertRoutes([
+	{
+		path: '*',
+		import: () => import('@components/pages/not-found-page.js'),
+		title: 'Not Found'
+	}
+]);
 
 /**
  * This will get the module settings.
@@ -25,6 +40,8 @@ const getModuleSettings = (modules) =>
 		const moduleLinks = module.getLinks() || [];
 		links.push(...moduleLinks);
 	});
+
+	routes.push(...getFallbackRoutes());
 
 	return {
 		routes,

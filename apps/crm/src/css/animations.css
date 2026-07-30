@@ -226,3 +226,20 @@
     backface-visibility: hidden;
     will-change: transform, opacity;
 }
+
+@keyframes routeProgressShuttle {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(350%);
+    }
+}
+
+.routeProgressShuttle {
+    animation: routeProgressShuttle 1.05s ease-in-out infinite;
+
+    backface-visibility: hidden;
+    will-change: transform;
+}

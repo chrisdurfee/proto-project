@@ -1,6 +1,7 @@
 import { Div } from '@base-framework/atoms';
 import { Atom, Jot } from '@base-framework/base';
 import { NotificationContainer } from '@base-framework/ui/molecules';
+import { RouteProgress } from './route-progress/route-progress.js';
 import { verifyEmail } from './verify-email.js';
 
 /**
@@ -23,6 +24,11 @@ const Shell = Atom((props, children) =>
 			new NotificationContainer({
 				cache: 'notifications'
 			}),
+
+			/**
+			 * This shows a thin top loading bar while a route chunk downloads.
+			 */
+			RouteProgress(),
 			...children
 	]);
 });
@@ -45,7 +51,7 @@ export const AppShell = Jot(
 	{
 		return Shell([
 			Div({
-				class: 'flex flex-auto flex-col',
+				class: 'flex flex-auto flex-col min-w-0',
 				route: {
 					uri: 'verify-email*',
 					callBack: () => verifyEmail()

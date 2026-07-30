@@ -1,3 +1,7 @@
+import { RouteLoadErrorPage } from '@components/pages/route-load-error-page.js';
+import { RouteLoading } from '../../shell/data/route-loading.js';
+import { recoverFromStaleChunk } from '../../utils/stale-chunk.js';
+
 /**
  * Gets the global app data user object.
  *
@@ -39,6 +43,38 @@ const userHasRole = (roleSlug) =>
 };
 
 /**
+ * Wraps a dynamic import loader so a failed chunk load triggers
+ * stale-shell recovery and re-throws. Resolving with the error page
+ * here would poison the framework's import cache for the whole
+ * session — instead the rejection is propagated so the cache entry
+ * is dropped and the route's `fallback` layout renders. A later
+ * navigation (or the fallback's retry) re-attempts the import.
+ *
+ * @param {function} src
+ * @returns {function}
+ */
+const guardLoader = (src) =>
+{
+	return () =>
+	{
+		RouteLoading.start();
+		return src()
+			.then((mod) =>
+			{
+				RouteLoading.done();
+				return mod;
+			})
+			.catch((error) =>
+			{
+				RouteLoading.done();
+				console.error('Route chunk failed to load:', error);
+				recoverFromStaleChunk();
+				throw error;
+			});
+	};
+};
+
+/**
  * ModuleRoutes
  *
  * This will help create local module routes.
@@ -55,6 +91,7 @@ export class ModuleRoutes
 	 * @param {string} [title]
 	 * @param {boolean} [preventScroll]
 	 * @param {string} [role]
+	 * @param {boolean} [persist=true]
 	 * @returns {object}
 	 */
 	add(
@@ -62,7 +99,8 @@ export class ModuleRoutes
 		component,
 		title,
 		preventScroll = false,
-		role = null
+		role = null,
+		persist = true
 	)
 	{
 		if (role && !userHasRole(role))
@@ -75,7 +113,7 @@ export class ModuleRoutes
 			component,
 			title,
 			preventScroll: preventScroll || false,
-			persist: true
+			persist
 		};
 	}
 
@@ -103,9 +141,10 @@ export class ModuleRoutes
 	 * @param {string} [title]
 	 * @param {boolean} [preventScroll]
 	 * @param {string} [role]
+	 * @param {boolean} [persist=true]
 	 * @returns {object}
 	 */
-	load(uri, loader, title, preventScroll = false, role = null)
+	load(uri, loader, title, preventScroll = false, role = null, persist = true)
 	{
 		if (typeof loader === 'string')
 		{
@@ -126,15 +165,17 @@ export class ModuleRoutes
 			return null;
 		}
 
+		const src = typeof loader.src === 'function' ? guardLoader(loader.src) : loader.src;
 		return {
 			uri,
 			import: {
-				src: loader.src,
-				callBack
+				src,
+				callBack,
+				fallback: () => RouteLoadErrorPage()
 			},
 			title,
 			preventScroll,
-			persist: true
+			persist
 		};
 	}
 }

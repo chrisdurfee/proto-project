@@ -61,7 +61,8 @@ export class Module
 					route.import,
 					route.title,
 					route.preventScroll,
-					route.role
+					route.role,
+					route.persist
 				);
 			}
 
@@ -70,7 +71,8 @@ export class Module
 				route.component,
 				route.title,
 				route.preventScroll,
-				route.role
+				route.role,
+				route.persist
 			);
 		});
 	}
