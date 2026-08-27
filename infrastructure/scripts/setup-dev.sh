@@ -53,7 +53,7 @@ echo "📦 Installing frontend dependencies..."
 for app in main crm developer; do
     echo "   Installing dependencies for $app app..."
     if [ -f "apps/$app/package.json" ]; then
-        docker-compose exec vite-$app npm install
+        docker-compose exec vite-$app npm ci
     fi
 done
 

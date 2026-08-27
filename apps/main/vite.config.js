@@ -144,6 +144,24 @@ export default defineConfig({
 	],
 	base: BASE_URL,
 	resolve: {
+		/**
+		 * The framework packages export module-level singletons — `base`,
+		 * `dataBinder`, `router` — and a directive registry populated by
+		 * import-time side effects. A second module instance means a second
+		 * data binder and directive registry, so elements built through one
+		 * instance silently fail to bind or render through the other. There
+		 * is no error; it surfaces as unexplained rendering bugs.
+		 *
+		 * atoms/organisms/ui declare base as a peer, so npm normally hoists
+		 * one copy. dedupe is the guarantee: it pins these specifiers to the
+		 * root-resolved copy even if a nested one ever appears.
+		 */
+		dedupe: [
+			'@base-framework/base',
+			'@base-framework/atoms',
+			'@base-framework/organisms',
+			'@base-framework/ui'
+		],
 		alias: {
 			'@components': path.resolve(__dirname, 'src/components'),
 			'@pages': path.resolve(__dirname, 'src/components/pages'),

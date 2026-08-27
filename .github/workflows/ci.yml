@@ -303,7 +303,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: apps/${{ matrix.app }}
-        run: npm install
+        run: npm ci
 
       - name: Type check
         working-directory: apps/${{ matrix.app }}
@@ -389,20 +389,20 @@ jobs:
       - name: Audit frontend dependencies - Main
         working-directory: apps/main
         run: |
-          npm install
+          npm ci
           npm audit --audit-level=high
         continue-on-error: true
 
       - name: Audit frontend dependencies - CRM
         working-directory: apps/crm
         run: |
-          npm install
+          npm ci
           npm audit --audit-level=high
         continue-on-error: true
 
       - name: Audit frontend dependencies - Developer
         working-directory: apps/developer
         run: |
-          npm install
+          npm ci
           npm audit --audit-level=high
         continue-on-error: true

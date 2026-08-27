@@ -52,7 +52,7 @@ REM Install dependencies for each app
 for %%a in (main crm developer) do (
     echo    Installing dependencies for %%a app...
     if exist "apps\%%a\package.json" (
-        docker-compose exec vite-%%a npm install
+        docker-compose exec vite-%%a npm ci
     )
 )
 

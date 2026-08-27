@@ -164,8 +164,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 COPY apps/ ./apps/
 
 # Build frontend apps for production (main and crm only, developer is dev-only)
-RUN cd apps/main && npm install && npm run build && \
-    cd ../crm && npm install && npm run build && \
+RUN cd apps/main && npm ci && npm run build && \
+    cd ../crm && npm ci && npm run build && \
     cd ../.. && \
     echo "Frontend apps built successfully"
 
