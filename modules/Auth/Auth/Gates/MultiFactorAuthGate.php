@@ -75,13 +75,13 @@ class MultiFactorAuthGate extends Gate
 	 * Persist both user and device references for the current MFA flow.
 	 *
 	 * @param User $user Authenticated user model.
-	 * @param object $device Device/fingerprint model.
+	 * @param object|null $device Device/fingerprint model (empty object when omitted).
 	 * @return void
 	 */
-	public function setResources(User $user, object $device): void
+	public function setResources(User $user, ?object $device = null): void
 	{
 		$this->setUser($user);
-		$this->setDevice($device);
+		$this->setDevice($device ?? (object)[]);
 	}
 
 	/**

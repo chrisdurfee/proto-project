@@ -59,10 +59,10 @@ class MultiFactorAuthService extends Service
 	 * Persist user and device context for this MFA session.
 	 *
 	 * @param User $user
-	 * @param object $device
+	 * @param object|null $device
 	 * @return void
 	 */
-	public function setResources(User $user, object $device): void
+	public function setResources(User $user, ?object $device = null): void
 	{
 		self::gate()->setResources($user, $device);
 	}
