@@ -31,7 +31,7 @@
 		"@tailwindcss/postcss": "^4.1.16",
 		"@tailwindcss/vite": "^4.1.16",
 		"d3": "^7.9.0",
-		"http-proxy-middleware": "^3.0.5",
+		"http-proxy-middleware": "^4.2.0",
 		"mapbox-gl": "^3.21.0",
 		"typescript": "^5.9.3",
 		"vite": "^7.3.2"
