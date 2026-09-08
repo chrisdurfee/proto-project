@@ -12,6 +12,8 @@ use Modules\Auth\Auth\Policies\AuthPolicy;
 use Proto\Controllers\Controller;
 use Proto\Http\Router\Request;
 use Proto\Auth\Gates\CrossSiteRequestForgeryGate;
+use Proto\Http\Limit;
+use Proto\Http\RateLimiter;
 
 /**
  * AuthController
@@ -35,6 +37,28 @@ class AuthController extends Controller
 	 * @var int
 	 */
 	const MAX_ATTEMPTS = 10;
+
+	/**
+	 * Maximum login attempts allowed per source IP within the window below.
+	 *
+	 * @var int
+	 */
+	const MAX_LOGIN_ATTEMPTS_PER_IP = 10;
+
+	/**
+	 * Maximum login attempts allowed per account within the window below,
+	 * regardless of how many source IPs the requests arrive from.
+	 *
+	 * @var int
+	 */
+	const MAX_LOGIN_ATTEMPTS_PER_ACCOUNT = 10;
+
+	/**
+	 * Window (in seconds) the login attempt limits above apply over.
+	 *
+	 * @var int
+	 */
+	const LOGIN_ATTEMPT_WINDOW_SECONDS = 900;
 
 	/**
 	 * Constructor.
@@ -69,6 +93,10 @@ class AuthController extends Controller
 				HttpStatus::BAD_REQUEST->value
 			);
 		}
+
+		// Bound attackers who rotate source IPs; the DB-backed counter
+		// below is keyed on (ip, username) and cannot see them.
+		$this->enforceLoginRateLimit($req, $username);
 
 		$attempts = $this->getAttempts($username, $req->ip());
 		if ($attempts >= self::MAX_ATTEMPTS)
@@ -703,6 +731,39 @@ class AuthController extends Controller
 		}
 
 		return $userId;
+	}
+
+	/**
+	 * Applies IP-independent throttling to a login attempt.
+	 *
+	 * The DB-backed counter in getAttempts() is keyed on (ip, username),
+	 * so an attacker who rotates source IPs never accumulates enough
+	 * attempts against any single pair to trip it. These limits close
+	 * that gap: one bounds a single noisy IP across accounts, the other
+	 * bounds a single account across every IP.
+	 *
+	 * The account key is hashed so the raw identifier is never used as a
+	 * cache key. Sends a 429 and exits when either limit is exceeded.
+	 *
+	 * @param Request $req
+	 * @param string $username Username or email as submitted at login.
+	 * @return void
+	 */
+	protected function enforceLoginRateLimit(Request $req, string $username): void
+	{
+		$ip = (string)($req->ip() ?? 'unknown');
+		RateLimiter::check(
+			(new Limit(self::MAX_LOGIN_ATTEMPTS_PER_IP))
+				->setTimeLimit(self::LOGIN_ATTEMPT_WINDOW_SECONDS)
+				->by('login-ip:' . $ip)
+		);
+
+		$identifier = hash('sha256', strtolower(trim($username)));
+		RateLimiter::check(
+			(new Limit(self::MAX_LOGIN_ATTEMPTS_PER_ACCOUNT))
+				->setTimeLimit(self::LOGIN_ATTEMPT_WINDOW_SECONDS)
+				->by('login-account:' . $identifier)
+		);
 	}
 
 	/**
