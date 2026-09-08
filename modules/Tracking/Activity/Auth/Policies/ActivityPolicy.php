@@ -36,6 +36,63 @@ class ActivityPolicy extends Policy
 	 */
 	public function default(Request $request): bool
 	{
-		return ($this->canAccessCrm());
+		return $this->canAccessCrm();
+	}
+
+	/**
+	 * Register the current user as viewing a resource.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function add(Request $request): bool
+	{
+		return $this->isSignedIn();
+	}
+
+	/**
+	 * List active viewers for a resource.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function getByType(Request $request): bool
+	{
+		return $this->isSignedIn();
+	}
+
+	/**
+	 * Stream real-time presence updates for a resource.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function sync(Request $request): bool
+	{
+		return $this->isSignedIn();
+	}
+
+	/**
+	 * Remove a user from a resource's active viewers.
+	 *
+	 * The userId is client-supplied, so a caller may only remove
+	 * themselves. Admins and CRM staff may evict any viewer.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function deleteUserByType(Request $request): bool
+	{
+		if (!$this->isSignedIn())
+		{
+			return false;
+		}
+
+		if ($this->isAdmin() || $this->canAccessCrm())
+		{
+			return true;
+		}
+
+		return $request->getInt('userId') === $this->getUserId();
 	}
 }

@@ -22,15 +22,97 @@ class NotificationPolicy extends Policy
 	protected ?string $type = 'notification';
 
 	/**
-	 * Allow any authenticated user through by default
-	 * (list, mark-all-read, sync).
+	 * Admin bypass; per-method gates handle non-admin access.
+	 *
+	 * A `before()` that returns true short-circuits every other policy
+	 * method, so it must never return a bare `isSignedIn()` here or the
+	 * ownership checks below would never run.
 	 *
 	 * @param Request $request
 	 * @return bool
 	 */
 	public function before(Request $request): bool
 	{
+		return $this->isAdmin();
+	}
+
+	/**
+	 * Listing notifications is scoped server-side to the session user;
+	 * any authenticated user may list their own.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function all(Request $request): bool
+	{
 		return $this->isSignedIn();
+	}
+
+	/**
+	 * Allow fetching the unread notification count.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function unreadCount(Request $request): bool
+	{
+		return $this->isSignedIn();
+	}
+
+	/**
+	 * Allow fetching feed-card notifications for the session user.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function feedCards(Request $request): bool
+	{
+		return $this->isSignedIn();
+	}
+
+	/**
+	 * Allow syncing notifications.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function sync(Request $request): bool
+	{
+		return $this->isSignedIn();
+	}
+
+	/**
+	 * Allow marking all of the session user's notifications as read.
+	 * Server-side scope ensures only the caller's notifications are touched.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function markAllRead(Request $request): bool
+	{
+		return $this->isSignedIn();
+	}
+
+	/**
+	 * Allow marking a single notification read only if it belongs to the user.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function markRead(Request $request): bool
+	{
+		return $this->ownsNotification($request);
+	}
+
+	/**
+	 * Allow dismissing a single notification only if it belongs to the user.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function dismiss(Request $request): bool
+	{
+		return $this->ownsNotification($request);
 	}
 
 	/**

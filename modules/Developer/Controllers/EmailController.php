@@ -3,6 +3,7 @@ namespace Modules\Developer\Controllers;
 
 use Proto\Http\Router\Request;
 use Proto\Dispatch\Email\Template;
+use Modules\Developer\Auth\Policies\OperationsPolicy;
 use Proto\Dispatch\Dispatcher;
 
 /**
@@ -14,6 +15,11 @@ use Proto\Dispatch\Dispatcher;
  */
 class EmailController extends Controller
 {
+	/**
+	 * @var string|null $policy
+	 */
+	protected ?string $policy = OperationsPolicy::class;
+
 	/**
 	 * Previews the email template.
 	 *

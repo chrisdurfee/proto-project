@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Developer\Controllers;
 
+use Modules\Developer\Auth\Policies\OperationsPolicy;
 use Proto\Error\Models\ErrorLog;
 use Proto\Http\Router\Request;
 
@@ -13,6 +14,11 @@ use Proto\Http\Router\Request;
  */
 class ErrorController extends Controller
 {
+	/**
+	 * @var string|null $policy
+	 */
+	protected ?string $policy = OperationsPolicy::class;
+
 	/**
 	 * This will toggle the resolved status of an error.
 	 *

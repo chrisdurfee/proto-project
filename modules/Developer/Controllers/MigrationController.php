@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Modules\Developer\Controllers;
 
+use Modules\Developer\Auth\Policies\OperationsPolicy;
 use Proto\Database\Migrations\Guide;
 use Proto\Database\Migrations\Models\Migration;
 use Proto\Http\Router\Request;
@@ -14,6 +15,11 @@ use Proto\Http\Router\Request;
  */
 class MigrationController extends Controller
 {
+	/**
+	 * @var string|null $policy
+	 */
+	protected ?string $policy = OperationsPolicy::class;
+
 	/**
 	 * Initializes the migration guide service.
 	 *
@@ -74,7 +80,7 @@ class MigrationController extends Controller
 
 			error_log('[MigrationController] ' . get_class($e) . ': ' . $message . ' in ' . $trace);
 
-			return $this->error($message . ' [' . $trace . ']');
+			return $this->error('Migration failed.');
 		}
 	}
 
