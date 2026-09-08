@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# Docker container startup script
-echo "🚀 Starting Rally container..."
+# Docker container startup script.
+# SERVICE_ROLE selects the process model for this container:
+#   web (default)  — PHP-FPM + Apache; RUN_CRON gates in-container cron
+#   scheduler      — cron only (no Apache/FPM); always installs cron jobs
+# Use one scheduler with RUN_CRON=true (or SERVICE_ROLE=scheduler) and set
+# RUN_CRON=false on every web replica so deploys/restarts do not kill jobs.
+echo "🚀 Starting container (SERVICE_ROLE=${SERVICE_ROLE:-web})..."
 
 # Function to check if a service is ready
 wait_for_service() {
@@ -24,6 +29,39 @@ wait_for_service() {
     if [ $count -lt $max_wait ]; then
         echo "✅ $service_name is ready"
     fi
+}
+
+# Install /etc/cron.d jobs from infrastructure/docker/cron and start cron.
+# Shared by the web role (when RUN_CRON=true) and the scheduler role (always).
+install_and_start_cron() {
+    echo "📅 Configuring scheduled tasks (cron)..."
+    mkdir -p /var/log
+    # Ensure www-data can create new log files inside /var/log even if the
+    # per-file pre-creation below is skipped (e.g. due to a timing race on
+    # first container start or after a recreate that drops the writable layer).
+    chgrp www-data /var/log 2>/dev/null || true
+    chmod g+w /var/log 2>/dev/null || true
+    if [ -d /var/www/html/infrastructure/docker/cron ]; then
+        for cronfile in /var/www/html/infrastructure/docker/cron/*; do
+            [ -f "$cronfile" ] || continue
+            name="$(basename "$cronfile")"
+            cp "$cronfile" /etc/cron.d/"$name"
+            chmod 0644 /etc/cron.d/"$name"
+            # Pre-create the log file each cron job redirects to so the
+            # unprivileged user (www-data) running the job can append to
+            # it. Without this, cron jobs silently fail with
+            # "cannot create /var/log/<name>.log: Permission denied" and
+            # the failure only surfaces in /var/mail/www-data.
+            logfile="/var/log/${name}.log"
+            touch "$logfile"
+            chown www-data:www-data "$logfile"
+            chmod 0664 "$logfile"
+            echo "✅ Installed cron job: $name"
+        done
+        php /var/www/html/infrastructure/scripts/sync-cron-registry.php >/dev/null 2>&1 || true
+    fi
+    service cron start >/dev/null 2>&1 || cron >/dev/null 2>&1 || true
+    echo "✅ Cron daemon started"
 }
 
 # Wait for dependencies if they exist
@@ -131,6 +169,36 @@ try {
 "
 
 echo "✅ Initialization complete, starting services..."
+
+# -------------------------------------------------------------------------
+# Scheduler role: cron only. No Apache / PHP-FPM / bind-mount watcher.
+# Web deploys can recreate the web container without killing in-progress
+# scheduled jobs, and the scheduler never competes with web traffic for
+# the container's memory/CPU budget.
+# -------------------------------------------------------------------------
+if [ "${SERVICE_ROLE:-web}" = "scheduler" ]; then
+    echo "🗓️  SERVICE_ROLE=scheduler — starting cron-only process model"
+    # Dynamic PHP config still helps CLI cron jobs (opcache, etc.)
+    if [ "${APP_ENV}" = "production" ]; then
+        if [ -f /var/www/html/infrastructure/docker/php/php-production.ini ]; then
+            cp /var/www/html/infrastructure/docker/php/php-production.ini /usr/local/etc/php/conf.d/zz-php-production.ini
+            rm -f /usr/local/etc/php/conf.d/custom-php.ini
+        fi
+        cat > /usr/local/etc/php/conf.d/zz-env-overrides.ini <<'EOF'
+; Runtime generated (production / scheduler)
+opcache.validate_timestamps=0
+opcache.revalidate_freq=0
+opcache.save_comments=1
+opcache.max_wasted_percentage=5
+EOF
+    fi
+    install_and_start_cron
+    echo "✅ Scheduler ready (cron foreground keep-alive)"
+    # Keep the container alive; cron runs as a daemon. Prefer sleep over
+    # hanging on a pipe so docker stop sends SIGTERM cleanly.
+    exec sleep infinity
+fi
+
 echo "🌐 Application will be available on ports 80 (HTTP) and 443 (HTTPS)"
 
 # Enable Apache MPM tuning config if mounted
@@ -253,40 +321,13 @@ echo "📅 Configuring scheduled tasks (cron)..."
 # RUN_CRON gates whether THIS container runs the scheduler. Defaults to true so
 # single-container (dev) deployments work out of the box. When scaling
 # horizontally (many web replicas), set RUN_CRON=false on the web replicas and
-# run exactly one dedicated scheduler container with RUN_CRON=true to avoid every
-# replica spinning a cron daemon. Correctness does NOT depend on this: each
-# routine is additionally guarded by a MySQL advisory lock (GET_LOCK) in
-# run-routine.php, so even if multiple containers run cron the same routine can
-# never execute twice concurrently.
+# run exactly one dedicated scheduler container (SERVICE_ROLE=scheduler) to
+# avoid every replica spinning a cron daemon. Correctness does NOT depend on
+# this: each routine is additionally guarded by a MySQL advisory lock
+# (GET_LOCK) in run-routine.php, so even if multiple containers run cron the
+# same routine can never execute twice concurrently.
 if [ "${RUN_CRON:-true}" = "true" ]; then
-    # Install cron job files from the project's cron directory
-    mkdir -p /var/log
-    # Ensure www-data can create new log files inside /var/log even if the
-    # per-file pre-creation below is skipped (e.g. due to a timing race on
-    # first container start or after a recreate that drops the writable layer).
-    chgrp www-data /var/log 2>/dev/null || true
-    chmod g+w /var/log 2>/dev/null || true
-    if [ -d /var/www/html/infrastructure/docker/cron ]; then
-        for cronfile in /var/www/html/infrastructure/docker/cron/*; do
-            [ -f "$cronfile" ] || continue
-            name="$(basename "$cronfile")"
-            cp "$cronfile" /etc/cron.d/"$name"
-            chmod 0644 /etc/cron.d/"$name"
-            # Pre-create the log file each cron job redirects to so the
-            # unprivileged user (www-data) running the job can append to
-            # it. Without this, cron jobs silently fail with
-            # "cannot create /var/log/<name>.log: Permission denied" and
-            # the failure only surfaces in /var/mail/www-data.
-            logfile="/var/log/${name}.log"
-            touch "$logfile"
-            chown www-data:www-data "$logfile"
-            chmod 0664 "$logfile"
-            echo "✅ Installed cron job: $name"
-        done
-        php /var/www/html/infrastructure/scripts/sync-cron-registry.php >/dev/null 2>&1 || true
-    fi
-    service cron start >/dev/null 2>&1 || cron >/dev/null 2>&1 || true
-    echo "✅ Cron daemon started"
+    install_and_start_cron
 else
     echo "⏭️  RUN_CRON=false — skipping cron daemon on this container (scheduler runs elsewhere)"
 fi
