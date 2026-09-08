@@ -1,9 +1,12 @@
 <?php declare(strict_types=1);
 namespace Modules\Messaging\Services;
 
+use Common\Http\UploadedFiles;
 use Common\Services\Service;
+use Modules\Messaging\Models\ConversationParticipant;
 use Modules\Messaging\Models\Message;
 use Modules\Tracking\Signals\Signals\SignalType;
+use Modules\User\Blocked\Models\BlockUser;
 use Proto\Http\Router\Request;
 
 /**
@@ -35,6 +38,15 @@ class MessageService extends Service
 
 		// Prepare message data
 		$this->prepareMessageData($data, $conversationId, $request);
+
+		// Reject if any conversation peer has a block relationship with the
+		// sender in either direction. Blocking is about content + messaging
+		// boundaries: even though blocked users remain visible in discovery,
+		// they cannot exchange messages.
+		if ($this->hasBlockingRelationship($conversationId, (int)($data->senderId ?? 0)))
+		{
+			return $this->error('You cannot send messages in this conversation.');
+		}
 
 		// Create the message using model instance to get the ID
 		$message = new Message($data);
@@ -125,8 +137,8 @@ class MessageService extends Service
 	/**
 	 * Check if the request has file attachments.
 	 *
-	 * Uses a raw $_FILES check to avoid creating UploadFile instances (which rename
-	 * temp files) before processAttachments() gets a chance to validate and store them.
+	 * Uses UploadedFiles::has() so UploadFile is not constructed (and temps
+	 * are not renamed) before processAttachments() validates and stores them.
 	 *
 	 * @param Request|null $request The HTTP request object.
 	 * @return bool
@@ -138,8 +150,7 @@ class MessageService extends Service
 			return false;
 		}
 
-		$rawFiles = $_FILES['attachments'] ?? null;
-		return !empty($rawFiles) && !empty($rawFiles['name']);
+		return UploadedFiles::has('attachments');
 	}
 
 	/**
@@ -172,5 +183,41 @@ class MessageService extends Service
 		$this->updateConversationLastMessage($conversationId, $messageId);
 		$this->publishRedisEvent($conversationId, $messageId, 'merge');
 		$this->notifyConversationParticipants($conversationId, $messageId, true);
+	}
+
+	/**
+	 * Check whether the sender has a mutual block relationship with any
+	 * other participant in the conversation, in either direction.
+	 *
+	 * @param int $conversationId
+	 * @param int $senderId
+	 * @return bool
+	 */
+	protected function hasBlockingRelationship(int $conversationId, int $senderId): bool
+	{
+		if ($senderId <= 0)
+		{
+			return false;
+		}
+
+		$participants = ConversationParticipant::fetchWhere([
+			['cp.conversationId', $conversationId]
+		]);
+
+		foreach ($participants as $participant)
+		{
+			$peerId = (int)$participant->userId;
+			if ($peerId <= 0 || $peerId === $senderId)
+			{
+				continue;
+			}
+
+			if (BlockUser::isAdded($senderId, $peerId) || BlockUser::isAdded($peerId, $senderId))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

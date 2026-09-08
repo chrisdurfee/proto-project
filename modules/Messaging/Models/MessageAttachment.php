@@ -2,6 +2,7 @@
 namespace Modules\Messaging\Models;
 
 use Proto\Models\Model;
+use Proto\Storage\DataTypes\JsonType;
 
 /**
  * MessageAttachment
@@ -38,7 +39,15 @@ class MessageAttachment extends Model
 		'fileUrl',
 		'fileType',
 		'fileName',
-		'fileSize'
+		'fileSize',
+		'fileVariants'
+	];
+
+	/**
+	 * @var array $dataTypes
+	 */
+	protected static array $dataTypes = [
+		'fileVariants' => JsonType::class
 	];
 
 	/**

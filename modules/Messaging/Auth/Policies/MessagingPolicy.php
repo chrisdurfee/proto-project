@@ -39,7 +39,8 @@ abstract class MessagingPolicy extends Policy
 
 		$participant = ConversationParticipant::getBy([
 			'cp.conversation_id' => $conversationId,
-			'cp.user_id' => $userId
+			'cp.user_id' => $userId,
+			'cp.deleted_at' => null
 		]);
 
 		return $participant !== null;

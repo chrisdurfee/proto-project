@@ -92,16 +92,22 @@ trait MessageServiceTrait
 
 		foreach ($participants as $participant)
 		{
-			events()->emit("redis:user:{$participant->userId}:conversations", [
+			$userId = (int)($participant->userId ?? 0);
+			if ($userId < 1)
+			{
+				continue;
+			}
+
+			events()->emit("redis:user:{$userId}:conversations", [
 				'id' => $conversationId,
 				'conversationId' => $conversationId,
 				'action' => 'merge'
 			]);
 
-			if ($sendPushNotifications && (int)$participant->userId !== (int)$message->senderId)
+			if ($sendPushNotifications && $userId !== (int)$message->senderId)
 			{
-				$this->sendPushNotification($participant->userId, $message);
-				$this->logMessageNotification((int)$participant->userId, $message);
+				$this->sendPushNotification($userId, $message);
+				$this->logMessageNotification($userId, $message);
 			}
 		}
 	}
@@ -145,6 +151,7 @@ trait MessageServiceTrait
 	{
 		$name = $message->displayName ?? 'Someone';
 		$conversationId = (int)$message->conversationId;
+		$primaryAction = $conversationId > 0 ? "/messages/{$conversationId}" : '/messages';
 
 		$existing = UserNotification::builder()
 			->select()
@@ -163,6 +170,7 @@ trait MessageServiceTrait
 				->update()
 				->set([
 					'description' => "{$name} sent you a message",
+					'primary_action' => $primaryAction,
 					'created_at' => date('Y-m-d H:i:s'),
 					'updated_at' => date('Y-m-d H:i:s')
 				])
@@ -183,7 +191,8 @@ trait MessageServiceTrait
 			'chat',
 			[
 				'refId' => $conversationId,
-				'refType' => 'conversation'
+				'refType' => 'conversation',
+				'primaryAction' => $primaryAction
 			]
 		);
 	}

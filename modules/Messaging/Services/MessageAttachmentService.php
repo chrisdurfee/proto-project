@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 namespace Modules\Messaging\Services;
 
+use Common\Media\ImagePresets;
+use Common\Media\ImageProcessor;
 use Common\Services\Service;
 use Modules\Messaging\Models\MessageAttachment;
 use Proto\Http\Router\Request;
@@ -72,6 +74,7 @@ class MessageAttachmentService extends Service
 				}
 
 				$attachmentData = $this->prepareAttachmentData($uploadFile, $messageId);
+				$this->optimizeImageAttachment($attachmentData, $uploadFile);
 				if (MessageAttachment::create($attachmentData))
 				{
 					$count++;
@@ -84,6 +87,50 @@ class MessageAttachmentService extends Service
 		}
 
 		return $count;
+	}
+
+	/**
+	 * If the uploaded file is an image, generate optimized variants
+	 * (thumb / card / large) alongside the original and update the
+	 * attachment payload so the variants map is persisted.
+	 *
+	 * @param object $attachmentData
+	 * @param UploadFile $uploadFile
+	 * @return void
+	 */
+	protected function optimizeImageAttachment(object $attachmentData, UploadFile $uploadFile): void
+	{
+		if (!$uploadFile->isImageFile())
+		{
+			return;
+		}
+
+		$result = ImageProcessor::process(
+			'local',
+			'messages',
+			$attachmentData->fileUrl,
+			ImagePresets::MEDIA,
+			ImagePresets::ORIGINAL_MEDIA
+		);
+
+		if ($result === null)
+		{
+			return;
+		}
+
+		if (!empty($result['mainFile']))
+		{
+			$attachmentData->fileUrl = (string)$result['mainFile'];
+		}
+		if (!empty($result['mimeType']))
+		{
+			$attachmentData->fileType = (string)$result['mimeType'];
+		}
+		if (!empty($result['fileSize']))
+		{
+			$attachmentData->fileSize = (int)$result['fileSize'];
+		}
+		$attachmentData->fileVariants = $result['variants'] ?? null;
 	}
 
 	/**
@@ -100,7 +147,8 @@ class MessageAttachmentService extends Service
 			'fileName' => $uploadFile->getOriginalName(),
 			'fileUrl' => $uploadFile->getNewName(),
 			'fileType' => $uploadFile->getMimeType(),
-			'fileSize' => $uploadFile->getSize()
+			'fileSize' => $uploadFile->getSize(),
+			'fileVariants' => null
 		];
 
 		return (object)$attachmentData;
@@ -133,6 +181,7 @@ class MessageAttachmentService extends Service
 
 		// Delete file from storage
         Vault::disk('local', 'messages')->delete($attachment->fileUrl);
+		ImageProcessor::deleteVariants('local', 'messages', $attachment->fileVariants ?? null);
 		return $attachment->delete();
 	}
 }
