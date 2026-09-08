@@ -238,6 +238,20 @@ export function http2ProxyPlugin(options)
 			{
 				const status = responseHeaders[':status'];
 
+				// Skip 1xx informational responses (e.g. 103 Early Hints).
+				// They fire as separate 'response' events before the final response,
+				// and HTTP/1 res.writeHead() can only be called once.
+				if (status >= 100 && status < 200)
+				{
+					return;
+				}
+
+				// Guard against duplicate response events
+				if (res.headersSent)
+				{
+					return;
+				}
+
 				// Build response headers (exclude HTTP/2 pseudo-headers)
 				const outHeaders = {};
 				for (const [key, value] of Object.entries(responseHeaders))
