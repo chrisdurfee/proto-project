@@ -1,0 +1,11 @@
+# Slow query spike check — runs every 15 minutes
+# Alerts ops via email when MariaDB's Slow_queries counter (queries over
+# long_query_time, see infrastructure/config/mariadb/conf.d/performance.cnf)
+# grows faster than expected in the trailing window (see
+# common/Services/SlowQueryAlertService.php). Keeps its own baseline in
+# Redis between runs since the counter itself has no timestamps.
+# Logs are written to /var/log/slow-query-alert.log inside the container.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+*/15 * * * * www-data cd /var/www/html && php infrastructure/scripts/run-routine.php "Common\\Automation\\Processes\\SlowQueryAlertRoutine" >> /var/log/slow-query-alert.log 2>&1

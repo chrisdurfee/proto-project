@@ -1,0 +1,11 @@
+# Slow query log prune — runs daily at 03:50 (off-peak)
+# Rebuilds mysql.slow_log so it only retains the trailing retention
+# window (see common/Services/SlowQueryLogPruneService.php for the
+# window length and why a plain filtered DELETE isn't possible on this
+# CSV-engine log table). Runs under the dedicated connections.slowLogMaintenance
+# credential — never the runtime app user (see create-app-db-user.sql).
+# Logs are written to /var/log/slow-log-prune.log inside the container.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+50 3 * * * www-data cd /var/www/html && php infrastructure/scripts/run-routine.php "Common\\Automation\\Processes\\SlowQueryLogPruneRoutine" >> /var/log/slow-log-prune.log 2>&1
