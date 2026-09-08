@@ -21,15 +21,23 @@ abstract class MultiFactorHelper
 	 * @param object|null $device
 	 * @return bool
 	 */
-    public static function isDeviceAuthorized(User $user, ?object $device = null): bool
+	public static function isDeviceAuthorized(User $user, ?object $device = null): bool
 	{
-		if (!$device)
+		$rawGuid = $device?->guid ?? null;
+		$guid = is_string($rawGuid) ? trim($rawGuid) : '';
+		if ($guid === '')
+		{
+			return false;
+		}
+
+		$ip = Request::ip();
+		if (!is_string($ip) || $ip === '')
 		{
 			return false;
 		}
 
 		$model = new UserAuthedConnectionController();
-		return $model->isAuthed($user->id, $device->guid, Request::ip());
+		return $model->isAuthed($user->id, $guid, $ip);
 	}
 
 	/**

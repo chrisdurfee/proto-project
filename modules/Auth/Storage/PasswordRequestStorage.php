@@ -57,7 +57,7 @@ class PasswordRequestStorage extends Storage
 				"{$this->alias}.user_id = ?",
 				"request_id = ?",
 				"{$this->alias}.status = 'pending'",
-				"{$this->alias}.created_at <= DATE_ADD({$this->alias}.created_at, INTERVAL 1 DAY)")
+				"{$this->alias}.created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)")
 			->first([$userId, $requestId]);
 
 		return ($result->username ?? null);
