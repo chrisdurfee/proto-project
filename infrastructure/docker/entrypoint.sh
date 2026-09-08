@@ -36,7 +36,12 @@ if [ -n "$REDIS_HOST" ] && [ "$REDIS_HOST" != "localhost" ]; then
 fi
 
 # Runtime initialization (safe operations only)
-echo "� Running startup initialization..."
+echo "🔧 Running startup initialization..."
+
+# opcache.file_cache (see php.ini) must exist before any PHP process starts,
+# or PHP fatals. /tmp can be a tmpfs, so recreate on every boot.
+mkdir -p /tmp/opcache
+chmod 1777 /tmp/opcache 2>/dev/null || true
 
 # Wait for important app files to appear (helps when host bind-mounts may take a
 # short while to become available). This prevents running composer/migrations
@@ -77,6 +82,12 @@ else
         echo "🔄 Regenerating autoloader for bind-mounted directories..."
         composer dump-autoload --optimize || echo "⚠️ Autoloader regeneration failed"
     fi
+fi
+
+# orhanerday/open-ai calls curl_close(), deprecated (no-op) since PHP 8.0.
+if [ -f infrastructure/scripts/patch-openai-curl-close.php ] && [ -f vendor/orhanerday/open-ai/src/OpenAi.php ]; then
+    php infrastructure/scripts/patch-openai-curl-close.php vendor/orhanerday/open-ai/src/OpenAi.php \
+        || echo "⚠️ OpenAI curl_close patch failed (continuing)"
 fi
 
 # Create file storage directories if they don't exist
