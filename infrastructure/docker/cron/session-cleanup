@@ -1,0 +1,15 @@
+# Session store cleanup — runs daily at 04:00
+# Removes expired (6+ months stale) and empty rows from the framework's
+# database-backed session store (`user_sessions`, Proto\Http\Session\
+# DatabaseSession). Never scheduled before, so the table grew unbounded
+# since launch. Runs our own Common\Automation\Processes\Session\
+# CleanUpUserSessionsRoutine rather than the vendor
+# Proto\Automation\Processes\Session\CleanUpSessionRoutine — the vendor
+# routine calls instance methods with static syntax (always throws) and
+# mishandles the returned rows even if that's patched around; see the
+# app routine's docblock for details.
+# Logs are written to /var/log/session-cleanup.log inside the container.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+0 4 * * * www-data cd /var/www/html && php infrastructure/scripts/run-routine.php "Common\\Automation\\Processes\\Session\\CleanUpUserSessionsRoutine" >> /var/log/session-cleanup.log 2>&1

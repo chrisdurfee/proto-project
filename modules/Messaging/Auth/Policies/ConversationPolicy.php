@@ -31,7 +31,7 @@ class ConversationPolicy extends MessagingPolicy
 			return false;
 		}
 
-		return (int)$conversation->userId === $userId;
+		return (int)$conversation->createdBy === $userId;
 	}
 
 	/**
@@ -78,12 +78,15 @@ class ConversationPolicy extends MessagingPolicy
 	/**
 	 * Determines if the user can setup a conversation.
 	 *
+	 * PUT is a write against an existing conversation, so it must be no
+	 * more permissive than update() — owner only.
+	 *
 	 * @param Request $request
 	 * @return bool
 	 */
 	public function setup(Request $request): bool
 	{
-		return $this->getUserId() !== null;
+		return $this->update($request);
 	}
 
 	/**

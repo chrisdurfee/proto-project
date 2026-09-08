@@ -32,8 +32,10 @@ class MessageReadService extends Service
 			return $this->error('Conversation ID required');
 		}
 
-		// Get user ID from session if not provided
-		$userId = $userId ?? session()->user->id ?? null;
+		if ($userId === null)
+		{
+			$userId = (int)session()->user->id;
+		}
 		if (!$userId)
 		{
 			return $this->error('User not authenticated');
@@ -128,7 +130,11 @@ class MessageReadService extends Service
 	 */
 	public function getUnreadCount(int $conversationId, ?int $userId = null): int
 	{
-		$userId = $userId ?? session()->user->id ?? null;
+		if ($userId === null)
+		{
+			$sessionUser = session()->user ?? null;
+			$userId = $sessionUser->id ?? null;
+		}
 		if (!$userId)
 		{
 			return 0;

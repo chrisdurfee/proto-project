@@ -35,7 +35,10 @@ class MessagePolicy extends MessagingPolicy
 	}
 
 	/**
-	 * Determines if the user can view messages in a conversation.
+	 * Determines if the user can view a message in a conversation.
+	 *
+	 * The message row must belong to the route conversation so a
+	 * participant of one conversation cannot read messages from another.
 	 *
 	 * @param Request $request
 	 * @return bool
@@ -48,7 +51,22 @@ class MessagePolicy extends MessagingPolicy
 			return false;
 		}
 
-		return $this->isParticipant($conversationId);
+		if (!$this->isParticipant($conversationId))
+		{
+			return false;
+		}
+
+		$messageId = $this->getResourceId($request);
+		if ($messageId)
+		{
+			$message = Message::get((int)$messageId);
+			if (!$message || (int)$message->conversationId !== $conversationId)
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -185,5 +203,16 @@ class MessagePolicy extends MessagingPolicy
 		}
 
 		return $this->isParticipant($conversationId);
+	}
+
+	/**
+	 * Determines if the user can stream real-time message updates.
+	 *
+	 * @param Request $request
+	 * @return bool
+	 */
+	public function stream(Request $request): bool
+	{
+		return $this->isSignedIn();
 	}
 }

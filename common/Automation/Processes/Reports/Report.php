@@ -67,10 +67,10 @@ class Report
 			 */
 			if ($count === 0)
 			{
-				fputcsv($fp, array_keys((array)$fields));
+				fputcsv($fp, array_keys((array)$fields), ',', '"', '');
 			}
 
-			fputcsv($fp, (array)$fields);
+			fputcsv($fp, (array)$fields, ',', '"', '');
 			$count++;
 		}
 

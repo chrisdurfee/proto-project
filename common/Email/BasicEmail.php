@@ -167,6 +167,19 @@ HTML;
 	}
 
 	/**
+	 * Renders a mono uppercase eyebrow label (e.g. "ALERT · ERROR SPIKE")
+	 * used at the top of an email body to call out its purpose.
+	 *
+	 * @param string $text
+	 * @return string
+	 */
+	protected function addEyebrow(string $text): string
+	{
+		$safe = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+		return '<p style="margin: 0 0 12px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #6b7280;">' . $safe . '</p>';
+	}
+
+	/**
 	 * This will add the banner image e.g.
 	 * "<img src="{$src}" alt="Banner Image">"
 	 *

@@ -34,7 +34,7 @@ trait ResponseTrait
 	protected function success(mixed $data = null): object
 	{
 		$response = new Response();
-		$response->success($data);
+		$response->setData($data);
 		return $response->format();
 	}
 

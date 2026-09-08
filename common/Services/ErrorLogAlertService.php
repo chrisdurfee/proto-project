@@ -3,6 +3,7 @@
 namespace Common\Services;
 
 use Common\Email\Alerts\ErrorSpikeAlertEmail;
+use Common\Services\Traits\OpsAlertEmailTrait;
 use Proto\Database\Database;
 use Proto\Dispatch\Dispatcher;
 
@@ -15,10 +16,15 @@ use Proto\Dispatch\Dispatcher;
  * cron interval itself is the throttle: it only fires again on the next
  * run if the volume is still elevated.
  *
+ * Sending is opt-in via email.alertsEnabled — leave that false for
+ * local/dev and personal SMTP inboxes.
+ *
  * @package Common\Services
  */
 class ErrorLogAlertService extends Service
 {
+	use OpsAlertEmailTrait;
+
 	/**
 	 * New unresolved rows within the window that trigger an alert.
 	 */
@@ -37,6 +43,11 @@ class ErrorLogAlertService extends Service
 	 */
 	public function checkAndAlert(): bool
 	{
+		if (!$this->alertsEnabled())
+		{
+			return false;
+		}
+
 		$db = Database::getConnection('default');
 		if ($db === null)
 		{
@@ -96,11 +107,10 @@ class ErrorLogAlertService extends Service
 	 */
 	protected function sendAlert(int $count, string $sampleMessage, string $sampleFile): void
 	{
-		$emailConfig = env('email');
-		$to = $emailConfig->securityAlerts ?? $emailConfig->default ?? null;
+		$to = $this->getAlertRecipient();
 		if (!$to)
 		{
-			error_log('ErrorLogAlertService: no alert recipient configured (email.securityAlerts / email.default).');
+			error_log('ErrorLogAlertService: no alert recipient configured (email.securityAlerts / email.default), or alertsEnabled is false.');
 			return;
 		}
 

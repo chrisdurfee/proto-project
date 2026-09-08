@@ -66,6 +66,17 @@ log_queries_not_using_indexes=1
 log_slow_admin_statements=1
 log_error=/var/lib/mysql/error.log
 
+# Also mirror the slow log into mysql.slow_log (CSV table), in addition to
+# the flat file above. The file stays the source of truth for manual
+# review; the table exists so app code can filter on the real
+# `query_time` column. This is required because
+# log_queries_not_using_indexes=1 (above) writes every query that skips an
+# index to the slow log *regardless of how long it took* -- parsing the
+# flat file or reading Slow_queries from SHOW STATUS can't distinguish a
+# sub-millisecond unindexed lookup from a genuine >1s query, but a SQL
+# filter on mysql.slow_log.query_time can.
+log_output=FILE,TABLE
+
 # General query log (DISABLE in production - only for debugging)
 general_log=0
 

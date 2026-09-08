@@ -12,10 +12,4 @@ use Proto\Patterns\Structural\Registry;
  */
 class Data extends Registry
 {
-	/**
-	 * The singleton instance.
-	 *
-	 * @var self|null
-	 */
-	protected static ?self $instance = null;
 }

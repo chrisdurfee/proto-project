@@ -5,48 +5,29 @@ namespace Common\Gateways\Concerns;
 /**
  * LazyGatewayTrait
  *
- * Memoizes sub-gateway and service instances so that anemic accessors
- * such as `Gateway::view()` stop returning a brand-new gateway on every
- * call. The framework re-instantiates the top-level module gateway on
- * each `modules()->x()` lookup, but within a single chain (or any code
- * that holds on to the parent gateway), repeat accesses now reuse the
- * same child instance.
+ * Memoized child gateway / service resolution, keyed on class name plus
+ * constructor arguments. Mirrors Proto\Module\Traits\LazyGatewayTrait so
+ * facade gateways (no single primary model) can memoize their children too.
  *
- * Usage:
- * ```php
- * class Gateway
- * {
- *     use LazyGatewayTrait;
- *
- *     public function view(): ViewGateway
- *     {
- *         return $this->gateway(ViewGateway::class);
- *     }
- *
- *     public function comment(): CommentGateway
- *     {
- *         return $this->gateway(CommentGateway::class);
- *     }
- * }
- * ```
+ * Prefer this Common copy for facade gateways. Proto\Module\Gateway still
+ * uses the proto trait for model-backed gateways.
  *
  * @package Common\Gateways\Concerns
  */
 trait LazyGatewayTrait
 {
 	/**
-	 * Cached gateway / service instances keyed by fully-qualified class
-	 * name. Each entry is created on first access by {@see gateway()}.
+	 * Memoized child gateway / service instances.
 	 *
-	 * @var array<class-string, object>
+	 * @var array<string, object>
 	 */
 	private array $lazyGatewayInstances = [];
 
 	/**
-	 * Return a memoized instance of the requested gateway / service
-	 * class. Constructor arguments are supported for the first call only
-	 * — subsequent calls return the cached instance regardless of the
-	 * arguments supplied.
+	 * Return a memoized instance of a child gateway or service.
+	 *
+	 * Keyed on class + constructor args. Different args get different
+	 * instances; do not pass a different arg and expect the same object.
 	 *
 	 * @template T of object
 	 * @param class-string<T> $class
@@ -55,13 +36,19 @@ trait LazyGatewayTrait
 	 */
 	protected function gateway(string $class, mixed ...$constructorArgs): object
 	{
-		if (!isset($this->lazyGatewayInstances[$class]))
+		$key = $class;
+		if ($constructorArgs !== [])
 		{
-			$this->lazyGatewayInstances[$class] = new $class(...$constructorArgs);
+			$key .= ':' . md5(serialize($constructorArgs));
+		}
+
+		if (!isset($this->lazyGatewayInstances[$key]))
+		{
+			$this->lazyGatewayInstances[$key] = new $class(...$constructorArgs);
 		}
 
 		/** @var T $instance */
-		$instance = $this->lazyGatewayInstances[$class];
+		$instance = $this->lazyGatewayInstances[$key];
 		return $instance;
 	}
 }

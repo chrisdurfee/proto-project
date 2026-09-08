@@ -117,6 +117,10 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}
       - APP_ENV=production
       - AUTO_MIGRATE=true
+      # Cron runs on the dedicated `scheduler` service below. Keep false on
+      # every web replica so recreates/deploys do not kill in-flight jobs.
+      - RUN_CRON=false
+      - SERVICE_ROLE=web
       - DOCKER_CONTAINER=true
       - PROJECT_ROOT=/var/www/html
       - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
@@ -156,6 +160,81 @@ services:
         reservations:
           memory: 1G
           cpus: '0.5'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  # Dedicated scheduler: same image as web, cron-only process model.
+  # Survives web recreate/deploy so long-running routines are not killed.
+  # Exactly ONE of these should run per environment.
+  scheduler:
+    image: proto-web:latest
+    container_name: proto-scheduler
+    restart: unless-stopped
+    # No ports — cron jobs call PHP CLI against shared Maria/Redis/files.
+    volumes:
+      - ./public/files:/var/www/html/public/files:rw
+      - ./common/files:/var/www/html/common/files:rw
+      - ./common/Config:/var/www/html/common/Config:ro
+      - ./infrastructure/docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+    depends_on:
+      - mariadb
+      - redis
+      - web
+    networks:
+      - proto-network
+    environment:
+      - DB_HOST=${DB_HOST:-mariadb}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_DATABASE=${DB_DATABASE:-proto}
+      - DB_USERNAME=${DB_USERNAME:-proto_app_user}
+      - DB_PASSWORD=${DB_PASSWORD:-ProtoApp2025!SecureDbPass#789}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}
+      - APP_ENV=production
+      # Web owns migrations; scheduler must not race them on boot.
+      - AUTO_MIGRATE=false
+      - RUN_CRON=true
+      - SERVICE_ROLE=scheduler
+      - DOCKER_CONTAINER=true
+      - PROJECT_ROOT=/var/www/html
+      - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-tls}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@proto.local}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Proto Project}
+      - MAIL_ENABLED=${MAIL_ENABLED:-true}
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -x cron >/dev/null || pgrep -x crond >/dev/null || exit 1"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=256M,mode=1777
+      - /var/log:size=128M
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
       restart_policy:
         condition: on-failure
         delay: 5s
