@@ -48,6 +48,19 @@ class DataRetentionService extends Service
 	];
 
 	/**
+	 * Conditional retention: table => [timestamp column, days, AND clause].
+	 *
+	 * Used when a table mixes high-volume noise rows with signal rows that
+	 * must be kept indefinitely (e.g. an events table where "viewed" rows
+	 * age out but "created" rows feed long-lived counters). The AND clause
+	 * is a static trusted fragment (never user input) appended to both the
+	 * eligibility count and the batched delete.
+	 *
+	 * @var array<string, array{0: string, 1: int, 2: string}>
+	 */
+	protected const CONDITIONAL_POLICIES = [];
+
+	/**
 	 * Returns the retention policy map (table => [column, days]).
 	 *
 	 * @return array<string, array{0: string, 1: int}>
@@ -55,6 +68,16 @@ class DataRetentionService extends Service
 	public static function policies(): array
 	{
 		return self::POLICIES;
+	}
+
+	/**
+	 * Returns conditional retention policies (table => [column, days, andSql]).
+	 *
+	 * @return array<string, array{0: string, 1: int, 2: string}>
+	 */
+	public static function conditionalPolicies(): array
+	{
+		return self::CONDITIONAL_POLICIES;
 	}
 
 	/**
@@ -77,6 +100,11 @@ class DataRetentionService extends Service
 			$total += $this->sweepTable($db, $table, $column, $days);
 		}
 
+		foreach (self::CONDITIONAL_POLICIES as $table => [$column, $days, $andSql])
+		{
+			$total += $this->sweepTable($db, $table, $column, $days, $andSql);
+		}
+
 		return $total;
 	}
 
@@ -87,15 +115,26 @@ class DataRetentionService extends Service
 	 * @param string $table
 	 * @param string $column
 	 * @param int $days
+	 * @param string|null $andSql Optional trusted AND clause (no bindings).
 	 * @return int
 	 */
-	protected function sweepTable(object $db, string $table, string $column, int $days): int
+	protected function sweepTable(
+		object $db,
+		string $table,
+		string $column,
+		int $days,
+		?string $andSql = null
+	): int
 	{
 		$cutoff = date('Y-m-d H:i:s', time() - ($days * 86400));
+		$extra = ($andSql !== null && $andSql !== '') ? ' AND ' . $andSql : '';
 
 		try
 		{
-			$row = $db->first("SELECT COUNT(*) AS n FROM {$table} WHERE {$column} < ?", [$cutoff]);
+			$row = $db->first(
+				"SELECT COUNT(*) AS n FROM {$table} WHERE {$column} < ?{$extra}",
+				[$cutoff]
+			);
 			$eligible = (int)($row->n ?? 0);
 			if ($eligible <= 0)
 			{
@@ -105,7 +144,11 @@ class DataRetentionService extends Service
 			$batches = min(self::MAX_BATCHES, (int)ceil($eligible / self::BATCH_SIZE));
 			for ($batch = 0; $batch < $batches; $batch++)
 			{
-				if (!$db->execute("DELETE FROM {$table} WHERE {$column} < ? LIMIT " . self::BATCH_SIZE, [$cutoff]))
+				$ok = $db->execute(
+					"DELETE FROM {$table} WHERE {$column} < ?{$extra} LIMIT " . self::BATCH_SIZE,
+					[$cutoff]
+				);
+				if (!$ok)
 				{
 					break;
 				}

@@ -105,6 +105,48 @@ class UserPolicy extends Policy
 	}
 
 	/**
+	 * Determines if the user can list route-scoped resources
+	 * (authed devices, login log) for the route user. Both consuming
+	 * controllers (UserAuthedDeviceController, LoginLogController) use
+	 * `routeParams = ['userId' => true]`, so this always maps to the
+	 * same route segment. Without this explicit check, the framework's
+	 * policy fallback ("default" method missing) ALLOWS by default —
+	 * any signed-in user could enumerate another user's devices/login
+	 * history by guessing the route.
+	 *
+	 * @param Request $request The request object.
+	 * @return bool
+	 */
+	public function all(Request $request): bool
+	{
+		return $this->matchesRouteUser($request, 'userId');
+	}
+
+	/**
+	 * Determines if the user can revoke all authenticated devices for
+	 * the route user (used by UserAuthedDeviceController).
+	 *
+	 * @param Request $request The request object.
+	 * @return bool
+	 */
+	public function revokeAll(Request $request): bool
+	{
+		return $this->matchesRouteUser($request, 'userId');
+	}
+
+	/**
+	 * Determines if the user can revoke a single authenticated device
+	 * for the route user (used by UserAuthedDeviceController).
+	 *
+	 * @param Request $request The request object.
+	 * @return bool
+	 */
+	public function revokeOne(Request $request): bool
+	{
+		return $this->matchesRouteUser($request, 'userId');
+	}
+
+	/**
 	 * Checks if the resource in the request is owned by the user.
 	 *
 	 * @param Request $request The request object.
