@@ -4,6 +4,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import { generateUrls } from '../../infrastructure/config/domain.config.js';
 import { http2ProxyPlugin } from '../../infrastructure/config/vite-http2-proxy-plugin.js';
+import { preserveHashedAssets } from '../../infrastructure/config/vite-preserve-hashed-assets-plugin.js';
 
 // Generate URLs based on environment
 const isDev = process.env.NODE_ENV !== 'production';
@@ -25,7 +26,8 @@ export default defineConfig({
 			apiTarget,
 			paths: ['/api', '/files'],
 			certPath: hasSSL ? sslCertPath : undefined
-		})
+		}),
+		preserveHashedAssets(path.resolve(__dirname, '../../public/crm'))
 	],
 	base: BASE_URL,
 	resolve: {

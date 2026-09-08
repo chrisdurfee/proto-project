@@ -5,6 +5,7 @@ import zlib from 'zlib';
 import { defineConfig } from 'vite';
 import { generateUrls } from '../../infrastructure/config/domain.config.js';
 import { http2ProxyPlugin } from '../../infrastructure/config/vite-http2-proxy-plugin.js';
+import { preserveHashedAssets } from '../../infrastructure/config/vite-preserve-hashed-assets-plugin.js';
 
 // Generate URLs based on environment
 const isDev = process.env.NODE_ENV !== 'production';
@@ -140,7 +141,8 @@ export default defineConfig({
 			certPath: hasSSL ? sslCertPath : undefined
 		}),
 		stampServiceWorker(path.resolve(__dirname, '../../public/main')),
-		precompressAssets(path.resolve(__dirname, '../../public/main'))
+		precompressAssets(path.resolve(__dirname, '../../public/main')),
+		preserveHashedAssets(path.resolve(__dirname, '../../public/main'))
 	],
 	base: BASE_URL,
 	resolve: {
