@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.4
+ARG PHP_VERSION=8.5
 FROM php:${PHP_VERSION}-fpm
 
 # Install system dependencies including Apache2
@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libwebp-dev \
     libonig-dev \
     libxml2-dev \
     libicu-dev \
@@ -28,8 +29,10 @@ RUN apt-get update && apt-get install -y \
 # Install GMP library for faster VAPID calculations
 RUN apt-get update && apt-get install -y libgmp-dev && rm -rf /var/lib/apt/lists/*
 
-# Configure and install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+# Configure and install PHP extensions.
+# OPcache is built into the PHP 8.5 binary (not a shared module); installing
+# it with docker-php-ext-install fails, and zend_extension=opcache.so warns.
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
     mysqli \
     pdo_mysql \
@@ -38,18 +41,19 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     mbstring \
     xml \
     intl \
-    opcache \
     gmp
 
-# Install Redis extension
-RUN pecl install redis && docker-php-ext-enable redis
+# Pin PECL versions so a package's new major cannot break the image on
+# rebuild. redis 6.3.0 and imagick 3.8.1 are the first stables that compile
+# cleanly on PHP 8.5.
+RUN pecl install redis-6.3.0 && docker-php-ext-enable redis
 
-# Install ImageMagick with HEIC/HEIF support for receipt scanning
+# Install ImageMagick with HEIC/HEIF support (modern image formats)
 RUN apt-get update && apt-get install -y \
     libmagickwand-dev \
     libheif-dev \
     imagemagick \
-    && pecl install imagick \
+    && pecl install imagick-3.8.1 \
     && docker-php-ext-enable imagick \
     && rm -rf /var/lib/apt/lists/*
 
@@ -68,6 +72,11 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
 
 # Copy custom PHP configuration
 COPY infrastructure/docker/php/php.ini /usr/local/etc/php/conf.d/custom-php.ini
+
+# opcache.file_cache (see php.ini) must exist before any PHP process starts,
+# or PHP fatals immediately. Create it right after the INI is in place so
+# later build-time CLI steps (composer, etc.) can run PHP without failing.
+RUN mkdir -p /tmp/opcache && chmod 1777 /tmp/opcache
 
 # Copy Apache configurations and entrypoint
 COPY infrastructure/docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
@@ -178,8 +187,8 @@ RUN mkdir -p /var/www/html/common/Migrations \
 RUN composer dump-autoload --optimize --no-dev || echo "Autoloader generation skipped - will regenerate at runtime"
 
 # Create directories that Apache/PHP-FPM need to write to
-RUN mkdir -p /var/run/apache2 /var/lock/apache2 /tmp/php-sessions \
-    && chown -R www-data:www-data /var/run/apache2 /var/lock/apache2 /tmp/php-sessions
+RUN mkdir -p /var/run/apache2 /var/lock/apache2 /tmp/php-sessions /tmp/opcache \
+    && chown -R www-data:www-data /var/run/apache2 /var/lock/apache2 /tmp/php-sessions /tmp/opcache
 
 # Set ownership for www-data (bind mounts will override content but keep permissions)
 RUN chown -R www-data:www-data /var/www/html
