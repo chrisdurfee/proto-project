@@ -27,7 +27,7 @@ Never pad values, keys, operators, types, or comments with extra spaces to make 
 Always use tabs with 4 spaces for alignment. Do not use spaces for indentation.
 
 ## Stack
-- **Backend**: PHP 8.5 monolith using **Proto Framework**. Entry: `public/api/index.php`.
+- **Backend**: PHP 8.4 monolith using **Proto Framework**. Entry: `public/api/index.php`.
  Proto has built-in routing, middleware, server events, sockets, tests, controllers, models, factories, seeders, generators, dispatching, jobs, integrations, automations, auth, patterns, services, storages, migrations, ORM, validation, file storage, utils.
 - **Frontend**: Vite-based apps in `apps/{crm,developer,main}` using **Base Framework** (fundamentally different from React/Vue).
 - **Infrastructure**: Dockerized (Web/PHP, MariaDB, Redis) via `infrastructure/docker-compose.yaml`.

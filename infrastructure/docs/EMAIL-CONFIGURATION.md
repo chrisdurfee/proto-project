@@ -7,7 +7,7 @@ The Rally uses the enhanced Proto Framework (v1.0.15+) with native PHPMailer/SMT
 ## Framework Requirements
 
 - **Proto Framework**: v1.0.15 or higher (includes enhanced Email class)
-- **PHP**: 8.5 or higher
+- **PHP**: 8.4 or higher
 - **PHPMailer**: Included with Proto framework
 
 ## Configuration Methods

@@ -1,3 +1,9 @@
+# Pinned to 8.4 until protoframework/proto ^2.0 lands. PHP 8.5 enforces
+# invariance for typed static properties, and proto 1.x (through 1.3.54)
+# redeclares `protected static ?self $instance` in Config, Auth, Events, Cache
+# and the session Adapter, so the app fatals while loading Proto\Config.
+# Raising this also requires re-checking the opcache line below: opcache is a
+# shared module on 8.4 but built into the binary on 8.5.
 ARG PHP_VERSION=8.4
 FROM php:${PHP_VERSION}-fpm
 

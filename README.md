@@ -2,7 +2,7 @@
 
 This repository is a **project skeleton** for building applications on the [Proto Framework](https://github.com/chrisdurfee/proto), with [Base Framework](https://github.com/chrisdurfee/base) on the front end. It includes the files, settings, and configuration you need to bootstrap a large, multi-app platform.
 
-The project is published on Packagist and can be set up in just a few commands. It uses Docker, Composer, NPM, Vite, Base, PHP 8.5+, MariaDB, Redis, and more.
+The project is published on Packagist and can be set up in just a few commands. It uses Docker, Composer, NPM, Vite, Base, PHP 8.4+, MariaDB, Redis, and more.
 
 It wires up Docker, a sensible folder structure, and a minimal entry point so you can start writing modules and apps right away. It also includes a companion document to help AI agents understand the project structure, dependencies, and configuration.
 
@@ -28,7 +28,7 @@ On the backend, an integrated **OpenAI** service powers AI features such as chat
 
 ### For Traditional Development
 - Git
-- PHP 8.5+
+- PHP 8.4+
 - Composer
 - MySQL/MariaDB
 - Node.js (for frontend development)
