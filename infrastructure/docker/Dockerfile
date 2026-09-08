@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.5
+ARG PHP_VERSION=8.4
 FROM php:${PHP_VERSION}-fpm
 
 # Install system dependencies including Apache2
@@ -30,8 +30,6 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get update && apt-get install -y libgmp-dev && rm -rf /var/lib/apt/lists/*
 
 # Configure and install PHP extensions.
-# OPcache is built into the PHP 8.5 binary (not a shared module); installing
-# it with docker-php-ext-install fails, and zend_extension=opcache.so warns.
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
     mysqli \
@@ -41,11 +39,12 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     mbstring \
     xml \
     intl \
-    gmp
+    gmp \
+    opcache
 
 # Pin PECL versions so a package's new major cannot break the image on
 # rebuild. redis 6.3.0 and imagick 3.8.1 are the first stables that compile
-# cleanly on PHP 8.5.
+# cleanly on PHP 8.4.
 RUN pecl install redis-6.3.0 && docker-php-ext-enable redis
 
 # Install ImageMagick with HEIC/HEIF support (modern image formats)
