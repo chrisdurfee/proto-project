@@ -3,7 +3,7 @@ namespace Modules\Developer\Auth\Policies;
 
 use Modules\Developer\Auth\Gates\EnvGate;
 use Common\Auth\Policies\Policy;
-use Proto\Controllers\Controller;
+use Proto\Controllers\ControllerInterface;
 use Proto\Http\Router\Request;
 
 /**
@@ -25,12 +25,12 @@ class DeveloperPolicy extends Policy
 	/**
 	 * This will create a new instance of the policy.
 	 *
-	 * @param ?Controller $controller The controller instance associated with this policy.
+	 * @param ?ControllerInterface $controller The controller instance associated with this policy.
 	 * @param EnvGate $gate The environment gate instance for access control.
 	 * @return void
 	 */
 	public function __construct(
-		protected ?Controller $controller = null,
+		protected ?ControllerInterface $controller = null,
 		protected EnvGate $gate = new EnvGate()
 	)
 	{
@@ -45,6 +45,6 @@ class DeveloperPolicy extends Policy
 	 */
 	public function default(Request $request): bool
 	{
-		return $this->gate->isDev();
+		return $this->isSignedIn() && $this->gate->isDev();
 	}
 }

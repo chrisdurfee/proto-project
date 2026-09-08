@@ -14,6 +14,8 @@ use Proto\Base;
 use Proto\Config;
 use Proto\Database\ConnectionSettingsCache;
 use Proto\Database\ConnectionCache;
+use Proto\Http\Session;
+use Proto\Http\Session\SessionInterface;
 
 // Define BASE_PATH as the project root
 if (!defined('BASE_PATH'))
@@ -68,4 +70,22 @@ if ($forceTesting)
 	setEnv('env', 'testing');
 	ConnectionSettingsCache::clearAll();
 	ConnectionCache::clear();
+}
+
+/**
+ * Initialize the session and expose the session() helper.
+ *
+ * The helper is normally declared in Proto\Api\ApiRouter, which is only
+ * loaded by the HTTP entrypoint. Tests never load that file, so policies
+ * and tests that call session() would fatal with an undefined function.
+ * Declaring it here keeps test behavior aligned with production.
+ */
+Session::init();
+
+if (!function_exists('session'))
+{
+	function session(): SessionInterface
+	{
+		return Session::getInstance();
+	}
 }
