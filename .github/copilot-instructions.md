@@ -70,7 +70,7 @@ Never use hardcoded colors (`text-white`, `bg-zinc-900`, `#0b0b0c`, `border-whit
 
 ## Stack at a Glance
 
-- **Backend**: PHP 8.4 monolith using **Proto Framework**. Entry: `public/api/index.php`.
+- **Backend**: PHP 8.5 monolith using **Proto Framework**. Entry: `public/api/index.php`.
 - **Frontend**: Vite-based apps in `apps/{crm,developer,main}` using **Base Framework** (NOT React/Vue/JSX — plain JS object trees).
 - **Infrastructure**: Dockerized (Web/PHP, MariaDB on host port 3307, Redis on host port 6380) via `infrastructure/docker-compose.yaml`.
 
