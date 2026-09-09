@@ -1,5 +1,6 @@
-import { Div, I, Li, Span } from "@base-framework/atoms";
+import { Div, Li, Span } from "@base-framework/atoms";
 import { NavLink } from "@base-framework/base";
+import { UniversalIcon } from "@base-framework/ui/atoms";
 
 /**
  * This will get the max height.
@@ -31,7 +32,7 @@ export const MobileLink = (props) => (
 			exact: props.exact || false,
 		},
 		[
-			I({ class: 'flex items-center justify-center py-[2px] px-3 rounded-md', html: props.icon }),
+			UniversalIcon({ size: 'sm' }, props.icon),
 			Span({ class: 'text-[10px]' }, props.label)
 		])
 	])
@@ -49,7 +50,7 @@ export const MobileButton = (props) => (
 			class: 'p-[4px] flex flex-col items-center justify-center rounded-md md:hover:bg-muted transition-colors duration-200',
 		},
 		[
-			I({ class: 'flex items-center justify-center py-[2px] px-3 rounded-md', html: props.icon }),
+			UniversalIcon({ size: 'sm' }, props.icon),
 			Span({ class: 'text-[10px]' }, props.label)
 		])
 	])

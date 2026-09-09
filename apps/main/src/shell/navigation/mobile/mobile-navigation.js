@@ -1,5 +1,6 @@
-import { Button, I, Li, Nav, Span, Ul } from "@base-framework/atoms";
+import { Button, Li, Nav, Span, Ul } from "@base-framework/atoms";
 import { Component, Jot } from "@base-framework/base";
+import { UniversalIcon } from "@base-framework/ui/atoms";
 import { MobileLink } from "./mobile-link.js";
 import { PopOverContainer } from "./popover-container.js";
 
@@ -17,7 +18,7 @@ export const AdditionalOptionsButton = ({ click }) => (
 		click
 	}, [
 		Button({ class: 'p-[4px] flex flex-col items-center justify-center', onState: ['open', { active: true }] }, [
-			I({ class: 'flex items-center justify-center py-[2px] px-3 rounded-md', html: 'more_vert' }),
+			UniversalIcon({ size: 'sm' }, 'more_vert'),
 			Span({ class: 'text-[10px]' }, 'More')
 		])
 	])
