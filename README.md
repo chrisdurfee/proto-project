@@ -74,7 +74,17 @@ First, create your Common/Config/.env file by copying the example:
 cp ./common/Config/.env-example ./common/Config/.env
 ```
 
-Update the environment variables as needed. Then, sync your Proto configuration to Docker:
+Generate a unique application encryption key. The example ships with an empty
+`encryption.key` on purpose so that no two projects share one:
+
+```bash
+# Prints a key, then paste it into "encryption": { "key": "..." }
+openssl rand -hex 64
+```
+
+Update the environment variables as needed. Anything still set to
+`CHANGE_ME_BEFORE_DEPLOYING` must be replaced before you deploy. Then, sync your
+Proto configuration to Docker:
 
 ```bash
 # Generate Docker .env from Proto configuration

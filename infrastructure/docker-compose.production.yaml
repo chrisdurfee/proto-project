@@ -111,10 +111,10 @@ services:
       - DB_PORT=${DB_PORT:-3306}
       - DB_DATABASE=${DB_DATABASE:-proto}
       - DB_USERNAME=${DB_USERNAME:-proto_app_user}
-      - DB_PASSWORD=${DB_PASSWORD:-ProtoApp2025!SecureDbPass#789}
+      - DB_PASSWORD=${DB_PASSWORD:?Please set DB_PASSWORD in infrastructure/.env file}
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?Please set REDIS_PASSWORD in infrastructure/.env file}
       - APP_ENV=production
       - AUTO_MIGRATE=true
       # Cron runs on the dedicated `scheduler` service below. Keep false on
@@ -190,10 +190,10 @@ services:
       - DB_PORT=${DB_PORT:-3306}
       - DB_DATABASE=${DB_DATABASE:-proto}
       - DB_USERNAME=${DB_USERNAME:-proto_app_user}
-      - DB_PASSWORD=${DB_PASSWORD:-ProtoApp2025!SecureDbPass#789}
+      - DB_PASSWORD=${DB_PASSWORD:?Please set DB_PASSWORD in infrastructure/.env file}
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-ProtoRedis2025!CacheSecure#123456789}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?Please set REDIS_PASSWORD in infrastructure/.env file}
       - APP_ENV=production
       # Web owns migrations; scheduler must not race them on boot.
       - AUTO_MIGRATE=false

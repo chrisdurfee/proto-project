@@ -61,6 +61,9 @@ Before contributing, ensure you have:
    # Copy example configuration
    cp common/Config/.env-example common/Config/.env
 
+   # Generate a unique encryption key and paste it into "encryption": { "key": "..." }
+   openssl rand -hex 64
+
    # Sync configuration to Docker
    ./infrastructure/scripts/run.sh sync-config
 
