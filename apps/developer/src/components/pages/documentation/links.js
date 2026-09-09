@@ -100,6 +100,10 @@ export const Links = (path) => ([
 			{
 				label: 'File Storage',
 				href: `${path}/file-storage`
+			},
+			{
+				label: 'Caching',
+				href: `${path}/caching`
 			}
 		]
 	},

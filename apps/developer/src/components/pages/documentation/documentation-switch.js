@@ -45,6 +45,7 @@ export const DocumentationSwitch = (basePath) => ([
 	// Performance & Caching
 	Page(`${basePath}/storage`, 'Storage', () => import('./storage/storage-page.js')),
 	Page(`${basePath}/file-storage`, 'File Storage', () => import('./file-storage/file-storage-page.js')),
+	Page(`${basePath}/caching`, 'Caching', () => import('./caching/caching-page.js')),
 
 	// Real-time & Background
 	Page(`${basePath}/websockets`, 'WebSockets & Real-time', () => import('./websockets/websockets-page.js')),

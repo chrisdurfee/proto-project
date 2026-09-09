@@ -42,321 +42,191 @@ const CodeBlock = Atom((props, children) => (
 /**
  * CachingPage
  *
- * This page documents basic caching concepts and patterns for Proto applications.
+ * This page documents Proto's built-in cache layer.
  *
  * @returns {DocPage}
  */
 export const CachingPage = () =>
 	DocPage(
 		{
-			title: 'Caching Concepts',
-			description: 'Learn about caching strategies and patterns for improving application performance in Proto.'
+			title: 'Caching',
+			description: 'Configure Proto\'s cache driver, cache controller responses safely, and invalidate them when data changes.'
 		},
 		[
 			// Overview
 			Section({ class: 'flex flex-col gap-y-4' }, [
 				H4({ class: 'text-lg font-bold' }, 'Overview'),
 				P({ class: 'text-muted-foreground' },
-					`Caching is an important technique for improving application performance by storing
-					frequently accessed data in memory or fast storage systems. This page covers general
-					caching concepts and patterns that can be applied in Proto applications.`
+					`Proto ships with a cache layer built around a pluggable driver. Redis is the
+					supported driver. Caching is opt-in at every level: no driver is configured by
+					default, and no controller is cached until it says so.`
+				),
+				P({ class: 'text-muted-foreground' },
+					`Every cache call degrades to "no cache" when a driver is unavailable. A cache
+					backend being unreachable slows the application down, but it never takes it down,
+					so you do not need to guard your own calls.`
 				)
 			]),
 
-			// Basic Caching Concepts
+			// Configuration
 			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
-				H4({ class: 'text-lg font-bold' }, 'Basic Caching Concepts'),
+				H4({ class: 'text-lg font-bold' }, 'Configuration'),
 				P({ class: 'text-muted-foreground' },
-					`Caching involves storing copies of data in a location where it can be accessed
-					more quickly than from the original source.`
+					`Caching is configured under the "cache" key in common/Config/.env. Leave "driver"
+					null to disable caching entirely.`
+				),
+				CodeBlock(
+`{
+    "cache": {
+        "driver": "RedisDriver",
+        "connection": {
+            "host": "redis",
+            "port": 6379,
+            "password": "your_redis_password"
+        }
+    }
+}`
+				),
+				P({ class: 'text-muted-foreground' },
+					`After changing this file, regenerate the Docker environment so the containers
+					pick the values up.`
+				),
+				CodeBlock(`./infrastructure/scripts/run.sh sync-config`)
+			]),
+
+			// Cache facade
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'The Cache Facade'),
+				P({ class: 'text-muted-foreground' },
+					`Proto\\Cache\\Cache is a static facade over the active driver. Values are stored
+					as strings, so encode structured data before writing it and decode it on read.`
+				),
+				CodeBlock(
+`<?php declare(strict_types=1);
+
+use Proto\\Cache\\Cache;
+
+// Read-through pattern
+$key = 'report:monthly:' . $userId;
+$cached = Cache::get($key);
+if ($cached !== null)
+{
+    return json_decode($cached, true);
+}
+
+$report = $this->buildExpensiveReport($userId);
+
+// Third argument is the TTL in seconds
+Cache::set($key, json_encode($report), 3600);
+
+return $report;`
+				),
+				P({ class: 'text-muted-foreground' },
+					`Available methods:`
 				),
 				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
-					Li("Cache Hit: When requested data is found in cache"),
-					Li("Cache Miss: When requested data is not in cache"),
-					Li("TTL (Time To Live): How long data stays in cache"),
-					Li("Cache Invalidation: Removing or updating cached data"),
-					Li("Cache Warming: Pre-loading cache with important data")
+					Li('Cache::get(string $key): ?string - returns null on a miss or when no driver is active'),
+					Li('Cache::set(string $key, string $value, ?int $expire = null): void'),
+					Li('Cache::has(string $key): bool'),
+					Li('Cache::delete(string $key): bool'),
+					Li('Cache::incr(string $key): int - atomic counter, useful for rate limits'),
+					Li('Cache::expire(string $key, int $seconds): bool and Cache::ttl(string $key): int'),
+					Li('Cache::keys(string $pattern): ?array - pattern lookup, use sparingly'),
+					Li('Cache::isSupported(): bool - whether a driver is configured and reachable')
 				])
 			]),
 
-			// Memory Caching
+			// Controller response caching
 			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
-				H4({ class: 'text-lg font-bold' }, 'Simple Memory Caching'),
+				H4({ class: 'text-lg font-bold' }, 'Caching Controller Responses'),
 				P({ class: 'text-muted-foreground' },
-					`Simple in-memory caching can be implemented using static arrays or objects
-					to store frequently accessed data within a single request.`
+					`A controller opts in by setting $cacheable. The router then wraps it in a cache
+					proxy that serves reads from cache and clears them on writes.`
 				),
 				CodeBlock(
 `<?php declare(strict_types=1);
+namespace Modules\\Product\\Controllers;
 
-/**
- * Simple memory cache implementation
- */
-class SimpleCache
+use Proto\\Controllers\\ResourceController;
+use Modules\\Product\\Models\\Product;
+
+class ProductController extends ResourceController
 {
-    private static array $cache = [];
+    protected bool $cacheable = true;
 
-    public static function get(string $key): mixed
-    {
-        return self::$cache[$key] ?? null;
-    }
-
-    public static function put(string $key, mixed $value): void
-    {
-        self::$cache[$key] = $value;
-    }
-
-    public static function forget(string $key): void
-    {
-        unset(self::$cache[$key]);
-    }
-
-    public static function flush(): void
-    {
-        self::$cache = [];
-    }
-}
-
-// Usage example
-$expensiveData = SimpleCache::get('user_data');
-if ($expensiveData === null) {
-    $expensiveData = performExpensiveOperation();
-    SimpleCache::put('user_data', $expensiveData);
-}
-`
-				)
-			]),
-
-			// File-based Caching
-			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
-				H4({ class: 'text-lg font-bold' }, 'File-based Caching'),
-				P({ class: 'text-muted-foreground' },
-					`File-based caching stores data in files on disk, providing persistence
-					across requests and application restarts.`
-				),
-				CodeBlock(
-`<?php declare(strict_types=1);
-
-/**
- * File-based cache implementation
- */
-class FileCache
-{
-    private string $cacheDir;
-
-    public function __construct(string $cacheDir = '/tmp/cache')
-    {
-        $this->cacheDir = $cacheDir;
-        if (!is_dir($this->cacheDir)) {
-            mkdir($this->cacheDir, 0755, true);
-        }
-    }
-
-    public function get(string $key): mixed
-    {
-        $filename = $this->getFilename($key);
-
-        if (!file_exists($filename)) {
-            return null;
-        }
-
-        $data = unserialize(file_get_contents($filename));
-
-        // Check if expired
-        if ($data['expires'] > 0 && time() > $data['expires']) {
-            $this->forget($key);
-            return null;
-        }
-
-        return $data['value'];
-    }
-
-    public function put(string $key, mixed $value, int $ttl = 0): void
-    {
-        $filename = $this->getFilename($key);
-        $expires = $ttl > 0 ? time() + $ttl : 0;
-
-        $data = [
-            'value' => $value,
-            'expires' => $expires,
-            'created' => time()
-        ];
-
-        file_put_contents($filename, serialize($data));
-    }
-
-    public function forget(string $key): void
-    {
-        $filename = $this->getFilename($key);
-        if (file_exists($filename)) {
-            unlink($filename);
-        }
-    }
-
-    private function getFilename(string $key): string
-    {
-        return $this->cacheDir . '/' . md5($key) . '.cache';
-    }
-}
-`
-				)
-			]),
-
-			// Database Query Results
-			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
-				H4({ class: 'text-lg font-bold' }, 'Caching Database Results'),
-				P({ class: 'text-muted-foreground' },
-					`One common caching pattern is to cache expensive database query results
-					to avoid repeated database calls.`
-				),
-				CodeBlock(
-`<?php declare(strict_types=1);
-
-/**
- * Example of caching database results
- */
-class UserService
-{
-    private FileCache $cache;
+    protected ?string $policy = ProductPolicy::class;
 
     public function __construct()
     {
-        $this->cache = new FileCache('/tmp/user_cache');
+        parent::__construct(Product::class);
     }
-
-    public function getAllUsers(): array
-    {
-        $cacheKey = 'all_users';
-
-        // Try to get from cache first
-        $users = $this->cache->get($cacheKey);
-
-        if ($users === null) {
-            // Cache miss - get from database
-            $users = $this->getUsersFromDatabase();
-
-            // Store in cache for 1 hour (3600 seconds)
-            $this->cache->put($cacheKey, $users, 3600);
-        }
-
-        return $users;
-    }
-
-    public function getUser(int $id): ?array
-    {
-        $cacheKey = "user_{$id}";
-
-        $user = $this->cache->get($cacheKey);
-
-        if ($user === null) {
-            $user = $this->getUserFromDatabase($id);
-            if ($user) {
-                $this->cache->put($cacheKey, $user, 1800); // 30 minutes
-            }
-        }
-
-        return $user;
-    }
-
-    public function updateUser(int $id, array $data): void
-    {
-        // Update in database
-        $this->updateUserInDatabase($id, $data);
-
-        // Invalidate cached data
-        $this->cache->forget("user_{$id}");
-        $this->cache->forget('all_users');
-    }
-
-    private function getUsersFromDatabase(): array
-    {
-        // Simulate expensive database query
-        return ['user1', 'user2', 'user3'];
-    }
-
-    private function getUserFromDatabase(int $id): ?array
-    {
-        // Simulate database query
-        return ['id' => $id, 'name' => "User {$id}"];
-    }
-
-    private function updateUserInDatabase(int $id, array $data): void
-    {
-        // Simulate database update
-    }
-}
-`
-				)
-			]),
-
-			// Best Practices
-			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
-				H4({ class: 'text-lg font-bold' }, 'Caching Best Practices'),
+}`
+				),
+				P({ class: 'text-muted-foreground' },
+					`The proxy is skipped, and the controller runs normally, when any of the following
+					is true. This is why cached responses do not appear during local development.`
+				),
 				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
-					Li("Cache only data that is expensive to compute or retrieve"),
-					Li("Use appropriate TTL values - not too short or too long"),
-					Li("Implement cache invalidation when data changes"),
-					Li("Monitor cache hit rates to measure effectiveness"),
-					Li("Be careful with memory usage when caching large objects"),
-					Li("Consider using cache keys that are easy to invalidate"),
-					Li("Implement fallback mechanisms when cache is unavailable"),
-					Li("Use consistent naming conventions for cache keys")
+					Li('The controller does not declare $cacheable'),
+					Li('No cache driver is configured or reachable'),
+					Li("The environment is 'dev'")
 				])
 			]),
 
-			// Cache Invalidation Strategies
+			// Scoped keys
 			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
-				H4({ class: 'text-lg font-bold' }, 'Cache Invalidation Strategies'),
+				H4({ class: 'text-lg font-bold' }, 'Responses Are Cached Per User'),
 				P({ class: 'text-muted-foreground' },
-					`Different strategies for keeping cached data fresh and accurate:`
+					`Cached responses are never shared between viewers. Every key includes a scope
+					token identifying the acting user, or the anonymous session when signed out.`
+				),
+				CodeBlock(
+`Modules\\Product\\Controllers\\ProductController:u42:all:{"limit":20}
+Modules\\Product\\Controllers\\ProductController:u7:get:15
+Modules\\Product\\Controllers\\ProductController:sA1B2C3:all:{"limit":20}
+             ^controller                        ^scope ^method ^params`
+				),
+				P({ class: 'text-muted-foreground' },
+					`This is deliberate. Two users may be permitted to see different rows, or different
+					fields on the same row, so a globally shared payload would leak data across
+					accounts. The tradeoff is a lower hit rate, which is the correct default for a
+					response cache that sits behind authorization.`
+				)
+			]),
+
+			// Invalidation
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'Invalidation'),
+				P({ class: 'text-muted-foreground' },
+					`Because a write by one user can change what every other user would see, writes
+					invalidate across all scopes using a wildcard pattern rather than only the acting
+					user's keys.`
 				),
 				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
-					Li("Time-based expiration (TTL)"),
-					Li("Manual invalidation when data changes"),
-					Li("Tag-based invalidation for related data"),
-					Li("Version-based invalidation"),
-					Li("Write-through caching (update cache when data changes)"),
-					Li("Write-behind caching (update cache and database separately)")
+					Li('add, setup and merge clear the cached list responses'),
+					Li('update and updateStatus clear get:{id} for every scope, then the list responses'),
+					Li('delete clears that row and the list responses'),
+					Li('GET requests are cached; every other method is treated as a write')
 				]),
-				CodeBlock(
-`// Example of tag-based cache invalidation concept
-class TaggedCache extends FileCache
-{
-    private array $tags = [];
-
-    public function putWithTags(string $key, mixed $value, array $tags, int $ttl = 0): void
-    {
-        $this->put($key, $value, $ttl);
-
-        // Store tag associations
-        foreach ($tags as $tag) {
-            if (!isset($this->tags[$tag])) {
-                $this->tags[$tag] = [];
-            }
-            $this->tags[$tag][] = $key;
-        }
-    }
-
-    public function invalidateByTag(string $tag): void
-    {
-        if (isset($this->tags[$tag])) {
-            foreach ($this->tags[$tag] as $key) {
-                $this->forget($key);
-            }
-            unset($this->tags[$tag]);
-        }
-    }
-}
-
-// Usage
-$cache = new TaggedCache();
-$cache->putWithTags('user_1', $userData, ['users', 'user_1'], 3600);
-$cache->putWithTags('user_2', $userData2, ['users', 'user_2'], 3600);
-
-// Invalidate all user caches
-$cache->invalidateByTag('users');
-`
+				P({ class: 'text-muted-foreground' },
+					`Writes performed outside the controller, such as a direct Model::update() in a job
+					or a seeder, do not pass through the proxy and will not invalidate anything. Clear
+					those keys yourself, or let them expire.`
 				)
+			]),
+
+			// Best practices
+			Section({ class: 'flex flex-col gap-y-4 mt-12' }, [
+				H4({ class: 'text-lg font-bold' }, 'Best Practices'),
+				Ul({ class: 'list-disc pl-6 flex flex-col gap-y-1 text-muted-foreground' }, [
+					Li('Enable $cacheable on read-heavy endpoints such as catalogs and taxonomies'),
+					Li('Do not enable it on endpoints that return one-off or rapidly changing data'),
+					Li('Always set a TTL on manual Cache::set() calls so a missed invalidation self-heals'),
+					Li('Encode structured values with json_encode; the driver stores strings'),
+					Li('Use Cache::incr() for counters instead of a read-modify-write sequence'),
+					Li('Avoid Cache::keys() on hot paths, since pattern scans are expensive on large keyspaces'),
+					Li('Never cache a value that has not already passed the same authorization checks as an uncached response')
+				])
 			])
 		]
 	);
