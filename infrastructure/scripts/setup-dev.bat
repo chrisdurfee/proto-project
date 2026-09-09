@@ -1,8 +1,8 @@
 @echo off
-REM Rally - Container Development Setup (Windows)
+REM Proto - Container Development Setup (Windows)
 REM This script sets up the complete containerized development environment
 
-echo 🐳 Setting up Rally containerized development environment...
+echo 🐳 Setting up Proto containerized development environment...
 
 REM Check if Docker is running
 docker info >nul 2>&1

@@ -6,7 +6,7 @@
 set -e
 
 CERT_FILE="./infrastructure/docker/ssl/localhost.crt"
-CERT_NAME="Rally Localhost"
+CERT_NAME="Proto Localhost"
 
 if [ ! -f "$CERT_FILE" ]; then
     echo "❌ Certificate not found at $CERT_FILE"
@@ -19,7 +19,7 @@ echo "🔐 Trusting certificate on Linux..."
 # 1. Add to System Trust Store (requires sudo)
 if command -v update-ca-certificates >/dev/null; then
     echo "sudo access is required to update system certificates."
-    sudo cp "$CERT_FILE" "/usr/local/share/ca-certificates/rally-localhost.crt"
+    sudo cp "$CERT_FILE" "/usr/local/share/ca-certificates/proto-localhost.crt"
     sudo update-ca-certificates
     echo "✅ Added to system trust store."
 else

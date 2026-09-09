@@ -50,7 +50,7 @@ case "$SCRIPT_NAME" in
         "$SCRIPTS_DIR/switch-env.bat" "$@"
         ;;
     "help"|"--help"|"-h")
-        echo "Rally Script Runner"
+        echo "Proto Script Runner"
         echo ""
         echo "Usage: ./run.sh <script> [args...]"
         echo ""

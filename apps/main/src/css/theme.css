@@ -47,7 +47,7 @@
     /* Additive surface, hairline and accent-tint tokens.
        Light values mirror the existing card/border palette so utilities
        like `bg-surface-2` resolve sensibly in light mode; dark mode
-       overrides below replace these with the Rally dark palette. */
+       overrides below replace these with the Proto dark palette. */
     --color-surface-2: hsl(0 0% 96%);
     --color-surface-3: hsl(0 0% 98%);
     --color-border-strong: hsl(240 5.9% 70%);
@@ -81,7 +81,7 @@
 }
 
 /*
-   Dark theme — Rally palette. Applied via system preference (when not
+   Dark theme — Proto palette. Applied via system preference (when not
    explicitly opted into light) and via the `.dark` class. Light theme
    above is intentionally left unchanged.
 */

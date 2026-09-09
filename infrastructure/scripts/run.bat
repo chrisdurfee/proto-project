@@ -58,7 +58,7 @@ call "%SCRIPTS_DIR%\switch-env.bat" %2 %3 %4 %5 %6 %7 %8 %9
 goto end
 
 :help
-echo Rally Script Runner
+echo Proto Script Runner
 echo.
 echo Usage: run.bat ^<script^> [args...]
 echo.

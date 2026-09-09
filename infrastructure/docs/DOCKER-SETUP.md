@@ -1,4 +1,4 @@
-# Rally - Hybrid Development Setup
+# Proto - Hybrid Development Setup
 
 This setup provides a **hybrid development environment** that combines containerized backend services with local frontend development for optimal performance.
 

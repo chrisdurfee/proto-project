@@ -103,8 +103,8 @@ Edit `common/Config/.env` and sync to Docker:
       "username": "your_username",
       "password": "your_password",
       "encryption": "tls",
-      "fromAddress": "noreply@rally.com",
-      "fromName": "Rally",
+      "fromAddress": "noreply@proto.local",
+      "fromName": "Proto",
       "sendingEnabled": false
     }
   }
@@ -123,8 +123,8 @@ MAIL_PORT=2525
 MAIL_USERNAME=your_username
 MAIL_PASSWORD=your_password
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@rally.com
-MAIL_FROM_NAME="Rally"
+MAIL_FROM_ADDRESS=noreply@proto.local
+MAIL_FROM_NAME="Proto"
 # Set to 'true' to enable email sending in development (disabled by default)
 MAIL_SENDING_ENABLED=false
 ```

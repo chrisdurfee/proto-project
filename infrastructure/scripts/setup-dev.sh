@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Rally - Container Development Setup
+# Proto - Container Development Setup
 # This script sets up the complete containerized development environment
 
-echo "🐳 Setting up Rally containerized development environment..."
+echo "🐳 Setting up Proto containerized development environment..."
 
 # Check if Docker is running
 if ! docker info > /dev/null 2>&1; then

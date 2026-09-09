@@ -1,10 +1,10 @@
 # SSL Certificate Setup Guide
 
-This guide explains how to set up SSL certificates for your Rally using Let's Encrypt (Option A - Recommended).
+This guide explains how to set up SSL certificates for your Proto using Let's Encrypt (Option A - Recommended).
 
 ## Overview
 
-The Rally includes automated SSL certificate setup using Let's Encrypt, which provides:
+Proto includes automated SSL certificate setup using Let's Encrypt, which provides:
 - ✅ **Free SSL certificates** for all subdomains
 - ✅ **Automatic renewal** scripts
 - ✅ **Production-ready** Apache configuration
@@ -96,7 +96,7 @@ chmod 600 private/$DOMAIN_NAME.key
 After successful setup, you'll have:
 
 ```
-rally/
+proto/
 ├── certs/
 │   ├── yourdomain.com.crt        # SSL certificate
 │   └── live/                     # Let's Encrypt raw files
