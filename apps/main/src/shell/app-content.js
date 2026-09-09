@@ -1,8 +1,20 @@
 import { Div } from '@base-framework/atoms';
 import { openInstallPrompt } from './installation/install.js';
 import { updateBodyClass } from './app-content/body-class.js';
-import { LoginPage, MainContent } from './app-content/imports.js';
+import { LoginPage, MainContent, PublicPage } from './app-content/imports.js';
 import { resumeUserSession } from './app-content/resume.js';
+import { isOnPublicRoute } from './public-routes.js';
+
+/**
+ * Chooses the shell for a signed-out visitor.
+ *
+ * Legal documents and the Help Center have to be readable without an
+ * account, so a signed-out visitor on one of those paths gets the
+ * public shell instead of the login gate.
+ *
+ * @returns {object}
+ */
+const SignedOutContent = () => (isOnPublicRoute() ? PublicPage() : LoginPage());
 
 /**
  * AppContent
@@ -41,7 +53,7 @@ export const AppContent = () => (
 		},
 
 		onState: [
-			['isSignedIn', (isSignedIn) => (!isSignedIn ? LoginPage() : MainContent())],
+			['isSignedIn', (isSignedIn) => (!isSignedIn ? SignedOutContent() : MainContent())],
 			['isSignedIn', updateBodyClass]
 		]
 	})
