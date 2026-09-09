@@ -37,6 +37,16 @@ if errorlevel 1 (
 )
 echo ✅ Developer app built successfully -^> public/developer/
 
+REM Build Website (static marketing site + rendered legal pages)
+echo 📦 Building Website (domain.com)...
+cd ..\website
+call npm run build
+if %errorlevel% neq 0 (
+    echo ❌ Website build failed
+    exit /b 1
+)
+echo ✅ Website built successfully -^> public/website/
+
 REM Return to root
 cd ..\..
 
@@ -44,6 +54,7 @@ echo.
 echo 🎉 All apps built successfully!
 echo.
 echo 📁 Build Output:
+echo    • Website:       public/website/   → domain.com
 echo    • Main App:      public/main/      → app.domain.com
 echo    • CRM App:       public/crm/       → crm.domain.com
 echo    • Developer App: public/developer/ → dev.domain.com

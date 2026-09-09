@@ -1,0 +1,234 @@
+/**
+ * Marketing site styles.
+ *
+ * Deliberately dependency-free: the website is plain HTML and CSS so it
+ * loads fast, works without JavaScript, and stays crawlable. Tokens
+ * mirror the app theme so the two surfaces feel related.
+ */
+
+:root {
+	--background: #0b0b0c;
+	--foreground: #fafafa;
+	--muted-foreground: #a1a1aa;
+	--card: #131315;
+	--border: #27272a;
+	--primary: #fafafa;
+	--primary-foreground: #18181b;
+	--radius: 12px;
+	--measure: 68ch;
+}
+
+@media (prefers-color-scheme: light) {
+	:root {
+		--background: #ffffff;
+		--foreground: #18181b;
+		--muted-foreground: #52525b;
+		--card: #fafafa;
+		--border: #e4e4e7;
+		--primary: #18181b;
+		--primary-foreground: #fafafa;
+	}
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	background: var(--background);
+	color: var(--foreground);
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	line-height: 1.6;
+	font-size: 16px;
+}
+
+a {
+	color: inherit;
+}
+
+.site-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem 1.5rem;
+	border-bottom: 1px solid var(--border);
+}
+
+.site-header .brand {
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.site-header nav a {
+	color: var(--muted-foreground);
+	text-decoration: none;
+	margin-left: 1.25rem;
+}
+
+.site-header nav a:hover {
+	color: var(--foreground);
+}
+
+.site-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 1.5rem;
+	padding: 2rem 1.5rem;
+	border-top: 1px solid var(--border);
+	color: var(--muted-foreground);
+	font-size: 0.875rem;
+}
+
+.site-footer a {
+	text-decoration: none;
+}
+
+.site-footer a:hover {
+	color: var(--foreground);
+}
+
+.hero {
+	max-width: var(--measure);
+	margin: 0 auto;
+	padding: 5rem 1.5rem 3rem;
+	text-align: center;
+}
+
+.hero h1 {
+	font-size: clamp(2rem, 6vw, 3.25rem);
+	line-height: 1.1;
+	letter-spacing: -0.02em;
+	margin: 0 0 1rem;
+}
+
+.hero p {
+	color: var(--muted-foreground);
+	font-size: 1.125rem;
+	margin: 0 auto 2rem;
+}
+
+.cta {
+	display: inline-block;
+	padding: 0.75rem 1.5rem;
+	border-radius: 999px;
+	background: var(--primary);
+	color: var(--primary-foreground);
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.cta:hover {
+	opacity: 0.9;
+}
+
+.cta.secondary {
+	background: transparent;
+	color: var(--foreground);
+	border: 1px solid var(--border);
+}
+
+.cta.secondary:hover {
+	background: var(--card);
+	opacity: 1;
+}
+
+.features {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: 1fr;
+	max-width: 60rem;
+	margin: 0 auto;
+	padding: 2rem 1.5rem 4rem;
+}
+
+@media (min-width: 720px) {
+	.features {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+.feature {
+	padding: 1.25rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--card);
+}
+
+.feature h2 {
+	font-size: 1rem;
+	margin: 0 0 0.5rem;
+}
+
+.feature p {
+	color: var(--muted-foreground);
+	font-size: 0.9375rem;
+	margin: 0;
+}
+
+.legal-page {
+	max-width: var(--measure);
+	margin: 0 auto;
+	padding: 3rem 1.5rem 4rem;
+}
+
+.legal-page .eyebrow {
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-size: 0.75rem;
+	color: var(--muted-foreground);
+	margin: 0 0 0.5rem;
+}
+
+.legal-page h1 {
+	font-size: clamp(1.75rem, 4vw, 2.5rem);
+	line-height: 1.15;
+	margin: 0 0 0.5rem;
+}
+
+.legal-page .effective {
+	color: var(--muted-foreground);
+	font-size: 0.875rem;
+	margin: 0 0 2rem;
+}
+
+.legal-page .intro {
+	margin: 0 0 2.5rem;
+}
+
+.legal-section {
+	margin-bottom: 2.5rem;
+}
+
+.legal-section h2 {
+	font-size: 1.125rem;
+	margin: 0 0 0.75rem;
+}
+
+.legal-section p {
+	color: var(--muted-foreground);
+	margin: 0 0 0.75rem;
+}
+
+.related {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.5rem;
+	padding-top: 2rem;
+	border-top: 1px solid var(--border);
+	font-size: 0.875rem;
+}
+
+:focus-visible {
+	outline: 2px solid var(--foreground);
+	outline-offset: 2px;
+}

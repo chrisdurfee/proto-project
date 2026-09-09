@@ -15,6 +15,7 @@
 export const LEGAL_CONFIG = {
 	appName: 'Proto',
 	companyName: 'Proto',
+	siteUrl: 'https://example.com',
 	legalEmail: 'legal@example.com',
 	privacyEmail: 'privacy@example.com',
 	supportEmail: 'support@example.com',

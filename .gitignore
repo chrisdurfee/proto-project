@@ -47,6 +47,7 @@ nginx-certbot.conf
 public/main/
 public/crm/
 public/developer/
+public/website/
 
 # Docker volumes data
 docker/mysql/data/

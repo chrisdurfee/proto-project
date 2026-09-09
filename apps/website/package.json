@@ -1,0 +1,22 @@
+{
+	"name": "website",
+	"version": "0.1.0",
+	"description": "Marketing website: static landing site built with the Proto/Base toolchain.",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"render-legal": "node scripts/render-legal-pages.js",
+		"preview": "vite preview"
+	},
+	"keywords": [
+		"Proto",
+		"Website",
+		"Static",
+		"Landing"
+	],
+	"license": "MIT",
+	"devDependencies": {
+		"vite": "^7.3.2"
+	}
+}

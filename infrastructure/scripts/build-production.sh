@@ -38,6 +38,16 @@ if [ $? -ne 0 ]; then
 fi
 echo "✅ Developer app built successfully -> public/developer/"
 
+# Build Website (static marketing site + rendered legal pages)
+echo "📦 Building Website (domain.com)..."
+cd ../website
+npm run build
+if [ $? -ne 0 ]; then
+    echo "❌ Website build failed"
+    exit 1
+fi
+echo "✅ Website built successfully -> public/website/"
+
 # Return to root
 cd ../..
 
@@ -45,6 +55,7 @@ echo ""
 echo "🎉 All apps built successfully!"
 echo ""
 echo "📁 Build Output:"
+echo "   • Website:       public/website/   → domain.com"
 echo "   • Main App:      public/main/      → app.domain.com"
 echo "   • CRM App:       public/crm/       → crm.domain.com"
 echo "   • Developer App: public/developer/ → dev.domain.com"
